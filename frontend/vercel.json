@@ -1,20 +1,13 @@
 {
-  "name": "crm2-produccion",
-  "framework": null,
-  "buildCommand": "npm install && npm run build",
+  "version": 2,
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "env": {
     "NODE_ENV": "production",
     "REACT_APP_API_URL": "https://crm2-backend.onrender.com/api"
   },
-  "build": {
-    "env": {
-      "NODE_ENV": "production",
-      "REACT_APP_API_URL": "https://crm2-backend.onrender.com/api"
-    }
-  },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://crm2-backend.onrender.com/api/$1" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
