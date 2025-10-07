@@ -1,0 +1,19 @@
+{
+  "name": "crm2-root",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+  "prestart": "npx kill-port 3000 || true && npx kill-port 3001 || true",
+    "start": "concurrently -n BACKEND,FRONTEND -c green,blue \"npm --prefix backend run dev\" \"npm --prefix frontend run start:clean\"",
+    "start:alt": "concurrently -n BACKEND,FRONTEND -c green,blue \"npm --prefix backend run dev\" \"npm --prefix frontend run start:alt\"",
+    "test:backend": "npm --prefix backend test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "kill-port": "^2.0.1"
+  }
+}
