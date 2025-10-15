@@ -37,9 +37,10 @@ router.post('/register', auth('manager'), async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Login attempt:', { email, password }); // Log para depuración
 
-    // Check if user exists
-    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    // Check if user exists (buscar por nombre o email)
+    const user = await pool.query('SELECT * FROM users WHERE nombre = $1 OR email = $1', [email]);
     if (user.rows.length === 0) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
@@ -67,9 +68,8 @@ router.post('/login', async (req, res) => {
         res.json({ token });
       }
     );
-
   } catch (err) {
-    console.error(err.message);
+    console.error('Login error:', err);
     res.status(500).send('Server Error');
   }
 });

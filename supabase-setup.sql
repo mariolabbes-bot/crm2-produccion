@@ -176,7 +176,7 @@ INSERT INTO goal_types (nombre, descripcion) VALUES
 
 -- Usuario administrador por defecto
 INSERT INTO users (nombre, email, password, rol) VALUES
-('Administrador', 'admin@crm2.com', '$2b$10$1234567890abcdefghijklmnopqrstuvwxyz', 'manager');
+('Administrador', 'admin@crm2.com', '$2b$10$D.ayFteHr57zk5qnxnB.sutiyhFXp5AO8rEVBYMKdxM8isw4vjJe6', 'manager');
 
 -- ========================================
 -- CREAR ÍNDICES PARA PERFORMANCE
