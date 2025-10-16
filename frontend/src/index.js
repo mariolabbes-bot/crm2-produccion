@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, Link as RouterLink } from 'react-router-dom';
-import { getClients, addClient, bulkAddClients } from './api';
+import { getClients, addClient, bulkAddClients, getVendedores } from './api';
 import { getToken, removeToken, getUser } from './utils/auth';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -37,6 +37,7 @@ const ClientManager = () => {
   const [error, setError] = useState('');
   const [nuevoCliente, setNuevoCliente] = useState({ rut: '', nombre: '', direccion: '', ciudad: '', estado: '', codigo_postal: '', pais: '', telefono: '', email: '' });
   const [csvFile, setCsvFile] = useState(null);
+  const [vendedores, setVendedores] = useState([]);
   const navigate = useNavigate();
   const user = getUser();
 
@@ -57,6 +58,8 @@ const ClientManager = () => {
 
   useEffect(() => {
     fetchClients();
+    // Cargar vendedores para el select
+    getVendedores().then(setVendedores).catch(() => setVendedores([]));
   }, []);
 
   const handleAddClient = async (e) => {
@@ -64,7 +67,7 @@ const ClientManager = () => {
     setError('');
     try {
       await addClient(nuevoCliente);
-      setNuevoCliente({ rut: '', nombre: '', direccion: '', ciudad: '', estado: '', codigo_postal: '', pais: '', telefono: '', email: '' });
+      setNuevoCliente({ rut: '', nombre: '', direccion: '', ciudad: '', estado: '', codigo_postal: '', pais: '', telefono: '', email: '', vendedor_id: '' });
       fetchClients();
     } catch (err) {
       console.error(err);
@@ -193,6 +196,19 @@ const ClientManager = () => {
             <TextField label="País" value={nuevoCliente.pais} onChange={e => setNuevoCliente({ ...nuevoCliente, pais: e.target.value })} />
             <TextField label="Teléfono" value={nuevoCliente.telefono} onChange={e => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })} />
             <TextField label="Email" type="email" value={nuevoCliente.email} onChange={e => setNuevoCliente({ ...nuevoCliente, email: e.target.value })} />
+            {/* Selector de vendedor */}
+            <TextField
+              select
+              label="Vendedor asignado"
+              value={nuevoCliente.vendedor_id || ''}
+              onChange={e => setNuevoCliente({ ...nuevoCliente, vendedor_id: e.target.value })}
+              required
+            >
+              <option value="" disabled>Seleccione un vendedor</option>
+              {vendedores.map(v => (
+                <option key={v.id} value={v.id}>{v.nombre} ({v.email})</option>
+              ))}
+            </TextField>
             <Button type="submit" variant="contained">Agregar</Button>
           </Box>
         </Box>

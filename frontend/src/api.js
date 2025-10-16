@@ -1,3 +1,5 @@
+// USERS - Vendedores
+export const getVendedores = () => apiFetch(`${API_URL}/users/vendedores`);
 import { getToken } from './utils/auth';
 
 // API URL con fallback para desarrollo y producción

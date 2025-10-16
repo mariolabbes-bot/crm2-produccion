@@ -74,4 +74,24 @@ router.post('/login', async (req, res) => {
   }
 });
 
+
+// Obtener todos los vendedores
+router.get('/vendedores', async (req, res) => {
+  try {
+    // Busca el rol_id correspondiente a 'Vendedor'
+    const rolRes = await pool.query("SELECT id FROM roles WHERE nombre = 'Vendedor'");
+    if (rolRes.rows.length === 0) {
+      return res.status(404).json({ msg: 'Rol Vendedor no encontrado' });
+    }
+    const rolId = rolRes.rows[0].id;
+
+    // Busca todos los usuarios con ese rol_id
+    const vendedores = await pool.query('SELECT id, nombre, email FROM users WHERE rol_id = $1', [rolId]);
+    res.json(vendedores.rows);
+  } catch (err) {
+    console.error('Error al obtener vendedores:', err);
+    res.status(500).send('Server Error');
+  }
+});
+
 module.exports = router;

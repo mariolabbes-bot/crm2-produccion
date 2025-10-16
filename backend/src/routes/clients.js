@@ -44,8 +44,7 @@ router.get('/:id', auth(), async (req, res) => {
 // CREATE a new client with geocoding
 router.post('/', auth(), async (req, res) => {
   try {
-    const { rut, nombre, direccion, ciudad, estado, codigo_postal, pais, telefono, email } = req.body;
-    
+    const { rut, nombre, direccion, ciudad, estado, codigo_postal, pais, telefono, email, vendedor_id } = req.body;
     let latitud = null;
     let longitud = null;
 
@@ -53,28 +52,30 @@ router.post('/', auth(), async (req, res) => {
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
     if (apiKey && direccion) {
-        try {
-            const geoResponse = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
-                params: {
-                    address: fullAddress,
-                    key: apiKey
-                }
-            });
-    
-            if (geoResponse.data.status === 'OK') {
-                const location = geoResponse.data.results[0].geometry.location;
-                latitud = location.lat;
-                longitud = location.lng;
-            }
-        } catch (geoErr) {
-            console.error('Geocoding failed:', geoErr.message);
-            // Non-blocking error, we still save the client
+      try {
+        const geoResponse = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+          params: {
+            address: fullAddress,
+            key: apiKey
+          }
+        });
+        if (geoResponse.data.status === 'OK') {
+          const location = geoResponse.data.results[0].geometry.location;
+          latitud = location.lat;
+          longitud = location.lng;
         }
+      } catch (geoErr) {
+        console.error('Geocoding failed:', geoErr.message);
+        // Non-blocking error, we still save the client
+      }
     }
+
+    // Si el usuario es manager y se envía vendedor_id, usarlo. Si no, usar el id del usuario autenticado.
+    let vendedorIdToUse = req.user.rol === 'manager' && vendedor_id ? vendedor_id : req.user.id;
 
     const newClient = await pool.query(
       'INSERT INTO clients (rut, nombre, direccion, ciudad, estado, codigo_postal, pais, latitud, longitud, telefono, email, vendedor_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *',
-      [rut, nombre, direccion, ciudad, estado, codigo_postal, pais, latitud, longitud, telefono, email, req.user.id]
+      [rut, nombre, direccion, ciudad, estado, codigo_postal, pais, latitud, longitud, telefono, email, vendedorIdToUse]
     );
     res.status(201).json(newClient.rows[0]);
   } catch (err) {

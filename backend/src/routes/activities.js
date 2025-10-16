@@ -104,6 +104,15 @@ router.post('/', auth(), async (req, res) => {
   try {
     await client.query('BEGIN');
 
+    // Verificar que el vendedor tenga acceso al cliente
+    if (req.user.rol !== 'manager') {
+      const clientCheck = await client.query('SELECT id FROM clients WHERE id = $1 AND vendedor_id = $2', [cliente_id, req.user.id]);
+      if (clientCheck.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(403).json({ msg: 'No tienes acceso a este cliente' });
+      }
+    }
+
     const newActivity = await client.query(
       'INSERT INTO activities (usuario_id, cliente_id, activity_type_id, fecha, notas) VALUES ($1, $2, $3, $4, $5) RETURNING *',
       [usuario_id, cliente_id, activity_type_id, fecha, notas]
@@ -180,6 +189,14 @@ router.put('/:id', auth(), async (req, res) => {
 
     if (req.user.rol !== 'manager' && activity.usuario_id !== req.user.id) {
       return res.status(403).json({ msg: 'Access denied' });
+    }
+
+    // Verificar que el vendedor tenga acceso al nuevo cliente si se cambia
+    if (req.user.rol !== 'manager' && cliente_id !== activity.cliente_id) {
+      const clientCheck = await pool.query('SELECT id FROM clients WHERE id = $1 AND vendedor_id = $2', [cliente_id, req.user.id]);
+      if (clientCheck.rows.length === 0) {
+        return res.status(403).json({ msg: 'No tienes acceso a este cliente' });
+      }
     }
 
     const updatedActivity = await pool.query(

@@ -8,16 +8,31 @@ const auth = require('../middleware/auth');
 // @access  Private
 router.get('/top-clients', auth(), async (req, res) => {
   try {
-    const query = `
-      SELECT c.nombre, SUM(s.net_amount) AS total_sales
-      FROM sales s
-      JOIN clients c ON s.client_id = c.id
-      GROUP BY c.nombre
-      ORDER BY total_sales DESC
-      LIMIT 5;
-    `;
-    const result = await pool.query(query);
-    res.json(result.rows);
+    let query;
+    if (req.user.rol === 'manager') {
+      query = `
+        SELECT c.nombre, SUM(s.net_amount) AS total_sales
+        FROM sales s
+        JOIN clients c ON s.client_id = c.id
+        GROUP BY c.nombre
+        ORDER BY total_sales DESC
+        LIMIT 5;
+      `;
+      const result = await pool.query(query);
+      res.json(result.rows);
+    } else {
+      query = `
+        SELECT c.nombre, SUM(s.net_amount) AS total_sales
+        FROM sales s
+        JOIN clients c ON s.client_id = c.id
+        WHERE c.vendedor_id = $1
+        GROUP BY c.nombre
+        ORDER BY total_sales DESC
+        LIMIT 5;
+      `;
+      const result = await pool.query(query, [req.user.id]);
+      res.json(result.rows);
+    }
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -29,13 +44,26 @@ router.get('/top-clients', auth(), async (req, res) => {
 // @access  Private
 router.get('/sales-summary', auth(), async (req, res) => {
   try {
-    const query = `
-      SELECT SUM(net_amount) AS total_sales
-      FROM sales
-      WHERE invoice_date >= NOW() - INTERVAL '3 months';
-    `;
-    const result = await pool.query(query);
-    res.json(result.rows[0]);
+    let query;
+    if (req.user.rol === 'manager') {
+      query = `
+        SELECT SUM(net_amount) AS total_sales
+        FROM sales
+        WHERE invoice_date >= NOW() - INTERVAL '3 months';
+      `;
+      const result = await pool.query(query);
+      res.json(result.rows[0]);
+    } else {
+      query = `
+        SELECT SUM(s.net_amount) AS total_sales
+        FROM sales s
+        JOIN clients c ON s.client_id = c.id
+        WHERE c.vendedor_id = $1
+        AND s.invoice_date >= NOW() - INTERVAL '3 months';
+      `;
+      const result = await pool.query(query, [req.user.id]);
+      res.json(result.rows[0]);
+    }
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
