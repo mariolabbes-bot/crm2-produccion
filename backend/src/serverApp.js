@@ -10,8 +10,16 @@ const app = express();
 // Configuración de CORS para producción
 const corsOptions = {
   origin: function (origin, callback) {
-    // Permitir todos los orígenes temporalmente para depuración
-    callback(null, true);
+    // Permitir solo el dominio de producción, ignorando slash final y mayúsculas/minúsculas
+    const allowedOrigins = [
+      'https://crm2-produccion.vercel.app'
+    ];
+    const normalize = o => (o || '').replace(/\/$/, '').toLowerCase();
+    if (!origin || allowedOrigins.some(o => normalize(o) === normalize(origin))) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
   },
   credentials: true
 };

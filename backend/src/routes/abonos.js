@@ -26,7 +26,7 @@ router.get('/', auth(), async (req, res) => {
         a.descripcion,
         u.nombre as vendedor_nombre,
         u.id as vendedor_id
-      FROM abono a
+  FROM abonos a
       LEFT JOIN users u ON a.vendedor_id = u.id
       WHERE 1=1
     `;
@@ -75,7 +75,7 @@ router.get('/', auth(), async (req, res) => {
     // Obtener el total de registros para paginación
     let countQuery = `
       SELECT COUNT(*) as total
-      FROM abono a
+  FROM abonos a
       WHERE 1=1
     `;
     
@@ -174,7 +174,7 @@ router.get('/estadisticas', auth(), async (req, res) => {
         MAX(monto) as abono_maximo,
         MIN(fecha_abono) as fecha_primera,
         MAX(fecha_abono) as fecha_ultima
-      FROM abono a
+  FROM abonos a
       ${whereClause}
     `;
 
@@ -185,7 +185,7 @@ router.get('/estadisticas', auth(), async (req, res) => {
         COUNT(*) as cantidad,
         SUM(monto) as monto_total,
         AVG(monto)::numeric(15,2) as promedio
-      FROM abono a
+  FROM abonos a
       ${whereClause}
       GROUP BY tipo_pago
       ORDER BY monto_total DESC
@@ -198,7 +198,7 @@ router.get('/estadisticas', auth(), async (req, res) => {
         COUNT(*) as cantidad,
         SUM(monto) as monto_total,
         AVG(monto)::numeric(15,2) as promedio
-      FROM abono a
+  FROM abonos a
       ${whereClause}
       GROUP BY TO_CHAR(fecha_abono, 'YYYY-MM')
       ORDER BY mes DESC
@@ -294,7 +294,7 @@ router.get('/comparativo', auth(), async (req, res) => {
           vendedor_id,
           SUM(monto) as total_abonos,
           COUNT(*) as cantidad_abonos
-        FROM abono
+  FROM abonos
         ${whereClause.replace('fecha', 'fecha_abono')}
         GROUP BY TO_CHAR(fecha_abono, '${dateFormat}'), vendedor_id
       )
@@ -333,7 +333,7 @@ router.get('/comparativo', auth(), async (req, res) => {
         SELECT 
           SUM(monto) as total_abonos,
           COUNT(*) as cantidad_abonos
-        FROM abono
+  FROM abonos
         ${whereClause.replace('fecha', 'fecha_abono')}
       )
       SELECT 
@@ -459,7 +459,7 @@ router.get('/tipos-pago', auth(), async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT DISTINCT tipo_pago
-      FROM abono
+  FROM abonos
       WHERE tipo_pago IS NOT NULL
       ORDER BY tipo_pago
     `);
