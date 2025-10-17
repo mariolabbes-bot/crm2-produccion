@@ -227,7 +227,7 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<ManagerRoute><Register /></ManagerRoute>} />
-          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/" element={<PrivateRoute><DashboardNuevo /></PrivateRoute>} />
           <Route path="/clients" element={<PrivateRoute><ClientManager /></PrivateRoute>} />
           <Route path="/activities" element={<PrivateRoute><ActivityList /></PrivateRoute>} />
           <Route path="/activities/new" element={<PrivateRoute><ActivityEditor /></PrivateRoute>} />

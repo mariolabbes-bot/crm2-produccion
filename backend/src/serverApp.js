@@ -1,4 +1,5 @@
 console.log('Iniciando CRM2 Backend en modo:', process.env.NODE_ENV);
+console.log('Valor de CORS_ORIGINS:', process.env.CORS_ORIGINS);
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
@@ -9,28 +10,15 @@ const app = express();
 // Configuración de CORS para producción
 const corsOptions = {
   origin: function (origin, callback) {
-    // En desarrollo, permitir sin origin (para herramientas como Postman)
-    if (!origin && process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    }
-    
-    // Orígenes permitidos solo desde variable de entorno
-    let allowedOrigins = [];
-    if (process.env.CORS_ORIGINS) {
-      allowedOrigins = process.env.CORS_ORIGINS.split(',').map(o => o.trim());
-    }
-    // Permitir sin origin solo en desarrollo (ej: Postman)
-    if (allowedOrigins.includes(origin) || (!origin && process.env.NODE_ENV !== 'production')) {
-      callback(null, true);
-    } else {
-      callback(new Error('No permitido por CORS'));
-    }
+    // Permitir todos los orígenes temporalmente para depuración
+    callback(null, true);
   },
   credentials: true
 };
 
 app.use(express.json());
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Rutas principales
