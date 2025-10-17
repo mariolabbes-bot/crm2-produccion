@@ -1,0 +1,285 @@
+.comparativo-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.comparativo-header {
+  margin-bottom: 30px;
+}
+
+.comparativo-header h1 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+/* Resumen General */
+.resumen-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.resumen-section h3 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.resumen-card {
+  padding: 25px;
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.resumen-card.ventas {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.resumen-card.abonos {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.resumen-card.saldo {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.resumen-card.porcentaje {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.resumen-icon {
+  font-size: 2.5rem;
+}
+
+.resumen-content {
+  flex: 1;
+}
+
+.resumen-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.resumen-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.resumen-count,
+.resumen-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Detalle */
+.detalle-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.detalle-section h3 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.comparativo-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.comparativo-table thead {
+  background: #f8f9fa;
+}
+
+.comparativo-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #dee2e6;
+  font-size: 0.9rem;
+}
+
+.comparativo-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.comparativo-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.periodo {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.monto {
+  text-align: right;
+  font-family: monospace;
+  font-weight: 500;
+}
+
+.monto.ventas {
+  color: #667eea;
+}
+
+.monto.abonos {
+  color: #27ae60;
+}
+
+.monto.diferencia.positivo {
+  color: #e74c3c;
+}
+
+.monto.diferencia.negativo {
+  color: #27ae60;
+}
+
+.cantidad {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.porcentaje-cell {
+  text-align: center;
+}
+
+.porcentaje-cell span {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.mini-progress {
+  width: 100%;
+  height: 4px;
+  background: #f1f1f1;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Análisis */
+.analisis-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.analisis-section h3 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.analisis-cards {
+  display: grid;
+  gap: 15px;
+}
+
+.analisis-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  border-radius: 10px;
+  border-left: 4px solid;
+}
+
+.analisis-card.success {
+  background: #e8f8f5;
+  border-color: #27ae60;
+}
+
+.analisis-card.warning {
+  background: #fff3cd;
+  border-color: #f39c12;
+}
+
+.analisis-card.danger {
+  background: #fee;
+  border-color: #e74c3c;
+}
+
+.analisis-card.info {
+  background: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.analisis-icon {
+  font-size: 2rem;
+}
+
+.analisis-content h4 {
+  margin: 0 0 5px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.analisis-content p {
+  margin: 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparativo-table {
+    font-size: 0.85rem;
+  }
+
+  .comparativo-table th,
+  .comparativo-table td {
+    padding: 8px 6px;
+  }
+
+  .resumen-value {
+    font-size: 1.4rem;
+  }
+
+  .resumen-icon {
+    font-size: 2rem;
+  }
+}

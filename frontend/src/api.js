@@ -107,3 +107,26 @@ export const importSalesJson = (rows) => apiFetch(`${API_URL}/sales/import-json`
   method: 'POST',
   body: JSON.stringify(rows)
 });
+
+// ABONOS
+export const getAbonos = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/abonos${queryString ? `?${queryString}` : ''}`);
+};
+
+export const getAbonosEstadisticas = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/abonos/estadisticas${queryString ? `?${queryString}` : ''}`);
+};
+
+export const getAbonosComparativo = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/abonos/comparativo${queryString ? `?${queryString}` : ''}`);
+};
+
+export const getAbonosPorVendedor = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/abonos/por-vendedor${queryString ? `?${queryString}` : ''}`);
+};
+
+export const getTiposPago = () => apiFetch(`${API_URL}/abonos/tipos-pago`);

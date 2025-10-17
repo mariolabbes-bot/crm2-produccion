@@ -44,6 +44,7 @@ app.use('/api/opportunities', require('./routes/opportunities'));
 app.use('/api/threats', require('./routes/threats'));
 app.use('/api/sales', require('./routes/sales'));
 app.use('/api/kpis', require('./routes/kpis'));
+app.use('/api/abonos', require('./routes/abonos'));
 
 app.get('/', (req, res) => {
   res.send('CRM2 Backend funcionando');

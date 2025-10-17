@@ -60,26 +60,28 @@ const Dashboard = () => {
         {/* KPI Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} md={3}>
-            <Card>
+            <Card sx={{ cursor: 'pointer' }} component={Link} to="/comparativo" style={{ textDecoration: 'none' }}>
               <CardContent>
                 <Typography color="textSecondary" gutterBottom>Ventas (Últimos 3 meses)</Typography>
                 <Typography variant="h5">${new Intl.NumberFormat('es-CL').format(salesSummary.total_sales || 0)}</Typography>
+                <Typography variant="caption" color="primary">Ver comparativo →</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ cursor: 'pointer' }} component={Link} to="/abonos" style={{ textDecoration: 'none' }}>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom>Abonos</Typography>
+                <Typography variant="h5">💰</Typography>
+                <Typography variant="caption" color="primary">Ver abonos →</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <Card>
               <CardContent>
-                <Typography color="textSecondary" gutterBottom>Actividades Completadas (Mes)</Typography>
-                <Typography variant="h5">--</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>Tasa de Cumplimiento</Typography>
-                <Typography variant="h5">--%</Typography>
+                <Typography color="textSecondary" gutterBottom>Actividades Vencidas</Typography>
+                <Typography variant="h5">{overdueActivities.length}</Typography>
               </CardContent>
             </Card>
           </Grid>
