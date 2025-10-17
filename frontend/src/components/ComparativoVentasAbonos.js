@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAbonosComparativo, getVendedores } from '../api';
-import { getUserFromToken } from '../utils/auth';
+import { getUser } from '../utils/auth';
 import './ComparativoVentasAbonos.css';
 
 const ComparativoVentasAbonos = () => {
@@ -16,7 +16,7 @@ const ComparativoVentasAbonos = () => {
     agrupar: 'mes'
   });
 
-  const user = getUserFromToken();
+  const user = getUser();
   const isManager = user?.rol === 'manager';
 
   useEffect(() => {

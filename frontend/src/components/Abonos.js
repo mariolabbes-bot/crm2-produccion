@@ -5,7 +5,7 @@ import {
   getTiposPago,
   getVendedores 
 } from '../api';
-import { getUserFromToken } from '../utils/auth';
+import { getUser } from '../utils/auth';
 import './Abonos.css';
 
 const Abonos = () => {
@@ -33,7 +33,7 @@ const Abonos = () => {
     currentPage: 1
   });
 
-  const user = getUserFromToken();
+  const user = getUser();
   const isManager = user?.rol === 'manager';
 
   useEffect(() => {
