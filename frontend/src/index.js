@@ -11,6 +11,7 @@ import ActivityEditor from './components/ActivityEditor';
 import Goals from './components/Goals';
 import AdminManager from './components/AdminManager';
 import Dashboard from './components/Dashboard';
+import DashboardNuevo from './components/DashboardNuevo';
 import Abonos from './components/Abonos';
 import ComparativoVentasAbonos from './components/ComparativoVentasAbonos';
 import Papa from 'papaparse';
@@ -235,6 +236,7 @@ const App = () => {
           <Route path="/admin" element={<ManagerRoute><AdminManager /></ManagerRoute>} />
           <Route path="/abonos" element={<PrivateRoute><Abonos /></PrivateRoute>} />
           <Route path="/comparativo" element={<PrivateRoute><ComparativoVentasAbonos /></PrivateRoute>} />
+          <Route path="/dashboard-nuevo" element={<DashboardNuevo />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>

@@ -1,0 +1,47 @@
+.dashboard-nuevo-container {
+  padding: 30px 10px 40px 10px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f8f9fa;
+}
+
+.metric-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.08);
+  background: linear-gradient(135deg, #fff 60%, #f3e5f5 100%);
+  color: #2c3e50;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.metric-card.ventas {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+.metric-card.abonos {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: #fff;
+}
+.metric-card.porcentaje {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+}
+.metric-card.saldo {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: #fff;
+}
+.metric-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.18);
+}
+
+.chart-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.07);
+  background: #fff;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-nuevo-container {
+    padding: 10px 2px 20px 2px;
+  }
+}
