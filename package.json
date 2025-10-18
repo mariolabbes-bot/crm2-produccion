@@ -10,7 +10,8 @@
     "prestart": "npx kill-port 3000 || true && npx kill-port 3001 || true",
     "start": "concurrently -n BACKEND,FRONTEND -c green,blue \"npm --prefix backend run dev\" \"npm --prefix frontend run start:clean\"",
     "start:alt": "concurrently -n BACKEND,FRONTEND -c green,blue \"npm --prefix backend run dev\" \"npm --prefix frontend run start:alt\"",
-    "test:backend": "npm --prefix backend test"
+    "test:backend": "npm --prefix backend test",
+    "build": "npm --prefix frontend run build"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
