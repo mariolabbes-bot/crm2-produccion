@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button } from '@mui/material';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary } from '../api';
+import { removeToken } from '../utils/auth';
 import './DashboardNuevo.css';
 
 const COLORS = ['#667eea', '#43e97b', '#f093fb', '#fa709a', '#764ba2', '#38f9d7', '#f5576c', '#fee140'];
 
 const DashboardNuevo = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [comparativo, setComparativo] = useState(null);
   const [vendedores, setVendedores] = useState([]);
@@ -17,6 +20,11 @@ const DashboardNuevo = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleLogout = () => {
+    removeToken();
+    navigate('/login');
+  };
 
   const loadData = async () => {
     try {
@@ -71,7 +79,17 @@ const DashboardNuevo = () => {
 
   return (
     <Box className="dashboard-nuevo-container">
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Dashboard General</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700 }}>Dashboard General</Typography>
+        <Button 
+          variant="outlined" 
+          color="error" 
+          onClick={handleLogout}
+          sx={{ fontWeight: 600 }}
+        >
+          Cerrar Sesión
+        </Button>
+      </Box>
       {error && <Typography color="error">{error}</Typography>}
       {loading ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
