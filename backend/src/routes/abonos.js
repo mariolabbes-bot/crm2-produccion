@@ -422,8 +422,8 @@ router.get('/por-vendedor', auth(), async (req, res) => {
           ${fecha_desde ? `AND s.fecha_emision >= $1` : ''}
           ${fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : ''}
         ) as total_ventas
-      FROM users u
-      LEFT JOIN abono a ON u.id = a.vendedor_id ${whereClause.replace('WHERE 1=1 AND', 'AND')}
+  FROM users u
+  LEFT JOIN abonos a ON u.id = a.vendedor_id ${whereClause.replace('WHERE 1=1 AND', 'AND')}
       WHERE u.rol IN ('vendedor', 'manager')
       GROUP BY u.id, u.nombre
       ORDER BY total_abonos DESC NULLS LAST
