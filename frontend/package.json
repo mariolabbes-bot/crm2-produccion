@@ -22,7 +22,8 @@
     "start": "webpack serve --mode development --open --port 3000",
     "start:clean": "npx kill-port 3000 || true && webpack serve --mode development --open --port 3000",
     "start:alt": "webpack serve --mode development --open --port 3002",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "vercel-build": "webpack --mode production"
   },
   "devDependencies": {
     "@babel/core": "^7.23.9",
