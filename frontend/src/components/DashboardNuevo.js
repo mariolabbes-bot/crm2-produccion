@@ -10,6 +10,7 @@ const DashboardNuevo = () => {
   const [stats, setStats] = useState(null);
   const [comparativo, setComparativo] = useState(null);
   const [vendedores, setVendedores] = useState([]);
+  const [ventasPorVendedorMes, setVentasPorVendedorMes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,16 +21,28 @@ const DashboardNuevo = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [abonosStats, comparativoData, vendedoresData] = await Promise.all([
+      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData] = await Promise.all([
         getAbonosEstadisticas(),
         getAbonosComparativo({ agrupar: 'mes' }),
-        getVendedores()
+        getVendedores(),
+        getAbonosComparativo({ agrupar: 'mes', fecha_desde: '2025-01-01', fecha_hasta: '2025-12-31' })
       ]);
       setStats(abonosStats.data);
       setComparativo(comparativoData.data);
       setVendedores(vendedoresData);
+      
+      console.log('📊 Datos de ventas 2025:', ventasVendedorMesData);
+      const detalle = ventasVendedorMesData.data?.detalle || [];
+      console.log('📋 Detalle ventas 2025:', detalle.length, 'registros');
+      
+      // Filtrar solo registros con ventas > 0
+      const detalleConVentas = detalle.filter(row => parseFloat(row.total_ventas) > 0);
+      console.log('📈 Registros con ventas:', detalleConVentas.length);
+      
+      setVentasPorVendedorMes(detalleConVentas);
     } catch (err) {
-      setError('Error al cargar datos');
+      console.error('❌ Error al cargar datos:', err);
+      setError('Error al cargar datos: ' + (err.message || 'Error desconocido'));
     } finally {
       setLoading(false);
     }
@@ -66,7 +79,7 @@ const DashboardNuevo = () => {
           <Typography sx={{ mt: 2 }}>Cargando dashboard...</Typography>
         </Box>
       ) : (
-        <>
+  <>
           {/* Métricas principales */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={6} md={3}>
@@ -167,6 +180,52 @@ const DashboardNuevo = () => {
               </Paper>
             </Grid>
           </Grid>
+          {/* Tabla de ventas por vendedor por mes 2025 */}
+          <Box sx={{ mt: 4 }}>
+            <Paper className="chart-card" sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                📊 Ventas por Vendedor por Mes (2025)
+                <Typography variant="caption" sx={{ ml: 2, color: '#666' }}>
+                  {ventasPorVendedorMes.length} registros encontrados
+                </Typography>
+              </Typography>
+              <div style={{ overflowX: 'auto', maxHeight: '500px', overflowY: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead style={{ position: 'sticky', top: 0, background: '#f3e5f5', zIndex: 1 }}>
+                    <tr>
+                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'left', fontWeight: 600 }}>Mes</th>
+                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'left', fontWeight: 600 }}>Vendedor</th>
+                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'right', fontWeight: 600 }}>Ventas</th>
+                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'center', fontWeight: 600 }}>Cant.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ventasPorVendedorMes.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
+                          <Typography variant="body1">❌ No hay datos de ventas para 2025</Typography>
+                          <Typography variant="caption">Verifica que haya ventas registradas en ese período</Typography>
+                        </td>
+                      </tr>
+                    ) : (
+                      ventasPorVendedorMes.map((row, idx) => (
+                        <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : '#f9f9f9' }}>
+                          <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{row.periodo}</td>
+                          <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{row.vendedor_nombre || 'Sin vendedor'}</td>
+                          <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 500, color: '#667eea' }}>
+                            {formatMoney(row.total_ventas)}
+                          </td>
+                          <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'center' }}>
+                            {row.cantidad_ventas || 0}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Paper>
+          </Box>
         </>
       )}
     </Box>
