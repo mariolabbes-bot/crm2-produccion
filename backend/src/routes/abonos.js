@@ -3,6 +3,30 @@ const router = express.Router();
 const pool = require('../db');
 const auth = require('../middleware/auth');
 
+// Runtime detection of actual table names in the connected database
+let detectedTables = null;
+let detectedAt = 0;
+async function getDetectedTables() {
+  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+  if (detectedTables && (Date.now() - detectedAt) < CACHE_TTL_MS) return detectedTables;
+
+  const q = `
+    SELECT 
+      EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'abonos') AS has_abonos,
+      EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'abono') AS has_abono,
+      EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'sales') AS has_sales,
+      EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'ventas') AS has_ventas,
+      EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'venta') AS has_venta
+  `;
+  const { rows } = await pool.query(q);
+  const r = rows[0] || {};
+  const abonosTable = r.has_abonos ? 'abonos' : (r.has_abono ? 'abono' : null);
+  const salesTable = r.has_sales ? 'sales' : (r.has_ventas ? 'ventas' : (r.has_venta ? 'venta' : null));
+  detectedTables = { abonosTable, salesTable };
+  detectedAt = Date.now();
+  return detectedTables;
+}
+
 // GET /api/abonos - Obtener abonos con filtros
 router.get('/', auth(), async (req, res) => {
   try {
@@ -15,6 +39,11 @@ router.get('/', auth(), async (req, res) => {
       offset = 0 
     } = req.query;
 
+    const { abonosTable } = await getDetectedTables();
+    if (!abonosTable) {
+      return res.status(500).json({ success: false, message: "Tabla de abonos no encontrada (abonos/abono) en la base de datos" });
+    }
+
     let query = `
       SELECT 
         a.id,
@@ -26,7 +55,7 @@ router.get('/', auth(), async (req, res) => {
         a.descripcion,
         u.nombre as vendedor_nombre,
         u.id as vendedor_id
-  FROM abonos a
+  FROM ${abonosTable} a
       LEFT JOIN users u ON a.vendedor_id = u.id
       WHERE 1=1
     `;
@@ -75,7 +104,7 @@ router.get('/', auth(), async (req, res) => {
     // Obtener el total de registros para paginación
     let countQuery = `
       SELECT COUNT(*) as total
-  FROM abonos a
+  FROM ${abonosTable} a
       WHERE 1=1
     `;
     
@@ -135,6 +164,10 @@ router.get('/', auth(), async (req, res) => {
 // GET /api/abonos/estadisticas - Estadísticas de abonos
 router.get('/estadisticas', auth(), async (req, res) => {
   try {
+    const { abonosTable } = await getDetectedTables();
+    if (!abonosTable) {
+      return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
+    }
     const { vendedor_id, fecha_desde, fecha_hasta } = req.query;
 
     let whereClause = 'WHERE 1=1';
@@ -174,7 +207,7 @@ router.get('/estadisticas', auth(), async (req, res) => {
         MAX(monto) as abono_maximo,
         MIN(fecha_abono) as fecha_primera,
         MAX(fecha_abono) as fecha_ultima
-  FROM abonos a
+  FROM ${abonosTable} a
       ${whereClause}
     `;
 
@@ -185,7 +218,7 @@ router.get('/estadisticas', auth(), async (req, res) => {
         COUNT(*) as cantidad,
         SUM(monto) as monto_total,
         AVG(monto)::numeric(15,2) as promedio
-  FROM abonos a
+  FROM ${abonosTable} a
       ${whereClause}
       GROUP BY tipo_pago
       ORDER BY monto_total DESC
@@ -198,7 +231,7 @@ router.get('/estadisticas', auth(), async (req, res) => {
         COUNT(*) as cantidad,
         SUM(monto) as monto_total,
         AVG(monto)::numeric(15,2) as promedio
-  FROM abonos a
+  FROM ${abonosTable} a
       ${whereClause}
       GROUP BY TO_CHAR(fecha_abono, 'YYYY-MM')
       ORDER BY mes DESC
@@ -233,6 +266,10 @@ router.get('/estadisticas', auth(), async (req, res) => {
 router.get('/comparativo', auth(), async (req, res) => {
   try {
     const { vendedor_id, fecha_desde, fecha_hasta, agrupar = 'mes' } = req.query;
+    const { abonosTable, salesTable } = await getDetectedTables();
+    if (!abonosTable) {
+      return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
+    }
 
     let whereClause = 'WHERE 1=1';
     const params = [];
@@ -277,26 +314,32 @@ router.get('/comparativo', auth(), async (req, res) => {
         dateFormat = 'YYYY-MM';
     }
 
-    const comparativoQuery = `
-      WITH ventas_agrupadas AS (
-        SELECT 
+    const ventasCte = salesTable
+      ? `SELECT 
           TO_CHAR(fecha_emision, '${dateFormat}') as periodo,
           vendedor_id,
           SUM(total_venta) as total_ventas,
           COUNT(*) as cantidad_ventas
-        FROM sales
+        FROM ${salesTable}
         ${whereClause.replace('fecha', 'fecha_emision')}
-        GROUP BY TO_CHAR(fecha_emision, '${dateFormat}'), vendedor_id
-      ),
-      abonos_agrupados AS (
-        SELECT 
+        GROUP BY TO_CHAR(fecha_emision, '${dateFormat}'), vendedor_id`
+      : `SELECT NULL::text as periodo, NULL::int as vendedor_id, 0::numeric as total_ventas, 0::bigint as cantidad_ventas WHERE 1=0`;
+
+    const abonosCte = `SELECT 
           TO_CHAR(fecha_abono, '${dateFormat}') as periodo,
           vendedor_id,
           SUM(monto) as total_abonos,
           COUNT(*) as cantidad_abonos
-  FROM abonos
+        FROM ${abonosTable}
         ${whereClause.replace('fecha', 'fecha_abono')}
-        GROUP BY TO_CHAR(fecha_abono, '${dateFormat}'), vendedor_id
+        GROUP BY TO_CHAR(fecha_abono, '${dateFormat}'), vendedor_id`;
+
+    const comparativoQuery = `
+      WITH ventas_agrupadas AS (
+        ${ventasCte}
+      ),
+      abonos_agrupados AS (
+        ${abonosCte}
       )
       SELECT 
         COALESCE(v.periodo, a.periodo) as periodo,
@@ -321,19 +364,23 @@ router.get('/comparativo', auth(), async (req, res) => {
     const result = await pool.query(comparativoQuery, params);
 
     // Resumen total
-    const resumenQuery = `
-      WITH ventas_total AS (
-        SELECT 
+    const ventasTotalCte = salesTable
+      ? `SELECT 
           SUM(total_venta) as total_ventas,
           COUNT(*) as cantidad_ventas
-        FROM sales
-        ${whereClause.replace('fecha', 'fecha_emision')}
+        FROM ${salesTable}
+        ${whereClause.replace('fecha', 'fecha_emision')}`
+      : `SELECT 0::numeric as total_ventas, 0::bigint as cantidad_ventas`;
+
+    const resumenQuery = `
+      WITH ventas_total AS (
+        ${ventasTotalCte}
       ),
       abonos_total AS (
         SELECT 
           SUM(monto) as total_abonos,
           COUNT(*) as cantidad_abonos
-  FROM abonos
+        FROM ${abonosTable}
         ${whereClause.replace('fecha', 'fecha_abono')}
       )
       SELECT 
@@ -373,6 +420,10 @@ router.get('/comparativo', auth(), async (req, res) => {
 router.get('/por-vendedor', auth(), async (req, res) => {
   try {
     const { fecha_desde, fecha_hasta } = req.query;
+    const { abonosTable, salesTable } = await getDetectedTables();
+    if (!abonosTable) {
+      return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
+    }
 
     // Solo managers pueden ver todos los vendedores
     if (req.user.rol !== 'manager') {
@@ -410,20 +461,20 @@ router.get('/por-vendedor', auth(), async (req, res) => {
         -- Ventas del vendedor
         (
           SELECT COUNT(*) 
-          FROM sales s 
+          FROM ${salesTable || 'users'} s 
           WHERE s.vendedor_id = u.id 
-          ${fecha_desde ? `AND s.fecha_emision >= $1` : ''}
-          ${fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : ''}
+          ${salesTable ? (fecha_desde ? `AND s.fecha_emision >= $1` : '') : ''}
+          ${salesTable ? (fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : '') : ''}
         ) as cantidad_ventas,
         (
           SELECT COALESCE(SUM(total_venta), 0) 
-          FROM sales s 
+          FROM ${salesTable || 'users'} s 
           WHERE s.vendedor_id = u.id
-          ${fecha_desde ? `AND s.fecha_emision >= $1` : ''}
-          ${fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : ''}
+          ${salesTable ? (fecha_desde ? `AND s.fecha_emision >= $1` : '') : ''}
+          ${salesTable ? (fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : '') : ''}
         ) as total_ventas
   FROM users u
-  LEFT JOIN abonos a ON u.id = a.vendedor_id ${whereClause.replace('WHERE 1=1 AND', 'AND')}
+  LEFT JOIN ${abonosTable} a ON u.id = a.vendedor_id ${whereClause.replace('WHERE 1=1 AND', 'AND')}
       WHERE u.rol IN ('vendedor', 'manager')
       GROUP BY u.id, u.nombre
       ORDER BY total_abonos DESC NULLS LAST
@@ -457,9 +508,13 @@ router.get('/por-vendedor', auth(), async (req, res) => {
 // GET /api/abonos/tipos-pago - Lista de tipos de pago disponibles
 router.get('/tipos-pago', auth(), async (req, res) => {
   try {
+    const { abonosTable } = await getDetectedTables();
+    if (!abonosTable) {
+      return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
+    }
     const result = await pool.query(`
       SELECT DISTINCT tipo_pago
-  FROM abonos
+      FROM ${abonosTable}
       WHERE tipo_pago IS NOT NULL
       ORDER BY tipo_pago
     `);
