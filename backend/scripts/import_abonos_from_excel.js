@@ -9,7 +9,17 @@ const pool = new Pool({
   }
 });
 
-const excelPath = '/Users/mariolabbe/Library/Mobile Documents/com~apple~CloudDocs/Desktop/Ventas/BASE VENTAS CRM2/BASE TABLAS CRM2.xlsx';
+const excelPath = process.env.EXCEL_ABONOS_PATH || '/Users/mariolabbe/Library/Mobile Documents/com~apple~CloudDocs/Desktop/Ventas/BASE VENTAS CRM2/BASE TABLAS CRM2.xlsx';
+
+async function detectAbonosTable(client) {
+  const { rows } = await client.query(`
+    SELECT 
+      EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'abonos') AS has_abonos,
+      EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'abono') AS has_abono
+  `);
+  const r = rows[0] || {};
+  return r.has_abonos ? 'abonos' : (r.has_abono ? 'abono' : null);
+}
 
 // Función para convertir fecha a formato YYYY-MM-DD
 function formatDate(dateValue) {
@@ -110,7 +120,9 @@ async function importAbonos() {
     `);
     const managerId = managerResult.rows[0]?.id;
     
-    console.log('💾 Insertando abonos...\n');
+  console.log('💾 Insertando abonos...\n');
+  const abonosTable = await detectAbonosTable(client);
+  if (!abonosTable) throw new Error('No se encontró tabla de abonos (abonos/abono)');
     
     let imported = 0;
     let errors = 0;
@@ -177,7 +189,7 @@ async function importAbonos() {
         
         // Insertar en lotes
         if (batch.length >= batchSize) {
-          await insertBatch(client, batch);
+          await insertBatch(client, batch, abonosTable);
           imported += batch.length;
           batch = [];
           
@@ -196,7 +208,7 @@ async function importAbonos() {
     
     // Insertar el último lote
     if (batch.length > 0) {
-      await insertBatch(client, batch);
+  await insertBatch(client, batch, abonosTable);
       imported += batch.length;
     }
     
@@ -218,7 +230,7 @@ async function importAbonos() {
         MAX(fecha_abono) as fecha_ultima,
         COUNT(DISTINCT vendedor_id) as total_vendedores,
         COUNT(DISTINCT tipo_pago) as tipos_pago_diferentes
-      FROM abono
+      FROM ${abonosTable}
     `);
     
     console.log('📈 Estadísticas de abonos:');
@@ -231,7 +243,7 @@ async function importAbonos() {
         COUNT(*) as cantidad_abonos,
         SUM(a.monto) as monto_total,
         AVG(a.monto)::numeric(15,2) as promedio
-      FROM abono a
+      FROM ${abonosTable} a
       JOIN users u ON a.vendedor_id = u.id
       GROUP BY u.id, u.nombre
       ORDER BY monto_total DESC
@@ -247,7 +259,7 @@ async function importAbonos() {
         COALESCE(tipo_pago, 'Sin especificar') as tipo_pago,
         COUNT(*) as cantidad,
         SUM(monto) as monto_total
-      FROM abono
+      FROM ${abonosTable}
       GROUP BY tipo_pago
       ORDER BY monto_total DESC
     `);
@@ -264,7 +276,7 @@ async function importAbonos() {
   }
 }
 
-async function insertBatch(client, batch) {
+async function insertBatch(client, batch, abonosTable) {
   const values = [];
   const placeholders = [];
   
@@ -285,7 +297,7 @@ async function insertBatch(client, batch) {
   });
   
   const query = `
-    INSERT INTO abono (vendedor_id, fecha_abono, monto, descripcion, folio, cliente_nombre, tipo_pago)
+    INSERT INTO ${abonosTable} (vendedor_id, fecha_abono, monto, descripcion, folio, cliente_nombre, tipo_pago)
     VALUES ${placeholders.join(', ')}
   `;
   
