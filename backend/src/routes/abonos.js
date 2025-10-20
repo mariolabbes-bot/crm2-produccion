@@ -449,6 +449,13 @@ router.get('/por-vendedor', auth(), async (req, res) => {
       paramCounter++;
     }
 
+    const ventasCantidadSub = salesTable
+      ? `SELECT COUNT(*) FROM ${salesTable} s WHERE s.vendedor_id = u.id ${fecha_desde ? `AND s.fecha_emision >= $1` : ''} ${fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : ''}`
+      : `SELECT 0`;
+    const ventasTotalSub = salesTable
+      ? `SELECT COALESCE(SUM(total_venta), 0) FROM ${salesTable} s WHERE s.vendedor_id = u.id ${fecha_desde ? `AND s.fecha_emision >= $1` : ''} ${fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : ''}`
+      : `SELECT 0`;
+
     const query = `
       SELECT 
         u.id as vendedor_id,
@@ -459,20 +466,8 @@ router.get('/por-vendedor', auth(), async (req, res) => {
         MIN(a.fecha_abono) as primer_abono,
         MAX(a.fecha_abono) as ultimo_abono,
         -- Ventas del vendedor
-        (
-          SELECT COUNT(*) 
-          FROM ${salesTable || 'users'} s 
-          WHERE s.vendedor_id = u.id 
-          ${salesTable ? (fecha_desde ? `AND s.fecha_emision >= $1` : '') : ''}
-          ${salesTable ? (fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : '') : ''}
-        ) as cantidad_ventas,
-        (
-          SELECT COALESCE(SUM(total_venta), 0) 
-          FROM ${salesTable || 'users'} s 
-          WHERE s.vendedor_id = u.id
-          ${salesTable ? (fecha_desde ? `AND s.fecha_emision >= $1` : '') : ''}
-          ${salesTable ? (fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : '') : ''}
-        ) as total_ventas
+        ( ${ventasCantidadSub} ) as cantidad_ventas,
+        ( ${ventasTotalSub} ) as total_ventas
   FROM users u
   LEFT JOIN ${abonosTable} a ON u.id = a.vendedor_id ${whereClause.replace('WHERE 1=1 AND', 'AND')}
       WHERE u.rol IN ('vendedor', 'manager')
