@@ -30,23 +30,35 @@ const DashboardNuevo = () => {
     try {
       setLoading(true);
       const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData] = await Promise.all([
-        getAbonosEstadisticas(),
-        getAbonosComparativo({ agrupar: 'mes' }),
-        getVendedores(),
-        getAbonosComparativo({ agrupar: 'mes', fecha_desde: '2025-01-01', fecha_hasta: '2025-12-31' })
+        getAbonosEstadisticas().catch(e => ({ success: false, error: e.message })),
+        getAbonosComparativo({ agrupar: 'mes' }).catch(e => ({ success: false, error: e.message })),
+        getVendedores().catch(e => []),
+        getAbonosComparativo({ agrupar: 'mes', fecha_desde: '2025-01-01', fecha_hasta: '2025-12-31' }).catch(e => ({ success: false, error: e.message }))
       ]);
-      setStats(abonosStats.data);
-      setComparativo(comparativoData.data);
-      setVendedores(vendedoresData);
-      
-      console.log('📊 Datos de ventas 2025:', ventasVendedorMesData);
-      const detalle = ventasVendedorMesData.data?.detalle || [];
-      console.log('📋 Detalle ventas 2025:', detalle.length, 'registros');
-      
-      // Filtrar solo registros con ventas > 0
+
+      // Validar estructura y mostrar errores específicos
+      if (!abonosStats || abonosStats.success === false || !abonosStats.data) {
+        setError('No se pudieron cargar las estadísticas de abonos. ' + (abonosStats?.error || ''));
+        setStats(null);
+      } else {
+        setStats(abonosStats.data);
+      }
+
+      if (!comparativoData || comparativoData.success === false || !comparativoData.data) {
+        setError('No se pudo cargar el comparativo de ventas vs abonos. ' + (comparativoData?.error || ''));
+        setComparativo(null);
+      } else {
+        setComparativo(comparativoData.data);
+      }
+
+      setVendedores(Array.isArray(vendedoresData) ? vendedoresData : []);
+
+      // Ventas por vendedor mes
+      let detalle = [];
+      if (ventasVendedorMesData && ventasVendedorMesData.data && Array.isArray(ventasVendedorMesData.data.detalle)) {
+        detalle = ventasVendedorMesData.data.detalle;
+      }
       const detalleConVentas = detalle.filter(row => parseFloat(row.total_ventas) > 0);
-      console.log('📈 Registros con ventas:', detalleConVentas.length);
-      
       setVentasPorVendedorMes(detalleConVentas);
     } catch (err) {
       console.error('❌ Error al cargar datos:', err);

@@ -1,10 +1,14 @@
 const path = require('path');
-
+const dotenv = require('dotenv');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
+  
+  // Cargar variables de entorno del archivo correspondiente
+  const envFile = isProduction ? '.env.production' : '.env';
+  dotenv.config({ path: path.resolve(__dirname, envFile) });
   
   return {
     entry: './src/index.js',
@@ -20,7 +24,7 @@ module.exports = (env, argv) => {
         inject: true,
       }),
       new webpack.DefinePlugin({
-        'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL || ''),
+        'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL || 'http://localhost:3001/api'),
       }),
     ],
     devServer: {
