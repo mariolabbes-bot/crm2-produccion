@@ -50,6 +50,13 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Endpoint temporal para depuración: muestra la cadena de conexión actual
+app.get('/api/debug/dburl', (req, res) => {
+  res.json({
+    DATABASE_URL: process.env.DATABASE_URL || null
+  });
+});
+
 // Middleware 404
 app.use((req, res, next) => {
   res.status(404).json({ msg: 'Endpoint no encontrado' });
