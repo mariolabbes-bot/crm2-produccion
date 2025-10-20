@@ -270,6 +270,15 @@ router.get('/comparativo', auth(), async (req, res) => {
     if (!abonosTable) {
       return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
     }
+    // Detect date column in sales table
+    let salesDateCol = 'fecha_emision';
+    if (salesTable) {
+      const { rows } = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [salesTable]);
+      const cols = rows.map(r => r.column_name);
+      if (cols.includes('fecha_emision')) salesDateCol = 'fecha_emision';
+      else if (cols.includes('invoice_date')) salesDateCol = 'invoice_date';
+      else if (cols.includes('fecha')) salesDateCol = 'fecha';
+    }
 
     let whereClause = 'WHERE 1=1';
     const params = [];
@@ -287,13 +296,13 @@ router.get('/comparativo', auth(), async (req, res) => {
     }
 
     if (fecha_desde) {
-      whereClause += ` AND fecha >= $${paramCounter}`;
+      whereClause += ` AND ${salesDateCol} >= $${paramCounter}`;
       params.push(fecha_desde);
       paramCounter++;
     }
 
     if (fecha_hasta) {
-      whereClause += ` AND fecha <= $${paramCounter}`;
+      whereClause += ` AND ${salesDateCol} <= $${paramCounter}`;
       params.push(fecha_hasta);
       paramCounter++;
     }
@@ -316,13 +325,13 @@ router.get('/comparativo', auth(), async (req, res) => {
 
     const ventasCte = salesTable
       ? `SELECT 
-          TO_CHAR(fecha_emision, '${dateFormat}') as periodo,
+          TO_CHAR(${salesDateCol}, '${dateFormat}') as periodo,
           vendedor_id,
           SUM(total_venta) as total_ventas,
           COUNT(*) as cantidad_ventas
         FROM ${salesTable}
-        ${whereClause.replace('fecha', 'fecha_emision')}
-        GROUP BY TO_CHAR(fecha_emision, '${dateFormat}'), vendedor_id`
+        ${whereClause}
+        GROUP BY TO_CHAR(${salesDateCol}, '${dateFormat}'), vendedor_id`
       : `SELECT NULL::text as periodo, NULL::int as vendedor_id, 0::numeric as total_ventas, 0::bigint as cantidad_ventas WHERE 1=0`;
 
     const abonosCte = `SELECT 
@@ -369,7 +378,7 @@ router.get('/comparativo', auth(), async (req, res) => {
           SUM(total_venta) as total_ventas,
           COUNT(*) as cantidad_ventas
         FROM ${salesTable}
-        ${whereClause.replace('fecha', 'fecha_emision')}`
+        ${whereClause}`
       : `SELECT 0::numeric as total_ventas, 0::bigint as cantidad_ventas`;
 
     const resumenQuery = `
