@@ -58,8 +58,9 @@ const DashboardNuevo = () => {
       if (ventasVendedorMesData && ventasVendedorMesData.data && Array.isArray(ventasVendedorMesData.data.detalle)) {
         detalle = ventasVendedorMesData.data.detalle;
       }
-      const detalleConVentas = detalle.filter(row => parseFloat(row.total_ventas) > 0);
-      setVentasPorVendedorMes(detalleConVentas);
+      // Mostrar todos los registros, incluso si no tienen ventas pero sí abonos
+      const detalleConDatos = detalle.filter(row => parseFloat(row.total_ventas) > 0 || parseFloat(row.total_abonos) > 0);
+      setVentasPorVendedorMes(detalleConDatos);
     } catch (err) {
       console.error('❌ Error al cargar datos:', err);
       setError('Error al cargar datos: ' + (err.message || 'Error desconocido'));
@@ -210,11 +211,11 @@ const DashboardNuevo = () => {
               </Paper>
             </Grid>
           </Grid>
-          {/* Tabla de ventas por vendedor por mes 2025 */}
+          {/* Tabla de ventas/abonos por vendedor por mes 2025 */}
           <Box sx={{ mt: 4 }}>
             <Paper className="chart-card" sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ mb: 2 }}>
-                📊 Ventas por Vendedor por Mes (2025)
+                📊 Ventas y Abonos por Vendedor por Mes (2025)
                 <Typography variant="caption" sx={{ ml: 2, color: '#666' }}>
                   {ventasPorVendedorMes.length} registros encontrados
                 </Typography>
@@ -226,15 +227,16 @@ const DashboardNuevo = () => {
                       <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'left', fontWeight: 600 }}>Mes</th>
                       <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'left', fontWeight: 600 }}>Vendedor</th>
                       <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'right', fontWeight: 600 }}>Ventas</th>
-                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'center', fontWeight: 600 }}>Cant.</th>
+                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'right', fontWeight: 600 }}>Abonos</th>
+                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'center', fontWeight: 600 }}>% Cobrado</th>
                     </tr>
                   </thead>
                   <tbody>
                     {ventasPorVendedorMes.length === 0 ? (
                       <tr>
-                        <td colSpan={4} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
-                          <Typography variant="body1">❌ No hay datos de ventas para 2025</Typography>
-                          <Typography variant="caption">Verifica que haya ventas registradas en ese período</Typography>
+                        <td colSpan={5} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
+                          <Typography variant="body1">❌ No hay datos para 2025</Typography>
+                          <Typography variant="caption">Verifica que haya ventas o abonos registrados en ese período</Typography>
                         </td>
                       </tr>
                     ) : (
@@ -245,8 +247,11 @@ const DashboardNuevo = () => {
                           <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 500, color: '#667eea' }}>
                             {formatMoney(row.total_ventas)}
                           </td>
-                          <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'center' }}>
-                            {row.cantidad_ventas || 0}
+                          <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 500, color: '#43e97b' }}>
+                            {formatMoney(row.total_abonos)}
+                          </td>
+                          <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'center', fontWeight: 500 }}>
+                            {row.porcentaje_cobrado}%
                           </td>
                         </tr>
                       ))
