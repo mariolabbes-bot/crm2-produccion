@@ -8,5 +8,9 @@
         "distDir": "dist"
       }
     }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/" }
   ]
 }
