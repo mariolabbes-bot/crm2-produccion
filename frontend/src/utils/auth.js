@@ -14,12 +14,20 @@ export const removeToken = () => {
 
 export const getUser = () => {
   const token = getToken();
-  if (!token) {
-    return null;
-  }
+  if (!token) return null;
   try {
-    return jwtDecode(token).user;
+    const payload = jwtDecode(token);
+    // Verificar expiración (exp en segundos)
+    if (payload && payload.exp && Date.now() >= payload.exp * 1000) {
+      removeToken();
+      return null;
+    }
+    return payload.user;
   } catch (e) {
+    // Token inválido
+    removeToken();
     return null;
   }
 };
+
+export const isAuthenticated = () => !!getUser();

@@ -20,8 +20,14 @@ const apiFetch = async (url, options = {}) => {
   const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    const error = new Error(errorData.msg || 'API request failed');
+    let errorData = {};
+    try { errorData = await response.json(); } catch (_) {}
+    if (response.status === 401 || response.status === 403) {
+      // Token inválido o expirado: limpiar y redirigir
+      try { localStorage.removeItem('token'); } catch (_) {}
+    }
+    const error = new Error(errorData.msg || errorData.message || `API request failed (${response.status})`);
+    error.status = response.status;
     error.response = { data: errorData };
     throw error;
   }

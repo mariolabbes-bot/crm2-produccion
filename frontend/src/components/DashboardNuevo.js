@@ -1,15 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button } from '@mui/material';
+import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary } from '../api';
-import { removeToken } from '../utils/auth';
+import { removeToken, getUser } from '../utils/auth';
 import './DashboardNuevo.css';
 
 const COLORS = ['#667eea', '#43e97b', '#f093fb', '#fa709a', '#764ba2', '#38f9d7', '#f5576c', '#fee140'];
 
+// Helper para calcular rango de fechas
+const getDateRange = (months = 3) => {
+  const now = new Date();
+  const hasta = now.toISOString().split('T')[0];
+  const desde = new Date(now.getFullYear(), now.getMonth() - months, 1).toISOString().split('T')[0];
+  return { desde, hasta };
+};
+
 const DashboardNuevo = () => {
   const navigate = useNavigate();
+  const user = getUser();
+  const isManager = user?.rol === 'manager';
+  
   const [stats, setStats] = useState(null);
   const [comparativo, setComparativo] = useState(null);
   const [vendedores, setVendedores] = useState([]);
@@ -17,27 +28,57 @@ const DashboardNuevo = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Filtros
+  const defaultRange = getDateRange(3);
+  const [filtroVendedor, setFiltroVendedor] = useState('');
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState(defaultRange.desde);
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState(defaultRange.hasta);
+  const [rangoRapido, setRangoRapido] = useState('3'); // meses
+
   useEffect(() => {
     loadData();
-  }, []);
+  }, [filtroVendedor, filtroFechaDesde, filtroFechaHasta]);
 
   const handleLogout = () => {
     removeToken();
     navigate('/login');
   };
 
+  const handleRangoRapido = (meses) => {
+    setRangoRapido(meses);
+    const range = getDateRange(parseInt(meses, 10));
+    setFiltroFechaDesde(range.desde);
+    setFiltroFechaHasta(range.hasta);
+  };
+
   const loadData = async () => {
     try {
       setLoading(true);
+      
+      // Construir parámetros de filtro
+      const params = {
+        agrupar: 'mes',
+        fecha_desde: filtroFechaDesde,
+        fecha_hasta: filtroFechaHasta
+      };
+      if (isManager && filtroVendedor) {
+        params.vendedor_id = filtroVendedor;
+      }
+      
       const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData] = await Promise.all([
-        getAbonosEstadisticas().catch(e => ({ success: false, error: e.message })),
-        getAbonosComparativo({ agrupar: 'mes' }).catch(e => ({ success: false, error: e.message })),
+        getAbonosEstadisticas(params).catch(e => ({ success: false, error: e.message, status: e.status })),
+        getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status })),
         getVendedores().catch(e => []),
-        getAbonosComparativo({ agrupar: 'mes', fecha_desde: '2025-01-01', fecha_hasta: '2025-12-31' }).catch(e => ({ success: false, error: e.message }))
+        getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status }))
       ]);
 
       // Validar estructura y mostrar errores específicos
       if (!abonosStats || abonosStats.success === false || !abonosStats.data) {
+        if (abonosStats?.status === 401 || abonosStats?.status === 403) {
+          setError('Tu sesión expiró. Ingresa nuevamente.');
+          navigate('/login');
+          return;
+        }
         setError('No se pudieron cargar las estadísticas de abonos. ' + (abonosStats?.error || ''));
         setStats(null);
       } else {
@@ -45,6 +86,11 @@ const DashboardNuevo = () => {
       }
 
       if (!comparativoData || comparativoData.success === false || !comparativoData.data) {
+        if (comparativoData?.status === 401 || comparativoData?.status === 403) {
+          setError('Tu sesión expiró. Ingresa nuevamente.');
+          navigate('/login');
+          return;
+        }
         setError('No se pudo cargar el comparativo de ventas vs abonos. ' + (comparativoData?.error || ''));
         setComparativo(null);
       } else {
@@ -103,6 +149,65 @@ const DashboardNuevo = () => {
           Cerrar Sesión
         </Button>
       </Box>
+
+      {/* Filtros */}
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>Filtros</Typography>
+        <Grid container spacing={2} alignItems="center">
+          {/* Rango rápido */}
+          <Grid item xs={12} sm={6} md={3}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Rango rápido</InputLabel>
+              <Select value={rangoRapido} onChange={(e) => handleRangoRapido(e.target.value)} label="Rango rápido">
+                <MenuItem value="1">Último mes</MenuItem>
+                <MenuItem value="3">Últimos 3 meses</MenuItem>
+                <MenuItem value="6">Últimos 6 meses</MenuItem>
+                <MenuItem value="12">Último año</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          
+          {/* Fechas personalizadas */}
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField 
+              label="Desde" 
+              type="date" 
+              size="small" 
+              fullWidth 
+              InputLabelProps={{ shrink: true }}
+              value={filtroFechaDesde}
+              onChange={(e) => setFiltroFechaDesde(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField 
+              label="Hasta" 
+              type="date" 
+              size="small" 
+              fullWidth 
+              InputLabelProps={{ shrink: true }}
+              value={filtroFechaHasta}
+              onChange={(e) => setFiltroFechaHasta(e.target.value)}
+            />
+          </Grid>
+          
+          {/* Filtro vendedor (solo manager) */}
+          {isManager && (
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Vendedor</InputLabel>
+                <Select value={filtroVendedor} onChange={(e) => setFiltroVendedor(e.target.value)} label="Vendedor">
+                  <MenuItem value="">Todos</MenuItem>
+                  {vendedores.map(v => (
+                    <MenuItem key={v.id} value={v.id}>{v.nombre}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          )}
+        </Grid>
+      </Paper>
+
       {error && <Typography color="error">{error}</Typography>}
       {loading ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
