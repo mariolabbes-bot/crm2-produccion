@@ -295,16 +295,45 @@ router.get('/comparativo', auth(), async (req, res) => {
       paramCounter++;
     }
 
+    // Construir whereClause para ventas
+    let whereClauseVentas = whereClause;
     if (fecha_desde) {
-      whereClause += ` AND ${salesDateCol} >= $${paramCounter}`;
+      whereClauseVentas += ` AND ${salesDateCol} >= $${paramCounter}`;
       params.push(fecha_desde);
       paramCounter++;
     }
 
     if (fecha_hasta) {
-      whereClause += ` AND ${salesDateCol} <= $${paramCounter}`;
+      whereClauseVentas += ` AND ${salesDateCol} <= $${paramCounter}`;
       params.push(fecha_hasta);
       paramCounter++;
+    }
+
+    // Construir whereClause para abonos (mismos parámetros pero con fecha_abono)
+    let whereClauseAbonos = whereClause;
+    const abonosParams = [];
+    let abonosParamCounter = 1;
+    
+    if (req.user.rol === 'vendedor') {
+      whereClauseAbonos += ` AND vendedor_id = $${abonosParamCounter}`;
+      abonosParams.push(req.user.id);
+      abonosParamCounter++;
+    } else if (vendedor_id) {
+      whereClauseAbonos += ` AND vendedor_id = $${abonosParamCounter}`;
+      abonosParams.push(vendedor_id);
+      abonosParamCounter++;
+    }
+
+    if (fecha_desde) {
+      whereClauseAbonos += ` AND fecha_abono >= $${abonosParamCounter}`;
+      abonosParams.push(fecha_desde);
+      abonosParamCounter++;
+    }
+
+    if (fecha_hasta) {
+      whereClauseAbonos += ` AND fecha_abono <= $${abonosParamCounter}`;
+      abonosParams.push(fecha_hasta);
+      abonosParamCounter++;
     }
 
     // Determinar formato de agrupación
@@ -330,7 +359,7 @@ router.get('/comparativo', auth(), async (req, res) => {
           SUM(total_venta) as total_ventas,
           COUNT(*) as cantidad_ventas
         FROM ${salesTable}
-        ${whereClause}
+        ${whereClauseVentas}
         GROUP BY TO_CHAR(${salesDateCol}, '${dateFormat}'), vendedor_id`
       : `SELECT NULL::text as periodo, NULL::int as vendedor_id, 0::numeric as total_ventas, 0::bigint as cantidad_ventas WHERE 1=0`;
 
@@ -340,73 +369,122 @@ router.get('/comparativo', auth(), async (req, res) => {
           SUM(monto) as total_abonos,
           COUNT(*) as cantidad_abonos
         FROM ${abonosTable}
-        ${whereClause.replace('fecha', 'fecha_abono')}
+        ${whereClauseAbonos}
         GROUP BY TO_CHAR(fecha_abono, '${dateFormat}'), vendedor_id`;
 
-    const comparativoQuery = `
-      WITH ventas_agrupadas AS (
-        ${ventasCte}
-      ),
-      abonos_agrupados AS (
-        ${abonosCte}
-      )
+    // Ejecutar consultas por separado ya que tienen diferentes parámetros
+    const ventasData = salesTable ? await pool.query(`
       SELECT 
-        COALESCE(v.periodo, a.periodo) as periodo,
-        COALESCE(v.vendedor_id, a.vendedor_id) as vendedor_id,
-        u.nombre as vendedor_nombre,
-        COALESCE(v.total_ventas, 0) as total_ventas,
-        COALESCE(v.cantidad_ventas, 0) as cantidad_ventas,
-        COALESCE(a.total_abonos, 0) as total_abonos,
-        COALESCE(a.cantidad_abonos, 0) as cantidad_abonos,
-        COALESCE(v.total_ventas, 0) - COALESCE(a.total_abonos, 0) as diferencia,
-        CASE 
-          WHEN COALESCE(v.total_ventas, 0) > 0 
-          THEN (COALESCE(a.total_abonos, 0) / COALESCE(v.total_ventas, 0) * 100)::numeric(5,2)
-          ELSE 0 
-        END as porcentaje_cobrado
-      FROM ventas_agrupadas v
-      FULL OUTER JOIN abonos_agrupados a ON v.periodo = a.periodo AND v.vendedor_id = a.vendedor_id
-      LEFT JOIN users u ON COALESCE(v.vendedor_id, a.vendedor_id) = u.id
-      ORDER BY periodo DESC, vendedor_nombre
-    `;
+        TO_CHAR(${salesDateCol}, '${dateFormat}') as periodo,
+        vendedor_id,
+        SUM(total_venta) as total_ventas,
+        COUNT(*) as cantidad_ventas
+      FROM ${salesTable}
+      ${whereClauseVentas}
+      GROUP BY TO_CHAR(${salesDateCol}, '${dateFormat}'), vendedor_id
+    `, params) : { rows: [] };
 
-    const result = await pool.query(comparativoQuery, params);
-
-    // Resumen total
-    const ventasTotalCte = salesTable
-      ? `SELECT 
-          SUM(total_venta) as total_ventas,
-          COUNT(*) as cantidad_ventas
-        FROM ${salesTable}
-        ${whereClause}`
-      : `SELECT 0::numeric as total_ventas, 0::bigint as cantidad_ventas`;
-
-    const resumenQuery = `
-      WITH ventas_total AS (
-        ${ventasTotalCte}
-      ),
-      abonos_total AS (
-        SELECT 
-          SUM(monto) as total_abonos,
-          COUNT(*) as cantidad_abonos
-        FROM ${abonosTable}
-        ${whereClause.replace('fecha', 'fecha_abono')}
-      )
+    const abonosData = await pool.query(`
       SELECT 
-        v.total_ventas,
-        v.cantidad_ventas,
-        a.total_abonos,
-        a.cantidad_abonos,
-        v.total_ventas - a.total_abonos as saldo_pendiente,
-        CASE 
-          WHEN v.total_ventas > 0 
-          THEN (a.total_abonos / v.total_ventas * 100)::numeric(5,2)
-          ELSE 0 
-        END as porcentaje_cobrado_total
-      FROM ventas_total v, abonos_total a
-    `;
+        TO_CHAR(fecha_abono, '${dateFormat}') as periodo,
+        vendedor_id,
+        SUM(monto) as total_abonos,
+        COUNT(*) as cantidad_abonos
+      FROM ${abonosTable}
+      ${whereClauseAbonos}
+      GROUP BY TO_CHAR(fecha_abono, '${dateFormat}'), vendedor_id
+    `, abonosParams);
 
-    const resumen = await pool.query(resumenQuery, params);
+    // Combinar resultados en memoria
+    const periodoVendedorMap = new Map();
+
+    // Procesar ventas
+    ventasData.rows.forEach(row => {
+      const key = `${row.periodo}-${row.vendedor_id}`;
+      periodoVendedorMap.set(key, {
+        periodo: row.periodo,
+        vendedor_id: row.vendedor_id,
+        total_ventas: parseFloat(row.total_ventas) || 0,
+        cantidad_ventas: parseInt(row.cantidad_ventas) || 0,
+        total_abonos: 0,
+        cantidad_abonos: 0
+      });
+    });
+
+    // Procesar abonos
+    abonosData.rows.forEach(row => {
+      const key = `${row.periodo}-${row.vendedor_id}`;
+      if (periodoVendedorMap.has(key)) {
+        const existing = periodoVendedorMap.get(key);
+        existing.total_abonos = parseFloat(row.total_abonos) || 0;
+        existing.cantidad_abonos = parseInt(row.cantidad_abonos) || 0;
+      } else {
+        periodoVendedorMap.set(key, {
+          periodo: row.periodo,
+          vendedor_id: row.vendedor_id,
+          total_ventas: 0,
+          cantidad_ventas: 0,
+          total_abonos: parseFloat(row.total_abonos) || 0,
+          cantidad_abonos: parseInt(row.cantidad_abonos) || 0
+        });
+      }
+    });
+
+    // Obtener nombres de vendedores
+    const vendedorIds = [...new Set([...periodoVendedorMap.values()].map(v => v.vendedor_id))];
+    const usuariosData = vendedorIds.length > 0 ? await pool.query(`
+      SELECT id, nombre FROM users WHERE id = ANY($1)
+    `, [vendedorIds]) : { rows: [] };
+
+    const vendedorNombres = new Map(usuariosData.rows.map(u => [u.id, u.nombre]));
+
+    // Construir resultado final
+    const result = {
+      rows: [...periodoVendedorMap.values()].map(row => ({
+        ...row,
+        vendedor_nombre: vendedorNombres.get(row.vendedor_id) || 'Desconocido',
+        diferencia: row.total_ventas - row.total_abonos,
+        porcentaje_cobrado: row.total_ventas > 0 
+          ? parseFloat(((row.total_abonos / row.total_ventas) * 100).toFixed(2))
+          : 0
+      })).sort((a, b) => {
+        if (b.periodo !== a.periodo) return b.periodo.localeCompare(a.periodo);
+        return a.vendedor_nombre.localeCompare(b.vendedor_nombre);
+      })
+    };
+
+    // Resumen total - también con consultas separadas
+    const ventasTotalData = salesTable ? await pool.query(`
+      SELECT 
+        SUM(total_venta) as total_ventas,
+        COUNT(*) as cantidad_ventas
+      FROM ${salesTable}
+      ${whereClauseVentas}
+    `, params) : { rows: [{ total_ventas: 0, cantidad_ventas: 0 }] };
+
+    const abonosTotalData = await pool.query(`
+      SELECT 
+        SUM(monto) as total_abonos,
+        COUNT(*) as cantidad_abonos
+      FROM ${abonosTable}
+      ${whereClauseAbonos}
+    `, abonosParams);
+
+    const ventasTotal = parseFloat(ventasTotalData.rows[0]?.total_ventas) || 0;
+    const abonosTotal = parseFloat(abonosTotalData.rows[0]?.total_abonos) || 0;
+
+    const resumen = {
+      rows: [{
+        total_ventas: ventasTotal,
+        cantidad_ventas: parseInt(ventasTotalData.rows[0]?.cantidad_ventas) || 0,
+        total_abonos: abonosTotal,
+        cantidad_abonos: parseInt(abonosTotalData.rows[0]?.cantidad_abonos) || 0,
+        saldo_pendiente: ventasTotal - abonosTotal,
+        porcentaje_cobrado_total: ventasTotal > 0 
+          ? parseFloat(((abonosTotal / ventasTotal) * 100).toFixed(2))
+          : 0
+      }]
+    };
 
     res.json({
       success: true,
