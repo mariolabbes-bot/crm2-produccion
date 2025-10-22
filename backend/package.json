@@ -20,6 +20,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
     "pg": "^8.11.1",
+    "pg-copy-streams": "^7.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
