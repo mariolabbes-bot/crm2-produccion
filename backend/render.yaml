@@ -5,17 +5,16 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: npm start
-    rootDir: backend
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
+        fromGroup: web
       - key: DATABASE_URL
-        sync: false  # Configurar manualmente con Supabase URL
+        sync: false  # Configurar manualmente en Render Dashboard con tu URL de Neon
       - key: JWT_SECRET
-        sync: false  # Configurar manualmente con clave secreta
+        sync: false  # Configurar manualmente con clave secreta fuerte
       - key: CORS_ORIGINS
-        sync: false  # Configurar manualmente con URL del frontend
+        sync: false  # Configurar con tu URL de Vercel, ej: https://tu-app.vercel.app
     healthCheckPath: /api/health
     autoDeploy: true

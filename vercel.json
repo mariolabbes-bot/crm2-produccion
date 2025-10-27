@@ -11,6 +11,10 @@
   ],
   "routes": [
     { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/" }
-  ]
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "outputDirectory": "frontend/dist",
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "installCommand": "cd frontend && npm install",
+  "framework": null
 }

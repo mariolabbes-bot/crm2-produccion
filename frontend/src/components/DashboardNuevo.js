@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary } from '../api';
+import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales } from '../api';
 import { removeToken, getUser } from '../utils/auth';
 import './DashboardNuevo.css';
+import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 const COLORS = ['#667eea', '#43e97b', '#f093fb', '#fa709a', '#764ba2', '#38f9d7', '#f5576c', '#fee140'];
 
@@ -24,7 +26,163 @@ const DashboardNuevo = () => {
   const [stats, setStats] = useState(null);
   const [comparativo, setComparativo] = useState(null);
   const [vendedores, setVendedores] = useState([]);
-  const [ventasPorVendedorMes, setVentasPorVendedorMes] = useState([]);
+  const [comparativasMensuales, setComparativasMensuales] = useState(null);
+  // Datos pivoteados para la tabla inferior
+  const [pivotMonths, setPivotMonths] = useState([]); // ['YYYY-MM', ...]
+  const [pivotRows, setPivotRows] = useState([]);     // [{ vendedor_id, vendedor_nombre, 'YYYY-MM': {ventas, abonos}, totalVentas, totalAbonos }, ...]
+  const [pivoteModo, setPivoteModo] = useState('ventas'); // 'ventas' | 'abonos' | 'ambos'
+  const [sortDir, setSortDir] = useState('desc'); // 'asc' | 'desc'
+
+  // Reordenar cuando cambie el orden o la métrica
+  useEffect(() => {
+    setPivotRows(prev => {
+      const sorted = [...prev].sort((a, b) => {
+        const getTotal = (r) => pivoteModo === 'abonos' ? (r.totalAbonos || 0) : (r.totalVentas || 0);
+        const av = getTotal(a);
+        const bv = getTotal(b);
+        return sortDir === 'asc' ? av - bv : bv - av;
+      });
+      return sorted;
+    });
+  }, [sortDir, pivoteModo]);
+
+  // Max por mes para heatmap
+  const monthMax = React.useMemo(() => {
+    const acc = {};
+    pivotMonths.forEach(m => { acc[m] = 0; });
+    pivotRows.forEach(row => {
+      pivotMonths.forEach(m => {
+        const v = row[m]?.ventas || 0;
+        const a = row[m]?.abonos || 0;
+        if (pivoteModo === 'ventas') acc[m] = Math.max(acc[m], v);
+        else if (pivoteModo === 'abonos') acc[m] = Math.max(acc[m], a);
+        else acc[m] = Math.max(acc[m], v + a);
+      });
+    });
+    return acc;
+  }, [pivotMonths, pivotRows, pivoteModo]);
+
+  const getHeatStyle = (modo, month, valV, valA) => {
+    // Para 'ambos' usamos intensidad cero para evitar ambigüedad visual
+    if (modo === 'ambos') return { bgColor: 'transparent', color: 'inherit' };
+    const max = monthMax[month] || 0;
+    const val = modo === 'ventas' ? (valV || 0) : (valA || 0);
+    if (!max || !val) return { bgColor: 'transparent', color: 'inherit' };
+    // Intensidad 0.1 a 0.6
+    const ratio = Math.min(1, val / max);
+    const alpha = 0.1 + ratio * 0.5;
+    const bgColor = modo === 'ventas' ? `rgba(102, 126, 234, ${alpha})` : `rgba(67, 233, 123, ${alpha})`;
+    return { bgColor, color: '#111' };
+  };
+
+  const exportPivotCSV = () => {
+    if (!pivotRows.length) return;
+    let headers = ['Vendedor'];
+    if (pivoteModo === 'ambos') {
+      headers = headers.concat(pivotMonths.flatMap(m => [`${m} Ventas`, `${m} Abonos`]));
+      headers.push('Total Ventas', 'Total Abonos');
+    } else {
+      headers = headers.concat(pivotMonths);
+      headers.push('Total');
+    }
+
+    const data = pivotRows.map(r => {
+      const row = { Vendedor: r.vendedor_nombre };
+      if (pivoteModo === 'ambos') {
+        pivotMonths.forEach(m => {
+          row[`${m} Ventas`] = r[m]?.ventas || 0;
+          row[`${m} Abonos`] = r[m]?.abonos || 0;
+        });
+        row['Total Ventas'] = r.totalVentas || 0;
+        row['Total Abonos'] = r.totalAbonos || 0;
+      } else if (pivoteModo === 'ventas') {
+        pivotMonths.forEach(m => { row[m] = r[m]?.ventas || 0; });
+        row['Total'] = r.totalVentas || 0;
+      } else {
+        pivotMonths.forEach(m => { row[m] = r[m]?.abonos || 0; });
+        row['Total'] = r.totalAbonos || 0;
+      }
+      return row;
+    });
+
+    const csv = Papa.unparse({ fields: headers, data: data.map(d => headers.map(h => d[h] ?? '')) });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const prefix = pivoteModo === 'ambos' ? 'ventas_abonos' : pivoteModo;
+    link.download = `pivote_${prefix}_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPivotXLSX = () => {
+    if (!pivotRows.length) return;
+    let headers = ['Vendedor'];
+    if (pivoteModo === 'ambos') {
+      headers = headers.concat(pivotMonths.flatMap(m => [`${m} Ventas`, `${m} Abonos`]));
+      headers.push('Total Ventas', 'Total Abonos');
+    } else {
+      headers = headers.concat(pivotMonths);
+      headers.push('Total');
+    }
+
+    const aoa = [headers];
+
+    // Filas por vendedor
+    pivotRows.forEach(r => {
+      const row = [r.vendedor_nombre || ''];
+      if (pivoteModo === 'ambos') {
+        pivotMonths.forEach(m => {
+          row.push(r[m]?.ventas || 0);
+          row.push(r[m]?.abonos || 0);
+        });
+        row.push(r.totalVentas || 0);
+        row.push(r.totalAbonos || 0);
+      } else if (pivoteModo === 'ventas') {
+        pivotMonths.forEach(m => { row.push(r[m]?.ventas || 0); });
+        row.push(r.totalVentas || 0);
+      } else {
+        pivotMonths.forEach(m => { row.push(r[m]?.abonos || 0); });
+        row.push(r.totalAbonos || 0);
+      }
+      aoa.push(row);
+    });
+
+    // Fila de totales al final
+    const totalsRow = ['Total'];
+    if (pivoteModo === 'ambos') {
+      pivotMonths.forEach(m => {
+        const totV = pivotRows.reduce((acc, r) => acc + (r[m]?.ventas || 0), 0);
+        const totA = pivotRows.reduce((acc, r) => acc + (r[m]?.abonos || 0), 0);
+        totalsRow.push(totV);
+        totalsRow.push(totA);
+      });
+      totalsRow.push(pivotRows.reduce((a, r) => a + (r.totalVentas || 0), 0));
+      totalsRow.push(pivotRows.reduce((a, r) => a + (r.totalAbonos || 0), 0));
+    } else if (pivoteModo === 'ventas') {
+      pivotMonths.forEach(m => {
+        const totV = pivotRows.reduce((acc, r) => acc + (r[m]?.ventas || 0), 0);
+        totalsRow.push(totV);
+      });
+      totalsRow.push(pivotRows.reduce((a, r) => a + (r.totalVentas || 0), 0));
+    } else {
+      pivotMonths.forEach(m => {
+        const totA = pivotRows.reduce((acc, r) => acc + (r[m]?.abonos || 0), 0);
+        totalsRow.push(totA);
+      });
+      totalsRow.push(pivotRows.reduce((a, r) => a + (r.totalAbonos || 0), 0));
+    }
+    aoa.push(totalsRow);
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Pivote');
+    const prefix = pivoteModo === 'ambos' ? 'ventas_abonos' : pivoteModo;
+    XLSX.writeFile(wb, `pivote_${prefix}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -65,11 +223,12 @@ const DashboardNuevo = () => {
         params.vendedor_id = filtroVendedor;
       }
       
-      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData] = await Promise.all([
+      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData] = await Promise.all([
         getAbonosEstadisticas(params).catch(e => ({ success: false, error: e.message, status: e.status })),
         getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status })),
         getVendedores().catch(e => []),
-        getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status }))
+        getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status })),
+        getComparativasMensuales().catch(e => ({ success: false, error: e.message, status: e.status }))
       ]);
 
       // Validar estructura y mostrar errores específicos
@@ -97,16 +256,91 @@ const DashboardNuevo = () => {
         setComparativo(comparativoData.data);
       }
 
-      setVendedores(Array.isArray(vendedoresData) ? vendedoresData : []);
+      // Lista de vendedores para filas (según rol)
+      const listaVendedores = Array.isArray(vendedoresData) ? vendedoresData : [];
+      setVendedores(listaVendedores);
 
-      // Ventas por vendedor mes
-      let detalle = [];
-      if (ventasVendedorMesData && ventasVendedorMesData.data && Array.isArray(ventasVendedorMesData.data.detalle)) {
-        detalle = ventasVendedorMesData.data.detalle;
+      // Cargar comparativas mensuales
+      if (comparativasData && comparativasData.success && comparativasData.data) {
+        setComparativasMensuales(comparativasData.data);
+      } else {
+        setComparativasMensuales(null);
       }
-      // Mostrar todos los registros, incluso si no tienen ventas pero sí abonos
-      const detalleConDatos = detalle.filter(row => parseFloat(row.total_ventas) > 0 || parseFloat(row.total_abonos) > 0);
-      setVentasPorVendedorMes(detalleConDatos);
+
+      // Construir pivote: filas = vendedores, columnas = meses en rango, celdas = total_ventas
+      const detalleComparativo = (comparativoData && comparativoData.data && Array.isArray(comparativoData.data.detalle))
+        ? comparativoData.data.detalle
+        : [];
+
+      // Generar lista de meses desde el rango seleccionado (YYYY-MM)
+      const genMonthsInRange = (desdeStr, hastaStr) => {
+        if (!desdeStr || !hastaStr) return [];
+        const start = new Date(desdeStr + 'T00:00:00');
+        const end = new Date(hastaStr + 'T00:00:00');
+        const months = [];
+        const d = new Date(start.getFullYear(), start.getMonth(), 1);
+        while (d <= end) {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          months.push(`${y}-${m}`);
+          d.setMonth(d.getMonth() + 1);
+        }
+        return months;
+      };
+
+      const months = genMonthsInRange(filtroFechaDesde, filtroFechaHasta);
+      setPivotMonths(months);
+
+      // Preparar mapas por (vendedor_id, periodo)
+      const ventasMap = new Map(); // key: `${vendedor_id}|${periodo}` => total_ventas
+      const abonosMap = new Map(); // key: `${vendedor_id}|${periodo}` => total_abonos
+      for (const r of detalleComparativo) {
+        const key = `${r.vendedor_id}|${r.periodo}`;
+        const valV = parseFloat(r.total_ventas || 0) || 0;
+        const valA = parseFloat(r.total_abonos || 0) || 0;
+        ventasMap.set(key, (ventasMap.get(key) || 0) + valV);
+        abonosMap.set(key, (abonosMap.get(key) || 0) + valA);
+      }
+
+      // Determinar filas: si manager y filtroVendedor, solo ese; si manager sin filtro, todos; si vendedor, solo el propio
+      const vendorRowsBase = (() => {
+        if (isManager) {
+          if (params.vendedor_id) {
+            const v = listaVendedores.find(x => String(x.id) === String(params.vendedor_id));
+            return v ? [v] : [];
+          }
+          return listaVendedores;
+        }
+        // rol vendedor: solo el usuario
+        return user ? [{ id: user.id, nombre: user.nombre }] : [];
+      })();
+
+      const rows = vendorRowsBase.map(v => {
+        const row = { vendedor_id: v.id, vendedor_nombre: v.nombre };
+        let totalV = 0;
+        let totalA = 0;
+        months.forEach(mm => {
+          const key = `${v.id}|${mm}`;
+          const valV = ventasMap.get(key) || 0;
+          const valA = abonosMap.get(key) || 0;
+          row[mm] = { ventas: valV, abonos: valA };
+          totalV += valV;
+          totalA += valA;
+        });
+        row.totalVentas = totalV;
+        row.totalAbonos = totalA;
+        return row;
+      });
+
+      // Ordenar por total según modo
+      const sorted = [...rows].sort((a, b) => {
+        const getTotal = (r) => pivoteModo === 'abonos' ? (r.totalAbonos || 0) : (r.totalVentas || 0);
+        const av = getTotal(a);
+        const bv = getTotal(b);
+        return sortDir === 'asc' ? av - bv : bv - av;
+      });
+
+      setPivotRows(sorted);
     } catch (err) {
       console.error('❌ Error al cargar datos:', err);
       setError('Error al cargar datos: ' + (err.message || 'Error desconocido'));
@@ -140,14 +374,25 @@ const DashboardNuevo = () => {
     <Box className="dashboard-nuevo-container">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>Dashboard General</Typography>
-        <Button 
-          variant="outlined" 
-          color="error" 
-          onClick={handleLogout}
-          sx={{ fontWeight: 600 }}
-        >
-          Cerrar Sesión
-        </Button>
+        <Box>
+          {isManager && (
+            <Button 
+              variant="contained" 
+              onClick={() => navigate('/import-data')}
+              sx={{ fontWeight: 600, mr: 2 }}
+            >
+              📊 Importar Datos
+            </Button>
+          )}
+          <Button 
+            variant="outlined" 
+            color="error" 
+            onClick={handleLogout}
+            sx={{ fontWeight: 600 }}
+          >
+            Cerrar Sesión
+          </Button>
+        </Box>
       </Box>
 
       {/* Filtros */}
@@ -316,50 +561,220 @@ const DashboardNuevo = () => {
               </Paper>
             </Grid>
           </Grid>
-          {/* Tabla de ventas/abonos por vendedor por mes 2025 */}
+
+          {/* TABLAS COMPARATIVAS */}
+          {comparativasMensuales && comparativasMensuales.comparativas && (
+            <Grid container spacing={3} sx={{ mt: 2 }}>
+              {/* Tabla 1: Mes actual vs promedio últimos 3 meses */}
+              <Grid item xs={12} md={6}>
+                <Paper className="chart-card" sx={{ p: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+                    📈 Mes Actual vs Promedio 3 Meses
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#666', mb: 2, display: 'block' }}>
+                    Comparación del mes {comparativasMensuales.mes_actual} contra el promedio de {comparativasMensuales.meses_comparacion.join(', ')}
+                  </Typography>
+                  <div style={{ overflowX: 'auto', maxHeight: '400px', overflowY: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                      <thead style={{ position: 'sticky', top: 0, background: '#f5f5f5', zIndex: 1 }}>
+                        <tr>
+                          <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Vendedor</th>
+                          <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Mes Actual</th>
+                          <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Prom. 3M</th>
+                          <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Var. $</th>
+                          <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Var. %</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {comparativasMensuales.comparativas.map((comp, idx) => {
+                          const varPct = comp.variacion_promedio_porcentaje || 0;
+                          const isPositive = varPct >= 0;
+                          const colorPct = isPositive ? '#27ae60' : '#e74c3c';
+                          const iconPct = isPositive ? '↑' : '↓';
+                          return (
+                            <tr key={comp.vendedor_id} style={{ background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                              <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{comp.vendedor_nombre}</td>
+                              <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #eee', fontWeight: 600 }}>{formatMoney(comp.mes_actual)}</td>
+                              <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #eee' }}>{formatMoney(comp.promedio_3_meses)}</td>
+                              <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #eee', color: colorPct }}>{formatMoney(comp.variacion_promedio_pesos)}</td>
+                              <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #eee', color: colorPct, fontWeight: 700 }}>
+                                {iconPct} {Math.abs(varPct).toFixed(1)}%
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </Paper>
+              </Grid>
+
+              {/* Tabla 2: Mes actual vs mismo mes año anterior */}
+              <Grid item xs={12} md={6}>
+                <Paper className="chart-card" sx={{ p: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+                    📅 Mes Actual vs Mismo Mes Año Anterior
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#666', mb: 2, display: 'block' }}>
+                    Comparación del mes {comparativasMensuales.mes_actual} vs {comparativasMensuales.mes_anio_anterior}
+                  </Typography>
+                  <div style={{ overflowX: 'auto', maxHeight: '400px', overflowY: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                      <thead style={{ position: 'sticky', top: 0, background: '#f5f5f5', zIndex: 1 }}>
+                        <tr>
+                          <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Vendedor</th>
+                          <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>2025</th>
+                          <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>2024</th>
+                          <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Var. $</th>
+                          <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Var. %</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {comparativasMensuales.comparativas.map((comp, idx) => {
+                          const varPct = comp.variacion_anio_anterior_porcentaje || 0;
+                          const isPositive = varPct >= 0;
+                          const colorPct = isPositive ? '#27ae60' : '#e74c3c';
+                          const iconPct = isPositive ? '↑' : '↓';
+                          return (
+                            <tr key={comp.vendedor_id} style={{ background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                              <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{comp.vendedor_nombre}</td>
+                              <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #eee', fontWeight: 600 }}>{formatMoney(comp.mes_actual)}</td>
+                              <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #eee' }}>{formatMoney(comp.mes_anio_anterior)}</td>
+                              <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #eee', color: colorPct }}>{formatMoney(comp.variacion_anio_anterior_pesos)}</td>
+                              <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #eee', color: colorPct, fontWeight: 700 }}>
+                                {iconPct} {Math.abs(varPct).toFixed(1)}%
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </Paper>
+              </Grid>
+            </Grid>
+          )}
+
+          {/* Tabla pivote: filas = vendedores, columnas = meses (ventas/abonos) */}
           <Box sx={{ mt: 4 }}>
             <Paper className="chart-card" sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ mb: 2 }}>
-                📊 Ventas y Abonos por Vendedor por Mes (2025)
+                📊 Ventas por Vendedor por Mes
                 <Typography variant="caption" sx={{ ml: 2, color: '#666' }}>
-                  {ventasPorVendedorMes.length} registros encontrados
+                  {pivotRows.length} vendedores mostrados
                 </Typography>
               </Typography>
+                {/* Selector de métrica para la tabla pivote */}
+                <Box sx={{ mb: 2 }}>
+                  <FormControl size="small">
+                    <InputLabel>Métrica</InputLabel>
+                    <Select label="Métrica" value={pivoteModo} onChange={(e) => setPivoteModo(e.target.value)}>
+                      <MenuItem value="ventas">Ventas</MenuItem>
+                      <MenuItem value="abonos">Abonos</MenuItem>
+                      <MenuItem value="ambos">Ambos</MenuItem>
+                    </Select>
+                  </FormControl>
+                <Button onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')} size="small" sx={{ ml: 2 }} variant="outlined">
+                  Orden Total: {sortDir === 'asc' ? 'Asc' : 'Desc'}
+                </Button>
+                <Button onClick={() => exportPivotCSV()} size="small" sx={{ ml: 2 }} variant="contained">
+                  Exportar CSV
+                </Button>
+                <Button onClick={() => exportPivotXLSX()} size="small" sx={{ ml: 1 }} variant="outlined">
+                  Exportar XLSX
+                </Button>
+                </Box>
               <div style={{ overflowX: 'auto', maxHeight: '500px', overflowY: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead style={{ position: 'sticky', top: 0, background: '#f3e5f5', zIndex: 1 }}>
                     <tr>
-                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'left', fontWeight: 600 }}>Mes</th>
-                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'left', fontWeight: 600 }}>Vendedor</th>
-                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'right', fontWeight: 600 }}>Ventas</th>
-                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'right', fontWeight: 600 }}>Abonos</th>
-                      <th style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'center', fontWeight: 600 }}>% Cobrado</th>
+                      <th style={{ position: 'sticky', left: 0, zIndex: 2, background: '#f3e5f5', padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'left', fontWeight: 600 }}>Vendedor</th>
+                      {pivotMonths.map(m => (
+                        <th key={m} style={{ padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'right', fontWeight: 600 }}>{m}</th>
+                      ))}
+                      <th style={{ cursor: 'pointer', padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'right', fontWeight: 600 }} onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}>Total {sortDir === 'asc' ? '↑' : '↓'}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {ventasPorVendedorMes.length === 0 ? (
+                    {pivotRows.length === 0 ? (
                       <tr>
-                        <td colSpan={5} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
-                          <Typography variant="body1">❌ No hay datos para 2025</Typography>
-                          <Typography variant="caption">Verifica que haya ventas o abonos registrados en ese período</Typography>
+                          <td colSpan={pivotMonths.length + 2} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
+                          <Typography variant="body1">❌ Sin datos en el rango seleccionado</Typography>
+                          <Typography variant="caption">Ajusta el rango de fechas o revisa filtros</Typography>
                         </td>
                       </tr>
                     ) : (
-                      ventasPorVendedorMes.map((row, idx) => (
-                        <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : '#f9f9f9' }}>
-                          <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{row.periodo}</td>
-                          <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{row.vendedor_nombre || 'Sin vendedor'}</td>
-                          <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 500, color: '#667eea' }}>
-                            {formatMoney(row.total_ventas)}
-                          </td>
-                          <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 500, color: '#43e97b' }}>
-                            {formatMoney(row.total_abonos)}
-                          </td>
-                          <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'center', fontWeight: 500 }}>
-                            {row.porcentaje_cobrado}%
-                          </td>
+                      pivotRows.map((row, idx) => (
+                        <tr key={row.vendedor_id || idx} style={{ background: idx % 2 === 0 ? '#fff' : '#f9f9f9' }}>
+                          <td style={{ position: 'sticky', left: 0, zIndex: 1, background: '#fff', padding: '12px', borderBottom: '1px solid #eee' }}>{row.vendedor_nombre || 'Sin vendedor'}</td>
+                          {pivotMonths.map(m => {
+                            const valV = row[m]?.ventas || 0;
+                            const valA = row[m]?.abonos || 0;
+                            const { bgColor, color } = getHeatStyle(pivoteModo, m, valV, valA);
+                            return (
+                            <td key={m} style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 500, backgroundColor: bgColor, color }}>
+                                {pivoteModo === 'ventas' && (
+                                <span style={{ color: '#667eea', fontWeight: 600 }}>{formatMoney(valV)}</span>
+                                )}
+                                {pivoteModo === 'abonos' && (
+                                <span style={{ color: '#43e97b', fontWeight: 600 }}>{formatMoney(valA)}</span>
+                                )}
+                                {pivoteModo === 'ambos' && (
+                                  <span>
+                                  <span style={{ display: 'block', color: '#667eea', fontWeight: 600 }}>V: {formatMoney(valV)}</span>
+                                  <span style={{ display: 'block', color: '#43e97b', fontWeight: 600 }}>A: {formatMoney(valA)}</span>
+                                  </span>
+                                )}
+                            </td>
+                          );})}
+                            <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 700 }}>
+                              {pivoteModo === 'ventas' && (
+                                <span style={{ color: '#667eea' }}>{formatMoney(row.totalVentas || 0)}</span>
+                              )}
+                              {pivoteModo === 'abonos' && (
+                                <span style={{ color: '#43e97b' }}>{formatMoney(row.totalAbonos || 0)}</span>
+                              )}
+                              {pivoteModo === 'ambos' && (
+                                <span>
+                                  <span style={{ display: 'block', color: '#667eea' }}>V: {formatMoney(row.totalVentas || 0)}</span>
+                                  <span style={{ display: 'block', color: '#43e97b' }}>A: {formatMoney(row.totalAbonos || 0)}</span>
+                                </span>
+                              )}
+                            </td>
                         </tr>
                       ))
+                    )}
+                    {/* Fila de totales por mes */}
+                    {pivotRows.length > 0 && (
+                      <tr style={{ background: '#fafafa' }}>
+                        <td style={{ position: 'sticky', left: 0, zIndex: 1, background: '#fafafa', padding: '12px', borderTop: '2px solid #ccc', fontWeight: 700 }}>Total</td>
+                        {pivotMonths.map(m => {
+                          const totV = pivotRows.reduce((acc, r) => acc += (r[m]?.ventas || 0), 0);
+                          const totA = pivotRows.reduce((acc, r) => acc += (r[m]?.abonos || 0), 0);
+                          return (
+                            <td key={`tot-${m}`} style={{ padding: '12px', borderTop: '2px solid #ccc', textAlign: 'right', fontWeight: 700 }}>
+                              {pivoteModo === 'ventas' && <span style={{ color: '#667eea' }}>{formatMoney(totV)}</span>}
+                              {pivoteModo === 'abonos' && <span style={{ color: '#43e97b' }}>{formatMoney(totA)}</span>}
+                              {pivoteModo === 'ambos' && (
+                                <span>
+                                  <span style={{ display: 'block', color: '#667eea' }}>V: {formatMoney(totV)}</span>
+                                  <span style={{ display: 'block', color: '#43e97b' }}>A: {formatMoney(totA)}</span>
+                                </span>
+                              )}
+                            </td>
+                          );
+                        })}
+                        <td style={{ padding: '12px', borderTop: '2px solid #ccc', textAlign: 'right', fontWeight: 900 }}>
+                          {pivoteModo === 'ventas' && <span style={{ color: '#667eea' }}>{formatMoney(pivotRows.reduce((a, r) => a + (r.totalVentas || 0), 0))}</span>}
+                          {pivoteModo === 'abonos' && <span style={{ color: '#43e97b' }}>{formatMoney(pivotRows.reduce((a, r) => a + (r.totalAbonos || 0), 0))}</span>}
+                          {pivoteModo === 'ambos' && (
+                            <span>
+                              <span style={{ display: 'block', color: '#667eea' }}>V: {formatMoney(pivotRows.reduce((a, r) => a + (r.totalVentas || 0), 0))}</span>
+                              <span style={{ display: 'block', color: '#43e97b' }}>A: {formatMoney(pivotRows.reduce((a, r) => a + (r.totalAbonos || 0), 0))}</span>
+                            </span>
+                          )}
+                        </td>
+                      </tr>
                     )}
                   </tbody>
                 </table>

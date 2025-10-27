@@ -12,29 +12,45 @@ backend/uploads/
 .env
 backend/.env
 frontend/.env
+.env.local
+.env.development.local
+.env.test.local
+
+# IMPORTANTE: NO ignorar .env.production para que esté disponible en el repo
+# pero NUNCA colocar datos sensibles reales en estos archivos
+# Los datos reales deben configurarse directamente en Vercel y Render
 
 # Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
 # Cache
 .cache/
 .parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist
 
 # MacOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
 # IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
 # Temporales
 temp/
 tmp/
+*.tmp
 
 # Databases locales (si usas SQLite)
 *.db
@@ -46,8 +62,12 @@ tmp/
 *.key
 *.crt
 
-# Configuraciones específicas del sistema
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Testing
+coverage/
+.nyc_output/
+
+# Vercel
+.vercel
+
+# Sistema operativo
+Thumbs.db

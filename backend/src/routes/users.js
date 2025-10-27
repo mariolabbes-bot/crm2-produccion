@@ -75,11 +75,21 @@ router.post('/login', async (req, res) => {
 });
 
 
-// Obtener todos los vendedores
+// Obtener todos los vendedores (deduplicado por las dos primeras palabras del nombre)
 router.get('/vendedores', async (req, res) => {
   try {
-    // Retorna usuarios cuyo rol sea 'vendedor' o 'manager'
-    const vendedores = await pool.query("SELECT id, nombre, email FROM users WHERE rol IN ('vendedor','manager') ORDER BY nombre ASC");
+    // Solo rol vendedor y deduplicación por las dos primeras palabras (case-insensitive)
+    const query = `
+      SELECT DISTINCT ON (
+        LOWER(TRIM(CONCAT_WS(' ', split_part(nombre, ' ', 1), split_part(nombre, ' ', 2))))
+      )
+        id, nombre, email
+      FROM users
+      WHERE rol = 'vendedor'
+      ORDER BY 
+        LOWER(TRIM(CONCAT_WS(' ', split_part(nombre, ' ', 1), split_part(nombre, ' ', 2)))), id ASC
+    `;
+    const vendedores = await pool.query(query);
     res.json(vendedores.rows);
   } catch (err) {
     console.error('Error al obtener vendedores:', err);

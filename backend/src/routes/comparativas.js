@@ -1,0 +1,136 @@
+const express = require('express');
+const router = express.Router();
+const pool = require('../db');
+const auth = require('../middleware/auth');
+
+// GET /api/comparativas/mensuales - Comparativas de ventas mensuales
+router.get('/mensuales', auth(), async (req, res) => {
+  try {
+    const { mes_actual } = req.query; // Formato: YYYY-MM (opcional, por defecto mes actual)
+    const user = req.user;
+
+    // Determinar mes actual a analizar
+    const mesActual = mes_actual || new Date().toISOString().slice(0, 7); // YYYY-MM
+    const [year, month] = mesActual.split('-').map(Number);
+
+    // Calcular meses anteriores
+    const mes1Atras = new Date(year, month - 2, 1).toISOString().slice(0, 7);
+    const mes2Atras = new Date(year, month - 3, 1).toISOString().slice(0, 7);
+    const mes3Atras = new Date(year, month - 4, 1).toISOString().slice(0, 7);
+
+    // Calcular mismo mes año anterior
+    const mesAnioAnterior = new Date(year - 1, month - 1, 1).toISOString().slice(0, 7);
+
+    // Detección dinámica de tabla y columna de fecha
+    const tableCheck = await pool.query(`
+      SELECT table_name FROM information_schema.tables 
+      WHERE table_schema = 'public' AND table_name IN ('sales', 'ventas')
+      LIMIT 1
+    `);
+    const salesTable = tableCheck.rows[0]?.table_name || 'sales';
+
+    const dateColCheck = await pool.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = $1
+      AND column_name IN ('fecha_emision', 'fecha', 'fecha_venta', 'created_at')
+      ORDER BY CASE column_name WHEN 'fecha_emision' THEN 1 WHEN 'fecha' THEN 2 WHEN 'fecha_venta' THEN 3 ELSE 4 END
+      LIMIT 1
+    `, [salesTable]);
+    const dateCol = dateColCheck.rows[0]?.column_name || 'fecha_emision';
+
+    // Filtro por vendedor si es vendedor (no manager)
+    let vendedorFilter = '';
+    let params = [];
+    if (user.rol !== 'manager') {
+      vendedorFilter = 'AND vendedor_id = $1';
+      params = [user.id];
+    }
+
+    // Query: Ventas por vendedor y mes
+    const query = `
+      WITH ventas_mensuales AS (
+        SELECT 
+          vendedor_id,
+          TO_CHAR(${dateCol}, 'YYYY-MM') as mes,
+          SUM(total_venta) as total_ventas
+        FROM ${salesTable}
+        WHERE TO_CHAR(${dateCol}, 'YYYY-MM') IN ($${params.length + 1}, $${params.length + 2}, $${params.length + 3}, $${params.length + 4}, $${params.length + 5})
+        ${vendedorFilter}
+        GROUP BY vendedor_id, TO_CHAR(${dateCol}, 'YYYY-MM')
+      )
+      SELECT 
+        u.id as vendedor_id,
+        u.nombre as vendedor_nombre,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 1} THEN vm.total_ventas END), 0) as mes_actual,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 2} THEN vm.total_ventas END), 0) as mes_1,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 3} THEN vm.total_ventas END), 0) as mes_2,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 4} THEN vm.total_ventas END), 0) as mes_3,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 5} THEN vm.total_ventas END), 0) as mes_anio_anterior
+      FROM users u
+      LEFT JOIN ventas_mensuales vm ON vm.vendedor_id = u.id
+      WHERE u.rol = 'vendedor'
+      GROUP BY u.id, u.nombre
+      ORDER BY u.nombre
+    `;
+
+    params.push(mesActual, mes1Atras, mes2Atras, mes3Atras, mesAnioAnterior);
+
+    const result = await pool.query(query, params);
+
+    // Calcular promedios y variaciones
+    const comparativas = result.rows.map(row => {
+      const mesActual = parseFloat(row.mes_actual) || 0;
+      const mes1 = parseFloat(row.mes_1) || 0;
+      const mes2 = parseFloat(row.mes_2) || 0;
+      const mes3 = parseFloat(row.mes_3) || 0;
+      const mesAnioAnterior = parseFloat(row.mes_anio_anterior) || 0;
+
+      // Promedio últimos 3 meses
+      const promedio3Meses = (mes1 + mes2 + mes3) / 3;
+
+      // Variación vs promedio
+      const variacionPromedioPesos = mesActual - promedio3Meses;
+      const variacionPromedioPorcentaje = promedio3Meses > 0 
+        ? ((mesActual - promedio3Meses) / promedio3Meses * 100).toFixed(2)
+        : 0;
+
+      // Variación vs año anterior
+      const variacionAnioAnteriorPesos = mesActual - mesAnioAnterior;
+      const variacionAnioAnteriorPorcentaje = mesAnioAnterior > 0
+        ? ((mesActual - mesAnioAnterior) / mesAnioAnterior * 100).toFixed(2)
+        : 0;
+
+      return {
+        vendedor_id: row.vendedor_id,
+        vendedor_nombre: row.vendedor_nombre,
+        mes_actual: mesActual,
+        promedio_3_meses: promedio3Meses,
+        variacion_promedio_pesos: variacionPromedioPesos,
+        variacion_promedio_porcentaje: parseFloat(variacionPromedioPorcentaje),
+        mes_anio_anterior: mesAnioAnterior,
+        variacion_anio_anterior_pesos: variacionAnioAnteriorPesos,
+        variacion_anio_anterior_porcentaje: parseFloat(variacionAnioAnteriorPorcentaje)
+      };
+    });
+
+    res.json({
+      success: true,
+      data: {
+        mes_actual: mesActual,
+        mes_anio_anterior: mesAnioAnterior,
+        meses_comparacion: [mes1Atras, mes2Atras, mes3Atras],
+        comparativas
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en comparativas mensuales:', error);
+    res.status(500).json({ 
+      success: false, 
+      msg: 'Error al obtener comparativas', 
+      error: error.message 
+    });
+  }
+});
+
+module.exports = router;

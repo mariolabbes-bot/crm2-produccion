@@ -136,3 +136,67 @@ export const getAbonosPorVendedor = (params = {}) => {
 };
 
 export const getTiposPago = () => apiFetch(`${API_URL}/abonos/tipos-pago`);
+
+// COMPARATIVAS
+export const getComparativasMensuales = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/comparativas/mensuales${queryString ? `?${queryString}` : ''}`);
+};
+
+// IMPORTACIÓN
+export const uploadVentasFile = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const token = getToken();
+  const response = await fetch(`${API_URL}/import/ventas`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.msg || 'Error al subir archivo');
+  }
+
+  return await response.json();
+};
+
+export const uploadAbonosFile = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const token = getToken();
+  const response = await fetch(`${API_URL}/import/abonos`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.msg || 'Error al subir archivo');
+  }
+
+  return await response.json();
+};
+
+export const downloadPlantillaVentas = () => {
+  const token = getToken();
+  window.open(`${API_URL}/import/plantilla/ventas?token=${token}`, '_blank');
+};
+
+export const downloadPlantillaAbonos = () => {
+  const token = getToken();
+  window.open(`${API_URL}/import/plantilla/abonos?token=${token}`, '_blank');
+};
+
+export const downloadInformePendientes = (filename) => {
+  const token = getToken();
+  window.open(`${API_URL}/import/download-report/${filename}?token=${token}`, '_blank');
+};

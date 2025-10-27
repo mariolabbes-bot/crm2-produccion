@@ -1,0 +1,420 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Alert,
+  LinearProgress,
+  Card,
+  CardContent,
+  Grid,
+  Chip,
+  List,
+  ListItem,
+  ListItemText,
+  Divider
+} from '@mui/material';
+import {
+  CloudUpload as UploadIcon,
+  Download as DownloadIcon,
+  Check as CheckIcon,
+  Warning as WarningIcon,
+  Error as ErrorIcon
+} from '@mui/icons-material';
+import { uploadVentasFile, uploadAbonosFile, downloadPlantillaVentas, downloadPlantillaAbonos, downloadInformePendientes } from '../api';
+import { removeToken } from '../utils/auth';
+
+const ImportPanel = () => {
+  const navigate = useNavigate();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [importType, setImportType] = useState('ventas'); // 'ventas' | 'abonos'
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  const handleLogout = () => {
+    removeToken();
+    navigate('/login');
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setResult(null);
+      setError(null);
+    }
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      setSelectedFile(file);
+      setResult(null);
+      setError(null);
+    } else {
+      setError('Solo se permiten archivos Excel (.xlsx, .xls)');
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setError('Selecciona un archivo primero');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      let response;
+      if (importType === 'ventas') {
+        response = await uploadVentasFile(selectedFile);
+      } else {
+        response = await uploadAbonosFile(selectedFile);
+      }
+
+      setResult(response);
+      setSelectedFile(null);
+    } catch (err) {
+      console.error('Error en upload:', err);
+      setError(err.message || 'Error al procesar el archivo');
+      if (err.message.includes('401') || err.message.includes('403')) {
+        setTimeout(() => {
+          removeToken();
+          navigate('/login');
+        }, 2000);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownloadPlantilla = () => {
+    if (importType === 'ventas') {
+      downloadPlantillaVentas();
+    } else {
+      downloadPlantillaAbonos();
+    }
+  };
+
+  const handleDownloadInforme = () => {
+    if (result && result.pendingReportUrl) {
+      const filename = result.pendingReportUrl.split('/').pop();
+      downloadInformePendientes(filename);
+    }
+  };
+
+  return (
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', p: 3 }}>
+      <Box sx={{ maxWidth: 1200, margin: '0 auto' }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>
+            📊 Importación de Datos
+          </Typography>
+          <Box>
+            <Button onClick={() => navigate('/')} sx={{ mr: 2 }}>
+              Volver al Dashboard
+            </Button>
+            <Button variant="outlined" color="error" onClick={handleLogout}>
+              Cerrar Sesión
+            </Button>
+          </Box>
+        </Box>
+
+        <Grid container spacing={3}>
+          {/* Panel izquierdo: Upload */}
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                1. Selecciona el tipo de datos
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                <Button
+                  variant={importType === 'ventas' ? 'contained' : 'outlined'}
+                  onClick={() => setImportType('ventas')}
+                  fullWidth
+                >
+                  Ventas
+                </Button>
+                <Button
+                  variant={importType === 'abonos' ? 'contained' : 'outlined'}
+                  onClick={() => setImportType('abonos')}
+                  fullWidth
+                >
+                  Abonos
+                </Button>
+              </Box>
+
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 3 }}>
+                2. Descarga la plantilla
+              </Typography>
+              <Button
+                startIcon={<DownloadIcon />}
+                variant="outlined"
+                onClick={handleDownloadPlantilla}
+                fullWidth
+                sx={{ mb: 3 }}
+              >
+                Descargar Plantilla de {importType === 'ventas' ? 'Ventas' : 'Abonos'}
+              </Button>
+
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                3. Sube tu archivo
+              </Typography>
+              <Box
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                sx={{
+                  border: '2px dashed #1976d2',
+                  borderRadius: 2,
+                  p: 4,
+                  textAlign: 'center',
+                  bgcolor: selectedFile ? '#e3f2fd' : '#fafafa',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    bgcolor: '#e3f2fd',
+                    borderColor: '#1565c0'
+                  }
+                }}
+                onClick={() => document.getElementById('file-input').click()}
+              >
+                <input
+                  id="file-input"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  style={{ display: 'none' }}
+                  onChange={handleFileSelect}
+                />
+                <UploadIcon sx={{ fontSize: 48, color: '#1976d2', mb: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  {selectedFile ? selectedFile.name : 'Arrastra tu archivo aquí'}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  o haz clic para seleccionar
+                </Typography>
+                <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                  Archivos permitidos: .xlsx, .xls (máx. 50MB)
+                </Typography>
+              </Box>
+
+              {selectedFile && (
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  sx={{ mt: 3 }}
+                  onClick={handleUpload}
+                  disabled={loading}
+                  startIcon={<UploadIcon />}
+                >
+                  {loading ? 'Procesando...' : 'Importar y Procesar'}
+                </Button>
+              )}
+
+              {loading && <LinearProgress sx={{ mt: 2 }} />}
+            </Paper>
+          </Grid>
+
+          {/* Panel derecho: Resultados */}
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                Resultado de la Importación
+              </Typography>
+
+              {!result && !error && (
+                <Box sx={{ textAlign: 'center', py: 8, color: '#999' }}>
+                  <Typography variant="body1">
+                    Sube un archivo para ver los resultados
+                  </Typography>
+                </Box>
+              )}
+
+              {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
+
+              {result && (
+                <Box>
+                  {/* Resumen */}
+                  <Card sx={{ mb: 2, bgcolor: result.canProceed ? '#e8f5e9' : '#fff3e0' }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        {result.canProceed ? (
+                          <CheckIcon sx={{ color: '#4caf50', fontSize: 40, mr: 2 }} />
+                        ) : (
+                          <WarningIcon sx={{ color: '#ff9800', fontSize: 40, mr: 2 }} />
+                        )}
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                            {result.canProceed ? 'Listo para importar' : 'Atención: Hay pendientes'}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {result.totalRows} filas procesadas
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <Typography variant="caption" color="textSecondary">
+                            Para importar
+                          </Typography>
+                          <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
+                            {result.toImport}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="caption" color="textSecondary">
+                            Duplicados
+                          </Typography>
+                          <Typography variant="h4" sx={{ color: '#ff9800', fontWeight: 700 }}>
+                            {result.duplicates}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+
+                  {/* Referencias faltantes */}
+                  {(result.missingVendors?.length > 0 || result.missingClients?.length > 0) && (
+                    <Card sx={{ mb: 2, border: '2px solid #ff9800' }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <ErrorIcon sx={{ color: '#ff9800', mr: 1 }} />
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            Referencias Faltantes
+                          </Typography>
+                        </Box>
+
+                        {result.missingVendors?.length > 0 && (
+                          <Box sx={{ mb: 2 }}>
+                            <Chip
+                              label={`${result.missingVendors.length} Vendedor(es) no encontrado(s)`}
+                              color="warning"
+                              size="small"
+                              sx={{ mb: 1 }}
+                            />
+                            <List dense>
+                              {result.missingVendors.slice(0, 5).map((v, idx) => (
+                                <ListItem key={idx} sx={{ py: 0.5 }}>
+                                  <ListItemText primary={v} primaryTypographyProps={{ variant: 'body2' }} />
+                                </ListItem>
+                              ))}
+                              {result.missingVendors.length > 5 && (
+                                <ListItem>
+                                  <ListItemText 
+                                    primary={`... y ${result.missingVendors.length - 5} más`}
+                                    primaryTypographyProps={{ variant: 'caption', color: 'textSecondary' }}
+                                  />
+                                </ListItem>
+                              )}
+                            </List>
+                          </Box>
+                        )}
+
+                        {result.missingClients?.length > 0 && (
+                          <Box>
+                            <Chip
+                              label={`${result.missingClients.length} Cliente(s) no encontrado(s)`}
+                              color="warning"
+                              size="small"
+                              sx={{ mb: 1 }}
+                            />
+                            <List dense>
+                              {result.missingClients.slice(0, 5).map((c, idx) => (
+                                <ListItem key={idx} sx={{ py: 0.5 }}>
+                                  <ListItemText primary={c} primaryTypographyProps={{ variant: 'body2' }} />
+                                </ListItem>
+                              ))}
+                              {result.missingClients.length > 5 && (
+                                <ListItem>
+                                  <ListItemText 
+                                    primary={`... y ${result.missingClients.length - 5} más`}
+                                    primaryTypographyProps={{ variant: 'caption', color: 'textSecondary' }}
+                                  />
+                                </ListItem>
+                              )}
+                            </List>
+                          </Box>
+                        )}
+
+                        {result.pendingReportUrl && (
+                          <Button
+                            startIcon={<DownloadIcon />}
+                            variant="contained"
+                            color="warning"
+                            fullWidth
+                            sx={{ mt: 2 }}
+                            onClick={handleDownloadInforme}
+                          >
+                            Descargar Informe de Pendientes
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Duplicados detectados */}
+                  {result.duplicates > 0 && result.duplicatesList?.length > 0 && (
+                    <Card sx={{ mb: 2 }}>
+                      <CardContent>
+                        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                          Registros Duplicados (primeros 10)
+                        </Typography>
+                        <List dense>
+                          {result.duplicatesList.map((dup, idx) => (
+                            <React.Fragment key={idx}>
+                              <ListItem>
+                                <ListItemText
+                                  primary={`Folio: ${dup.folio}${dup.tipoDoc ? ` (${dup.tipoDoc})` : ''}`}
+                                  secondary={dup.cliente || dup.fecha}
+                                  primaryTypographyProps={{ variant: 'body2' }}
+                                  secondaryTypographyProps={{ variant: 'caption' }}
+                                />
+                              </ListItem>
+                              {idx < result.duplicatesList.length - 1 && <Divider />}
+                            </React.Fragment>
+                          ))}
+                        </List>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Instrucciones */}
+                  {!result.canProceed && (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                        Próximos pasos:
+                      </Typography>
+                      <Typography variant="body2" component="ol" sx={{ pl: 2, m: 0 }}>
+                        <li>Descarga el informe de pendientes</li>
+                        <li>Registra los clientes/vendedores faltantes en el CRM</li>
+                        <li>Vuelve a subir el archivo para completar la importación</li>
+                      </Typography>
+                    </Alert>
+                  )}
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
+    </Box>
+  );
+};
+
+export default ImportPanel;

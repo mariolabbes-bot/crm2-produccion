@@ -7,12 +7,14 @@ const cors = require('cors');
 
 const app = express();
 
-// Configuración de CORS para producción
+// Configuración de CORS para producción y desarrollo
 const corsOptions = {
   origin: function (origin, callback) {
-    // Permitir solo el dominio de producción, ignorando slash final y mayúsculas/minúsculas
+    // Permitir dominios de producción y desarrollo local
     const allowedOrigins = [
-      'https://crm2-produccion.vercel.app'
+      'https://crm2-produccion.vercel.app',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000'
     ];
     const normalize = o => (o || '').replace(/\/$/, '').toLowerCase();
     if (!origin || allowedOrigins.some(o => normalize(o) === normalize(origin))) {
@@ -41,6 +43,8 @@ app.use('/api/threats', require('./routes/threats'));
 app.use('/api/sales', require('./routes/sales'));
 app.use('/api/kpis', require('./routes/kpis'));
 app.use('/api/abonos', require('./routes/abonos'));
+app.use('/api/comparativas', require('./routes/comparativas'));
+app.use('/api/import', require('./routes/import'));
 
 app.get('/', (req, res) => {
   res.send('CRM2 Backend funcionando');

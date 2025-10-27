@@ -7,7 +7,11 @@
     "dev": "npx kill-port 3001 || true && nodemon src/index.js",
     "start:clean": "npx kill-port 3001 || true && node src/index.js",
     "seed": "node src/seed.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "import:ventas": "node scripts/import_full_base_fast.js",
+    "import:abonos": "node scripts/import_abonos_fast.js",
+    "users:merge:dry": "DRY_RUN=true node scripts/merge_duplicate_users.js",
+    "users:merge": "DRY_RUN=false node scripts/merge_duplicate_users.js"
   },
   "dependencies": {
     "axios": "^1.12.2",
