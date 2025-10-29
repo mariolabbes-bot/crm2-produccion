@@ -16,9 +16,9 @@ router.get('/', auth(), async (req, res) => {
         at.nombre AS activity_type_name,
         u.nombre AS user_name
       FROM activities a
-      JOIN clients c ON a.cliente_id = c.id
+      JOIN cliente c ON a.cliente_id = c.id
       JOIN activity_types at ON a.activity_type_id = at.id
-      JOIN users u ON a.usuario_id = u.id
+      JOIN usuario u ON a.usuario_id = u.id
     `;
 
     if (req.user.rol === 'manager') {
@@ -73,9 +73,9 @@ router.get('/overdue', auth(), async (req, res) => {
         at.nombre AS activity_type_name,
         u.nombre AS user_name
       FROM activities a
-      JOIN clients c ON a.cliente_id = c.id
+      JOIN cliente c ON a.cliente_id = c.id
       JOIN activity_types at ON a.activity_type_id = at.id
-      JOIN users u ON a.usuario_id = u.id
+      JOIN usuario u ON a.usuario_id = u.id
       WHERE a.estado = 'abierto' AND a.fecha < NOW()
     `;
 
@@ -106,7 +106,7 @@ router.post('/', auth(), async (req, res) => {
 
     // Verificar que el vendedor tenga acceso al cliente
     if (req.user.rol !== 'manager') {
-      const clientCheck = await client.query('SELECT id FROM clients WHERE id = $1 AND vendedor_id = $2', [cliente_id, req.user.id]);
+      const clientCheck = await client.query('SELECT id FROM cliente WHERE id = $1 AND vendedor_id = $2', [cliente_id, req.user.id]);
       if (clientCheck.rows.length === 0) {
         await client.query('ROLLBACK');
         return res.status(403).json({ msg: 'No tienes acceso a este cliente' });
@@ -193,7 +193,7 @@ router.put('/:id', auth(), async (req, res) => {
 
     // Verificar que el vendedor tenga acceso al nuevo cliente si se cambia
     if (req.user.rol !== 'manager' && cliente_id !== activity.cliente_id) {
-      const clientCheck = await pool.query('SELECT id FROM clients WHERE id = $1 AND vendedor_id = $2', [cliente_id, req.user.id]);
+      const clientCheck = await pool.query('SELECT id FROM cliente WHERE id = $1 AND vendedor_id = $2', [cliente_id, req.user.id]);
       if (clientCheck.rows.length === 0) {
         return res.status(403).json({ msg: 'No tienes acceso a este cliente' });
       }

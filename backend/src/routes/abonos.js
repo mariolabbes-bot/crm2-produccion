@@ -56,7 +56,7 @@ router.get('/', auth(), async (req, res) => {
         u.nombre as vendedor_nombre,
         u.id as vendedor_id
   FROM ${abonosTable} a
-      LEFT JOIN users u ON a.vendedor_id = u.id
+      LEFT JOIN usuario u ON a.vendedor_id = u.id
       WHERE 1=1
     `;
 
@@ -433,7 +433,7 @@ router.get('/comparativo', auth(), async (req, res) => {
     // Obtener nombres de vendedores
     const vendedorIds = [...new Set([...periodoVendedorMap.values()].map(v => v.vendedor_id))];
     const usuariosData = vendedorIds.length > 0 ? await pool.query(`
-      SELECT id, nombre FROM users WHERE id = ANY($1)
+      SELECT id, nombre FROM usuario WHERE id = ANY($1)
     `, [vendedorIds]) : { rows: [] };
 
     const vendedorNombres = new Map(usuariosData.rows.map(u => [u.id, u.nombre]));
@@ -555,7 +555,7 @@ router.get('/por-vendedor', auth(), async (req, res) => {
         -- Ventas del vendedor
         ( ${ventasCantidadSub} ) as cantidad_ventas,
         ( ${ventasTotalSub} ) as total_ventas
-  FROM users u
+  FROM usuario u
   LEFT JOIN ${abonosTable} a ON u.id = a.vendedor_id ${whereClause.replace('WHERE 1=1 AND', 'AND')}
       WHERE u.rol IN ('vendedor', 'manager')
       GROUP BY u.id, u.nombre

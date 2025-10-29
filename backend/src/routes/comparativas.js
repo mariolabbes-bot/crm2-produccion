@@ -66,7 +66,7 @@ router.get('/mensuales', auth(), async (req, res) => {
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 3} THEN vm.total_ventas END), 0) as mes_2,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 4} THEN vm.total_ventas END), 0) as mes_3,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 5} THEN vm.total_ventas END), 0) as mes_anio_anterior
-      FROM users u
+      FROM usuario u
       LEFT JOIN ventas_mensuales vm ON vm.vendedor_id = u.id
       WHERE u.rol = 'vendedor'
       GROUP BY u.id, u.nombre

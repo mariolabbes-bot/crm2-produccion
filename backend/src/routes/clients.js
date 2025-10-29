@@ -74,7 +74,7 @@ router.post('/', auth(), async (req, res) => {
     let vendedorIdToUse = req.user.rol === 'manager' && vendedor_id ? vendedor_id : req.user.id;
 
     const newClient = await pool.query(
-      'INSERT INTO clients (rut, nombre, direccion, ciudad, estado, codigo_postal, pais, latitud, longitud, telefono, email, vendedor_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *',
+      'INSERT INTO cliente (rut, nombre, direccion, ciudad, estado, codigo_postal, pais, latitud, longitud, telefono, email, vendedor_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *',
       [rut, nombre, direccion, ciudad, estado, codigo_postal, pais, latitud, longitud, telefono, email, vendedorIdToUse]
     );
     res.status(201).json(newClient.rows[0]);
@@ -101,7 +101,7 @@ router.post('/bulk', auth(), async (req, res) => {
       // You might want to implement a batch geocoding strategy or a queue system for this.
       const { rut, nombre, direccion, telefono, email } = c;
       const newClient = await client.query(
-        'INSERT INTO clients (rut, nombre, direccion, telefono, email, vendedor_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        'INSERT INTO cliente (rut, nombre, direccion, telefono, email, vendedor_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
         [rut, nombre, direccion, telefono, email, req.user.id]
       );
       insertedClients.push(newClient.rows[0]);
@@ -127,12 +127,12 @@ router.put('/:id', auth(), async (req, res) => {
     let updatedClient;
     if (req.user.rol === 'manager') {
         updatedClient = await pool.query(
-            'UPDATE clients SET nombre = $1, direccion = $2, telefono = $3, email = $4 WHERE id = $5 RETURNING *',
+            'UPDATE cliente SET nombre = $1, direccion = $2, telefono = $3, email = $4 WHERE id = $5 RETURNING *',
             [nombre, direccion, telefono, email, id]
         );
     } else {
         updatedClient = await pool.query(
-            'UPDATE clients SET nombre = $1, direccion = $2, telefono = $3, email = $4 WHERE id = $5 AND vendedor_id = $6 RETURNING *',
+            'UPDATE cliente SET nombre = $1, direccion = $2, telefono = $3, email = $4 WHERE id = $5 AND vendedor_id = $6 RETURNING *',
             [nombre, direccion, telefono, email, id, req.user.id]
         );
     }
@@ -153,9 +153,9 @@ router.delete('/:id', auth(), async (req, res) => {
     const { id } = req.params;
     let deleteOp;
     if (req.user.rol === 'manager') {
-        deleteOp = await pool.query('DELETE FROM clients WHERE id = $1 RETURNING *', [id]);
+        deleteOp = await pool.query('DELETE FROM cliente WHERE id = $1 RETURNING *', [id]);
     } else {
-        deleteOp = await pool.query('DELETE FROM clients WHERE id = $1 AND vendedor_id = $2 RETURNING *', [id, req.user.id]);
+        deleteOp = await pool.query('DELETE FROM cliente WHERE id = $1 AND vendedor_id = $2 RETURNING *', [id, req.user.id]);
     }
 
     if (deleteOp.rows.length === 0) {

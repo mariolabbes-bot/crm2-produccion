@@ -95,11 +95,11 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     }
 
     // Cargar usuarios existentes
-    const usersRes = await client.query("SELECT id, nombre FROM users WHERE rol = 'vendedor'");
+    const usersRes = await client.query("SELECT id, nombre FROM usuario WHERE rol = 'vendedor'");
     const usersByNormName = new Map(usersRes.rows.map(u => [norm(u.nombre), u.id]));
 
     // Cargar clientes existentes
-    const clientsRes = await client.query("SELECT id, nombre, rut FROM clients");
+    const clientsRes = await client.query("SELECT id, nombre, rut FROM cliente");
     const clientsByRut = new Map(clientsRes.rows.filter(c => c.rut).map(c => [norm(c.rut), c.id]));
     const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.id]));
 
@@ -272,10 +272,10 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     }
 
     // Cargar vendedores y clientes
-    const usersRes = await client.query("SELECT id, nombre FROM users WHERE rol = 'vendedor'");
+    const usersRes = await client.query("SELECT id, nombre FROM usuario WHERE rol = 'vendedor'");
     const usersByNormName = new Map(usersRes.rows.map(u => [norm(u.nombre), u.id]));
 
-    const clientsRes = await client.query("SELECT id, nombre FROM clients");
+    const clientsRes = await client.query("SELECT id, nombre FROM cliente");
     const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.id]));
 
     // Detectar tabla de abonos

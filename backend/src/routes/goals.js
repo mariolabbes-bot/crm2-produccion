@@ -17,8 +17,8 @@ router.get('/', auth(), async (req, res) => {
       FROM goals g
       JOIN goal_types gt ON gt.id = g.goal_type_id
       JOIN activities a ON a.id = g.activity_id
-      JOIN clients c ON c.id = a.cliente_id
-      JOIN users u ON u.id = a.usuario_id`;
+      JOIN cliente c ON c.id = a.cliente_id
+      JOIN usuario u ON u.id = a.usuario_id`;
     let where = '';
     const params = [];
     if (req.user.rol !== 'manager') {

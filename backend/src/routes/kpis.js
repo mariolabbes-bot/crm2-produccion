@@ -65,7 +65,7 @@ router.get('/top-clients', auth(), async (req, res) => {
       const query = `
         SELECT c.nombre, SUM(s.${amountCol}) AS total_sales
         FROM ${salesTable} s
-        JOIN clients c ON s.${clientIdCol} = c.id
+        JOIN cliente c ON s.${clientIdCol} = c.id
         GROUP BY c.nombre
         ORDER BY total_sales DESC
         LIMIT 5
@@ -76,7 +76,7 @@ router.get('/top-clients', auth(), async (req, res) => {
       const query = `
         SELECT c.nombre, SUM(s.${amountCol}) AS total_sales
         FROM ${salesTable} s
-        JOIN clients c ON s.${clientIdCol} = c.id
+        JOIN cliente c ON s.${clientIdCol} = c.id
         WHERE c.vendedor_id = $1
         GROUP BY c.nombre
         ORDER BY total_sales DESC
@@ -114,7 +114,7 @@ router.get('/sales-summary', auth(), async (req, res) => {
       const query = `
         SELECT SUM(s.${amountCol}) AS total_sales
         FROM ${salesTable} s
-        JOIN clients c ON s.${clientIdCol} = c.id
+        JOIN cliente c ON s.${clientIdCol} = c.id
         WHERE c.vendedor_id = $1
         AND s.${dateCol} >= NOW() - INTERVAL '3 months'
       `;
