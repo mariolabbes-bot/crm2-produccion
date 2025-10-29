@@ -1,0 +1,4 @@
+email,nombre,password,rol
+juan@empresa.com,Juan Pérez,123456,vendedor
+maria@empresa.com,María López,manager,manager
+pedro@empresa.com,Pedro Gómez,123456,vendedor

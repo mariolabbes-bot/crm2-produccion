@@ -11,7 +11,7 @@ router.post('/register', auth('manager'), async (req, res) => {
     const { nombre, email, password, rol } = req.body;
 
     // Check if user exists
-    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+  const user = await pool.query('SELECT * FROM usuario WHERE email = $1', [email]);
     if (user.rows.length > 0) {
       return res.status(400).json({ msg: 'User already exists' });
     }
@@ -22,7 +22,7 @@ router.post('/register', auth('manager'), async (req, res) => {
 
     // Create new user
     const newUser = await pool.query(
-      'INSERT INTO users (nombre, email, password, rol) VALUES ($1, $2, $3, $4) RETURNING *',
+      'INSERT INTO usuario (nombre, email, password, rol) VALUES ($1, $2, $3, $4) RETURNING *',
       [nombre, email, hashedPassword, rol]
     );
 
@@ -37,16 +37,24 @@ router.post('/register', auth('manager'), async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log('Login attempt:', { email, password }); // Log para depuración
+  console.log('Login attempt:', { email, password }); // Log para depuración
 
-    // Check if user exists (buscar por nombre o email)
-    const user = await pool.query('SELECT * FROM users WHERE nombre = $1 OR email = $1', [email]);
+  // Log: usuario encontrado
+  console.log('Buscando usuario por email:', email);
+    // Check if user exists (buscar solo por email, case-insensitive)
+    const user = await pool.query('SELECT * FROM usuario WHERE lower(email) = lower($1)', [email]);
+
     if (user.rows.length === 0) {
+      console.log('No se encontró usuario con ese email.');
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Check password
+    // Log: hash almacenado
+    console.log('Hash almacenado:', user.rows[0].password);
+    // Log: password recibido
+    console.log('Password recibido:', password);
     const isMatch = await bcrypt.compare(password, user.rows[0].password);
+    console.log('Resultado bcrypt.compare:', isMatch);
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
@@ -84,7 +92,7 @@ router.get('/vendedores', async (req, res) => {
         LOWER(TRIM(CONCAT_WS(' ', split_part(nombre, ' ', 1), split_part(nombre, ' ', 2))))
       )
         id, nombre, email
-      FROM users
+      FROM usuario
       WHERE rol = 'vendedor'
       ORDER BY 
         LOWER(TRIM(CONCAT_WS(' ', split_part(nombre, ' ', 1), split_part(nombre, ' ', 2)))), id ASC

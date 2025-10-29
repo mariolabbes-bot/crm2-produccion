@@ -1,0 +1,70 @@
+REPORTE DE IMPORTACIÓN - CRM2
+Fecha: 28 de octubre de 2025
+Archivo: /Users/mariolabbe/Desktop/TRABAJO IA/CRM2/db/modelo_importacion_crm2.xlsx
+
+================================================================================
+RESUMEN DE IMPORTACIÓN
+================================================================================
+
+✅ IMPORTACIÓN COMPLETADA EXITOSAMENTE
+
+USUARIOS:
+  - Insertados: 19
+  - Actualizados: 0
+  - Omitidos: 0
+  - Total procesados: 19
+
+PRODUCTOS:
+  - Insertados: 2,697
+  - Actualizados: 0
+  - Omitidos: 0
+  - Total procesados: 2,697
+
+CLIENTES:
+  - Insertados: 2,914
+  - Actualizados: 13
+  - Omitidos: 0
+  - Total procesados: 2,927
+
+SIGNACIÓN LITROS:
+  - Actualizados: 0
+  - Omitidos: 136 (la tabla de productos no tiene columna de litros)
+  - Total procesados: 136
+
+================================================================================
+TOTALES
+================================================================================
+
+Total registros importados: 5,630
+Total registros actualizados: 13
+Total registros omitidos: 136
+Total registros procesados: 5,779
+
+================================================================================
+NOTAS
+================================================================================
+
+1. Todos los usuarios fueron importados con passwords hasheadas (bcrypt).
+2. Los emails de usuarios no tienen duplicados.
+3. 13 clientes fueron actualizados (ya existían en la base).
+4. La tabla producto no tiene columna para litros_por_unidad, por lo que 
+   136 registros de signación de litros no pudieron ser procesados.
+
+================================================================================
+PRÓXIMOS PASOS RECOMENDADOS
+================================================================================
+
+1. Verificar en la consola de Neon que los datos se importaron correctamente:
+   SELECT COUNT(*) FROM usuario;
+   SELECT COUNT(*) FROM producto;
+   SELECT COUNT(*) FROM cliente;
+
+2. Si necesitas importar la signación de litros, agrega la columna a producto:
+   ALTER TABLE producto ADD COLUMN litros_por_unidad NUMERIC(15,2);
+
+3. Vuelve a ejecutar la importación para actualizar los litros:
+   npm run import:model
+
+4. Prueba el login con algún usuario del Excel para confirmar autenticación.
+
+================================================================================

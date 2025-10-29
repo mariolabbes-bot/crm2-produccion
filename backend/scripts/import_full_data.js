@@ -148,7 +148,7 @@ async function importAbonos() {
       if (monto <= 0) continue; // Ignorar abonos sin monto
 
       await pool.query(`
-        INSERT INTO abonos (folio, fecha_abono, monto, tipo_pago, cliente_nombre, vendedor_id, descripcion)
+        INSERT INTO abono (folio, fecha_abono, monto, tipo_pago, cliente_nombre, vendedor_id, descripcion)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (folio) DO UPDATE SET
           monto = EXCLUDED.monto,
@@ -186,7 +186,7 @@ async function main() {
       SELECT 
         (SELECT COUNT(*) FROM clients) as clientes,
         (SELECT COUNT(*) FROM sales) as ventas,
-        (SELECT COUNT(*) FROM abonos) as abonos
+        (SELECT COUNT(*) FROM abono) as abonos
     `);
     console.log('\n📊 Estadísticas finales:');
     console.log(stats.rows[0]);

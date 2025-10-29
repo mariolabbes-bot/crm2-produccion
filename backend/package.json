@@ -11,7 +11,9 @@
     "import:ventas": "node scripts/import_full_base_fast.js",
     "import:abonos": "node scripts/import_abonos_fast.js",
     "users:merge:dry": "DRY_RUN=true node scripts/merge_duplicate_users.js",
-    "users:merge": "DRY_RUN=false node scripts/merge_duplicate_users.js"
+    "users:merge": "DRY_RUN=false node scripts/merge_duplicate_users.js",
+    "import:model:dry": "DRY_RUN=true node scripts/import_model_excel.js",
+    "import:model": "node scripts/import_model_excel.js"
   },
   "dependencies": {
     "axios": "^1.12.2",

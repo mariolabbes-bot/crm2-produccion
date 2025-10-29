@@ -45,7 +45,7 @@ router.post('/bulk', auth(), upload.single('file'), async (req, res) => {
         const insertedSales = [];
         const failedSales = [];
         const clientRutMap = new Map();
-        const allClients = await client.query('SELECT id, rut FROM clients');
+  const allClients = await client.query('SELECT id, rut FROM cliente');
         allClients.rows.forEach(c => clientRutMap.set(c.rut, c.id));
 
         for (const sale of salesData) {
@@ -118,7 +118,7 @@ router.post('/import-json', auth(), async (req, res) => {
   try {
     await client.query('BEGIN');
     const clientRutMap = new Map();
-    const allClients = await client.query('SELECT id, rut FROM clients');
+  const allClients = await client.query('SELECT id, rut FROM cliente');
     allClients.rows.forEach(c => clientRutMap.set(c.rut, c.id));
 
     const inserted = [];

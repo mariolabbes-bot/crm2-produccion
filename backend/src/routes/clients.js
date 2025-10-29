@@ -9,9 +9,9 @@ router.get('/', auth(), async (req, res) => {
   try {
     let result;
     if (req.user.rol === 'manager') {
-      result = await pool.query('SELECT c.*, u.nombre as vendedor_nombre FROM clients c JOIN users u ON c.vendedor_id = u.id ORDER BY c.id ASC');
+      result = await pool.query('SELECT c.*, u.nombre as vendedor_nombre FROM cliente c JOIN usuario u ON c.vendedor_id = u.id ORDER BY c.id ASC');
     } else {
-      result = await pool.query('SELECT c.*, u.nombre as vendedor_nombre FROM clients c JOIN users u ON c.vendedor_id = u.id WHERE c.vendedor_id = $1 ORDER BY c.id ASC', [req.user.id]);
+      result = await pool.query('SELECT c.*, u.nombre as vendedor_nombre FROM cliente c JOIN usuario u ON c.vendedor_id = u.id WHERE c.vendedor_id = $1 ORDER BY c.id ASC', [req.user.id]);
     }
     res.json(result.rows);
   } catch (err) {
@@ -25,11 +25,11 @@ router.get('/:id', auth(), async (req, res) => {
   try {
     const { id } = req.params;
     let result;
-    if (req.user.rol === 'manager') {
-        result = await pool.query('SELECT * FROM clients WHERE id = $1', [id]);
-    } else {
-        result = await pool.query('SELECT * FROM clients WHERE id = $1 AND vendedor_id = $2', [id, req.user.id]);
-    }
+  if (req.user.rol === 'manager') {
+    result = await pool.query('SELECT * FROM cliente WHERE id = $1', [id]);
+  } else {
+    result = await pool.query('SELECT * FROM cliente WHERE id = $1 AND vendedor_id = $2', [id, req.user.id]);
+  }
 
     if (result.rows.length === 0) {
       return res.status(404).json({ msg: 'Client not found' });

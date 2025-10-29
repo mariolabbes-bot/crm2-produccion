@@ -1,0 +1,10 @@
+Archivo validado: /Users/mariolabbe/Desktop/TRABAJO IA/CRM2/db/modelo_importacion_crm2.xlsx
+
+[USUARIO] Encabezados actuales: ['Nombre', 'RUT', 'Alias', 'Telefono', 'Email', 'Password', 'ROL']
+  - Emails vacíos: 0
+  - Emails duplicados: ninguno
+[PRODUCTOS] Encabezados actuales: ['SKU', 'Descripcion', 'Familia', 'SubFamilia', 'Marca']
+[CLIENTES] Encabezados actuales: ['RUT', 'Nombre', 'Email', 'Telefono', 'Sucursal', 'Comuna', 'Ciudad', 'Direccion', 'Vendedor']
+[VENTAS] Encabezados actuales: ['Sucursal', 'Tipo Documento', 'Folio', 'Fecha emision', 'Identificador', 'Cliente', 'Vendedor cliente', 'Vendedor documento', 'Estado Sistema', 'Estado comercial', 'Estado SII', 'Indice', 'SKU', 'Descripcion', 'Cantidad', 'Precio', 'Valor Total']
+[ABONOS] Encabezados actuales: ['Sucursal', 'Folio', 'Fecha', 'Identificador', 'Cliente', 'Vendedor cliente', 'Caja operacion', 'Usuario Ingreso', 'Monto Total', 'Saldo a Favor', 'Saldo a Favor total', 'Tipo Pago', 'Estado Abono', 'Identificador Abono', 'Fecha vencimiento', 'Monto', 'Monto Neto']
+[SIGNACION LITROS] Encabezados actuales: ['descripcion', 'litros x unidad de venta']

@@ -1,0 +1,10 @@
+[MODELO IMPORTADOR]
+
+- Hoja USUARIO: Nombre, RUT, Alias, Telefono, Email, Cargo
+- Hoja PRODUCTOS: SKU, Descripcion, Familia, SubFamilia, Marca
+- Hoja CLIENTES: RUT, Nombre, Email, Telefono, Sucursal, Comuna, Ciudad, Direccion, Vendedor
+- Hoja VENTAS: Sucursal, Tipo Documento, Folio, Fecha emision, Identificador, Cliente, Vendedor cliente, vendedor documento, Estado Sistema, Estado comercial, Estado SII, Indice, SKU, Descripcion, Cantidad, Precio, Valor Total
+- Hoja ABONOS: Sucursal, Folio, Fecha, Identificador, Cliente, Vendedor cliente, Caja operacion, Usuario Ingreso, Monto Total, Saldo a Favor, Saldo a Favor total, Tipo Pago, Estado Abono, Identificador Abono, Fecha vencimiento, Monto, Monto Neto
+- Hoja SIGNACION LITROS: descripcion, litros x unidad de venta
+
+(El archivo real debe ser un Excel con una hoja por cada tabla y los campos como encabezados en la primera fila)
