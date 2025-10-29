@@ -50,7 +50,7 @@ router.get('/', auth(), async (req, res) => {
     `, [abonosTable]);
     const cols = colRows.map(r => r.column_name);
     const fechaCol = cols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
-    const montoCol = cols.includes('monto') && !cols.includes('monto_total') ? 'monto' : 'monto_total';
+    const montoCol = cols.includes('monto_neto') ? 'monto_neto' : (cols.includes('monto') ? 'monto' : 'monto_total');
     const clienteCol = cols.includes('cliente_nombre') ? 'cliente_nombre' : 'cliente';
 
     let query = `
@@ -184,7 +184,7 @@ router.get('/estadisticas', auth(), async (req, res) => {
     `, [abonosTable]);
     const cols = colRows.map(r => r.column_name);
     const fechaCol = cols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
-    const montoCol = cols.includes('monto') && !cols.includes('monto_total') ? 'monto' : 'monto_total';
+    const montoCol = cols.includes('monto_neto') ? 'monto_neto' : (cols.includes('monto') ? 'monto' : 'monto_total');
 
     const { vendedor_id, fecha_desde, fecha_hasta } = req.query;
 
@@ -295,7 +295,7 @@ router.get('/comparativo', auth(), async (req, res) => {
     `, [abonosTable]);
     const abonoCols = abonoColRows.map(r => r.column_name);
     const abonoFechaCol = abonoCols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
-    const abonoMontoCol = abonoCols.includes('monto') && !abonoCols.includes('monto_total') ? 'monto' : 'monto_total';
+    const abonoMontoCol = abonoCols.includes('monto_neto') ? 'monto_neto' : (abonoCols.includes('monto') ? 'monto' : 'monto_total');
 
     // Detect date column and amount column in sales table
     let salesDateCol = 'fecha_emision';
