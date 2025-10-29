@@ -270,14 +270,21 @@ router.get('/comparativo', auth(), async (req, res) => {
     if (!abonosTable) {
       return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
     }
-    // Detect date column in sales table
+    // Detect date column and amount column in sales table
     let salesDateCol = 'fecha_emision';
+    let salesAmountCol = 'valor_total';
     if (salesTable) {
       const { rows } = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [salesTable]);
       const cols = rows.map(r => r.column_name);
+      // Date column
       if (cols.includes('fecha_emision')) salesDateCol = 'fecha_emision';
       else if (cols.includes('invoice_date')) salesDateCol = 'invoice_date';
       else if (cols.includes('fecha')) salesDateCol = 'fecha';
+      // Amount column
+      if (cols.includes('valor_total')) salesAmountCol = 'valor_total';
+      else if (cols.includes('total_venta')) salesAmountCol = 'total_venta';
+      else if (cols.includes('monto_total')) salesAmountCol = 'monto_total';
+      else if (cols.includes('net_amount')) salesAmountCol = 'net_amount';
     }
 
     let whereClause = 'WHERE 1=1';
@@ -356,7 +363,7 @@ router.get('/comparativo', auth(), async (req, res) => {
       ? `SELECT 
           TO_CHAR(${salesDateCol}, '${dateFormat}') as periodo,
           vendedor_id,
-          SUM(total_venta) as total_ventas,
+          SUM(${salesAmountCol}) as total_ventas,
           COUNT(*) as cantidad_ventas
         FROM ${salesTable}
         ${whereClauseVentas}
@@ -377,7 +384,7 @@ router.get('/comparativo', auth(), async (req, res) => {
       SELECT 
         TO_CHAR(${salesDateCol}, '${dateFormat}') as periodo,
         vendedor_id,
-        SUM(total_venta) as total_ventas,
+        SUM(${salesAmountCol}) as total_ventas,
         COUNT(*) as cantidad_ventas
       FROM ${salesTable}
       ${whereClauseVentas}

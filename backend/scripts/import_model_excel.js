@@ -32,6 +32,29 @@ const toNum = v => {
   return Number.isFinite(n) ? n : null;
 }
 
+// Convert Excel serial date to YYYY-MM-DD format
+function excelDateToISO(serial) {
+  if (!serial) return null;
+  if (typeof serial === 'string') {
+    // Already a string, check if it's a valid date format
+    if (/^\d{4}-\d{2}-\d{2}/.test(serial)) return serial.split(' ')[0];
+    // Try to parse as number
+    const num = parseFloat(serial);
+    if (isNaN(num)) return null;
+    serial = num;
+  }
+  if (typeof serial !== 'number') return null;
+  
+  // Excel date serial: days since 1900-01-01 (with 1900 leap year bug)
+  const utc_days  = Math.floor(serial - 25569);
+  const utc_value = utc_days * 86400;
+  const date_info = new Date(utc_value * 1000);
+  const year = date_info.getUTCFullYear();
+  const month = String(date_info.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date_info.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 async function tableExists(client, table) {
   const { rows } = await client.query(
     `select to_regclass($1) as reg`,
@@ -284,27 +307,177 @@ async function importSignacionLitros(client, workbook) {
   return { updated: upd, skipped: skip };
 }
 
+async function importVentas(client, workbook) {
+  const ws = workbook.Sheets['VENTAS'];
+  if (!ws) { console.log('VENTAS: hoja no encontrada, se omite.'); return { inserted:0, updated:0, skipped:0 }; }
+  const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+  const table = await resolveFirstExistingTable(client, ['venta','ventas','sales']);
+  if (!table) { console.log('VENTAS: no existe tabla venta/ventas/sales, se omite.'); return { inserted:0, updated:0, skipped:data.length } }
+  const cols = await getTableColumns(client, table);
+
+  let ins=0, upd=0, skip=0;
+  const BATCH_SIZE = 1000;
+  
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    const folio = toStr(row.Folio || row.folio);
+    const tipo_documento = toStr(row['Tipo Documento'] || row.tipo_documento);
+    if (!folio || !tipo_documento) { skip++; continue; }
+
+    const sucursal = toStr(row.Sucursal || row.sucursal);
+    const fecha_emision = excelDateToISO(row['Fecha emision'] || row.fecha_emision);
+    const identificador = toStr(row.Identificador || row.identificador);
+    const cliente = toStr(row.Cliente || row.cliente);
+    const vendedor_cliente = toStr(row['Vendedor cliente'] || row.vendedor_cliente);
+    const vendedor_documento = toStr(row['Vendedor documento'] || row.vendedor_documento);
+    const estado_sistema = toStr(row['Estado Sistema'] || row.estado_sistema);
+    const estado_comercial = toStr(row['Estado comercial'] || row.estado_comercial);
+    const estado_sii = toStr(row['Estado SII'] || row.estado_sii);
+    const indice = toNum(row.Indice || row.indice);
+    const sku = toStr(row.SKU || row.sku);
+    const descripcion = toStr(row.Descripcion || row.descripcion);
+    const cantidad = toNum(row.Cantidad || row.cantidad);
+    const precio = toNum(row.Precio || row.precio);
+    const valor_total = toNum(row['Valor Total'] || row.valor_total);
+
+    // Upsert por folio + tipo_documento
+    const { rows: ex } = await client.query(`select 1 from ${table} where folio=$1 and tipo_documento=$2 limit 1`, [folio, tipo_documento]);
+    if (ex.length) {
+      upd++;
+    } else {
+      if (!DRY_RUN) {
+        const colsIns=[], params=[], vals=[]; let j=0;
+        if (cols.includes('sucursal')) { colsIns.push('sucursal'); params.push(`$${++j}`); vals.push(sucursal); }
+        if (cols.includes('tipo_documento')) { colsIns.push('tipo_documento'); params.push(`$${++j}`); vals.push(tipo_documento); }
+        if (cols.includes('folio')) { colsIns.push('folio'); params.push(`$${++j}`); vals.push(folio); }
+        if (cols.includes('fecha_emision')) { colsIns.push('fecha_emision'); params.push(`$${++j}`); vals.push(fecha_emision); }
+        if (cols.includes('identificador')) { colsIns.push('identificador'); params.push(`$${++j}`); vals.push(identificador); }
+        if (cols.includes('cliente')) { colsIns.push('cliente'); params.push(`$${++j}`); vals.push(cliente); }
+        if (cols.includes('vendedor_cliente')) { colsIns.push('vendedor_cliente'); params.push(`$${++j}`); vals.push(vendedor_cliente); }
+        if (cols.includes('vendedor_documento')) { colsIns.push('vendedor_documento'); params.push(`$${++j}`); vals.push(vendedor_documento); }
+        if (cols.includes('estado_sistema')) { colsIns.push('estado_sistema'); params.push(`$${++j}`); vals.push(estado_sistema); }
+        if (cols.includes('estado_comercial')) { colsIns.push('estado_comercial'); params.push(`$${++j}`); vals.push(estado_comercial); }
+        if (cols.includes('estado_sii')) { colsIns.push('estado_sii'); params.push(`$${++j}`); vals.push(estado_sii); }
+        if (cols.includes('indice')) { colsIns.push('indice'); params.push(`$${++j}`); vals.push(indice); }
+        if (cols.includes('sku')) { colsIns.push('sku'); params.push(`$${++j}`); vals.push(sku); }
+        if (cols.includes('descripcion')) { colsIns.push('descripcion'); params.push(`$${++j}`); vals.push(descripcion); }
+        if (cols.includes('cantidad')) { colsIns.push('cantidad'); params.push(`$${++j}`); vals.push(cantidad); }
+        if (cols.includes('precio')) { colsIns.push('precio'); params.push(`$${++j}`); vals.push(precio); }
+        if (cols.includes('valor_total')) { colsIns.push('valor_total'); params.push(`$${++j}`); vals.push(valor_total); }
+        await client.query(`insert into ${table} (${colsIns.join(',')}) values (${params.join(',')})`, vals);
+      }
+      ins++;
+    }
+    
+    // Progress indicator every 1000 rows
+    if ((i + 1) % BATCH_SIZE === 0) {
+      console.log(`  VENTAS: procesados ${i + 1}/${data.length} (${Math.round((i+1)/data.length*100)}%)`);
+    }
+  }
+  console.log(`VENTAS -> insertados: ${ins}, actualizados: ${upd}, omitidos: ${skip}`);
+  return { inserted: ins, updated: upd, skipped: skip };
+}
+
+async function importAbonos(client, workbook) {
+  const ws = workbook.Sheets['ABONOS'];
+  if (!ws) { console.log('ABONOS: hoja no encontrada, se omite.'); return { inserted:0, updated:0, skipped:0 }; }
+  const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+  const table = await resolveFirstExistingTable(client, ['abono','abonos']);
+  if (!table) { console.log('ABONOS: no existe tabla abono/abonos, se omite.'); return { inserted:0, updated:0, skipped:data.length } }
+  const cols = await getTableColumns(client, table);
+
+  let ins=0, upd=0, skip=0;
+  const BATCH_SIZE = 1000;
+  
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    const folio = toStr(row.Folio || row.folio);
+    const identificador_abono = toStr(row['Identificador Abono'] || row.identificador_abono);
+    if (!folio && !identificador_abono) { skip++; continue; }
+
+    const sucursal = toStr(row.Sucursal || row.sucursal);
+    const fecha = excelDateToISO(row.Fecha || row.fecha);
+    const identificador = toStr(row.Identificador || row.identificador);
+    const cliente = toStr(row.Cliente || row.cliente);
+    const vendedor_cliente = toStr(row['Vendedor cliente'] || row.vendedor_cliente);
+    const caja_operacion = toStr(row['Caja operacion'] || row.caja_operacion);
+    const usuario_ingreso = toStr(row['Usuario Ingreso'] || row.usuario_ingreso);
+    const monto_total = toNum(row['Monto Total'] || row.monto_total);
+    const saldo_a_favor = toNum(row['Saldo a Favor'] || row.saldo_a_favor);
+    const saldo_a_favor_total = toNum(row['Saldo a Favor total'] || row.saldo_a_favor_total);
+    const tipo_pago = toStr(row['Tipo Pago'] || row.tipo_pago);
+    const estado_abono = toStr(row['Estado Abono'] || row.estado_abono);
+    const fecha_vencimiento = excelDateToISO(row['Fecha vencimiento'] || row.fecha_vencimiento);
+    const monto = toNum(row.Monto || row.monto);
+    const monto_neto = toNum(row['Monto Neto'] || row.monto_neto);
+
+    // Upsert por folio + identificador_abono (o solo identificador_abono si no hay folio)
+    const key = folio || identificador_abono;
+    const { rows: ex } = await client.query(`select 1 from ${table} where (folio=$1 OR identificador_abono=$1) limit 1`, [key]);
+    if (ex.length) {
+      upd++;
+    } else {
+      if (!DRY_RUN) {
+        const colsIns=[], params=[], vals=[]; let j=0;
+        if (cols.includes('sucursal')) { colsIns.push('sucursal'); params.push(`$${++j}`); vals.push(sucursal); }
+        if (cols.includes('folio')) { colsIns.push('folio'); params.push(`$${++j}`); vals.push(folio); }
+        if (cols.includes('fecha')) { colsIns.push('fecha'); params.push(`$${++j}`); vals.push(fecha); }
+        if (cols.includes('identificador')) { colsIns.push('identificador'); params.push(`$${++j}`); vals.push(identificador); }
+        if (cols.includes('cliente')) { colsIns.push('cliente'); params.push(`$${++j}`); vals.push(cliente); }
+        if (cols.includes('vendedor_cliente')) { colsIns.push('vendedor_cliente'); params.push(`$${++j}`); vals.push(vendedor_cliente); }
+        if (cols.includes('caja_operacion')) { colsIns.push('caja_operacion'); params.push(`$${++j}`); vals.push(caja_operacion); }
+        if (cols.includes('usuario_ingreso')) { colsIns.push('usuario_ingreso'); params.push(`$${++j}`); vals.push(usuario_ingreso); }
+        if (cols.includes('monto_total')) { colsIns.push('monto_total'); params.push(`$${++j}`); vals.push(monto_total); }
+        if (cols.includes('saldo_a_favor')) { colsIns.push('saldo_a_favor'); params.push(`$${++j}`); vals.push(saldo_a_favor); }
+        if (cols.includes('saldo_a_favor_total')) { colsIns.push('saldo_a_favor_total'); params.push(`$${++j}`); vals.push(saldo_a_favor_total); }
+        if (cols.includes('tipo_pago')) { colsIns.push('tipo_pago'); params.push(`$${++j}`); vals.push(tipo_pago); }
+        if (cols.includes('estado_abono')) { colsIns.push('estado_abono'); params.push(`$${++j}`); vals.push(estado_abono); }
+        if (cols.includes('identificador_abono')) { colsIns.push('identificador_abono'); params.push(`$${++j}`); vals.push(identificador_abono); }
+        if (cols.includes('fecha_vencimiento')) { colsIns.push('fecha_vencimiento'); params.push(`$${++j}`); vals.push(fecha_vencimiento); }
+        if (cols.includes('monto')) { colsIns.push('monto'); params.push(`$${++j}`); vals.push(monto); }
+        if (cols.includes('monto_neto')) { colsIns.push('monto_neto'); params.push(`$${++j}`); vals.push(monto_neto); }
+        await client.query(`insert into ${table} (${colsIns.join(',')}) values (${params.join(',')})`, vals);
+      }
+      ins++;
+    }
+    
+    // Progress indicator every 1000 rows
+    if ((i + 1) % BATCH_SIZE === 0) {
+      console.log(`  ABONOS: procesados ${i + 1}/${data.length} (${Math.round((i+1)/data.length*100)}%)`);
+    }
+  }
+  console.log(`ABONOS -> insertados: ${ins}, actualizados: ${upd}, omitidos: ${skip}`);
+  return { inserted: ins, updated: upd, skipped: skip };
+}
+
 async function main() {
   console.log(`\n🚀 Importación desde: ${EXCEL_PATH}`);
   if (DRY_RUN) console.log('🔎 Modo DRY_RUN=TRUE (no se escribirá en la base)');
   const workbook = XLSX.readFile(EXCEL_PATH);
   const client = await pool.connect();
   try {
+    // Import small tables in one transaction
     await client.query('BEGIN');
     const r1 = await importUsuarios(client, workbook);
     const r2 = await importProductos(client, workbook);
     const r3 = await importClientes(client, workbook);
     const r4 = await importSignacionLitros(client, workbook);
+    await client.query('COMMIT');
+    console.log('✅ Usuarios, Productos, Clientes y Signación completados\n');
+    
+    // Import large tables separately (auto-commit inside functions)
+    const r5 = await importVentas(client, workbook);
+    const r6 = await importAbonos(client, workbook);
     
     if (DRY_RUN) {
-      await client.query('ROLLBACK');
       console.log('\nℹ️ DRY_RUN completado. No se realizaron cambios.');
     } else {
-      await client.query('COMMIT');
       console.log('\n✅ Importación confirmada.');
     }
     console.log('\nResumen:');
-    console.log({ usuarios: r1, productos: r2, clientes: r3, signacion_litros: r4 });
+    console.log({ usuarios: r1, productos: r2, clientes: r3, signacion_litros: r4, ventas: r5, abonos: r6 });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('❌ Error en importación:', err.message);

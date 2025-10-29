@@ -34,7 +34,8 @@ async function getDetectedSales() {
     const { rows: crows } = await pool.query(colsQ, [salesTable]);
     const cols = new Set(crows.map(r => r.column_name));
     // Amount
-    if (cols.has('net_amount')) amountCol = 'net_amount';
+    if (cols.has('valor_total')) amountCol = 'valor_total';
+    else if (cols.has('net_amount')) amountCol = 'net_amount';
     else if (cols.has('total_venta')) amountCol = 'total_venta';
     else if (cols.has('monto_total')) amountCol = 'monto_total';
     // Date

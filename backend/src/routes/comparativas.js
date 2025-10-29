@@ -24,10 +24,11 @@ router.get('/mensuales', auth(), async (req, res) => {
     // Detección dinámica de tabla y columna de fecha
     const tableCheck = await pool.query(`
       SELECT table_name FROM information_schema.tables 
-      WHERE table_schema = 'public' AND table_name IN ('sales', 'ventas')
+      WHERE table_schema = 'public' AND table_name IN ('venta', 'sales', 'ventas')
+      ORDER BY CASE table_name WHEN 'venta' THEN 1 WHEN 'ventas' THEN 2 ELSE 3 END
       LIMIT 1
     `);
-    const salesTable = tableCheck.rows[0]?.table_name || 'sales';
+    const salesTable = tableCheck.rows[0]?.table_name || 'venta';
 
     const dateColCheck = await pool.query(`
       SELECT column_name FROM information_schema.columns
@@ -46,13 +47,23 @@ router.get('/mensuales', auth(), async (req, res) => {
       params = [user.id];
     }
 
+    // Detectar columna de monto
+    const amountColCheck = await pool.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = $1
+      AND column_name IN ('valor_total', 'total_venta', 'monto_total', 'net_amount')
+      ORDER BY CASE column_name WHEN 'valor_total' THEN 1 WHEN 'total_venta' THEN 2 WHEN 'monto_total' THEN 3 ELSE 4 END
+      LIMIT 1
+    `, [salesTable]);
+    const amountCol = amountColCheck.rows[0]?.column_name || 'valor_total';
+
     // Query: Ventas por vendedor y mes
     const query = `
       WITH ventas_mensuales AS (
         SELECT 
           vendedor_id,
           TO_CHAR(${dateCol}, 'YYYY-MM') as mes,
-          SUM(total_venta) as total_ventas
+          SUM(${amountCol}) as total_ventas
         FROM ${salesTable}
         WHERE TO_CHAR(${dateCol}, 'YYYY-MM') IN ($${params.length + 1}, $${params.length + 2}, $${params.length + 3}, $${params.length + 4}, $${params.length + 5})
         ${vendedorFilter}
