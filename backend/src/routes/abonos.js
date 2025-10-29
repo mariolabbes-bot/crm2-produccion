@@ -44,15 +44,24 @@ router.get('/', auth(), async (req, res) => {
       return res.status(500).json({ success: false, message: "Tabla de abonos no encontrada (abonos/abono) en la base de datos" });
     }
 
+    // Detectar nombres de columnas
+    const { rows: colRows } = await pool.query(`
+      SELECT column_name FROM information_schema.columns WHERE table_name = $1
+    `, [abonosTable]);
+    const cols = colRows.map(r => r.column_name);
+    const fechaCol = cols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
+    const montoCol = cols.includes('monto') && !cols.includes('monto_total') ? 'monto' : 'monto_total';
+    const clienteCol = cols.includes('cliente_nombre') ? 'cliente_nombre' : 'cliente';
+
     let query = `
       SELECT 
         a.id,
         a.folio,
-        a.fecha_abono,
-        a.monto,
+        a.${fechaCol} as fecha_abono,
+        a.${montoCol} as monto,
         a.tipo_pago,
-        a.cliente_nombre,
-        a.descripcion,
+        a.${clienteCol} as cliente_nombre,
+        a.identificador as descripcion,
         u.nombre as vendedor_nombre,
         u.id as vendedor_id
   FROM ${abonosTable} a
@@ -77,13 +86,13 @@ router.get('/', auth(), async (req, res) => {
 
     // Filtro por rango de fechas
     if (fecha_desde) {
-      query += ` AND a.fecha_abono >= $${paramCounter}`;
+      query += ` AND a.${fechaCol} >= $${paramCounter}`;
       params.push(fecha_desde);
       paramCounter++;
     }
 
     if (fecha_hasta) {
-      query += ` AND a.fecha_abono <= $${paramCounter}`;
+      query += ` AND a.${fechaCol} <= $${paramCounter}`;
       params.push(fecha_hasta);
       paramCounter++;
     }
@@ -95,7 +104,7 @@ router.get('/', auth(), async (req, res) => {
       paramCounter++;
     }
 
-    query += ` ORDER BY a.fecha_abono DESC, a.id DESC`;
+    query += ` ORDER BY a.${fechaCol} DESC, a.id DESC`;
     query += ` LIMIT $${paramCounter} OFFSET $${paramCounter + 1}`;
     params.push(limit, offset);
 
@@ -122,13 +131,13 @@ router.get('/', auth(), async (req, res) => {
     }
 
     if (fecha_desde) {
-      countQuery += ` AND a.fecha_abono >= $${countParamCounter}`;
+      countQuery += ` AND a.${fechaCol} >= $${countParamCounter}`;
       countParams.push(fecha_desde);
       countParamCounter++;
     }
 
     if (fecha_hasta) {
-      countQuery += ` AND a.fecha_abono <= $${countParamCounter}`;
+      countQuery += ` AND a.${fechaCol} <= $${countParamCounter}`;
       countParams.push(fecha_hasta);
       countParamCounter++;
     }
@@ -168,6 +177,15 @@ router.get('/estadisticas', auth(), async (req, res) => {
     if (!abonosTable) {
       return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
     }
+
+    // Detectar nombres de columnas
+    const { rows: colRows } = await pool.query(`
+      SELECT column_name FROM information_schema.columns WHERE table_name = $1
+    `, [abonosTable]);
+    const cols = colRows.map(r => r.column_name);
+    const fechaCol = cols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
+    const montoCol = cols.includes('monto') && !cols.includes('monto_total') ? 'monto' : 'monto_total';
+
     const { vendedor_id, fecha_desde, fecha_hasta } = req.query;
 
     let whereClause = 'WHERE 1=1';
@@ -186,13 +204,13 @@ router.get('/estadisticas', auth(), async (req, res) => {
     }
 
     if (fecha_desde) {
-      whereClause += ` AND a.fecha_abono >= $${paramCounter}`;
+      whereClause += ` AND a.${fechaCol} >= $${paramCounter}`;
       params.push(fecha_desde);
       paramCounter++;
     }
 
     if (fecha_hasta) {
-      whereClause += ` AND a.fecha_abono <= $${paramCounter}`;
+      whereClause += ` AND a.${fechaCol} <= $${paramCounter}`;
       params.push(fecha_hasta);
       paramCounter++;
     }
@@ -201,12 +219,12 @@ router.get('/estadisticas', auth(), async (req, res) => {
     const statsQuery = `
       SELECT 
         COUNT(*) as total_abonos,
-        SUM(monto) as monto_total,
-        AVG(monto) as promedio_abono,
-        MIN(monto) as abono_minimo,
-        MAX(monto) as abono_maximo,
-        MIN(fecha_abono) as fecha_primera,
-        MAX(fecha_abono) as fecha_ultima
+        SUM(${montoCol}) as monto_total,
+        AVG(${montoCol}) as promedio_abono,
+        MIN(${montoCol}) as abono_minimo,
+        MAX(${montoCol}) as abono_maximo,
+        MIN(${fechaCol}) as fecha_primera,
+        MAX(${fechaCol}) as fecha_ultima
   FROM ${abonosTable} a
       ${whereClause}
     `;
@@ -216,8 +234,8 @@ router.get('/estadisticas', auth(), async (req, res) => {
       SELECT 
         COALESCE(tipo_pago, 'Sin especificar') as tipo_pago,
         COUNT(*) as cantidad,
-        SUM(monto) as monto_total,
-        AVG(monto)::numeric(15,2) as promedio
+        SUM(${montoCol}) as monto_total,
+        AVG(${montoCol})::numeric(15,2) as promedio
   FROM ${abonosTable} a
       ${whereClause}
       GROUP BY tipo_pago
@@ -227,13 +245,13 @@ router.get('/estadisticas', auth(), async (req, res) => {
     // Por mes
     const porMesQuery = `
       SELECT 
-        TO_CHAR(fecha_abono, 'YYYY-MM') as mes,
+        TO_CHAR(${fechaCol}, 'YYYY-MM') as mes,
         COUNT(*) as cantidad,
-        SUM(monto) as monto_total,
-        AVG(monto)::numeric(15,2) as promedio
+        SUM(${montoCol}) as monto_total,
+        AVG(${montoCol})::numeric(15,2) as promedio
   FROM ${abonosTable} a
       ${whereClause}
-      GROUP BY TO_CHAR(fecha_abono, 'YYYY-MM')
+      GROUP BY TO_CHAR(${fechaCol}, 'YYYY-MM')
       ORDER BY mes DESC
       LIMIT 12
     `;
@@ -270,6 +288,15 @@ router.get('/comparativo', auth(), async (req, res) => {
     if (!abonosTable) {
       return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
     }
+
+    // Detectar columnas en tabla abonos
+    const { rows: abonoColRows } = await pool.query(`
+      SELECT column_name FROM information_schema.columns WHERE table_name = $1
+    `, [abonosTable]);
+    const abonoCols = abonoColRows.map(r => r.column_name);
+    const abonoFechaCol = abonoCols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
+    const abonoMontoCol = abonoCols.includes('monto') && !abonoCols.includes('monto_total') ? 'monto' : 'monto_total';
+
     // Detect date column and amount column in sales table
     let salesDateCol = 'fecha_emision';
     let salesAmountCol = 'valor_total';
@@ -332,13 +359,13 @@ router.get('/comparativo', auth(), async (req, res) => {
     }
 
     if (fecha_desde) {
-      whereClauseAbonos += ` AND fecha_abono >= $${abonosParamCounter}`;
+      whereClauseAbonos += ` AND ${abonoFechaCol} >= $${abonosParamCounter}`;
       abonosParams.push(fecha_desde);
       abonosParamCounter++;
     }
 
     if (fecha_hasta) {
-      whereClauseAbonos += ` AND fecha_abono <= $${abonosParamCounter}`;
+      whereClauseAbonos += ` AND ${abonoFechaCol} <= $${abonosParamCounter}`;
       abonosParams.push(fecha_hasta);
       abonosParamCounter++;
     }
@@ -371,13 +398,13 @@ router.get('/comparativo', auth(), async (req, res) => {
       : `SELECT NULL::text as periodo, NULL::int as vendedor_id, 0::numeric as total_ventas, 0::bigint as cantidad_ventas WHERE 1=0`;
 
     const abonosCte = `SELECT 
-          TO_CHAR(fecha_abono, '${dateFormat}') as periodo,
+          TO_CHAR(${abonoFechaCol}, '${dateFormat}') as periodo,
           vendedor_id,
-          SUM(monto) as total_abonos,
+          SUM(${abonoMontoCol}) as total_abonos,
           COUNT(*) as cantidad_abonos
         FROM ${abonosTable}
         ${whereClauseAbonos}
-        GROUP BY TO_CHAR(fecha_abono, '${dateFormat}'), vendedor_id`;
+        GROUP BY TO_CHAR(${abonoFechaCol}, '${dateFormat}'), vendedor_id`;
 
     // Ejecutar consultas por separado ya que tienen diferentes parámetros
     const ventasData = salesTable ? await pool.query(`
@@ -393,13 +420,13 @@ router.get('/comparativo', auth(), async (req, res) => {
 
     const abonosData = await pool.query(`
       SELECT 
-        TO_CHAR(fecha_abono, '${dateFormat}') as periodo,
+        TO_CHAR(${abonoFechaCol}, '${dateFormat}') as periodo,
         vendedor_id,
-        SUM(monto) as total_abonos,
+        SUM(${abonoMontoCol}) as total_abonos,
         COUNT(*) as cantidad_abonos
       FROM ${abonosTable}
       ${whereClauseAbonos}
-      GROUP BY TO_CHAR(fecha_abono, '${dateFormat}'), vendedor_id
+      GROUP BY TO_CHAR(${abonoFechaCol}, '${dateFormat}'), vendedor_id
     `, abonosParams);
 
     // Combinar resultados en memoria
