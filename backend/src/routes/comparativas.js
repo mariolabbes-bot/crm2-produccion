@@ -39,12 +39,16 @@ router.get('/mensuales', auth(), async (req, res) => {
     `, [salesTable]);
     const dateCol = dateColCheck.rows[0]?.column_name || 'fecha_emision';
 
-    // Filtro por vendedor si es vendedor (no manager)
-    let vendedorFilter = '';
-    let params = [];
-    if (user.rol !== 'manager') {
-      vendedorFilter = 'AND vendedor_id = $1';
-      params = [user.id];
+    // Detectar columna de vendedor en tabla ventas
+    let vendedorCol = 'vendedor_id';
+    const vendedorColCheck = await pool.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = $1
+      AND column_name IN ('vendedor_id', 'vendedor_cliente')
+      LIMIT 1
+    `, [salesTable]);
+    if (vendedorColCheck.rows.length > 0) {
+      vendedorCol = vendedorColCheck.rows[0].column_name;
     }
 
     // Detectar columna de monto
@@ -57,17 +61,59 @@ router.get('/mensuales', auth(), async (req, res) => {
     `, [salesTable]);
     const amountCol = amountColCheck.rows[0]?.column_name || 'valor_total';
 
+    // Filtro por vendedor si es vendedor (no manager)
+    let vendedorFilter = '';
+    let params = [];
+    if (user.rol !== 'manager') {
+      if (vendedorCol === 'vendedor_cliente') {
+        // Obtener alias del usuario
+        const userAlias = await pool.query('SELECT alias FROM usuario WHERE id = $1', [user.id]);
+        if (userAlias.rows.length > 0 && userAlias.rows[0].alias) {
+          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
+          params = [userAlias.rows[0].alias];
+        }
+      } else {
+        vendedorFilter = `AND ${vendedorCol} = $1`;
+        params = [user.id];
+      }
+    }
+
     // Query: Ventas por vendedor y mes
-    const query = `
+    // Si usa vendedor_cliente, agrupamos por nombre y luego hacemos JOIN con usuario
+    const query = vendedorCol === 'vendedor_cliente' ? `
       WITH ventas_mensuales AS (
         SELECT 
-          vendedor_id,
+          UPPER(TRIM(${vendedorCol})) as vendedor_nombre,
           TO_CHAR(${dateCol}, 'YYYY-MM') as mes,
           SUM(${amountCol}) as total_ventas
         FROM ${salesTable}
         WHERE TO_CHAR(${dateCol}, 'YYYY-MM') IN ($${params.length + 1}, $${params.length + 2}, $${params.length + 3}, $${params.length + 4}, $${params.length + 5})
         ${vendedorFilter}
-        GROUP BY vendedor_id, TO_CHAR(${dateCol}, 'YYYY-MM')
+        GROUP BY UPPER(TRIM(${vendedorCol})), TO_CHAR(${dateCol}, 'YYYY-MM')
+      )
+      SELECT 
+        u.id as vendedor_id,
+        u.nombre as vendedor_nombre,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 1} THEN vm.total_ventas END), 0) as mes_actual,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 2} THEN vm.total_ventas END), 0) as mes_1,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 3} THEN vm.total_ventas END), 0) as mes_2,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 4} THEN vm.total_ventas END), 0) as mes_3,
+        COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 5} THEN vm.total_ventas END), 0) as mes_anio_anterior
+      FROM usuario u
+      LEFT JOIN ventas_mensuales vm ON UPPER(TRIM(u.alias)) = vm.vendedor_nombre
+      WHERE u.rol = 'vendedor'
+      GROUP BY u.id, u.nombre
+      ORDER BY u.nombre
+    ` : `
+      WITH ventas_mensuales AS (
+        SELECT 
+          ${vendedorCol} as vendedor_id,
+          TO_CHAR(${dateCol}, 'YYYY-MM') as mes,
+          SUM(${amountCol}) as total_ventas
+        FROM ${salesTable}
+        WHERE TO_CHAR(${dateCol}, 'YYYY-MM') IN ($${params.length + 1}, $${params.length + 2}, $${params.length + 3}, $${params.length + 4}, $${params.length + 5})
+        ${vendedorFilter}
+        GROUP BY ${vendedorCol}, TO_CHAR(${dateCol}, 'YYYY-MM')
       )
       SELECT 
         u.id as vendedor_id,
