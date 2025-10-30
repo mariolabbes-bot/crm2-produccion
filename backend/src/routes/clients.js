@@ -24,8 +24,21 @@ router.get('/inactivos-mes-actual', auth(), async (req, res) => {
     const hace12mStr = `${hace12m.getFullYear()}-${String(hace12m.getMonth() + 1).padStart(2, '0')}-01`;
 
     // Query: clientes con ventas en últimos 12 meses, pero sin ventas en el mes actual
-    let query = `
-      SELECT c.id, c.nombre, c.rut, c.email, c.telefono, c.vendedor_id
+    // Primero obtener vendedor_id desde usuario para filtrar
+    let vendedorFilter = '';
+    const params = [hace12mStr, mesActualIni, mesActualFinStr];
+    
+    if (req.user.rol !== 'manager') {
+      // Si no es manager, filtrar por su vendedor_id
+      const userResult = await pool.query('SELECT vendedor_alias FROM usuario WHERE id = $1', [req.user.id]);
+      if (userResult.rows.length > 0 && userResult.rows[0].vendedor_alias) {
+        vendedorFilter = ` AND c.vendedor_alias = $4`;
+        params.push(userResult.rows[0].vendedor_alias);
+      }
+    }
+    
+    const query = `
+      SELECT c.rut, c.nombre, c.email, c.telefono, c.vendedor_alias, c.ciudad, c.comuna
       FROM cliente c
       WHERE EXISTS (
         SELECT 1 FROM ${ventasTable} v
@@ -37,13 +50,8 @@ router.get('/inactivos-mes-actual', auth(), async (req, res) => {
         WHERE v2.${clienteCol} = c.nombre
           AND v2.${fechaCol} >= $2 AND v2.${fechaCol} <= $3
       )
+      ${vendedorFilter}
     `;
-    const params = [hace12mStr, mesActualIni, mesActualFinStr];
-    // Si no es manager, filtrar por vendedor
-    if (req.user.rol !== 'manager') {
-      query += ` AND c.vendedor_id = $4`;
-      params.push(req.user.id);
-    }
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {

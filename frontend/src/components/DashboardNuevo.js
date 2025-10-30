@@ -635,13 +635,13 @@ const DashboardNuevo = () => {
                         </tr>
                       ) : (
                         clientesInactivos.map((cli, idx) => (
-                          <tr key={cli.id || idx} style={{ background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                          <tr key={cli.rut || idx} style={{ background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.nombre}</td>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.rut}</td>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.email}</td>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.telefono}</td>
                             {isManager && (
-                              <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.vendedor_id}</td>
+                              <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.vendedor_alias || '-'}</td>
                             )}
                           </tr>
                         ))
