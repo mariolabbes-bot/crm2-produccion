@@ -4,6 +4,54 @@ const pool = require('../db');
 const auth = require('../middleware/auth');
 const axios = require('axios');
 
+// GET clientes con ventas en últimos 12 meses pero sin ventas en el mes actual
+router.get('/inactivos-mes-actual', auth(), async (req, res) => {
+  try {
+    // Detectar tabla y columnas de ventas
+    const ventasTable = 'venta';
+    const clienteCol = 'cliente';
+    const fechaCol = 'fecha_emision';
+    const vendedorCol = 'vendedor_id';
+    const valorCol = 'valor_total';
+    // Fechas
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const mesActualIni = `${year}-${String(month).padStart(2, '0')}-01`;
+    const mesActualFin = new Date(year, month, 0); // último día del mes actual
+    const mesActualFinStr = `${year}-${String(month).padStart(2, '0')}-${String(mesActualFin.getDate()).padStart(2, '0')}`;
+    const hace12m = new Date(now.getFullYear(), now.getMonth() - 12, 1);
+    const hace12mStr = `${hace12m.getFullYear()}-${String(hace12m.getMonth() + 1).padStart(2, '0')}-01`;
+
+    // Query: clientes con ventas en últimos 12 meses, pero sin ventas en el mes actual
+    let query = `
+      SELECT c.id, c.nombre, c.rut, c.email, c.telefono, c.vendedor_id
+      FROM cliente c
+      WHERE EXISTS (
+        SELECT 1 FROM ${ventasTable} v
+        WHERE v.${clienteCol} = c.nombre
+          AND v.${fechaCol} >= $1 AND v.${fechaCol} < $2
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM ${ventasTable} v2
+        WHERE v2.${clienteCol} = c.nombre
+          AND v2.${fechaCol} >= $2 AND v2.${fechaCol} <= $3
+      )
+    `;
+    const params = [hace12mStr, mesActualIni, mesActualFinStr];
+    // Si no es manager, filtrar por vendedor
+    if (req.user.rol !== 'manager') {
+      query += ` AND c.vendedor_id = $4`;
+      params.push(req.user.id);
+    }
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
 // GET clients (all for manager, own for vendedor)
 router.get('/', auth(), async (req, res) => {
   try {

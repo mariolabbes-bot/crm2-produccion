@@ -1,14 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales } from '../api';
+import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual } from '../api';
 import { removeToken, getUser } from '../utils/auth';
 import './DashboardNuevo.css';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 
 const COLORS = ['#667eea', '#43e97b', '#f093fb', '#fa709a', '#764ba2', '#38f9d7', '#f5576c', '#fee140'];
+
 
 // Helper para calcular rango de fechas
 const getDateRange = (months = 3) => {
@@ -22,6 +23,31 @@ const DashboardNuevo = () => {
   const navigate = useNavigate();
   const user = getUser();
   const isManager = user?.rol === 'manager';
+  // Estado para clientes inactivos
+  const [clientesInactivos, setClientesInactivos] = useState([]);
+  const [loadingInactivos, setLoadingInactivos] = useState(false);
+  const [errorInactivos, setErrorInactivos] = useState(null);
+  const fetchInactivos = useCallback(async () => {
+    console.log('[Inactivos] Cargando clientes inactivos...');
+    setLoadingInactivos(true);
+    setErrorInactivos(null);
+    try {
+      const data = await getClientsInactivosMesActual();
+      console.log('[Inactivos] Respuesta:', data);
+      setClientesInactivos(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('[Inactivos] Error:', err);
+      setErrorInactivos('Error al cargar clientes inactivos: ' + (err.message || ''));
+      setClientesInactivos([]);
+    } finally {
+      setLoadingInactivos(false);
+    }
+  }, []);
+
+  // Cargar clientes inactivos al montar
+  useEffect(() => {
+    fetchInactivos();
+  }, [fetchInactivos]);
   
   const [stats, setStats] = useState(null);
   const [comparativo, setComparativo] = useState(null);
@@ -212,17 +238,20 @@ const DashboardNuevo = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      
       // Construir parámetros de filtro
       const params = {
         agrupar: 'mes',
         fecha_desde: filtroFechaDesde,
         fecha_hasta: filtroFechaHasta
       };
+      // Si es manager y seleccionó un vendedor, filtra por ese vendedor
       if (isManager && filtroVendedor) {
         params.vendedor_id = filtroVendedor;
       }
-      
+      // Si NO es manager, siempre filtra por su propio id
+      if (!isManager && user?.id) {
+        params.vendedor_id = user.id;
+      }
       const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData] = await Promise.all([
         getAbonosEstadisticas(params).catch(e => ({ success: false, error: e.message, status: e.status })),
         getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status })),
@@ -561,6 +590,68 @@ const DashboardNuevo = () => {
               </Paper>
             </Grid>
           </Grid>
+
+          {/* Tabla: Clientes inactivos este mes */}
+          <Box sx={{ mt: 4 }}>
+            <Paper className="chart-card" sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+                💤 Clientes Inactivos este Mes
+                <Typography variant="caption" sx={{ ml: 2, color: '#666' }}>
+                  {isManager ? 'Todos los clientes con ventas en los últimos 12 meses pero sin ventas este mes' : 'Tus clientes con ventas en los últimos 12 meses pero sin ventas este mes'}
+                </Typography>
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                <Typography variant="caption" sx={{ color: '#999' }}>
+                  Build: {new Date().toISOString()}
+                </Typography>
+                <Button size="small" variant="outlined" onClick={fetchInactivos}>Recargar</Button>
+              </Box>
+              {errorInactivos && <Typography color="error">{errorInactivos}</Typography>}
+              {loadingInactivos ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <LinearProgress />
+                  <Typography sx={{ mt: 2 }}>Cargando clientes inactivos...</Typography>
+                </Box>
+              ) : (
+                <div style={{ overflowX: 'auto', maxHeight: '400px', overflowY: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
+                    <thead style={{ position: 'sticky', top: 0, background: '#f5f5f5', zIndex: 1 }}>
+                      <tr>
+                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Nombre</th>
+                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>RUT</th>
+                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Email</th>
+                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Teléfono</th>
+                        {isManager && (
+                          <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Vendedor</th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {clientesInactivos.length === 0 ? (
+                        <tr>
+                          <td colSpan={isManager ? 5 : 4} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
+                            <Typography variant="body1">❌ No hay clientes inactivos este mes</Typography>
+                          </td>
+                        </tr>
+                      ) : (
+                        clientesInactivos.map((cli, idx) => (
+                          <tr key={cli.id || idx} style={{ background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.nombre}</td>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.rut}</td>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.email}</td>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.telefono}</td>
+                            {isManager && (
+                              <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.vendedor_id}</td>
+                            )}
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Paper>
+          </Box>
 
           {/* TABLAS COMPARATIVAS */}
           {comparativasMensuales && comparativasMensuales.comparativas && (
