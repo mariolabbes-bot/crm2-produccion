@@ -490,7 +490,7 @@ router.get('/comparativo', auth(), async (req, res) => {
     // Resumen total - también con consultas separadas
     const ventasTotalData = salesTable ? await pool.query(`
       SELECT 
-        SUM(total_venta) as total_ventas,
+        SUM(${salesAmountCol}) as total_ventas,
         COUNT(*) as cantidad_ventas
       FROM ${salesTable}
       ${whereClauseVentas}
@@ -498,7 +498,7 @@ router.get('/comparativo', auth(), async (req, res) => {
 
     const abonosTotalData = await pool.query(`
       SELECT 
-        SUM(monto) as total_abonos,
+        SUM(${abonoMontoCol}) as total_abonos,
         COUNT(*) as cantidad_abonos
       FROM ${abonosTable}
       ${whereClauseAbonos}
@@ -546,6 +546,29 @@ router.get('/por-vendedor', auth(), async (req, res) => {
       return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
     }
 
+    // Detectar columnas en tabla abonos
+    const { rows: abonoColRows } = await pool.query(`
+      SELECT column_name FROM information_schema.columns WHERE table_name = $1
+    `, [abonosTable]);
+    const abonoCols = abonoColRows.map(r => r.column_name);
+    const abonoFechaCol = abonoCols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
+    const abonoMontoCol = abonoCols.includes('monto_neto') ? 'monto_neto' : (abonoCols.includes('monto') ? 'monto' : 'monto_total');
+
+    // Detectar columnas en tabla ventas
+    let salesDateCol = 'fecha_emision';
+    let salesAmountCol = 'valor_total';
+    if (salesTable) {
+      const { rows } = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [salesTable]);
+      const cols = rows.map(r => r.column_name);
+      if (cols.includes('fecha_emision')) salesDateCol = 'fecha_emision';
+      else if (cols.includes('invoice_date')) salesDateCol = 'invoice_date';
+      else if (cols.includes('fecha')) salesDateCol = 'fecha';
+      if (cols.includes('valor_total')) salesAmountCol = 'valor_total';
+      else if (cols.includes('total_venta')) salesAmountCol = 'total_venta';
+      else if (cols.includes('monto_total')) salesAmountCol = 'monto_total';
+      else if (cols.includes('net_amount')) salesAmountCol = 'net_amount';
+    }
+
     // Solo managers pueden ver todos los vendedores
     if (req.user.rol !== 'manager') {
       return res.status(403).json({
@@ -559,22 +582,22 @@ router.get('/por-vendedor', auth(), async (req, res) => {
     let paramCounter = 1;
 
     if (fecha_desde) {
-      whereClause += ` AND a.fecha_abono >= $${paramCounter}`;
+      whereClause += ` AND a.${abonoFechaCol} >= $${paramCounter}`;
       params.push(fecha_desde);
       paramCounter++;
     }
 
     if (fecha_hasta) {
-      whereClause += ` AND a.fecha_abono <= $${paramCounter}`;
+      whereClause += ` AND a.${abonoFechaCol} <= $${paramCounter}`;
       params.push(fecha_hasta);
       paramCounter++;
     }
 
     const ventasCantidadSub = salesTable
-      ? `SELECT COUNT(*) FROM ${salesTable} s WHERE s.vendedor_id = u.id ${fecha_desde ? `AND s.fecha_emision >= $1` : ''} ${fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : ''}`
+      ? `SELECT COUNT(*) FROM ${salesTable} s WHERE s.vendedor_id = u.id ${fecha_desde ? `AND s.${salesDateCol} >= $1` : ''} ${fecha_hasta ? `AND s.${salesDateCol} <= $${fecha_desde ? 2 : 1}` : ''}`
       : `SELECT 0`;
     const ventasTotalSub = salesTable
-      ? `SELECT COALESCE(SUM(total_venta), 0) FROM ${salesTable} s WHERE s.vendedor_id = u.id ${fecha_desde ? `AND s.fecha_emision >= $1` : ''} ${fecha_hasta ? `AND s.fecha_emision <= $${fecha_desde ? 2 : 1}` : ''}`
+      ? `SELECT COALESCE(SUM(${salesAmountCol}), 0) FROM ${salesTable} s WHERE s.vendedor_id = u.id ${fecha_desde ? `AND s.${salesDateCol} >= $1` : ''} ${fecha_hasta ? `AND s.${salesDateCol} <= $${fecha_desde ? 2 : 1}` : ''}`
       : `SELECT 0`;
 
     const query = `
@@ -582,10 +605,10 @@ router.get('/por-vendedor', auth(), async (req, res) => {
         u.id as vendedor_id,
         u.nombre as vendedor_nombre,
         COUNT(a.id) as cantidad_abonos,
-        SUM(a.monto) as total_abonos,
-        AVG(a.monto)::numeric(15,2) as promedio_abono,
-        MIN(a.fecha_abono) as primer_abono,
-        MAX(a.fecha_abono) as ultimo_abono,
+        SUM(a.${abonoMontoCol}) as total_abonos,
+        AVG(a.${abonoMontoCol})::numeric(15,2) as promedio_abono,
+        MIN(a.${abonoFechaCol}) as primer_abono,
+        MAX(a.${abonoFechaCol}) as ultimo_abono,
         -- Ventas del vendedor
         ( ${ventasCantidadSub} ) as cantidad_ventas,
         ( ${ventasTotalSub} ) as total_ventas
