@@ -591,13 +591,13 @@ const DashboardNuevo = () => {
             </Grid>
           </Grid>
 
-          {/* Tabla: Clientes inactivos este mes */}
+          {/* Tabla: Top 20 Clientes Inactivos este Mes con Mayor Venta */}
           <Box sx={{ mt: 4 }}>
             <Paper className="chart-card" sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
-                💤 Clientes Inactivos este Mes
+                💤 Top 20 Clientes Inactivos este Mes (Mayor Venta Últimos 12 Meses)
                 <Typography variant="caption" sx={{ ml: 2, color: '#666' }}>
-                  {isManager ? 'Todos los clientes con ventas en los últimos 12 meses pero sin ventas este mes' : 'Tus clientes con ventas en los últimos 12 meses pero sin ventas este mes'}
+                  {isManager ? 'Clientes con mayores ventas en los últimos 12 meses pero sin ventas este mes' : 'Tus mejores clientes que no han comprado este mes'}
                 </Typography>
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
@@ -617,10 +617,12 @@ const DashboardNuevo = () => {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
                     <thead style={{ position: 'sticky', top: 0, background: '#f5f5f5', zIndex: 1 }}>
                       <tr>
+                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>#</th>
                         <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Nombre</th>
                         <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>RUT</th>
-                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Email</th>
-                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Teléfono</th>
+                        <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Monto Total</th>
+                        <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Monto Promedio</th>
+                        <th style={{ padding: '10px', textAlign: 'center', borderBottom: '2px solid #ddd', fontWeight: 600 }}>N° Facturas</th>
                         {isManager && (
                           <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Vendedor</th>
                         )}
@@ -629,19 +631,25 @@ const DashboardNuevo = () => {
                     <tbody>
                       {clientesInactivos.length === 0 ? (
                         <tr>
-                          <td colSpan={isManager ? 5 : 4} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
+                          <td colSpan={isManager ? 7 : 6} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
                             <Typography variant="body1">❌ No hay clientes inactivos este mes</Typography>
                           </td>
                         </tr>
                       ) : (
                         clientesInactivos.map((cli, idx) => (
                           <tr key={cli.rut || idx} style={{ background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee', fontWeight: 600, color: idx < 3 ? '#ff6b6b' : '#666' }}>{idx + 1}</td>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.nombre}</td>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.rut}</td>
-                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.email}</td>
-                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.telefono}</td>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 600, color: '#2196f3' }}>
+                              ${parseFloat(cli.monto_total || 0).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            </td>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee', textAlign: 'right', color: '#666' }}>
+                              ${parseFloat(cli.monto_promedio || 0).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            </td>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee', textAlign: 'center' }}>{cli.num_ventas || 0}</td>
                             {isManager && (
-                              <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.vendedor_alias || '-'}</td>
+                              <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.vendedor_nombre || '-'}</td>
                             )}
                           </tr>
                         ))

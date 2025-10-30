@@ -4,7 +4,7 @@ const pool = require('../db');
 const auth = require('../middleware/auth');
 const axios = require('axios');
 
-// GET clientes con ventas en últimos 12 meses pero sin ventas en el mes actual
+// GET top 20 clientes con mayor venta en últimos 12 meses pero sin ventas en el mes actual
 router.get('/inactivos-mes-actual', auth(), async (req, res) => {
   try {
     // Detectar tabla y columnas de ventas
@@ -23,34 +23,52 @@ router.get('/inactivos-mes-actual', auth(), async (req, res) => {
     const hace12m = new Date(now.getFullYear(), now.getMonth() - 12, 1);
     const hace12mStr = `${hace12m.getFullYear()}-${String(hace12m.getMonth() + 1).padStart(2, '0')}-01`;
 
-    // Query: clientes con ventas en últimos 12 meses, pero sin ventas en el mes actual
-    // Primero obtener vendedor_id desde usuario para filtrar
+    // Query: top 20 clientes con mayor venta en últimos 12 meses, sin ventas en mes actual
+    // Incluir monto total y promedio de ventas
     let vendedorFilter = '';
     const params = [hace12mStr, mesActualIni, mesActualFinStr];
     
     if (req.user.rol !== 'manager') {
-      // Si no es manager, filtrar por su vendedor_id
-      const userResult = await pool.query('SELECT vendedor_alias FROM usuario WHERE id = $1', [req.user.id]);
-      if (userResult.rows.length > 0 && userResult.rows[0].vendedor_alias) {
+      // Si no es manager, filtrar por su alias
+      const userResult = await pool.query('SELECT alias FROM usuario WHERE id = $1', [req.user.id]);
+      if (userResult.rows.length > 0 && userResult.rows[0].alias) {
         vendedorFilter = ` AND c.vendedor_alias = $4`;
-        params.push(userResult.rows[0].vendedor_alias);
+        params.push(userResult.rows[0].alias);
       }
     }
     
     const query = `
-      SELECT c.rut, c.nombre, c.email, c.telefono, c.vendedor_alias, c.ciudad, c.comuna
-      FROM cliente c
-      WHERE EXISTS (
-        SELECT 1 FROM ${ventasTable} v
-        WHERE v.${clienteCol} = c.nombre
+      WITH ventas_clientes AS (
+        SELECT 
+          c.rut, 
+          c.nombre, 
+          c.email, 
+          c.telefono, 
+          c.vendedor_alias,
+          c.ciudad, 
+          c.comuna,
+          COALESCE(SUM(v.${valorCol}), 0) as monto_total,
+          COALESCE(AVG(v.${valorCol}), 0) as monto_promedio,
+          COUNT(DISTINCT v.folio) as num_ventas,
+          MODE() WITHIN GROUP (ORDER BY v.${vendedorCol}) as vendedor_id_principal
+        FROM cliente c
+        INNER JOIN ${ventasTable} v ON v.${clienteCol} = c.nombre
           AND v.${fechaCol} >= $1 AND v.${fechaCol} < $2
+        WHERE NOT EXISTS (
+          SELECT 1 FROM ${ventasTable} v2
+          WHERE v2.${clienteCol} = c.nombre
+            AND v2.${fechaCol} >= $2 AND v2.${fechaCol} <= $3
+        )
+        ${vendedorFilter}
+        GROUP BY c.rut, c.nombre, c.email, c.telefono, c.vendedor_alias, c.ciudad, c.comuna
       )
-      AND NOT EXISTS (
-        SELECT 1 FROM ${ventasTable} v2
-        WHERE v2.${clienteCol} = c.nombre
-          AND v2.${fechaCol} >= $2 AND v2.${fechaCol} <= $3
-      )
-      ${vendedorFilter}
+      SELECT 
+        vc.*,
+        u.nombre as vendedor_nombre
+      FROM ventas_clientes vc
+      LEFT JOIN usuario u ON u.id = vc.vendedor_id_principal
+      ORDER BY monto_total DESC
+      LIMIT 20
     `;
     const result = await pool.query(query, params);
     res.json(result.rows);
