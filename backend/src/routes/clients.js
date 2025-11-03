@@ -25,14 +25,23 @@ router.get('/inactivos-mes-actual', auth(), async (req, res) => {
 
     // Query: top 20 clientes con mayor venta en últimos 12 meses, sin ventas en mes actual
     // Incluir monto total y promedio de ventas
-    let vendedorFilter = '';
     const params = [hace12mStr, mesActualIni, mesActualFinStr];
     let vendedorAlias = null;
+    // Si es vendedor (no manager), filtrar por su alias automáticamente
     if (req.user.rol !== 'manager') {
-      // Obtener alias del usuario logueado
       const userResult = await pool.query('SELECT alias FROM usuario WHERE id = $1', [req.user.id]);
       if (userResult.rows.length > 0 && userResult.rows[0].alias) {
         vendedorAlias = userResult.rows[0].alias;
+      }
+    } else if (req.query && req.query.vendedor_id) {
+      // Si es manager y envía vendedor_id, filtrar por ese vendedor
+      const vendedorId = parseInt(req.query.vendedor_id, 10);
+      if (!Number.isNaN(vendedorId)) {
+        const vRes = await pool.query('SELECT alias FROM usuario WHERE id = $1', [vendedorId]);
+        if (vRes.rows.length === 0 || !vRes.rows[0].alias) {
+          return res.status(400).json({ msg: 'vendedor_id inválido' });
+        }
+        vendedorAlias = vRes.rows[0].alias;
       }
     }
     

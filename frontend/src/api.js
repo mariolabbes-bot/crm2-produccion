@@ -51,7 +51,10 @@ export const addClient = (client) => apiFetch(`${API_URL}/clients`, { method: 'P
 export const updateClient = (id, client) => apiFetch(`${API_URL}/clients/${id}`, { method: 'PUT', body: JSON.stringify(client) });
 export const deleteClient = (id) => apiFetch(`${API_URL}/clients/${id}`, { method: 'DELETE' });
 export const bulkAddClients = (clients) => apiFetch(`${API_URL}/clients/bulk`, { method: 'POST', body: JSON.stringify(clients) });
-export const getClientsInactivosMesActual = () => apiFetch(`${API_URL}/clients/inactivos-mes-actual`);
+export const getClientsInactivosMesActual = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/clients/inactivos-mes-actual${qs ? `?${qs}` : ''}`);
+};
 
 // ACTIVITIES (New generalized workflow)
 export const getActivities = () => apiFetch(`${API_URL}/activities`);

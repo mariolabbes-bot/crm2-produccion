@@ -32,7 +32,11 @@ const DashboardNuevo = () => {
     setLoadingInactivos(true);
     setErrorInactivos(null);
     try {
-      const data = await getClientsInactivosMesActual();
+      const params = {};
+      if (isManager && filtroVendedor) {
+        params.vendedor_id = filtroVendedor;
+      }
+      const data = await getClientsInactivosMesActual(params);
       console.log('[Inactivos] Respuesta:', data);
       setClientesInactivos(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -221,6 +225,8 @@ const DashboardNuevo = () => {
 
   useEffect(() => {
     loadData();
+    // Al cambiar filtros también recargamos la tabla de inactivos para managers
+    fetchInactivos();
   }, [filtroVendedor, filtroFechaDesde, filtroFechaHasta]);
 
   const handleLogout = () => {
