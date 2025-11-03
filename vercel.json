@@ -1,18 +1,17 @@
 {
   "version": 2,
-  "buildCommand": "npm --prefix frontend run build",
-  "installCommand": "npm --prefix frontend install",
-  "outputDirectory": "frontend/dist",
   "env": {
     "REACT_APP_API_URL": "https://crm2-backend.onrender.com/api"
   },
-  "build": {
-    "env": {
-      "REACT_APP_API_URL": "https://crm2-backend.onrender.com/api"
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
     }
-  },
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "https://crm2-backend.onrender.com/api/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "https://crm2-backend.onrender.com/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
