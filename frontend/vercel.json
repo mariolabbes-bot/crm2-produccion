@@ -10,5 +10,9 @@
     "env": {
       "REACT_APP_API_URL": "https://crm2-backend.onrender.com/api"
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://crm2-backend.onrender.com/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
