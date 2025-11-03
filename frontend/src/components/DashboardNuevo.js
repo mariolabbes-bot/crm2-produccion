@@ -46,7 +46,7 @@ const DashboardNuevo = () => {
     } finally {
       setLoadingInactivos(false);
     }
-  }, []);
+  }, [isManager, filtroVendedor]);
 
   // Cargar clientes inactivos al montar
   useEffect(() => {
@@ -225,8 +225,6 @@ const DashboardNuevo = () => {
 
   useEffect(() => {
     loadData();
-    // Al cambiar filtros también recargamos la tabla de inactivos para managers
-    fetchInactivos();
   }, [filtroVendedor, filtroFechaDesde, filtroFechaHasta]);
 
   const handleLogout = () => {

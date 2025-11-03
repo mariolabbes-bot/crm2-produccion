@@ -1,5 +1,3 @@
-// USERS - Vendedores
-export const getVendedores = () => apiFetch(`${API_URL}/users/vendedores`);
 import { getToken } from './utils/auth';
 
 // API URL con fallback para desarrollo y producción
@@ -39,6 +37,9 @@ const apiFetch = async (url, options = {}) => {
   }
   return {}; // Return an empty object for non-JSON responses
 };
+
+// USERS - Vendedores
+export const getVendedores = () => apiFetch(`${API_URL}/users/vendedores`);
 
 // AUTH
 export const login = (credentials) => apiFetch(`${API_URL}/users/login`, { method: 'POST', body: JSON.stringify(credentials) });
