@@ -27,13 +27,12 @@ router.get('/inactivos-mes-actual', auth(), async (req, res) => {
     // Incluir monto total y promedio de ventas
     let vendedorFilter = '';
     const params = [hace12mStr, mesActualIni, mesActualFinStr];
-    
+    let vendedorAlias = null;
     if (req.user.rol !== 'manager') {
-      // Si no es manager, filtrar por su alias
+      // Obtener alias del usuario logueado
       const userResult = await pool.query('SELECT alias FROM usuario WHERE id = $1', [req.user.id]);
       if (userResult.rows.length > 0 && userResult.rows[0].alias) {
-        vendedorFilter = ` AND c.vendedor_alias = $4`;
-        params.push(userResult.rows[0].alias);
+        vendedorAlias = userResult.rows[0].alias;
       }
     }
     
@@ -50,7 +49,8 @@ router.get('/inactivos-mes-actual', auth(), async (req, res) => {
           COALESCE(SUM(v.${valorCol}), 0) as monto_total,
           COALESCE(AVG(v.${valorCol}), 0) as monto_promedio,
           COUNT(DISTINCT v.folio) as num_ventas,
-          MODE() WITHIN GROUP (ORDER BY v.${vendedorCol}) as vendedor_id_principal
+          MODE() WITHIN GROUP (ORDER BY v.${vendedorCol}) as vendedor_id_principal,
+          MIN(LOWER(v.vendedor_cliente)) as vendedor_cliente_lower
         FROM cliente c
         INNER JOIN ${ventasTable} v ON v.${clienteCol} = c.nombre
           AND v.${fechaCol} >= $1 AND v.${fechaCol} < $2
@@ -59,7 +59,6 @@ router.get('/inactivos-mes-actual', auth(), async (req, res) => {
           WHERE v2.${clienteCol} = c.nombre
             AND v2.${fechaCol} >= $2 AND v2.${fechaCol} <= $3
         )
-        ${vendedorFilter}
         GROUP BY c.rut, c.nombre, c.email, c.telefono, c.vendedor_alias, c.ciudad, c.comuna
       )
       SELECT 
@@ -67,9 +66,11 @@ router.get('/inactivos-mes-actual', auth(), async (req, res) => {
         u.nombre as vendedor_nombre
       FROM ventas_clientes vc
       LEFT JOIN usuario u ON u.id = vc.vendedor_id_principal
+      ${vendedorAlias ? 'WHERE EXISTS (SELECT 1 FROM venta v WHERE v.cliente = vc.nombre AND LOWER(v.vendedor_cliente) = LOWER($4) AND v.fecha_emision >= $1 AND v.fecha_emision < $2)' : ''}
       ORDER BY monto_total DESC
       LIMIT 20
     `;
+    if (vendedorAlias) params.push(vendedorAlias);
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
