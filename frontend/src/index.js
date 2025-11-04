@@ -1,3 +1,4 @@
+// Trigger Vercel redeploy: 2025-11-04
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, Link as RouterLink } from 'react-router-dom';
