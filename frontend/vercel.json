@@ -14,9 +14,5 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://crm2-backend.onrender.com/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "https://crm2-backend.onrender.com/api/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
