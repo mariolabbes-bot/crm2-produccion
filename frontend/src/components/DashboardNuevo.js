@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
+import SalesKpiCard from './ui/SalesKpiCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual } from '../api';
 import { removeToken, getUser } from '../utils/auth';
@@ -497,40 +498,39 @@ const DashboardNuevo = () => {
           {/* Métricas principales */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={6} md={3}>
-              <Card className="metric-card ventas">
-                <CardContent>
-                  <Typography variant="subtitle2" color="textSecondary">Total Ventas</Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>{formatMoney(comparativo?.resumen?.total_ventas)}</Typography>
-                  <Typography variant="caption" color="primary">Últimos 6 meses</Typography>
-                </CardContent>
-              </Card>
+              <SalesKpiCard
+                title="Total Ventas"
+                value={formatMoney(comparativo?.resumen?.total_ventas)}
+                subtitle="Últimos 6 meses"
+                color="primary"
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card className="metric-card abonos">
-                <CardContent>
-                  <Typography variant="subtitle2" color="textSecondary">Total Abonos</Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>{formatMoney(comparativo?.resumen?.total_abonos)}</Typography>
-                  <Typography variant="caption" color="primary">Últimos 6 meses</Typography>
-                </CardContent>
-              </Card>
+              <SalesKpiCard
+                title="Total Abonos"
+                value={formatMoney(comparativo?.resumen?.total_abonos)}
+                subtitle="Últimos 6 meses"
+                color="success"
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card className="metric-card porcentaje">
-                <CardContent>
-                  <Typography variant="subtitle2" color="textSecondary">% Cobrado</Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#27ae60' }}>{comparativo?.resumen?.porcentaje_cobrado_total}%</Typography>
-                  <LinearProgress variant="determinate" value={parseFloat(comparativo?.resumen?.porcentaje_cobrado_total) || 0} sx={{ height: 8, borderRadius: 4, mt: 1 }} />
-                </CardContent>
-              </Card>
+              <SalesKpiCard
+                title="% Cobrado"
+                value={comparativo?.resumen?.porcentaje_cobrado_total + '%'}
+                subtitle={null}
+                color="success"
+                sx={{ position: 'relative' }}
+              >
+                <LinearProgress variant="determinate" value={parseFloat(comparativo?.resumen?.porcentaje_cobrado_total) || 0} sx={{ height: 8, borderRadius: 4, mt: 1, backgroundColor: '#E5E9F2' }} />
+              </SalesKpiCard>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card className="metric-card saldo">
-                <CardContent>
-                  <Typography variant="subtitle2" color="textSecondary">Saldo Pendiente</Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#e74c3c' }}>{formatMoney(comparativo?.resumen?.saldo_pendiente)}</Typography>
-                  <Typography variant="caption" color="primary">Por cobrar</Typography>
-                </CardContent>
-              </Card>
+              <SalesKpiCard
+                title="Saldo Pendiente"
+                value={formatMoney(comparativo?.resumen?.saldo_pendiente)}
+                subtitle="Por cobrar"
+                color="warning"
+              />
             </Grid>
           </Grid>
 

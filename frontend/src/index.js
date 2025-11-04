@@ -16,16 +16,12 @@ import Abonos from './components/Abonos';
 import ComparativoVentasAbonos from './components/ComparativoVentasAbonos';
 import ImportPanel from './components/ImportPanel';
 import Papa from 'papaparse';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
+import salesTheme from './theme/salesTheme';
 import { Container, Box, Typography, TextField, Button, List, ListItem, ListItemText, Alert, Link, AppBar, Toolbar, IconButton } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 
-const theme = createTheme({
-  palette: {
-    primary: { main: '#1976d2' },
-    background: { default: '#f4f6f8' },
-  },
-});
+const theme = salesTheme;
 
 const PrivateRoute = ({ children }) => {
   return getToken() ? children : <Navigate to="/login" />;
