@@ -128,6 +128,14 @@ La aplicación estará disponible en:
 
 Ver `PRODUCCION.md` para instrucciones detalladas paso a paso.
 
+### Frontend Deploy (Vercel)
+
+Para el despliegue del frontend en Vercel con estructura monorepo, consulta la guía:
+
+- `frontend/DEPLOY.md` (Root Directory = `frontend`, `dist` como output, auto-deploy en `main`)
+
+Recomendación: Mantener una sola configuración activa en `frontend/vercel.json` y usar "Deploy latest" para despliegues manuales.
+
 ### Preparar para producción
 ```bash
 ./deploy-production.sh
