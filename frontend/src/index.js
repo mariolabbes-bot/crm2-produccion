@@ -18,11 +18,11 @@ import ComparativoVentasAbonos from './components/ComparativoVentasAbonos';
 import ImportPanel from './components/ImportPanel';
 import Papa from 'papaparse';
 import { ThemeProvider } from '@mui/material/styles';
-import salesTheme from './theme/salesTheme';
+import visionTheme from './theme/visionTheme';
 import { Container, Box, Typography, TextField, Button, List, ListItem, ListItemText, Alert, Link, AppBar, Toolbar, IconButton } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 
-const theme = salesTheme;
+const theme = visionTheme;
 
 const PrivateRoute = ({ children }) => {
   return getToken() ? children : <Navigate to="/login" />;

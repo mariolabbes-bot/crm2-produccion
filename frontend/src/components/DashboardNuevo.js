@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
-import SalesKpiCard from './ui/SalesKpiCard';
+import VisionCard from './ui/VisionCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual } from '../api';
 import { removeToken, getUser } from '../utils/auth';
@@ -498,39 +498,18 @@ const DashboardNuevo = () => {
           {/* Métricas principales */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={6} md={3}>
-              <SalesKpiCard
-                title="Total Ventas"
-                value={formatMoney(comparativo?.resumen?.total_ventas)}
-                subtitle="Últimos 6 meses"
-                color="primary"
-              />
+              <VisionCard title="Total Ventas" value={formatMoney(comparativo?.resumen?.total_ventas)} gradient="primary" sx={{ minWidth: 180, mb: 2 }} />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <SalesKpiCard
-                title="Total Abonos"
-                value={formatMoney(comparativo?.resumen?.total_abonos)}
-                subtitle="Últimos 6 meses"
-                color="success"
-              />
+              <VisionCard title="Total Abonos" value={formatMoney(comparativo?.resumen?.total_abonos)} gradient="success" sx={{ minWidth: 180, mb: 2 }} />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <SalesKpiCard
-                title="% Cobrado"
-                value={comparativo?.resumen?.porcentaje_cobrado_total + '%'}
-                subtitle={null}
-                color="success"
-                sx={{ position: 'relative' }}
-              >
+              <VisionCard title="% Cobrado" value={comparativo?.resumen?.porcentaje_cobrado_total + '%'} gradient="success" sx={{ minWidth: 180, mb: 2 }}>
                 <LinearProgress variant="determinate" value={parseFloat(comparativo?.resumen?.porcentaje_cobrado_total) || 0} sx={{ height: 8, borderRadius: 4, mt: 1, backgroundColor: '#E5E9F2' }} />
-              </SalesKpiCard>
+              </VisionCard>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <SalesKpiCard
-                title="Saldo Pendiente"
-                value={formatMoney(comparativo?.resumen?.saldo_pendiente)}
-                subtitle="Por cobrar"
-                color="warning"
-              />
+              <VisionCard title="Saldo Pendiente" value={formatMoney(comparativo?.resumen?.saldo_pendiente)} gradient="warning" sx={{ minWidth: 180, mb: 2 }} />
             </Grid>
           </Grid>
 
