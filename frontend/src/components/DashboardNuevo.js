@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
+import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select, useTheme, useMediaQuery } from '@mui/material';
 import VisionCard from './ui/VisionCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual } from '../api';
@@ -24,6 +24,14 @@ const DashboardNuevo = () => {
   const navigate = useNavigate();
   const user = getUser();
   const isManager = user?.rol === 'manager';
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const chartHeights = {
+    line: isMdUp ? 300 : 220,
+    pie: isMdUp ? 240 : 200,
+    bar: isMdUp ? 220 : 200,
+  };
+  const tableMaxHeight = isMdUp ? 360 : 300;
   // Estado para clientes inactivos
   const [clientesInactivos, setClientesInactivos] = useState([]);
   const [loadingInactivos, setLoadingInactivos] = useState(false);
@@ -516,15 +524,21 @@ const DashboardNuevo = () => {
           {/* Gráficos principales */}
           <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
-              <Paper className="chart-card" sx={{ p: 3, mb: 3 }}>
+              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos (últimos 6 meses)</Typography>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={chartHeights.line}>
                   <LineChart data={comparativo?.detalle?.length ? comparativo.detalle.map(row => ({ periodo: row.periodo, ventas: row.total_ventas, abonos: row.total_abonos })) : dummyLine}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="periodo" />
-                    <YAxis />
+                    <XAxis
+                      dataKey="periodo"
+                      tick={{ fontSize: isMdUp ? 12 : 10 }}
+                      interval={isMdUp ? 0 : 'preserveStartEnd'}
+                      angle={isMdUp ? 0 : -25}
+                      dy={isMdUp ? 0 : 10}
+                    />
+                    <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
                     <Tooltip formatter={formatMoney} />
-                    <Legend />
+                    {isMdUp && <Legend />}
                     <Line type="monotone" dataKey="ventas" stroke="#667eea" strokeWidth={3} name="Ventas" />
                     <Line type="monotone" dataKey="abonos" stroke="#43e97b" strokeWidth={3} name="Abonos" />
                   </LineChart>
@@ -532,16 +546,24 @@ const DashboardNuevo = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Paper className="chart-card" sx={{ p: 3, mb: 3 }}>
+              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>Distribución por Tipo de Pago</Typography>
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <Pie data={stats?.por_tipo_pago?.length ? stats.por_tipo_pago.map(tp => ({ name: tp.tipo_pago, value: tp.monto_total })) : dummyPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                <ResponsiveContainer width="100%" height={chartHeights.pie}>
+                  <PieChart margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
+                    <Pie
+                      data={stats?.por_tipo_pago?.length ? stats.por_tipo_pago.map(tp => ({ name: tp.tipo_pago, value: tp.monto_total })) : dummyPie}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={isMdUp ? 80 : 68}
+                      label={isMdUp}
+                    >
                       {(stats?.por_tipo_pago?.length ? stats.por_tipo_pago : dummyPie).map((entry, idx) => (
                         <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Legend />
+                    {isMdUp && <Legend />}
                   </PieChart>
                 </ResponsiveContainer>
               </Paper>
@@ -551,13 +573,13 @@ const DashboardNuevo = () => {
           {/* Top Vendedores (dummy) */}
           <Grid container spacing={3} sx={{ mt: 1 }}>
             <Grid item xs={12} md={6}>
-              <Paper className="chart-card" sx={{ p: 3 }}>
+              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 } }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>Top Vendedores</Typography>
-                <ResponsiveContainer width="100%" height={220}>
+                <ResponsiveContainer width="100%" height={chartHeights.bar}>
                   <BarChart data={vendedores?.length ? vendedores.map(v => ({ name: v.nombre, abonos: v.total_abonos || Math.random() * 10000000 })) : []}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
+                    <XAxis dataKey="name" tick={{ fontSize: isMdUp ? 12 : 10 }} interval={isMdUp ? 0 : 'preserveStartEnd'} angle={isMdUp ? 0 : -25} dy={isMdUp ? 0 : 10} />
+                    <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 40 : 30} />
                     <Tooltip formatter={formatMoney} />
                     <Bar dataKey="abonos" fill="#764ba2" name="Abonos" />
                   </BarChart>
@@ -565,7 +587,7 @@ const DashboardNuevo = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Paper className="chart-card" sx={{ p: 3 }}>
+              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 } }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>Top Clientes (próximamente)</Typography>
                 <Box sx={{ textAlign: 'center', color: '#aaa', mt: 6 }}>
                   <Typography variant="body1">En desarrollo...</Typography>
@@ -576,7 +598,7 @@ const DashboardNuevo = () => {
 
           {/* Tabla: Top 20 Clientes Inactivos este Mes con Mayor Venta */}
           <Box sx={{ mt: 4 }}>
-            <Paper className="chart-card" sx={{ p: 3 }}>
+            <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 } }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
                 💤 Top 20 Clientes Inactivos este Mes (Mayor Venta Últimos 12 Meses)
                 <Typography variant="caption" sx={{ ml: 2, color: '#666' }}>
@@ -596,16 +618,16 @@ const DashboardNuevo = () => {
                   <Typography sx={{ mt: 2 }}>Cargando clientes inactivos...</Typography>
                 </Box>
               ) : (
-                <div style={{ overflowX: 'auto', maxHeight: '400px', overflowY: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
+                <div style={{ overflowX: 'auto', maxHeight: `${tableMaxHeight}px`, overflowY: 'auto' }}>
+                  <table className="table-compact" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontSize: isMdUp ? '0.95rem' : '0.9rem' }}>
                     <thead style={{ position: 'sticky', top: 0, background: '#f5f5f5', zIndex: 1 }}>
                       <tr>
-                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>#</th>
-                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Nombre</th>
-                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>RUT</th>
-                        <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Monto Total</th>
-                        <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Monto Promedio</th>
-                        <th style={{ padding: '10px', textAlign: 'center', borderBottom: '2px solid #ddd', fontWeight: 600 }}>N° Facturas</th>
+                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600, width: '38px' }}>#</th>
+                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600, width: isMdUp ? '40%' : '46%' }}>Nombre</th>
+                        <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600, width: isMdUp ? '22%' : '28%' }}>RUT</th>
+                        <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600, width: isMdUp ? '14%' : '26%' }}>Monto Total</th>
+                        <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #ddd', fontWeight: 600, width: isMdUp ? '14%' : '0' }}>Monto Promedio</th>
+                        <th style={{ padding: '10px', textAlign: 'center', borderBottom: '2px solid #ddd', fontWeight: 600, width: '90px' }}>N° Facturas</th>
                         {isManager && (
                           <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Vendedor</th>
                         )}
@@ -622,17 +644,17 @@ const DashboardNuevo = () => {
                         clientesInactivos.map((cli, idx) => (
                           <tr key={cli.rut || idx} style={{ background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee', fontWeight: 600, color: idx < 3 ? '#ff6b6b' : '#666' }}>{idx + 1}</td>
-                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.nombre}</td>
-                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.rut}</td>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }} title={cli.nombre}>{cli.nombre}</td>
+                            <td style={{ padding: '10px', borderBottom: '1px solid #eee' }} title={cli.rut}>{cli.rut}</td>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 600, color: '#2196f3' }}>
                               ${parseFloat(cli.monto_total || 0).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                             </td>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee', textAlign: 'right', color: '#666' }}>
-                              ${parseFloat(cli.monto_promedio || 0).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                              {isMdUp ? `$${parseFloat(cli.monto_promedio || 0).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : ''}
                             </td>
                             <td style={{ padding: '10px', borderBottom: '1px solid #eee', textAlign: 'center' }}>{cli.num_ventas || 0}</td>
                             {isManager && (
-                              <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{cli.vendedor_nombre || '-'}</td>
+                              <td style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{isMdUp ? (cli.vendedor_nombre || '-') : ''}</td>
                             )}
                           </tr>
                         ))
@@ -649,15 +671,15 @@ const DashboardNuevo = () => {
             <Grid container spacing={3} sx={{ mt: 2 }}>
               {/* Tabla 1: Mes actual vs promedio últimos 3 meses */}
               <Grid item xs={12} md={6}>
-                <Paper className="chart-card" sx={{ p: 3 }}>
+                <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 } }}>
                   <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
                     📈 Mes Actual vs Promedio 3 Meses
                   </Typography>
                   <Typography variant="caption" sx={{ color: '#666', mb: 2, display: 'block' }}>
                     Comparación del mes {comparativasMensuales.mes_actual} contra el promedio de {comparativasMensuales.meses_comparacion.join(', ')}
                   </Typography>
-                  <div style={{ overflowX: 'auto', maxHeight: '400px', overflowY: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                  <div style={{ overflowX: 'auto', maxHeight: `${tableMaxHeight}px`, overflowY: 'auto' }}>
+                    <table className="table-compact" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontSize: isMdUp ? '0.85rem' : '0.82rem' }}>
                       <thead style={{ position: 'sticky', top: 0, background: '#f5f5f5', zIndex: 1 }}>
                         <tr>
                           <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Vendedor</th>
@@ -693,15 +715,15 @@ const DashboardNuevo = () => {
 
               {/* Tabla 2: Mes actual vs mismo mes año anterior */}
               <Grid item xs={12} md={6}>
-                <Paper className="chart-card" sx={{ p: 3 }}>
+                <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 } }}>
                   <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
                     📅 Mes Actual vs Mismo Mes Año Anterior
                   </Typography>
                   <Typography variant="caption" sx={{ color: '#666', mb: 2, display: 'block' }}>
                     Comparación del mes {comparativasMensuales.mes_actual} vs {comparativasMensuales.mes_anio_anterior}
                   </Typography>
-                  <div style={{ overflowX: 'auto', maxHeight: '400px', overflowY: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                  <div style={{ overflowX: 'auto', maxHeight: `${tableMaxHeight}px`, overflowY: 'auto' }}>
+                    <table className="table-compact" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontSize: isMdUp ? '0.85rem' : '0.82rem' }}>
                       <thead style={{ position: 'sticky', top: 0, background: '#f5f5f5', zIndex: 1 }}>
                         <tr>
                           <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ddd', fontWeight: 600 }}>Vendedor</th>
@@ -739,7 +761,7 @@ const DashboardNuevo = () => {
 
           {/* Tabla pivote: filas = vendedores, columnas = meses (ventas/abonos) */}
           <Box sx={{ mt: 4 }}>
-            <Paper className="chart-card" sx={{ p: 3 }}>
+            <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 } }}>
               <Typography variant="h6" sx={{ mb: 2 }}>
                 📊 Ventas por Vendedor por Mes
                 <Typography variant="caption" sx={{ ml: 2, color: '#666' }}>
@@ -766,8 +788,8 @@ const DashboardNuevo = () => {
                   Exportar XLSX
                 </Button>
                 </Box>
-              <div style={{ overflowX: 'auto', maxHeight: '500px', overflowY: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div style={{ overflowX: 'auto', maxHeight: `${isMdUp ? 500 : 360}px`, overflowY: 'auto' }}>
+                <table className="table-compact" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontSize: isMdUp ? '0.9rem' : '0.85rem' }}>
                   <thead style={{ position: 'sticky', top: 0, background: '#f3e5f5', zIndex: 1 }}>
                     <tr>
                       <th style={{ position: 'sticky', left: 0, zIndex: 2, background: '#f3e5f5', padding: '12px', borderBottom: '2px solid #667eea', textAlign: 'left', fontWeight: 600 }}>Vendedor</th>

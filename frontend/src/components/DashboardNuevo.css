@@ -44,4 +44,29 @@
   .dashboard-nuevo-container {
     padding: 10px 2px 20px 2px;
   }
+  .chart-card {
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .chart-card h6 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  .table-compact td, .table-compact th {
+    padding: 8px 6px !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Ultra-compact mode for very small devices */
+@media (max-width: 400px) {
+  .dashboard-nuevo-container {
+    padding: 6px 2px 14px 2px;
+  }
+  .chart-card {
+    border-radius: 10px;
+  }
 }
