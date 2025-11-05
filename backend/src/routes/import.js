@@ -286,8 +286,7 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
       console.log(`✅ Iniciando importación de ${toImport.length} ventas...`);
       
       try {
-  await client.query('BEGIN');
-
+        // Inserciones independientes por fila (sin transacción global)
         for (let j = 0; j < toImport.length; j++) {
           const item = toImport[j];
           const excelRow = j + 2; // aproximado para referencia
@@ -314,11 +313,8 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
             // Continuar con siguientes filas, no abortar toda la importación
           }
         }
-
-        await client.query('COMMIT');
         console.log(`✅ Importación finalizada: ${importedCount} ventas guardadas, ${toImport.length - importedCount} con observaciones`);
       } catch (error) {
-        await client.query('ROLLBACK');
         console.error('❌ Error al guardar en base de datos:', error);
         // Si hay un error fuera del loop, mantenerlo pero ya acumulamos observaciones
         observations.push({ fila: null, folio: null, campo: 'TRANSACCION', detalle: error.message });
@@ -553,8 +549,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       console.log(`✅ Iniciando importación de ${toImport.length} abonos...`);
       
       try {
-  await client.query('BEGIN');
-
+        // Inserciones independientes por fila (sin transacción global)
         for (let j = 0; j < toImport.length; j++) {
           const item = toImport[j];
           const excelRow = j + 2;
@@ -581,11 +576,8 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
             observations.push({ fila: excelRow, folio: item.folio || null, campo: 'DB', detalle: err.detail || err.message });
           }
         }
-
-        await client.query('COMMIT');
         console.log(`✅ Importación finalizada: ${importedCount} abonos guardados, ${toImport.length - importedCount} con observaciones`);
       } catch (error) {
-        await client.query('ROLLBACK');
         console.error('❌ Error al guardar abonos:', error);
         observations.push({ fila: null, folio: null, campo: 'TRANSACCION', detalle: error.message });
       }

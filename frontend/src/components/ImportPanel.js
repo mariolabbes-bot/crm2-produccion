@@ -89,7 +89,9 @@ const ImportPanel = () => {
       const status = err.status || 0;
       const backendMsg = err.data?.msg;
       const backendDetail = err.data?.error;
-      const msg = backendMsg || (backendDetail ? `Error al procesar archivo: ${backendDetail}` : err.message) || 'Error al procesar el archivo';
+      const msg = backendDetail
+        ? `${backendMsg || 'Error al procesar archivo'}: ${backendDetail}`
+        : (backendMsg || err.message || 'Error al procesar el archivo');
       setError(msg);
       if (status === 401 || status === 403) {
         setTimeout(() => {
