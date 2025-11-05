@@ -147,10 +147,11 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     );
 
     // Procesar filas
-    const toImport = [];
-    const duplicates = [];
-    const missingVendors = new Set();
-    const missingClients = new Set();
+  const toImport = [];
+  const duplicates = [];
+  const missingVendors = new Set();
+  const missingClients = new Set();
+  const observations = [];
 
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
@@ -188,10 +189,16 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
       let vendedorId = null;
       if (vendedorClienteAlias) {
         vendedorId = usersByNormAlias.get(norm(vendedorClienteAlias));
-        if (!vendedorId) missingVendors.add(vendedorClienteAlias);
+        if (!vendedorId) {
+          missingVendors.add(vendedorClienteAlias);
+          observations.push({ fila: excelRow, folio, campo: 'vendedor_id', detalle: `Vendedor no coincide (alias: ${vendedorClienteAlias})` });
+        }
       } else if (vendedorDocNombre) {
         vendedorId = usersByNormName.get(norm(vendedorDocNombre));
-        if (!vendedorId) missingVendors.add(vendedorDocNombre);
+        if (!vendedorId) {
+          missingVendors.add(vendedorDocNombre);
+          observations.push({ fila: excelRow, folio, campo: 'vendedor_id', detalle: `Vendedor no coincide (nombre: ${vendedorDocNombre})` });
+        }
       }
 
       // Buscar cliente_id (no requerido)
@@ -200,6 +207,10 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
         clienteId = clientsByRut.get(norm(identificador));
       } else if (clienteNombre) {
         clienteId = clientsByName.get(norm(clienteNombre));
+      }
+      if (!clienteId && (clienteNombre || identificador)) {
+        missingClients.add(clienteNombre || identificador);
+        observations.push({ fila: excelRow, folio, campo: 'cliente_id', detalle: `Cliente no encontrado (${clienteNombre || identificador})` });
       }
 
       toImport.push({
@@ -226,7 +237,8 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     }
 
     // Generar informe de faltantes
-    let pendingReportPath = null;
+  let pendingReportPath = null;
+  let observationsReportPath = null;
     if (missingVendors.size > 0 || missingClients.size > 0) {
       const reportWB = XLSX.utils.book_new();
       
@@ -258,15 +270,15 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
       XLSX.writeFile(reportWB, pendingReportPath);
     }
 
-    // Si todo está listo, ejecutar la importación
-    const canProceed = missingVendors.size === 0 && missingClients.size === 0;
+  // Flexibilizado: no bloqueamos por faltantes, seguimos con lo importable
+  const canProceed = true;
     let importedCount = 0;
 
     if (canProceed && toImport.length > 0) {
       console.log(`✅ Iniciando importación de ${toImport.length} ventas...`);
       
       try {
-        await client.query('BEGIN');
+  await client.query('BEGIN');
 
         for (let j = 0; j < toImport.length; j++) {
           const item = toImport[j];
@@ -290,19 +302,35 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
           } catch (err) {
             console.error(`❌ Error en fila Excel ${excelRow} (folio ${item.folio || 'N/A'}):`, err);
             // Propagar con contexto de fila
-            const e = new Error(`Fila ${excelRow} (folio ${item.folio || 'N/A'}): ${err.detail || err.message}`);
-            e.original = err;
-            throw e;
+            observations.push({ fila: excelRow, folio: item.folio || null, campo: 'DB', detalle: err.detail || err.message });
+            // Continuar con siguientes filas, no abortar toda la importación
           }
         }
 
         await client.query('COMMIT');
-        console.log(`✅ Importación exitosa: ${importedCount} ventas guardadas`);
+        console.log(`✅ Importación finalizada: ${importedCount} ventas guardadas, ${toImport.length - importedCount} con observaciones`);
       } catch (error) {
         await client.query('ROLLBACK');
         console.error('❌ Error al guardar en base de datos:', error);
-        throw new Error(`Error al guardar datos: ${error.message}`);
+        // Si hay un error fuera del loop, mantenerlo pero ya acumulamos observaciones
+        observations.push({ fila: null, folio: null, campo: 'TRANSACCION', detalle: error.message });
       }
+    }
+
+    // Generar informe de observaciones si existen
+    if (observations.length > 0) {
+      const wbObs = XLSX.utils.book_new();
+      const wsObs = XLSX.utils.json_to_sheet(observations.map(o => ({
+        'Fila Excel': o.fila,
+        'Folio': o.folio,
+        'Campo': o.campo,
+        'Detalle': o.detalle
+      })));
+      XLSX.utils.book_append_sheet(wbObs, wsObs, 'Observaciones');
+      const reportDir = 'uploads/reports';
+      if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
+      observationsReportPath = path.join(reportDir, `observaciones_ventas_${Date.now()}.xlsx`);
+      XLSX.writeFile(wbObs, observationsReportPath);
     }
 
     // Resultado
@@ -316,8 +344,9 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
       missingVendors: Array.from(missingVendors),
       missingClients: Array.from(missingClients),
       pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
+      observationsReportUrl: observationsReportPath ? `/api/import/download-report/${path.basename(observationsReportPath)}` : null,
       canProceed: canProceed,
-      dataImported: canProceed && importedCount > 0
+      dataImported: importedCount > 0
     };
 
     // Limpiar archivo temporal
@@ -330,11 +359,7 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    res.status(500).json({ 
-      success: false, 
-      msg: 'Error al procesar archivo', 
-      error: error.message 
-    });
+    res.status(500).json({ success: false, msg: 'Error al procesar archivo', error: error.message });
   } finally {
     client.release();
   }
@@ -414,10 +439,11 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const existingAbonos = await client.query(`SELECT folio FROM abono WHERE folio IS NOT NULL`);
     const existingFolios = new Set(existingAbonos.rows.map(a => norm(a.folio)));
 
-    const toImport = [];
-    const duplicates = [];
-    const missingVendors = new Set();
-    const missingClients = new Set();
+  const toImport = [];
+  const duplicates = [];
+  const missingVendors = new Set();
+  const missingClients = new Set();
+  const observations = [];
 
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
@@ -454,14 +480,20 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       let vendedorId = null;
       if (vendedorClienteAlias) {
         vendedorId = usersByNormAlias.get(norm(vendedorClienteAlias));
-        if (!vendedorId) missingVendors.add(vendedorClienteAlias);
+        if (!vendedorId) {
+          missingVendors.add(vendedorClienteAlias);
+          observations.push({ fila: excelRow, folio, campo: 'vendedor_id', detalle: `Vendedor no coincide (alias: ${vendedorClienteAlias})` });
+        }
       }
 
       // Buscar cliente
       let clienteId = null;
       if (clienteNombre) {
         clienteId = clientsByName.get(norm(clienteNombre));
-        if (!clienteId) missingClients.add(clienteNombre);
+        if (!clienteId) {
+          missingClients.add(clienteNombre);
+          observations.push({ fila: excelRow, folio, campo: 'cliente_id', detalle: `Cliente no encontrado (${clienteNombre})` });
+        }
       }
 
       toImport.push({
@@ -474,7 +506,8 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     }
 
     // Generar informe de faltantes
-    let pendingReportPath = null;
+  let pendingReportPath = null;
+  let observationsReportPath = null;
     if (missingVendors.size > 0 || missingClients.size > 0) {
       const reportWB = XLSX.utils.book_new();
       
@@ -505,14 +538,14 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     }
 
     // Si todo está listo, ejecutar la importación
-    const canProceed = missingVendors.size === 0 && missingClients.size === 0;
+  const canProceed = true;
     let importedCount = 0;
 
     if (canProceed && toImport.length > 0) {
       console.log(`✅ Iniciando importación de ${toImport.length} abonos...`);
       
       try {
-        await client.query('BEGIN');
+  await client.query('BEGIN');
 
         for (let j = 0; j < toImport.length; j++) {
           const item = toImport[j];
@@ -537,19 +570,32 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
             importedCount++;
           } catch (err) {
             console.error(`❌ Error en fila Excel ${excelRow} (folio ${item.folio || 'N/A'}):`, err);
-            const e = new Error(`Fila ${excelRow} (folio ${item.folio || 'N/A'}): ${err.detail || err.message}`);
-            e.original = err;
-            throw e;
+            observations.push({ fila: excelRow, folio: item.folio || null, campo: 'DB', detalle: err.detail || err.message });
           }
         }
 
         await client.query('COMMIT');
-        console.log(`✅ Importación exitosa: ${importedCount} abonos guardados`);
+        console.log(`✅ Importación finalizada: ${importedCount} abonos guardados, ${toImport.length - importedCount} con observaciones`);
       } catch (error) {
         await client.query('ROLLBACK');
         console.error('❌ Error al guardar abonos:', error);
-        throw new Error(`Error al guardar abonos: ${error.message}`);
+        observations.push({ fila: null, folio: null, campo: 'TRANSACCION', detalle: error.message });
       }
+    }
+
+    if (observations.length > 0) {
+      const wbObs = XLSX.utils.book_new();
+      const wsObs = XLSX.utils.json_to_sheet(observations.map(o => ({
+        'Fila Excel': o.fila,
+        'Folio': o.folio,
+        'Campo': o.campo,
+        'Detalle': o.detalle
+      })));
+      XLSX.utils.book_append_sheet(wbObs, wsObs, 'Observaciones');
+      const reportDir = 'uploads/reports';
+      if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
+      observationsReportPath = path.join(reportDir, `observaciones_abonos_${Date.now()}.xlsx`);
+      XLSX.writeFile(wbObs, observationsReportPath);
     }
 
     const result = {
@@ -562,8 +608,9 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       missingVendors: Array.from(missingVendors),
       missingClients: Array.from(missingClients),
       pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
+      observationsReportUrl: observationsReportPath ? `/api/import/download-report/${path.basename(observationsReportPath)}` : null,
       canProceed: canProceed,
-      dataImported: canProceed && importedCount > 0
+      dataImported: importedCount > 0
     };
 
     fs.unlinkSync(req.file.path);
@@ -574,11 +621,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    res.status(500).json({ 
-      success: false, 
-      msg: 'Error al procesar archivo', 
-      error: error.message 
-    });
+    res.status(500).json({ success: false, msg: 'Error al procesar archivo', error: error.message });
   } finally {
     client.release();
   }
