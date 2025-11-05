@@ -86,12 +86,14 @@ const ImportPanel = () => {
       setSelectedFile(null);
     } catch (err) {
       console.error('Error en upload:', err);
-      setError(err.message || 'Error al procesar el archivo');
-      if (err.message.includes('401') || err.message.includes('403')) {
+      const status = err.status || 0;
+      const msg = err.data?.msg || err.message || 'Error al procesar el archivo';
+      setError(msg);
+      if (status === 401 || status === 403) {
         setTimeout(() => {
           removeToken();
           navigate('/login');
-        }, 2000);
+        }, 1500);
       }
     } finally {
       setLoading(false);

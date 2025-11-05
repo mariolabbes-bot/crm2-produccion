@@ -6,14 +6,24 @@ module.exports = function(roles = []) {
   }
 
   return (req, res, next) => {
-    const token = req.header('Authorization');
+    // Soportar token en Authorization: Bearer <token> o en query ?token=<token>
+    let token = req.header('Authorization');
+    let rawToken = null;
 
-    if (!token) {
+    if (token && token.toLowerCase().startsWith('bearer ')) {
+      rawToken = token.split(' ')[1];
+    }
+
+    if (!rawToken && req.query && req.query.token) {
+      rawToken = req.query.token;
+    }
+
+    if (!rawToken) {
       return res.status(401).json({ msg: 'No token, authorization denied' });
     }
 
     try {
-      const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
+      const decoded = jwt.verify(rawToken, process.env.JWT_SECRET);
       req.user = decoded.user;
 
       if (roles.length && !roles.includes(req.user.rol)) {

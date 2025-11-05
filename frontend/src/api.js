@@ -165,7 +165,10 @@ export const uploadVentasFile = async (file) => {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.msg || 'Error al subir archivo');
+    const err = new Error(errorData.msg || 'Error al subir archivo');
+    err.status = response.status;
+    err.data = errorData;
+    throw err;
   }
 
   return await response.json();
@@ -186,7 +189,10 @@ export const uploadAbonosFile = async (file) => {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.msg || 'Error al subir archivo');
+    const err = new Error(errorData.msg || 'Error al subir archivo');
+    err.status = response.status;
+    err.data = errorData;
+    throw err;
   }
 
   return await response.json();
