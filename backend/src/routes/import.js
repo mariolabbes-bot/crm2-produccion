@@ -21,10 +21,10 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    if (ext === '.xlsx' || ext === '.xls') {
+    if (ext === '.xlsx' || ext === '.xls' || ext === '.xlsm') {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten archivos Excel (.xlsx, .xls)'));
+      cb(new Error('Solo se permiten archivos Excel (.xlsx, .xls, .xlsm)'));
     }
   }
 });
@@ -758,3 +758,19 @@ router.get('/plantilla/abonos', (req, res) => {
 });
 
 module.exports = router;
+
+// Manejador de errores específico para este router (multer y validaciones)
+router.use((err, req, res, next) => {
+  if (!err) return next();
+  console.error('Error en /api/import:', err);
+  // Tamaño excedido
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ success: false, msg: 'Archivo demasiado grande (máx 50MB)' });
+  }
+  // Error de formato de archivo / filtro
+  if (err.message && /Solo se permiten archivos Excel/i.test(err.message)) {
+    return res.status(400).json({ success: false, msg: err.message });
+  }
+  // Otro error genérico
+  return res.status(500).json({ success: false, msg: 'Error al procesar archivo', error: err.message });
+});
