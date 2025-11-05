@@ -332,6 +332,10 @@ const DashboardNuevo = () => {
       // Cargar KPIs del mes actual
       if (kpisMesData && kpisMesData.success && kpisMesData.data) {
         console.log('[KPIs Mes Actual] Datos recibidos:', kpisMesData.data);
+        console.log('[KPIs Mes Actual] monto_ventas_mes:', kpisMesData.data.monto_ventas_mes);
+        console.log('[KPIs Mes Actual] monto_abonos_mes:', kpisMesData.data.monto_abonos_mes);
+        console.log('[KPIs Mes Actual] variacion_vs_anio_anterior_pct:', kpisMesData.data.variacion_vs_anio_anterior_pct);
+        console.log('[KPIs Mes Actual] numero_clientes_con_venta_mes:', kpisMesData.data.numero_clientes_con_venta_mes);
         setKpisMesActual(kpisMesData.data);
       } else {
         console.warn('[KPIs Mes Actual] No se recibieron datos o respuesta inválida:', kpisMesData);
@@ -537,7 +541,11 @@ const DashboardNuevo = () => {
             <Grid item xs={12} sm={6} md={3}>
               <VisionCard 
                 title="Ventas Mes Actual" 
-                value={kpisMesActual ? formatMoney(kpisMesActual.monto_ventas_mes) : '—'} 
+                value={(() => {
+                  const val = kpisMesActual ? formatMoney(kpisMesActual.monto_ventas_mes) : '—';
+                  console.log('[Render] Ventas Mes Actual:', val, 'Raw:', kpisMesActual?.monto_ventas_mes);
+                  return val;
+                })()} 
                 gradient="primary" 
                 sx={{ minWidth: 180, mb: 2 }} 
               />
@@ -545,7 +553,11 @@ const DashboardNuevo = () => {
             <Grid item xs={12} sm={6} md={3}>
               <VisionCard 
                 title="Abonos Mes Actual" 
-                value={kpisMesActual ? formatMoney(kpisMesActual.monto_abonos_mes) : '—'} 
+                value={(() => {
+                  const val = kpisMesActual ? formatMoney(kpisMesActual.monto_abonos_mes) : '—';
+                  console.log('[Render] Abonos Mes Actual:', val, 'Raw:', kpisMesActual?.monto_abonos_mes);
+                  return val;
+                })()} 
                 gradient="success" 
                 sx={{ minWidth: 180, mb: 2 }} 
               />
@@ -553,7 +565,11 @@ const DashboardNuevo = () => {
             <Grid item xs={12} sm={6} md={3}>
               <VisionCard 
                 title="Variación vs Año Anterior" 
-                value={kpisMesActual ? `${kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? '+' : ''}${kpisMesActual.variacion_vs_anio_anterior_pct.toFixed(1)}%` : '—'} 
+                value={(() => {
+                  const val = kpisMesActual ? `${kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? '+' : ''}${kpisMesActual.variacion_vs_anio_anterior_pct.toFixed(1)}%` : '—';
+                  console.log('[Render] Variación:', val, 'Raw:', kpisMesActual?.variacion_vs_anio_anterior_pct);
+                  return val;
+                })()} 
                 gradient={kpisMesActual && kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? "success" : "warning"} 
                 sx={{ minWidth: 180, mb: 2 }} 
               />
@@ -561,7 +577,11 @@ const DashboardNuevo = () => {
             <Grid item xs={12} sm={6} md={3}>
               <VisionCard 
                 title="Clientes con Venta" 
-                value={kpisMesActual ? kpisMesActual.numero_clientes_con_venta_mes.toString() : '—'} 
+                value={(() => {
+                  const val = kpisMesActual ? kpisMesActual.numero_clientes_con_venta_mes.toString() : '—';
+                  console.log('[Render] Clientes con Venta:', val, 'Raw:', kpisMesActual?.numero_clientes_con_venta_mes);
+                  return val;
+                })()} 
                 gradient="info" 
                 sx={{ minWidth: 180, mb: 2 }} 
               />
