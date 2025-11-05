@@ -128,4 +128,164 @@ router.get('/sales-summary', auth(), async (req, res) => {
   }
 });
 
+// @route   GET /api/kpis/mes-actual
+// @desc    Get KPIs for current month: sales, payments, YoY%, client count
+// @access  Private
+router.get('/mes-actual', auth(), async (req, res) => {
+  try {
+    const { salesTable, amountCol, dateCol, clientIdCol } = await getDetectedSales();
+    if (!salesTable || !amountCol || !dateCol || !clientIdCol) {
+      return res.json({
+        success: true,
+        data: {
+          monto_ventas_mes: 0,
+          monto_abonos_mes: 0,
+          variacion_vs_anio_anterior_pct: 0,
+          numero_clientes_con_venta_mes: 0
+        }
+      });
+    }
+
+    const user = req.user;
+    const isManager = user.rol === 'manager';
+
+    // Determinar mes actual y mismo mes año anterior
+    const now = new Date();
+    const mesActual = now.toISOString().slice(0, 7); // YYYY-MM
+    const [year, month] = mesActual.split('-').map(Number);
+    const mesAnioAnterior = new Date(year - 1, month - 1, 1).toISOString().slice(0, 7);
+
+    // Detectar vendedor column
+    let vendedorCol = 'vendedor_id';
+    const vendedorColCheck = await pool.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = $1
+      AND column_name IN ('vendedor_id', 'vendedor_cliente')
+      LIMIT 1
+    `, [salesTable]);
+    if (vendedorColCheck.rows.length > 0) {
+      vendedorCol = vendedorColCheck.rows[0].column_name;
+    }
+
+    // Filtro vendedor
+    let vendedorFilter = '';
+    let params = [];
+    if (!isManager) {
+      if (vendedorCol === 'vendedor_cliente') {
+        const userAlias = await pool.query('SELECT alias FROM usuario WHERE id = $1', [user.id]);
+        if (userAlias.rows.length > 0 && userAlias.rows[0].alias) {
+          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
+          params = [userAlias.rows[0].alias];
+        }
+      } else {
+        vendedorFilter = `AND ${vendedorCol} = $1`;
+        params = [user.id];
+      }
+    }
+
+    // 1. Monto ventas mes actual
+    const queryVentasMes = `
+      SELECT COALESCE(SUM(${amountCol}), 0) AS monto
+      FROM ${salesTable}
+      WHERE TO_CHAR(${dateCol}, 'YYYY-MM') = $${params.length + 1}
+      ${vendedorFilter}
+    `;
+    const ventasMesResult = await pool.query(queryVentasMes, [...params, mesActual]);
+    const montoVentasMes = parseFloat(ventasMesResult.rows[0]?.monto || 0);
+
+    // 2. Monto ventas mismo mes año anterior
+    const queryVentasAnioAnt = `
+      SELECT COALESCE(SUM(${amountCol}), 0) AS monto
+      FROM ${salesTable}
+      WHERE TO_CHAR(${dateCol}, 'YYYY-MM') = $${params.length + 1}
+      ${vendedorFilter}
+    `;
+    const ventasAnioAntResult = await pool.query(queryVentasAnioAnt, [...params, mesAnioAnterior]);
+    const montoVentasAnioAnt = parseFloat(ventasAnioAntResult.rows[0]?.monto || 0);
+
+    // Calcular variación porcentual
+    let variacionPct = 0;
+    if (montoVentasAnioAnt > 0) {
+      variacionPct = ((montoVentasMes - montoVentasAnioAnt) / montoVentasAnioAnt) * 100;
+    } else if (montoVentasMes > 0) {
+      variacionPct = 100; // 100% si había 0 antes y ahora hay algo
+    }
+
+    // 3. Monto abonos mes actual (tabla abono)
+    let montoAbonosMes = 0;
+    const abonoTableCheck = await pool.query(`
+      SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'abono') AS has_abono
+    `);
+    if (abonoTableCheck.rows[0]?.has_abono) {
+      // Detectar columnas en tabla abono
+      const abonoColsQ = await pool.query(`
+        SELECT column_name FROM information_schema.columns WHERE table_name = 'abono'
+      `);
+      const abonoCols = new Set(abonoColsQ.rows.map(r => r.column_name));
+      
+      let abonoAmountCol = null;
+      let abonoDateCol = null;
+      let abonoVendedorCol = null;
+
+      if (abonoCols.has('monto')) abonoAmountCol = 'monto';
+      else if (abonoCols.has('monto_abono')) abonoAmountCol = 'monto_abono';
+      
+      if (abonoCols.has('fecha_abono')) abonoDateCol = 'fecha_abono';
+      else if (abonoCols.has('fecha')) abonoDateCol = 'fecha';
+      
+      if (abonoCols.has('vendedor_id')) abonoVendedorCol = 'vendedor_id';
+      else if (abonoCols.has('vendedor_cliente')) abonoVendedorCol = 'vendedor_cliente';
+
+      if (abonoAmountCol && abonoDateCol) {
+        let abonoVendedorFilter = '';
+        let abonoParams = [];
+        if (!isManager && abonoVendedorCol) {
+          if (abonoVendedorCol === 'vendedor_cliente') {
+            const userAlias = await pool.query('SELECT alias FROM usuario WHERE id = $1', [user.id]);
+            if (userAlias.rows.length > 0 && userAlias.rows[0].alias) {
+              abonoVendedorFilter = `AND UPPER(${abonoVendedorCol}) = UPPER($1)`;
+              abonoParams = [userAlias.rows[0].alias];
+            }
+          } else {
+            abonoVendedorFilter = `AND ${abonoVendedorCol} = $1`;
+            abonoParams = [user.id];
+          }
+        }
+
+        const queryAbonosMes = `
+          SELECT COALESCE(SUM(${abonoAmountCol}), 0) AS monto
+          FROM abono
+          WHERE TO_CHAR(${abonoDateCol}, 'YYYY-MM') = $${abonoParams.length + 1}
+          ${abonoVendedorFilter}
+        `;
+        const abonosResult = await pool.query(queryAbonosMes, [...abonoParams, mesActual]);
+        montoAbonosMes = parseFloat(abonosResult.rows[0]?.monto || 0);
+      }
+    }
+
+    // 4. Número de clientes con venta en el mes actual
+    const queryClientesConVenta = `
+      SELECT COUNT(DISTINCT ${clientIdCol}) AS num_clientes
+      FROM ${salesTable}
+      WHERE TO_CHAR(${dateCol}, 'YYYY-MM') = $${params.length + 1}
+      ${vendedorFilter}
+    `;
+    const clientesResult = await pool.query(queryClientesConVenta, [...params, mesActual]);
+    const numClientesConVenta = parseInt(clientesResult.rows[0]?.num_clientes || 0);
+
+    res.json({
+      success: true,
+      data: {
+        monto_ventas_mes: montoVentasMes,
+        monto_abonos_mes: montoAbonosMes,
+        variacion_vs_anio_anterior_pct: variacionPct,
+        numero_clientes_con_venta_mes: numClientesConVenta
+      }
+    });
+  } catch (err) {
+    console.error('Error en /api/kpis/mes-actual:', err.message);
+    res.status(500).json({ success: false, error: 'Server Error', message: err.message });
+  }
+});
+
 module.exports = router;

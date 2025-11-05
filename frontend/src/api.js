@@ -69,6 +69,7 @@ export const getOverdueActivities = () => apiFetch(`${API_URL}/activities/overdu
 // KPIS
 export const getTopClients = () => apiFetch(`${API_URL}/kpis/top-clients`);
 export const getSalesSummary = () => apiFetch(`${API_URL}/kpis/sales-summary`);
+export const getKPIsMesActual = () => apiFetch(`${API_URL}/kpis/mes-actual`);
 
 // ACTIVITY TYPES
 export const getActivityTypes = () => apiFetch(`${API_URL}/activity-types`);

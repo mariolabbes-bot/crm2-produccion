@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select, useTheme, useMediaQuery } from '@mui/material';
 import VisionCard from './ui/VisionCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual } from '../api';
+import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual } from '../api';
 import { removeToken, getUser } from '../utils/auth';
 import './DashboardNuevo.css';
 import Papa from 'papaparse';
@@ -66,6 +66,7 @@ const DashboardNuevo = () => {
   const [comparativo, setComparativo] = useState(null);
   const [vendedores, setVendedores] = useState([]);
   const [comparativasMensuales, setComparativasMensuales] = useState(null);
+  const [kpisMesActual, setKpisMesActual] = useState(null); // KPIs personalizados del mes actual
   // Datos pivoteados para la tabla inferior
   const [pivotMonths, setPivotMonths] = useState([]); // ['YYYY-MM', ...]
   const [pivotRows, setPivotRows] = useState([]);     // [{ vendedor_id, vendedor_nombre, 'YYYY-MM': {ventas, abonos}, totalVentas, totalAbonos }, ...]
@@ -265,12 +266,13 @@ const DashboardNuevo = () => {
       if (!isManager && user?.id) {
         params.vendedor_id = user.id;
       }
-      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData] = await Promise.all([
+      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData] = await Promise.all([
         getAbonosEstadisticas(params).catch(e => ({ success: false, error: e.message, status: e.status })),
         getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status })),
         getVendedores().catch(e => []),
         getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status })),
-        getComparativasMensuales().catch(e => ({ success: false, error: e.message, status: e.status }))
+        getComparativasMensuales().catch(e => ({ success: false, error: e.message, status: e.status })),
+        getKPIsMesActual().catch(e => ({ success: false, error: e.message, status: e.status }))
       ]);
 
       // Validar estructura y mostrar errores específicos
@@ -307,6 +309,13 @@ const DashboardNuevo = () => {
         setComparativasMensuales(comparativasData.data);
       } else {
         setComparativasMensuales(null);
+      }
+
+      // Cargar KPIs del mes actual
+      if (kpisMesData && kpisMesData.success && kpisMesData.data) {
+        setKpisMesActual(kpisMesData.data);
+      } else {
+        setKpisMesActual(null);
       }
 
       // Construir pivote: filas = vendedores, columnas = meses en rango, celdas = total_ventas
@@ -503,21 +512,39 @@ const DashboardNuevo = () => {
         </Box>
       ) : (
   <>
-          {/* Métricas principales */}
+          {/* Métricas principales - KPIs del mes actual */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={6} md={3}>
-              <VisionCard title="Total Ventas" value={formatMoney(comparativo?.resumen?.total_ventas)} gradient="primary" sx={{ minWidth: 180, mb: 2 }} />
+              <VisionCard 
+                title="Ventas Mes Actual" 
+                value={kpisMesActual ? formatMoney(kpisMesActual.monto_ventas_mes) : '—'} 
+                gradient="primary" 
+                sx={{ minWidth: 180, mb: 2 }} 
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <VisionCard title="Total Abonos" value={formatMoney(comparativo?.resumen?.total_abonos)} gradient="success" sx={{ minWidth: 180, mb: 2 }} />
+              <VisionCard 
+                title="Abonos Mes Actual" 
+                value={kpisMesActual ? formatMoney(kpisMesActual.monto_abonos_mes) : '—'} 
+                gradient="success" 
+                sx={{ minWidth: 180, mb: 2 }} 
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <VisionCard title="% Cobrado" value={comparativo?.resumen?.porcentaje_cobrado_total + '%'} gradient="success" sx={{ minWidth: 180, mb: 2 }}>
-                <LinearProgress variant="determinate" value={parseFloat(comparativo?.resumen?.porcentaje_cobrado_total) || 0} sx={{ height: 8, borderRadius: 4, mt: 1, backgroundColor: '#E5E9F2' }} />
-              </VisionCard>
+              <VisionCard 
+                title="Variación vs Año Anterior" 
+                value={kpisMesActual ? `${kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? '+' : ''}${kpisMesActual.variacion_vs_anio_anterior_pct.toFixed(1)}%` : '—'} 
+                gradient={kpisMesActual && kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? "success" : "warning"} 
+                sx={{ minWidth: 180, mb: 2 }} 
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <VisionCard title="Saldo Pendiente" value={formatMoney(comparativo?.resumen?.saldo_pendiente)} gradient="warning" sx={{ minWidth: 180, mb: 2 }} />
+              <VisionCard 
+                title="Clientes con Venta" 
+                value={kpisMesActual ? kpisMesActual.numero_clientes_con_venta_mes.toString() : '—'} 
+                gradient="info" 
+                sx={{ minWidth: 180, mb: 2 }} 
+              />
             </Grid>
           </Grid>
 
