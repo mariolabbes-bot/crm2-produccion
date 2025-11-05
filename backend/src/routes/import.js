@@ -7,9 +7,17 @@ const auth = require('../middleware/auth');
 const path = require('path');
 const fs = require('fs');
 
+// Asegurar directorios de trabajo para uploads temporales y reportes
+const TEMP_DIR = 'uploads/temp';
+try {
+  if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
+} catch (e) {
+  console.error('No se pudo crear el directorio de temporales:', TEMP_DIR, e);
+}
+
 // Configuración de multer para uploads temporales
 const upload = multer({
-  dest: 'uploads/temp/',
+  dest: TEMP_DIR + '/',
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
