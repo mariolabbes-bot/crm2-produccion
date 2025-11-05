@@ -250,17 +250,19 @@ const ImportPanel = () => {
               {result && (
                 <Box>
                   {/* Resumen */}
-                  <Card sx={{ mb: 2, bgcolor: result.canProceed ? '#e8f5e9' : '#fff3e0' }}>
+                    <Card sx={{ mb: 2, bgcolor: result.dataImported ? '#e8f5e9' : result.canProceed ? '#e8f5e9' : '#fff3e0' }}>
                     <CardContent>
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        {result.canProceed ? (
+                          {result.dataImported ? (
                           <CheckIcon sx={{ color: '#4caf50', fontSize: 40, mr: 2 }} />
+                          ) : result.canProceed ? (
+                            <CheckIcon sx={{ color: '#4caf50', fontSize: 40, mr: 2 }} />
                         ) : (
                           <WarningIcon sx={{ color: '#ff9800', fontSize: 40, mr: 2 }} />
                         )}
                         <Box>
                           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                            {result.canProceed ? 'Listo para importar' : 'Atención: Hay pendientes'}
+                              {result.dataImported ? '¡Importación Exitosa!' : result.canProceed ? 'Listo para importar' : 'Atención: Hay pendientes'}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             {result.totalRows} filas procesadas
@@ -268,14 +270,38 @@ const ImportPanel = () => {
                         </Box>
                       </Box>
 
+                        {result.dataImported && (
+                          <Alert severity="success" sx={{ mb: 2 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              ✅ Se han guardado {result.imported} registro{result.imported !== 1 ? 's' : ''} en la base de datos
+                            </Typography>
+                            <Typography variant="caption">
+                              Los datos ya están disponibles en el sistema
+                            </Typography>
+                          </Alert>
+                        )}
+
                       <Grid container spacing={2}>
                         <Grid item xs={6}>
-                          <Typography variant="caption" color="textSecondary">
-                            Para importar
-                          </Typography>
-                          <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
-                            {result.toImport}
-                          </Typography>
+                            {result.dataImported ? (
+                              <>
+                                <Typography variant="caption" color="textSecondary">
+                                  Importados
+                                </Typography>
+                                <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
+                                  {result.imported}
+                                </Typography>
+                              </>
+                            ) : (
+                              <>
+                                <Typography variant="caption" color="textSecondary">
+                                  Para importar
+                                </Typography>
+                                <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
+                                  {result.toImport}
+                                </Typography>
+                              </>
+                            )}
                         </Grid>
                         <Grid item xs={6}>
                           <Typography variant="caption" color="textSecondary">

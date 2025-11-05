@@ -205,18 +205,48 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
       XLSX.writeFile(reportWB, pendingReportPath);
     }
 
-    // Resultado
-    const result = {
-      success: true,
-      totalRows: data.length,
-      toImport: toImport.length,
-      duplicates: duplicates.length,
-      duplicatesList: duplicates.slice(0, 10), // Primeros 10
-      missingVendors: Array.from(missingVendors),
-      missingClients: Array.from(missingClients),
-      pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
-      canProceed: missingVendors.size === 0 && missingClients.size === 0
-    };
+      // Si todo está listo, ejecutar la importación
+      const canProceed = missingVendors.size === 0 && missingClients.size === 0;
+      let importedCount = 0;
+
+      if (canProceed && toImport.length > 0) {
+        console.log(`✅ Iniciando importación de ${toImport.length} ventas...`);
+      
+        try {
+          await client.query('BEGIN');
+
+          for (const item of toImport) {
+            await client.query(
+              `INSERT INTO sales (folio, tipo_documento, fecha_emision, cliente_id, vendedor_id, valor_total)
+               VALUES ($1, $2, $3, $4, $5, $6)`,
+              [item.folio, item.tipoDoc, item.fecha, item.clienteId, item.vendedorId, item.total]
+            );
+            importedCount++;
+          }
+
+          await client.query('COMMIT');
+          console.log(`✅ Importación exitosa: ${importedCount} ventas guardadas`);
+        } catch (error) {
+          await client.query('ROLLBACK');
+          console.error('❌ Error al guardar en base de datos:', error);
+          throw new Error(`Error al guardar datos: ${error.message}`);
+        }
+      }
+
+      // Resultado
+      const result = {
+        success: true,
+        totalRows: data.length,
+        toImport: toImport.length,
+        imported: importedCount,
+        duplicates: duplicates.length,
+        duplicatesList: duplicates.slice(0, 10), // Primeros 10
+        missingVendors: Array.from(missingVendors),
+        missingClients: Array.from(missingClients),
+        pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
+        canProceed: canProceed,
+        dataImported: canProceed && importedCount > 0
+      };
 
     // Limpiar archivo temporal
     fs.unlinkSync(req.file.path);
@@ -369,17 +399,79 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       XLSX.writeFile(reportWB, pendingReportPath);
     }
 
-    const result = {
-      success: true,
-      totalRows: data.length,
-      toImport: toImport.length,
-      duplicates: duplicates.length,
-      duplicatesList: duplicates.slice(0, 10),
-      missingVendors: Array.from(missingVendors),
-      missingClients: Array.from(missingClients),
-      pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
-      canProceed: missingVendors.size === 0 && missingClients.size === 0
-    };
+      // Si todo está listo, ejecutar la importación
+      const canProceed = missingVendors.size === 0 && missingClients.size === 0;
+      let importedCount = 0;
+
+      if (canProceed && toImport.length > 0) {
+        console.log(`✅ Iniciando importación de ${toImport.length} abonos...`);
+      
+        try {
+          await client.query('BEGIN');
+
+          // Detectar columnas de la tabla de abonos
+          const columnsRes = await client.query(`
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_schema = 'public' AND table_name = $1
+          `, [abonosTable]);
+          const columns = columnsRes.rows.map(r => r.column_name);
+
+          for (const item of toImport) {
+            // Construir query dinámico según columnas disponibles
+            const values = [item.folio, item.fecha, item.monto];
+            let sql = `INSERT INTO ${abonosTable} (folio, fecha_abono, monto`;
+            let placeholders = '$1, $2, $3';
+            let paramIndex = 4;
+
+            if (columns.includes('cliente_id') && item.clienteId) {
+              sql += ', cliente_id';
+              placeholders += `, $${paramIndex}`;
+              values.push(item.clienteId);
+              paramIndex++;
+            }
+
+            if (columns.includes('vendedor_id') && item.vendedorId) {
+              sql += ', vendedor_id';
+              placeholders += `, $${paramIndex}`;
+              values.push(item.vendedorId);
+              paramIndex++;
+            }
+
+            if (columns.includes('tipo_pago') && item.tipoPago) {
+              sql += ', tipo_pago';
+              placeholders += `, $${paramIndex}`;
+              values.push(item.tipoPago);
+              paramIndex++;
+            }
+
+            sql += `) VALUES (${placeholders})`;
+
+            await client.query(sql, values);
+            importedCount++;
+          }
+
+          await client.query('COMMIT');
+          console.log(`✅ Importación exitosa: ${importedCount} abonos guardados`);
+        } catch (error) {
+          await client.query('ROLLBACK');
+          console.error('❌ Error al guardar abonos en base de datos:', error);
+          throw new Error(`Error al guardar abonos: ${error.message}`);
+        }
+      }
+
+      const result = {
+        success: true,
+        totalRows: data.length,
+        toImport: toImport.length,
+        imported: importedCount,
+        duplicates: duplicates.length,
+        duplicatesList: duplicates.slice(0, 10),
+        missingVendors: Array.from(missingVendors),
+        missingClients: Array.from(missingClients),
+        pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
+        canProceed: canProceed,
+        dataImported: canProceed && importedCount > 0
+      };
 
     fs.unlinkSync(req.file.path);
     res.json(result);
