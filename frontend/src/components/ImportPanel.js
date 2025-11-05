@@ -55,12 +55,12 @@ const ImportPanel = () => {
   const handleDrop = (event) => {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
-    if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+    if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.xlsm'))) {
       setSelectedFile(file);
       setResult(null);
       setError(null);
     } else {
-      setError('Solo se permiten archivos Excel (.xlsx, .xls)');
+      setError('Solo se permiten archivos Excel (.xlsx, .xls, .xlsm)');
     }
   };
 
@@ -87,7 +87,9 @@ const ImportPanel = () => {
     } catch (err) {
       console.error('Error en upload:', err);
       const status = err.status || 0;
-      const msg = err.data?.msg || err.message || 'Error al procesar el archivo';
+      const backendMsg = err.data?.msg;
+      const backendDetail = err.data?.error;
+      const msg = backendMsg || (backendDetail ? `Error al procesar archivo: ${backendDetail}` : err.message) || 'Error al procesar el archivo';
       setError(msg);
       if (status === 401 || status === 403) {
         setTimeout(() => {
@@ -111,6 +113,13 @@ const ImportPanel = () => {
   const handleDownloadInforme = () => {
     if (result && result.pendingReportUrl) {
       const filename = result.pendingReportUrl.split('/').pop();
+      downloadInformePendientes(filename);
+    }
+  };
+
+  const handleDownloadObservaciones = () => {
+    if (result && result.observationsReportUrl) {
+      const filename = result.observationsReportUrl.split('/').pop();
       downloadInformePendientes(filename);
     }
   };
@@ -194,7 +203,7 @@ const ImportPanel = () => {
                 <input
                   id="file-input"
                   type="file"
-                  accept=".xlsx,.xls"
+                  accept=".xlsx,.xls,.xlsm"
                   style={{ display: 'none' }}
                   onChange={handleFileSelect}
                 />
@@ -206,7 +215,7 @@ const ImportPanel = () => {
                   o haz clic para seleccionar
                 </Typography>
                 <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                  Archivos permitidos: .xlsx, .xls (máx. 50MB)
+                  Archivos permitidos: .xlsx, .xls, .xlsm (máx. 50MB)
                 </Typography>
               </Box>
 
@@ -380,16 +389,16 @@ const ImportPanel = () => {
                           </Box>
                         )}
 
-                        {result.pendingReportUrl && (
+                        {(result.pendingReportUrl || result.observationsReportUrl) && (
                           <Button
                             startIcon={<DownloadIcon />}
                             variant="contained"
                             color="warning"
                             fullWidth
                             sx={{ mt: 2 }}
-                            onClick={handleDownloadInforme}
+                            onClick={result.pendingReportUrl ? handleDownloadInforme : handleDownloadObservaciones}
                           >
-                            Descargar Informe de Pendientes
+                            {result.pendingReportUrl ? 'Descargar Informe de Pendientes' : 'Descargar Informe de Observaciones'}
                           </Button>
                         )}
                       </CardContent>
