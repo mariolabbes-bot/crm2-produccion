@@ -267,12 +267,30 @@ const DashboardNuevo = () => {
         params.vendedor_id = user.id;
       }
       const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData] = await Promise.all([
-        getAbonosEstadisticas(params).catch(e => ({ success: false, error: e.message, status: e.status })),
-        getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status })),
-        getVendedores().catch(e => []),
-        getAbonosComparativo(params).catch(e => ({ success: false, error: e.message, status: e.status })),
-        getComparativasMensuales().catch(e => ({ success: false, error: e.message, status: e.status })),
-        getKPIsMesActual().catch(e => ({ success: false, error: e.message, status: e.status }))
+        getAbonosEstadisticas(params).catch(e => {
+          console.error('[loadData] Error en getAbonosEstadisticas:', e);
+          return { success: false, error: e.message, status: e.status };
+        }),
+        getAbonosComparativo(params).catch(e => {
+          console.error('[loadData] Error en getAbonosComparativo:', e);
+          return { success: false, error: e.message, status: e.status };
+        }),
+        getVendedores().catch(e => {
+          console.error('[loadData] Error en getVendedores:', e);
+          return [];
+        }),
+        getAbonosComparativo(params).catch(e => {
+          console.error('[loadData] Error en getAbonosComparativo (2):', e);
+          return { success: false, error: e.message, status: e.status };
+        }),
+        getComparativasMensuales().catch(e => {
+          console.error('[loadData] Error en getComparativasMensuales:', e);
+          return { success: false, error: e.message, status: e.status };
+        }),
+        getKPIsMesActual().catch(e => {
+          console.error('[loadData] Error en getKPIsMesActual:', e);
+          return { success: false, error: e.message, status: e.status };
+        })
       ]);
 
       // Validar estructura y mostrar errores específicos
@@ -313,8 +331,10 @@ const DashboardNuevo = () => {
 
       // Cargar KPIs del mes actual
       if (kpisMesData && kpisMesData.success && kpisMesData.data) {
+        console.log('[KPIs Mes Actual] Datos recibidos:', kpisMesData.data);
         setKpisMesActual(kpisMesData.data);
       } else {
+        console.warn('[KPIs Mes Actual] No se recibieron datos o respuesta inválida:', kpisMesData);
         setKpisMesActual(null);
       }
 
