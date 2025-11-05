@@ -34,6 +34,24 @@ function generarVentas() {
   console.log('Archivo generado:', outPath);
 }
 
+function generarVentasMin() {
+  const data = [
+    {
+      'Tipo documento': 'Factura',
+      'Folio': 'MIN-VENTA-001',
+      'Fecha': '2025-11-05'
+    }
+  ];
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Ventas');
+  const outDir = path.join(__dirname, 'samples');
+  fs.mkdirSync(outDir, { recursive: true });
+  const outPath = path.join(outDir, 'ventas_min.xlsx');
+  XLSX.writeFile(wb, outPath);
+  console.log('Archivo generado:', outPath);
+}
+
 function generarAbonos() {
   const data = [
     {
@@ -66,9 +84,29 @@ function generarAbonos() {
   console.log('Archivo generado:', outPath);
 }
 
+function generarAbonosMin() {
+  const data = [
+    {
+      'Folio': 'MIN-ABONO-001',
+      'Fecha': '2025-11-05',
+      'Monto': 10000
+    }
+  ];
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Abonos');
+  const outDir = path.join(__dirname, 'samples');
+  fs.mkdirSync(outDir, { recursive: true });
+  const outPath = path.join(outDir, 'abonos_min.xlsx');
+  XLSX.writeFile(wb, outPath);
+  console.log('Archivo generado:', outPath);
+}
+
 if (require.main === module) {
   generarVentas();
   generarAbonos();
+  generarVentasMin();
+  generarAbonosMin();
 }
 
-module.exports = { generarVentas, generarAbonos };
+module.exports = { generarVentas, generarAbonos, generarVentasMin, generarAbonosMin };
