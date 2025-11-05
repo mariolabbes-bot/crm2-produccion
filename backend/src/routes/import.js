@@ -83,9 +83,14 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     const data = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
     console.log(`📊 Total filas en Excel: ${data.length}`);
+    if (!Array.isArray(data) || data.length === 0) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ success: false, msg: 'El archivo Excel no contiene filas para procesar' });
+    }
 
     // Detectar columnas
     const headers = Object.keys(data[0] || {});
+    console.log('🔎 Encabezados detectados (ventas):', headers);
     const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
     
     // Columnas REQUERIDAS
@@ -110,7 +115,17 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     const colValorTotal = findCol([/^Valor.*total$/i, /^Total$/i]);
 
     if (!colFolio || !colTipoDoc || !colFecha) {
-      throw new Error('Faltan columnas requeridas: Folio, Tipo documento, Fecha');
+      const faltantes = [
+        !colFolio ? 'Folio' : null,
+        !colTipoDoc ? 'Tipo documento' : null,
+        !colFecha ? 'Fecha' : null
+      ].filter(Boolean);
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        success: false,
+        msg: `Faltan columnas requeridas: ${faltantes.join(', ')}`,
+        detalles: { encabezadosDetectados: headers }
+      });
     }
 
     // Cargar usuarios existentes
@@ -137,7 +152,9 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     const missingVendors = new Set();
     const missingClients = new Set();
 
-    for (const row of data) {
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const excelRow = i + 2; // considerando fila de encabezados
       const folio = row[colFolio] ? String(row[colFolio]).trim() : null;
       const tipoDoc = row[colTipoDoc] ? String(row[colTipoDoc]).trim() : null;
       const fecha = parseExcelDate(row[colFecha]);
@@ -251,22 +268,32 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
       try {
         await client.query('BEGIN');
 
-        for (const item of toImport) {
-          await client.query(
+        for (let j = 0; j < toImport.length; j++) {
+          const item = toImport[j];
+          const excelRow = j + 2; // aproximado para referencia
+          try {
+            await client.query(
             `INSERT INTO venta (
               sucursal, tipo_documento, folio, fecha_emision, identificador,
               cliente, vendedor_cliente, vendedor_documento,
               estado_sistema, estado_comercial, estado_sii, indice,
               sku, descripcion, cantidad, precio, valor_total, vendedor_id
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
-            [
-              item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador,
-              item.clienteNombre, item.vendedorClienteAlias, item.vendedorDocNombre,
-              item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice,
-              item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, item.vendedorId
-            ]
-          );
-          importedCount++;
+              [
+                item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador,
+                item.clienteNombre, item.vendedorClienteAlias, item.vendedorDocNombre,
+                item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice,
+                item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, item.vendedorId
+              ]
+            );
+            importedCount++;
+          } catch (err) {
+            console.error(`❌ Error en fila Excel ${excelRow} (folio ${item.folio || 'N/A'}):`, err);
+            // Propagar con contexto de fila
+            const e = new Error(`Fila ${excelRow} (folio ${item.folio || 'N/A'}): ${err.detail || err.message}`);
+            e.original = err;
+            throw e;
+          }
         }
 
         await client.query('COMMIT');
@@ -330,9 +357,14 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const data = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
     console.log(`📊 Total filas: ${data.length}`);
+    if (!Array.isArray(data) || data.length === 0) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ success: false, msg: 'El archivo Excel no contiene filas para procesar' });
+    }
 
     // Detectar columnas
     const headers = Object.keys(data[0] || {});
+    console.log('🔎 Encabezados detectados (abonos):', headers);
     const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
     
     // Columnas REQUERIDAS
@@ -357,7 +389,17 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const colMontoNeto = findCol([/^Monto.*neto$/i]);
 
     if (!colFolio || !colFecha || !colMonto) {
-      throw new Error('Faltan columnas requeridas: Folio, Fecha, Monto');
+      const faltantes = [
+        !colFolio ? 'Folio' : null,
+        !colFecha ? 'Fecha' : null,
+        !colMonto ? 'Monto' : null
+      ].filter(Boolean);
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        success: false,
+        msg: `Faltan columnas requeridas: ${faltantes.join(', ')}`,
+        detalles: { encabezadosDetectados: headers }
+      });
     }
 
     // Cargar usuarios
@@ -377,7 +419,9 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const missingVendors = new Set();
     const missingClients = new Set();
 
-    for (const row of data) {
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const excelRow = i + 2;
       const folio = row[colFolio] ? String(row[colFolio]).trim() : null;
       const fecha = parseExcelDate(row[colFecha]);
       const monto = colMonto ? parseNumeric(row[colMonto]) : null;
@@ -470,8 +514,11 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       try {
         await client.query('BEGIN');
 
-        for (const item of toImport) {
-          await client.query(
+        for (let j = 0; j < toImport.length; j++) {
+          const item = toImport[j];
+          const excelRow = j + 2;
+          try {
+            await client.query(
             `INSERT INTO abono (
               sucursal, folio, fecha, identificador, cliente,
               vendedor_cliente, caja_operacion, usuario_ingreso,
@@ -479,15 +526,21 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
               estado_abono, identificador_abono, fecha_vencimiento,
               monto, monto_neto, vendedor_id
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
-            [
-              item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
-              item.vendedorClienteAlias, item.cajaOperacion, item.usuarioIngreso,
-              item.montoTotal, item.saldoFavor, item.saldoFavorTotal, item.tipoPago,
-              item.estadoAbono, item.identificadorAbono, item.fechaVencimiento,
-              item.monto, item.montoNeto, item.vendedorId
-            ]
-          );
-          importedCount++;
+              [
+                item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
+                item.vendedorClienteAlias, item.cajaOperacion, item.usuarioIngreso,
+                item.montoTotal, item.saldoFavor, item.saldoFavorTotal, item.tipoPago,
+                item.estadoAbono, item.identificadorAbono, item.fechaVencimiento,
+                item.monto, item.montoNeto, item.vendedorId
+              ]
+            );
+            importedCount++;
+          } catch (err) {
+            console.error(`❌ Error en fila Excel ${excelRow} (folio ${item.folio || 'N/A'}):`, err);
+            const e = new Error(`Fila ${excelRow} (folio ${item.folio || 'N/A'}): ${err.detail || err.message}`);
+            e.original = err;
+            throw e;
+          }
         }
 
         await client.query('COMMIT');
