@@ -193,32 +193,30 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
       const precio = colPrecio ? parseNumeric(row[colPrecio]) : null;
       const valorTotal = colValorTotal ? parseNumeric(row[colValorTotal]) : null;
 
-      // Buscar vendedor_id
-      let vendedorId = null;
+      // Buscar vendedor por alias (no por ID, la tabla usa alias directamente)
+      let vendedorAlias = null;
       if (vendedorClienteAlias) {
-        vendedorId = usersByNormAlias.get(norm(vendedorClienteAlias));
-        if (!vendedorId) {
+        // Verificar si existe el alias
+        const existe = usersByNormAlias.has(norm(vendedorClienteAlias));
+        if (existe) {
+          vendedorAlias = vendedorClienteAlias; // Usamos el alias tal cual
+        } else {
           missingVendors.add(vendedorClienteAlias);
-          observations.push({ fila: excelRow, folio, campo: 'vendedor_id', detalle: `Vendedor no coincide (alias: ${vendedorClienteAlias})` });
-        }
-      } else if (vendedorDocNombre) {
-        vendedorId = usersByNormName.get(norm(vendedorDocNombre));
-        if (!vendedorId) {
-          missingVendors.add(vendedorDocNombre);
-          observations.push({ fila: excelRow, folio, campo: 'vendedor_id', detalle: `Vendedor no coincide (nombre: ${vendedorDocNombre})` });
+          observations.push({ fila: excelRow, folio, campo: 'vendedor_cliente', detalle: `Vendedor no encontrado (alias: ${vendedorClienteAlias})` });
         }
       }
 
-      // Buscar cliente_id (no requerido)
-      let clienteId = null;
+      // Buscar cliente por RUT (no por ID, la tabla usa rut directamente)
+      let clienteRut = null;
       if (identificador && /^\d{7,8}-[\dkK]$/.test(identificador)) {
-        clienteId = clientsByRut.get(norm(identificador));
-      } else if (clienteNombre) {
-        clienteId = clientsByName.get(norm(clienteNombre));
+        const existe = clientsByRut.has(norm(identificador));
+        if (existe) {
+          clienteRut = identificador; // Usamos el RUT tal cual
+        }
       }
-      if (!clienteId && (clienteNombre || identificador)) {
+      if (!clienteRut && (clienteNombre || identificador)) {
         missingClients.add(clienteNombre || identificador);
-        observations.push({ fila: excelRow, folio, campo: 'cliente_id', detalle: `Cliente no encontrado (${clienteNombre || identificador})` });
+        observations.push({ fila: excelRow, folio, campo: 'identificador', detalle: `Cliente no encontrado (${clienteNombre || identificador})` });
       }
 
       toImport.push({
@@ -226,9 +224,9 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
         tipoDoc,
         folio,
         fecha,
-        identificador,
+        identificador: clienteRut, // RUT del cliente (FK a cliente.rut)
         clienteNombre,
-        vendedorClienteAlias,
+        vendedorClienteAlias: vendedorAlias, // Alias del vendedor (FK a usuario.alias)
         vendedorDocNombre,
         estadoSistema,
         estadoComercial,
@@ -238,9 +236,7 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
         descripcion,
         cantidad,
         precio,
-        valorTotal,
-        vendedorId,
-        clienteId
+        valorTotal
       });
     }
 
@@ -296,13 +292,13 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
               sucursal, tipo_documento, folio, fecha_emision, identificador,
               cliente, vendedor_cliente, vendedor_documento,
               estado_sistema, estado_comercial, estado_sii, indice,
-              sku, descripcion, cantidad, precio, valor_total, vendedor_id
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+              sku, descripcion, cantidad, precio, valor_total
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
               [
                 item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador,
                 item.clienteNombre, item.vendedorClienteAlias, item.vendedorDocNombre,
                 item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice,
-                item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, item.vendedorId
+                item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal
               ]
             );
             importedCount++;
@@ -480,32 +476,37 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
       const montoNeto = colMontoNeto ? parseNumeric(row[colMontoNeto]) : null;
 
-      // Buscar vendedor
-      let vendedorId = null;
+      // Buscar vendedor por alias
+      let vendedorAlias = null;
       if (vendedorClienteAlias) {
-        vendedorId = usersByNormAlias.get(norm(vendedorClienteAlias));
-        if (!vendedorId) {
+        const existe = usersByNormAlias.has(norm(vendedorClienteAlias));
+        if (existe) {
+          vendedorAlias = vendedorClienteAlias;
+        } else {
           missingVendors.add(vendedorClienteAlias);
-          observations.push({ fila: excelRow, folio, campo: 'vendedor_id', detalle: `Vendedor no coincide (alias: ${vendedorClienteAlias})` });
+          observations.push({ fila: excelRow, folio, campo: 'vendedor_cliente', detalle: `Vendedor no encontrado (alias: ${vendedorClienteAlias})` });
         }
       }
 
-      // Buscar cliente
-      let clienteId = null;
-      if (clienteNombre) {
-        clienteId = clientsByName.get(norm(clienteNombre));
-        if (!clienteId) {
-          missingClients.add(clienteNombre);
-          observations.push({ fila: excelRow, folio, campo: 'cliente_id', detalle: `Cliente no encontrado (${clienteNombre})` });
+      // Buscar cliente por RUT
+      let clienteRut = null;
+      if (identificador && /^\d{7,8}-[\dkK]$/.test(identificador)) {
+        const existe = clientsByRut.has(norm(identificador));
+        if (existe) {
+          clienteRut = identificador;
         }
+      }
+      if (!clienteRut && clienteNombre) {
+        missingClients.add(clienteNombre);
+        observations.push({ fila: excelRow, folio, campo: 'identificador', detalle: `Cliente no encontrado (${clienteNombre})` });
       }
 
       toImport.push({
-        sucursal, folio, fecha, identificador, clienteNombre,
-        vendedorClienteAlias, cajaOperacion, usuarioIngreso,
+        sucursal, folio, fecha, identificador: clienteRut, clienteNombre,
+        vendedorClienteAlias: vendedorAlias, cajaOperacion, usuarioIngreso,
         montoTotal, saldoFavor, saldoFavorTotal, tipoPago,
         estadoAbono, identificadorAbono, fechaVencimiento,
-        monto, montoNeto, vendedorId, clienteId
+        monto, montoNeto
       });
     }
 
@@ -560,14 +561,14 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
               vendedor_cliente, caja_operacion, usuario_ingreso,
               monto_total, saldo_a_favor, saldo_a_favor_total, tipo_pago,
               estado_abono, identificador_abono, fecha_vencimiento,
-              monto, monto_neto, vendedor_id
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+              monto, monto_neto
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
               [
                 item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
                 item.vendedorClienteAlias, item.cajaOperacion, item.usuarioIngreso,
                 item.montoTotal, item.saldoFavor, item.saldoFavorTotal, item.tipoPago,
                 item.estadoAbono, item.identificadorAbono, item.fechaVencimiento,
-                item.monto, item.montoNeto, item.vendedorId
+                item.monto, item.montoNeto
               ]
             );
             importedCount++;
