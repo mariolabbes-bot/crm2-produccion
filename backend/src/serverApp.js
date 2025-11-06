@@ -45,6 +45,7 @@ app.use('/api/kpis', require('./routes/kpis'));
 app.use('/api/abonos', require('./routes/abonos'));
 app.use('/api/comparativas', require('./routes/comparativas'));
 app.use('/api/import', require('./routes/import'));
+app.use('/api/diagnostico', require('./routes/diagnostico'));
 
 app.get('/', (req, res) => {
   res.send('CRM2 Backend funcionando');
