@@ -78,6 +78,8 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
   const client = await pool.connect();
   
   try {
+    console.log('🔵 VERSIÓN: import.js actualizado sin vendedor_id - commit 1347266');
+    
     if (!req.file) {
       return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
     }
@@ -287,6 +289,7 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
           const item = toImport[j];
           const excelRow = j + 2; // aproximado para referencia
           try {
+            console.log(`⚡ Insertando venta fila ${excelRow}, folio: ${item.folio}`);
             await client.query(
             `INSERT INTO venta (
               sucursal, tipo_documento, folio, fecha_emision, identificador,
@@ -301,9 +304,11 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
                 item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal
               ]
             );
+            console.log(`✅ Venta ${item.folio} insertada correctamente`);
             importedCount++;
           } catch (err) {
-            console.error(`❌ Error en fila Excel ${excelRow} (folio ${item.folio || 'N/A'}):`, err);
+            console.error(`❌ Error en fila Excel ${excelRow} (folio ${item.folio || 'N/A'}):`, err.message);
+            console.error('Detalle completo:', err);
             // Propagar con contexto de fila
             observations.push({ fila: excelRow, folio: item.folio || null, campo: 'DB', detalle: err.detail || err.message });
             // Continuar con siguientes filas, no abortar toda la importación
