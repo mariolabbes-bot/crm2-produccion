@@ -78,4 +78,44 @@ router.get('/test-insert', async (req, res) => {
   }
 });
 
+// GET /api/diagnostico/test-insert-completo - Probar INSERT con todas las columnas
+router.get('/test-insert-completo', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const testFolio = `TEST-FULL-${Date.now()}`;
+    await client.query(`
+      INSERT INTO venta (
+        sucursal, tipo_documento, folio, fecha_emision, identificador,
+        cliente, vendedor_cliente, vendedor_documento,
+        estado_sistema, estado_comercial, estado_sii, indice,
+        sku, descripcion, cantidad, precio, valor_total, vendedor_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      RETURNING id, folio
+    `, [
+      null, 'Factura', testFolio, '2025-11-06', null,
+      null, null, null,
+      null, null, null, null,
+      null, null, null, null, null, null
+    ]);
+    
+    await client.query('DELETE FROM venta WHERE folio = $1', [testFolio]);
+    
+    res.json({ 
+      success: true, 
+      msg: 'INSERT completo exitoso con todas las columnas'
+    });
+  } catch (err) {
+    console.error('Error en test-insert-completo:', err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message,
+      detail: err.detail,
+      hint: err.hint,
+      position: err.position
+    });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
