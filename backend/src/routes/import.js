@@ -295,13 +295,13 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
               sucursal, tipo_documento, folio, fecha_emision, identificador,
               cliente, vendedor_cliente, vendedor_documento,
               estado_sistema, estado_comercial, estado_sii, indice,
-              sku, descripcion, cantidad, precio, valor_total
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+              sku, descripcion, cantidad, precio, valor_total, vendedor_id
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
               [
                 item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador,
                 item.clienteNombre, item.vendedorClienteAlias, item.vendedorDocNombre,
                 item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice,
-                item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal
+                item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, null
               ]
             );
             console.log(`✅ Venta ${item.folio} insertada correctamente`);
@@ -566,14 +566,14 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
               vendedor_cliente, caja_operacion, usuario_ingreso,
               monto_total, saldo_a_favor, saldo_a_favor_total, tipo_pago,
               estado_abono, identificador_abono, fecha_vencimiento,
-              monto, monto_neto
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+              monto, monto_neto, vendedor_id
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
               [
                 item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
                 item.vendedorClienteAlias, item.cajaOperacion, item.usuarioIngreso,
                 item.montoTotal, item.saldoFavor, item.saldoFavorTotal, item.tipoPago,
                 item.estadoAbono, item.identificadorAbono, item.fechaVencimiento,
-                item.monto, item.montoNeto
+                item.monto, item.montoNeto, null
               ]
             );
             importedCount++;
