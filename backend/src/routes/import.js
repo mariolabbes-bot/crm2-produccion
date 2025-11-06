@@ -290,6 +290,16 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
           const excelRow = j + 2; // aproximado para referencia
           try {
             console.log(`⚡ Insertando venta fila ${excelRow}, folio: ${item.folio}`);
+            console.log(`📋 Datos a insertar:`, {
+              sucursal: item.sucursal,
+              tipoDoc: item.tipoDoc,
+              folio: item.folio,
+              fecha: item.fecha,
+              identificador: item.identificador,
+              clienteNombre: item.clienteNombre,
+              vendedorClienteAlias: item.vendedorClienteAlias,
+              vendedorDocNombre: item.vendedorDocNombre
+            });
             await client.query(
             `INSERT INTO venta (
               sucursal, tipo_documento, folio, fecha_emision, identificador,
@@ -361,10 +371,18 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
 
   } catch (error) {
     console.error('❌ Error en importación:', error);
+    console.error('Stack trace:', error.stack);
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    res.status(500).json({ success: false, msg: 'Error al procesar archivo', error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      msg: 'Error al procesar archivo', 
+      error: error.message,
+      errorDetail: error.detail,
+      errorHint: error.hint,
+      errorStack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   } finally {
     client.release();
   }
