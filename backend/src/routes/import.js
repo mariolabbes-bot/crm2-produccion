@@ -139,14 +139,14 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     }
 
     // Cargar usuarios existentes
-    const usersRes = await client.query("SELECT id, nombre, alias FROM usuario WHERE rol = 'vendedor'");
-    const usersByNormName = new Map(usersRes.rows.map(u => [norm(u.nombre), u.id]));
-    const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.id]));
+    const usersRes = await client.query("SELECT alias, nombre FROM usuario WHERE rol = 'vendedor'");
+    const usersByNormName = new Map(usersRes.rows.map(u => [norm(u.nombre), u.alias]));
+    const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.alias]));
 
     // Cargar clientes existentes
-    const clientsRes = await client.query("SELECT id, nombre, rut FROM cliente");
-    const clientsByRut = new Map(clientsRes.rows.filter(c => c.rut).map(c => [norm(c.rut), c.id]));
-    const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.id]));
+    const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
+    const clientsByRut = new Map(clientsRes.rows.filter(c => c.rut).map(c => [norm(c.rut), c.rut]));
+    const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.rut]));
 
     // Verificar duplicados existentes (por tipo_documento + folio)
     const existingSales = await client.query(
@@ -451,12 +451,12 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     }
 
     // Cargar usuarios
-    const usersRes = await client.query("SELECT id, nombre, alias FROM usuario WHERE rol = 'vendedor'");
-    const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.id]));
+    const usersRes = await client.query("SELECT alias, nombre FROM usuario WHERE rol = 'vendedor'");
+    const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.alias]));
 
     // Cargar clientes
-    const clientsRes = await client.query("SELECT id, nombre FROM cliente");
-    const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.id]));
+    const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
+    const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.rut]));
 
     // Verificar duplicados
     const existingAbonos = await client.query(`SELECT folio FROM abono WHERE folio IS NOT NULL`);
