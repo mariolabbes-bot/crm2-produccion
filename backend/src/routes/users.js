@@ -83,25 +83,26 @@ router.post('/login', async (req, res) => {
 });
 
 
-// Obtener todos los vendedores (deduplicado por las dos primeras palabras del nombre)
+// Obtener todos los vendedores (simplificado para producción)
 router.get('/vendedores', async (req, res) => {
   try {
-    // Solo rol vendedor y deduplicación por las dos primeras palabras (case-insensitive)
+    // Obtener vendedores únicos por nombre (case-insensitive)
     const query = `
-      SELECT DISTINCT ON (
-        LOWER(TRIM(CONCAT_WS(' ', split_part(nombre, ' ', 1), split_part(nombre, ' ', 2))))
-      )
-        id, nombre, email
+      SELECT DISTINCT ON (LOWER(nombre))
+        id, nombre, email, rol
       FROM usuario
       WHERE rol = 'vendedor'
-      ORDER BY 
-        LOWER(TRIM(CONCAT_WS(' ', split_part(nombre, ' ', 1), split_part(nombre, ' ', 2)))), id ASC
+      ORDER BY LOWER(nombre), id ASC
     `;
     const vendedores = await pool.query(query);
     res.json(vendedores.rows);
   } catch (err) {
-    console.error('Error al obtener vendedores:', err);
-    res.status(500).send('Server Error');
+    console.error('Error al obtener vendedores:', err.message);
+    console.error('Stack:', err.stack);
+    res.status(500).json({ 
+      msg: 'Error al obtener vendedores', 
+      error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
+    });
   }
 });
 
