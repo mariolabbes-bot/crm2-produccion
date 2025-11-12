@@ -30,7 +30,7 @@ const PrivateRoute = ({ children }) => {
 
 const ManagerRoute = ({ children }) => {
     const user = getUser();
-    return user && user.rol === 'manager' ? children : <Navigate to="/" />;
+    return user && user.rol?.toUpperCase() === 'MANAGER' ? children : <Navigate to="/" />;
 }
 
 const ClientManager = () => {
@@ -130,7 +130,7 @@ const ClientManager = () => {
           <Button color="inherit" component={RouterLink} to="/goals">
             Objetivos
           </Button>
-          {user && user.rol === 'manager' && (
+          {user && user.rol?.toUpperCase() === 'MANAGER' && (
             <>
               <Button color="inherit" component={RouterLink} to="/admin">
                 Administrar
@@ -164,7 +164,7 @@ const ClientManager = () => {
                           {c.direccion}, {c.ciudad}, {c.pais}
                         </Typography>
                         <br />
-                        {user.rol === 'manager' ? `Vendedor: ${c.vendedor_nombre}` : c.email}
+                        {user.rol?.toUpperCase() === 'MANAGER' ? `Vendedor: ${c.vendedor_nombre}` : c.email}
                       </React.Fragment>
                     }
                   />

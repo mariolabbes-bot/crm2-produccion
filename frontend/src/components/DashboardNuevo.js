@@ -23,7 +23,7 @@ const getDateRange = (months = 3) => {
 const DashboardNuevo = () => {
   const navigate = useNavigate();
   const user = getUser();
-  const isManager = user?.rol === 'manager';
+  const isManager = user?.rol?.toUpperCase() === 'MANAGER';
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const chartHeights = {
