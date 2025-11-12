@@ -62,7 +62,7 @@ router.get('/top-clients', auth(), async (req, res) => {
       return res.json([]); // graceful empty for environments without sales schema
     }
 
-    if (req.user.rol === 'manager') {
+    if (req.user.rol === 'MANAGER') {
       const query = `
         SELECT c.nombre, SUM(s.${amountCol}) AS total_sales
         FROM ${salesTable} s
@@ -83,7 +83,7 @@ router.get('/top-clients', auth(), async (req, res) => {
         ORDER BY total_sales DESC
         LIMIT 5
       `;
-      const result = await pool.query(query, [req.user.id]);
+      const result = await pool.query(query, [req.user.rut]);
       return res.json(result.rows);
     }
   } catch (err) {
@@ -102,7 +102,7 @@ router.get('/sales-summary', auth(), async (req, res) => {
       return res.json({ total_sales: 0 });
     }
 
-    if (req.user.rol === 'manager') {
+    if (req.user.rol === 'MANAGER') {
       const query = `
         SELECT SUM(${amountCol}) AS total_sales
         FROM ${salesTable}
@@ -119,7 +119,7 @@ router.get('/sales-summary', auth(), async (req, res) => {
         WHERE c.vendedor_id = $1
         AND s.${dateCol} >= NOW() - INTERVAL '3 months'
       `;
-      const result = await pool.query(query, [req.user.id]);
+      const result = await pool.query(query, [req.user.rut]);
       return res.json(result.rows[0] || { total_sales: 0 });
     }
   } catch (err) {
@@ -147,7 +147,7 @@ router.get('/mes-actual', auth(), async (req, res) => {
     }
 
     const user = req.user;
-    const isManager = user.rol === 'manager';
+    const isManager = user.rol === 'MANAGER';
 
     // Determinar mes actual y mismo mes año anterior
     const now = new Date();
@@ -172,14 +172,14 @@ router.get('/mes-actual', auth(), async (req, res) => {
     let params = [];
     if (!isManager) {
       if (vendedorCol === 'vendedor_cliente') {
-        const userAlias = await pool.query('SELECT alias FROM usuario WHERE id = $1', [user.id]);
+        const userAlias = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
         if (userAlias.rows.length > 0 && userAlias.rows[0].alias) {
           vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
           params = [userAlias.rows[0].alias];
         }
       } else {
         vendedorFilter = `AND ${vendedorCol} = $1`;
-        params = [user.id];
+        params = [user.rut];
       }
     }
 
@@ -241,14 +241,14 @@ router.get('/mes-actual', auth(), async (req, res) => {
         let abonoParams = [];
         if (!isManager && abonoVendedorCol) {
           if (abonoVendedorCol === 'vendedor_cliente') {
-            const userAlias = await pool.query('SELECT alias FROM usuario WHERE id = $1', [user.id]);
+            const userAlias = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
             if (userAlias.rows.length > 0 && userAlias.rows[0].alias) {
               abonoVendedorFilter = `AND UPPER(${abonoVendedorCol}) = UPPER($1)`;
               abonoParams = [userAlias.rows[0].alias];
             }
           } else {
             abonoVendedorFilter = `AND ${abonoVendedorCol} = $1`;
-            abonoParams = [user.id];
+            abonoParams = [user.rut];
           }
         }
 

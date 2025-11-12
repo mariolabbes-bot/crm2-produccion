@@ -64,17 +64,17 @@ router.get('/mensuales', auth(), async (req, res) => {
     // Filtro por vendedor si es vendedor (no manager)
     let vendedorFilter = '';
     let params = [];
-    if (user.rol !== 'manager') {
+    if (user.rol !== 'MANAGER') {
       if (vendedorCol === 'vendedor_cliente') {
         // Obtener alias del usuario
-        const userAlias = await pool.query('SELECT alias FROM usuario WHERE id = $1', [user.id]);
+        const userAlias = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
         if (userAlias.rows.length > 0 && userAlias.rows[0].alias) {
           vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
           params = [userAlias.rows[0].alias];
         }
       } else {
         vendedorFilter = `AND ${vendedorCol} = $1`;
-        params = [user.id];
+        params = [user.rut];
       }
     }
 
@@ -92,8 +92,8 @@ router.get('/mensuales', auth(), async (req, res) => {
         GROUP BY UPPER(TRIM(${vendedorCol})), TO_CHAR(${dateCol}, 'YYYY-MM')
       )
       SELECT 
-        u.id as vendedor_id,
-        u.nombre as vendedor_nombre,
+        u.rut as vendedor_id,
+        u.nombre_completo as vendedor_nombre,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 1} THEN vm.total_ventas END), 0) as mes_actual,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 2} THEN vm.total_ventas END), 0) as mes_1,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 3} THEN vm.total_ventas END), 0) as mes_2,
@@ -101,9 +101,9 @@ router.get('/mensuales', auth(), async (req, res) => {
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 5} THEN vm.total_ventas END), 0) as mes_anio_anterior
       FROM usuario u
       LEFT JOIN ventas_mensuales vm ON UPPER(TRIM(u.alias)) = vm.vendedor_nombre
-      WHERE u.rol = 'vendedor'
-      GROUP BY u.id, u.nombre
-      ORDER BY u.nombre
+      WHERE u.rol_usuario = 'VENDEDOR'
+      GROUP BY u.rut, u.nombre_completo
+      ORDER BY u.nombre_completo
     ` : `
       WITH ventas_mensuales AS (
         SELECT 
@@ -116,18 +116,18 @@ router.get('/mensuales', auth(), async (req, res) => {
         GROUP BY ${vendedorCol}, TO_CHAR(${dateCol}, 'YYYY-MM')
       )
       SELECT 
-        u.id as vendedor_id,
-        u.nombre as vendedor_nombre,
+        u.rut as vendedor_id,
+        u.nombre_completo as vendedor_nombre,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 1} THEN vm.total_ventas END), 0) as mes_actual,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 2} THEN vm.total_ventas END), 0) as mes_1,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 3} THEN vm.total_ventas END), 0) as mes_2,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 4} THEN vm.total_ventas END), 0) as mes_3,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 5} THEN vm.total_ventas END), 0) as mes_anio_anterior
       FROM usuario u
-      LEFT JOIN ventas_mensuales vm ON vm.vendedor_id = u.id
-      WHERE u.rol = 'vendedor'
-      GROUP BY u.id, u.nombre
-      ORDER BY u.nombre
+      LEFT JOIN ventas_mensuales vm ON vm.vendedor_id = u.rut
+      WHERE u.rol_usuario = 'VENDEDOR'
+      GROUP BY u.rut, u.nombre_completo
+      ORDER BY u.nombre_completo
     `;
 
     params.push(mesActual, mes1Atras, mes2Atras, mes3Atras, mesAnioAnterior);
