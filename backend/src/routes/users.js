@@ -90,22 +90,28 @@ router.post('/login', async (req, res) => {
 });
 
 
-// Obtener todos los vendedores (adaptado a la estructura real de la tabla)
+// Obtener todos los vendedores
 router.get('/vendedores', async (req, res) => {
   try {
-    // Obtener vendedores únicos por nombre_vendedor
+    // Obtener todos los usuarios con rol vendedor
     const query = `
-      SELECT DISTINCT ON (LOWER(nombre_vendedor))
-        rut, nombre_completo, correo, rol_usuario, alias, nombre_vendedor, cargo, local
+      SELECT 
+        rut, 
+        nombre_completo, 
+        correo, 
+        rol_usuario, 
+        alias, 
+        nombre_vendedor,
+        cargo,
+        local
       FROM usuario
-      WHERE rol_usuario = 'vendedor' AND nombre_vendedor IS NOT NULL
-      ORDER BY LOWER(nombre_vendedor), rut ASC
+      WHERE rol_usuario = 'VENDEDOR'
+      ORDER BY nombre_completo ASC
     `;
     const vendedores = await pool.query(query);
     res.json(vendedores.rows);
   } catch (err) {
     console.error('Error al obtener vendedores:', err.message);
-    console.error('Stack:', err.stack);
     res.status(500).json({ 
       msg: 'Error al obtener vendedores', 
       error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
