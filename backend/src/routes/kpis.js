@@ -172,14 +172,14 @@ router.get('/mes-actual', auth(), async (req, res) => {
     let params = [];
     if (!isManager) {
       if (vendedorCol === 'vendedor_cliente') {
-        const userAlias = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
-        if (userAlias.rows.length > 0 && userAlias.rows[0].alias) {
+        // Usar nombre_vendedor del token JWT
+        if (user.nombre_vendedor) {
           vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-          params = [userAlias.rows[0].alias];
+          params = [user.nombre_vendedor];
         }
       } else {
         vendedorFilter = `AND ${vendedorCol} = $1`;
-        params = [user.rut];
+        params = [user.nombre_vendedor || user.rut];
       }
     }
 
@@ -241,14 +241,13 @@ router.get('/mes-actual', auth(), async (req, res) => {
         let abonoParams = [];
         if (!isManager && abonoVendedorCol) {
           if (abonoVendedorCol === 'vendedor_cliente') {
-            const userAlias = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
-            if (userAlias.rows.length > 0 && userAlias.rows[0].alias) {
+            if (user.nombre_vendedor) {
               abonoVendedorFilter = `AND UPPER(${abonoVendedorCol}) = UPPER($1)`;
-              abonoParams = [userAlias.rows[0].alias];
+              abonoParams = [user.nombre_vendedor];
             }
           } else {
             abonoVendedorFilter = `AND ${abonoVendedorCol} = $1`;
-            abonoParams = [user.rut];
+            abonoParams = [user.nombre_vendedor || user.rut];
           }
         }
 

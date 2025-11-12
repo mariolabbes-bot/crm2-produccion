@@ -66,15 +66,14 @@ router.get('/mensuales', auth(), async (req, res) => {
     let params = [];
     if (user.rol !== 'MANAGER') {
       if (vendedorCol === 'vendedor_cliente') {
-        // Obtener alias del usuario
-        const userAlias = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
-        if (userAlias.rows.length > 0 && userAlias.rows[0].alias) {
+        // Usar nombre_vendedor del token JWT
+        if (user.nombre_vendedor) {
           vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-          params = [userAlias.rows[0].alias];
+          params = [user.nombre_vendedor];
         }
       } else {
         vendedorFilter = `AND ${vendedorCol} = $1`;
-        params = [user.rut];
+        params = [user.nombre_vendedor || user.rut];
       }
     }
 
@@ -100,7 +99,7 @@ router.get('/mensuales', auth(), async (req, res) => {
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 4} THEN vm.total_ventas END), 0) as mes_3,
         COALESCE(MAX(CASE WHEN vm.mes = $${params.length + 5} THEN vm.total_ventas END), 0) as mes_anio_anterior
       FROM usuario u
-      LEFT JOIN ventas_mensuales vm ON UPPER(TRIM(u.alias)) = vm.vendedor_nombre
+      LEFT JOIN ventas_mensuales vm ON UPPER(TRIM(u.nombre_vendedor)) = vm.vendedor_nombre
       WHERE u.rol_usuario = 'VENDEDOR'
       GROUP BY u.rut, u.nombre_completo
       ORDER BY u.nombre_completo

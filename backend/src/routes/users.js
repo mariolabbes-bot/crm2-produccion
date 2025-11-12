@@ -61,6 +61,7 @@ router.post('/login', async (req, res) => {
         rut: user.rows[0].rut,
         alias: user.rows[0].alias,
         nombre: user.rows[0].nombre_completo,
+        nombre_vendedor: user.rows[0].nombre_vendedor,
         rol: user.rows[0].rol_usuario
       }
     };
@@ -78,7 +79,8 @@ router.post('/login', async (req, res) => {
             nombre: user.rows[0].nombre_completo,
             correo: user.rows[0].correo,
             rol: user.rows[0].rol_usuario,
-            alias: user.rows[0].alias
+            alias: user.rows[0].alias,
+            nombre_vendedor: user.rows[0].nombre_vendedor
           }
         });
       }

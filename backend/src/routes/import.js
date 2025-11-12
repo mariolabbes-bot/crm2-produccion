@@ -259,13 +259,13 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
       }
 
       if (missingClients.size > 0) {
-        const clientData = Array.from(missingClients).map(c => ({
-          'Nombre o RUT': c,
-          'Nombre Completo': '',
-          'RUT': '',
-          'Email': '',
-          'Teléfono': ''
-        }));
+        const clientData = Array.from(missingClients).map(c => {
+          // Si c parece un rut, lo ponemos en RUT, si no, en nombre
+          const rutRegex = /^\d{7,8}-[\dkK]$/;
+          return rutRegex.test(c)
+            ? { 'RUT': c, 'Nombre': '', 'Email': '', 'Teléfono': '' }
+            : { 'RUT': '', 'Nombre': c, 'Email': '', 'Teléfono': '' };
+        });
         const clientWS = XLSX.utils.json_to_sheet(clientData);
         XLSX.utils.book_append_sheet(reportWB, clientWS, 'Clientes Faltantes');
       }
@@ -550,11 +550,12 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       }
 
       if (missingClients.size > 0) {
-        const clientData = Array.from(missingClients).map(c => ({
-          'Nombre': c,
-          'RUT': '',
-          'Email': ''
-        }));
+        const clientData = Array.from(missingClients).map(c => {
+          const rutRegex = /^\d{7,8}-[\dkK]$/;
+          return rutRegex.test(c)
+            ? { 'RUT': c, 'Nombre': '', 'Email': '' }
+            : { 'RUT': '', 'Nombre': c, 'Email': '' };
+        });
         const clientWS = XLSX.utils.json_to_sheet(clientData);
         XLSX.utils.book_append_sheet(reportWB, clientWS, 'Clientes Faltantes');
       }

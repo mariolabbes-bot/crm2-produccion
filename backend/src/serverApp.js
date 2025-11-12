@@ -48,11 +48,21 @@ app.use('/api/import', require('./routes/import'));
 app.use('/api/diagnostico', require('./routes/diagnostico'));
 
 app.get('/', (req, res) => {
-  res.send('CRM2 Backend funcionando');
+  res.json({
+    status: 'ok',
+    message: 'CRM2 Backend API - Versión: 2024-11-12',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    database: process.env.DATABASE_URL ? 'configured' : 'not configured',
+    corsOrigins: process.env.CORS_ORIGINS || 'default'
+  });
 });
 
 // Endpoint temporal para depuración: muestra la cadena de conexión actual
