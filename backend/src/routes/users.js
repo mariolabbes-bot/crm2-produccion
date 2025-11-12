@@ -8,10 +8,10 @@ const auth = require('../middleware/auth');
 // User Registration (Manager only)
 router.post('/register', auth('manager'), async (req, res) => {
   try {
-    const { nombre, email, password, rol } = req.body;
+    const { rut, nombre_completo, correo, password, rol_usuario, alias } = req.body;
 
     // Check if user exists
-  const user = await pool.query('SELECT * FROM usuario WHERE email = $1', [email]);
+    const user = await pool.query('SELECT * FROM usuario WHERE correo = $1 OR alias = $2', [correo, alias]);
     if (user.rows.length > 0) {
       return res.status(400).json({ msg: 'User already exists' });
     }
@@ -22,8 +22,8 @@ router.post('/register', auth('manager'), async (req, res) => {
 
     // Create new user
     const newUser = await pool.query(
-      'INSERT INTO usuario (nombre, email, password, rol) VALUES ($1, $2, $3, $4) RETURNING *',
-      [nombre, email, hashedPassword, rol]
+      'INSERT INTO usuario (rut, nombre_completo, correo, password, rol_usuario, alias) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [rut, nombre_completo, correo, hashedPassword, rol_usuario, alias]
     );
 
     res.status(201).json(newUser.rows[0]);
@@ -37,24 +37,20 @@ router.post('/register', auth('manager'), async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-  console.log('Login attempt:', { email, password }); // Log para depuración
+    console.log('Login attempt:', { email }); // Log para depuración (sin password)
 
-  // Log: usuario encontrado
-  console.log('Buscando usuario por email:', email);
-    // Check if user exists (buscar solo por email, case-insensitive)
-    const user = await pool.query('SELECT * FROM usuario WHERE lower(email) = lower($1)', [email]);
+    // Check if user exists (buscar por correo, case-insensitive)
+    const user = await pool.query('SELECT * FROM usuario WHERE LOWER(correo) = LOWER($1)', [email]);
 
     if (user.rows.length === 0) {
-      console.log('No se encontró usuario con ese email.');
+      console.log('No se encontró usuario con ese correo.');
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Log: hash almacenado
-    console.log('Hash almacenado:', user.rows[0].password);
-    // Log: password recibido
-    console.log('Password recibido:', password);
+    // Verificar password
     const isMatch = await bcrypt.compare(password, user.rows[0].password);
-    console.log('Resultado bcrypt.compare:', isMatch);
+    console.log('Autenticación:', isMatch ? 'exitosa' : 'fallida');
+    
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
@@ -62,37 +58,48 @@ router.post('/login', async (req, res) => {
     // Create and return token
     const payload = {
       user: {
-        id: user.rows[0].id,
-        rol: user.rows[0].rol
+        rut: user.rows[0].rut,
+        alias: user.rows[0].alias,
+        nombre: user.rows[0].nombre_completo,
+        rol: user.rows[0].rol_usuario
       }
     };
 
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: 3600 }, // 1 hour
+      { expiresIn: '24h' }, // 24 horas
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({ 
+          token,
+          user: {
+            rut: user.rows[0].rut,
+            nombre: user.rows[0].nombre_completo,
+            correo: user.rows[0].correo,
+            rol: user.rows[0].rol_usuario,
+            alias: user.rows[0].alias
+          }
+        });
       }
     );
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).send('Server Error');
+    res.status(500).json({ msg: 'Server Error', error: err.message });
   }
 });
 
 
-// Obtener todos los vendedores (simplificado para producción)
+// Obtener todos los vendedores (adaptado a la estructura real de la tabla)
 router.get('/vendedores', async (req, res) => {
   try {
-    // Obtener vendedores únicos por nombre (case-insensitive)
+    // Obtener vendedores únicos por nombre_vendedor
     const query = `
-      SELECT DISTINCT ON (LOWER(nombre))
-        id, nombre, email, rol
+      SELECT DISTINCT ON (LOWER(nombre_vendedor))
+        rut, nombre_completo, correo, rol_usuario, alias, nombre_vendedor, cargo, local
       FROM usuario
-      WHERE rol = 'vendedor'
-      ORDER BY LOWER(nombre), id ASC
+      WHERE rol_usuario = 'vendedor' AND nombre_vendedor IS NOT NULL
+      ORDER BY LOWER(nombre_vendedor), rut ASC
     `;
     const vendedores = await pool.query(query);
     res.json(vendedores.rows);
