@@ -26,7 +26,8 @@ module.exports = function(roles = []) {
       const decoded = jwt.verify(rawToken, process.env.JWT_SECRET);
       req.user = decoded.user;
 
-      if (roles.length && !roles.includes(req.user.rol)) {
+      // Comparación case-insensitive para roles
+      if (roles.length && !roles.map(r => r.toLowerCase()).includes(req.user.rol.toLowerCase())) {
         return res.status(403).json({ msg: 'Access denied. Insufficient permissions.' });
       }
 

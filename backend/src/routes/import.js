@@ -284,12 +284,17 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
       console.log(`✅ Iniciando importación de ${toImport.length} ventas...`);
       
       // Pre-cargar todos los productos con litros_por_unidad para cálculo automático
-      const productosRes = await client.query('SELECT sku, litros_por_unidad FROM producto WHERE litros_por_unidad IS NOT NULL');
-      const productoMap = new Map();
-      productosRes.rows.forEach(p => {
-        productoMap.set(p.sku ? p.sku.toUpperCase().trim() : '', parseFloat(p.litros_por_unidad) || 0);
-      });
-      console.log(`📦 ${productoMap.size} productos cargados para cálculo de litros`);
+      let productoMap = new Map();
+      try {
+        const productosRes = await client.query('SELECT sku, litros_por_unidad FROM producto WHERE litros_por_unidad IS NOT NULL');
+        productosRes.rows.forEach(p => {
+          productoMap.set(p.sku ? p.sku.toUpperCase().trim() : '', parseFloat(p.litros_por_unidad) || 0);
+        });
+        console.log(`📦 ${productoMap.size} productos cargados para cálculo de litros`);
+      } catch (prodError) {
+        console.warn('⚠️ No se pudieron cargar productos para cálculo de litros:', prodError.message);
+        console.warn('⚠️ Continuando importación con litros_vendidos = 0 para todos');
+      }
       
       try {
         // Inserciones independientes por fila (sin transacción global)
