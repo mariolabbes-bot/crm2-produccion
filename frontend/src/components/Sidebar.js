@@ -120,21 +120,36 @@ const Sidebar = () => {
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <Box
           component="img"
-          src="/design-references/Lubricar LOGO.png"
+          src="/logo-lubricar-white.png"
           alt="Lubricar INSA CRM"
           sx={{
             width: '80%',
             maxWidth: 160,
             mb: 2,
-            filter: 'brightness(0) invert(1)', // Logo blanco
+          }}
+          onError={(e) => {
+            e.target.style.display = 'none';
+            console.log('Logo no encontrado, usando texto');
           }}
         />
         <Typography 
           variant="subtitle2" 
           sx={{ 
+            color: '#FFFFFF',
+            fontWeight: 600,
+            letterSpacing: '0.5px',
+            fontSize: '1.1rem'
+          }}
+        >
+          LUBRICAR INSA
+        </Typography>
+        <Typography 
+          variant="caption" 
+          sx={{ 
             color: '#9CA3AF',
             fontWeight: 500,
-            letterSpacing: '0.5px'
+            display: 'block',
+            mt: 0.5
           }}
         >
           CRM Dashboard
@@ -216,9 +231,10 @@ const Sidebar = () => {
                 >
                   <ListItemIcon
                     sx={{
-                      color: isActive(item.path) ? '#E57A2D' : item.color,
+                      color: '#FFFFFF', // ICONOS BLANCOS SIEMPRE para mejor contraste
                       minWidth: 40,
                       transition: 'color 0.2s ease',
+                      opacity: isActive(item.path) ? 1 : 0.85,
                     }}
                   >
                     {item.icon}
@@ -258,9 +274,10 @@ const Sidebar = () => {
           >
             <ListItemIcon
               sx={{
-                color: '#9CA3AF',
+                color: '#FFFFFF', // ICONO BLANCO para mejor contraste
                 minWidth: 40,
                 transition: 'color 0.2s ease',
+                opacity: 0.85,
               }}
             >
               <LogoutIcon />
