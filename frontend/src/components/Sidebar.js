@@ -126,7 +126,7 @@ const Sidebar = () => {
             width: '80%',
             maxWidth: 160,
             mb: 2,
-            filter: 'brightness(0) invert(1)', // Logo en blanco
+            filter: 'brightness(0) saturate(100%) invert(100%)', // Logo blanco puro
           }}
         />
         <Typography 
