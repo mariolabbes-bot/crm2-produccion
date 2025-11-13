@@ -78,7 +78,7 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
   const client = await pool.connect();
   
   try {
-    console.log('🔵 VERSIÓN: import.js actualizado sin vendedor_id - commit 1347266');
+    console.log('🔵 VERSIÓN: import.js con cálculo litros + roles case-insensitive - commit 7d2156e');
     
     if (!req.file) {
       return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
@@ -139,8 +139,8 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     }
 
     // Cargar usuarios existentes
-    const usersRes = await client.query("SELECT alias, nombre FROM usuario WHERE rol = 'vendedor'");
-    const usersByNormName = new Map(usersRes.rows.map(u => [norm(u.nombre), u.alias]));
+    const usersRes = await client.query("SELECT alias, nombre_completo FROM usuario WHERE rol_usuario = 'vendedor'");
+    const usersByNormName = new Map(usersRes.rows.map(u => [norm(u.nombre_completo), u.alias]));
     const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.alias]));
 
     // Cargar clientes existentes
@@ -478,7 +478,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     }
 
     // Cargar usuarios
-    const usersRes = await client.query("SELECT alias, nombre FROM usuario WHERE rol = 'vendedor'");
+    const usersRes = await client.query("SELECT alias, nombre_completo FROM usuario WHERE rol_usuario = 'vendedor'");
     const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.alias]));
 
     // Cargar clientes
