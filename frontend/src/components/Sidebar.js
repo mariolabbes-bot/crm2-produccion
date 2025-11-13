@@ -118,17 +118,32 @@ const Sidebar = () => {
     >
       {/* Logo y Título */}
       <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Box
-          component="img"
-          src="/lubricar-logo.png"
-          alt="Lubricar INSA"
-          sx={{
-            width: '80%',
-            maxWidth: 160,
-            mb: 2,
-            filter: 'brightness(0) saturate(100%) invert(100%)', // Logo blanco puro
+        {/* Logo como texto estilizado */}
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            color: '#FFFFFF',
+            fontWeight: 700,
+            letterSpacing: '2px',
+            mb: 1,
+            textTransform: 'uppercase',
+            fontSize: '1.3rem'
           }}
-        />
+        >
+          LUBRICAR
+        </Typography>
+        <Typography 
+          variant="subtitle2" 
+          sx={{ 
+            color: '#E57A2D', // Naranja Lubricar
+            fontWeight: 600,
+            letterSpacing: '1.5px',
+            mb: 2,
+            fontSize: '0.9rem'
+          }}
+        >
+          INSA
+        </Typography>
         <Typography 
           variant="caption" 
           sx={{ 
