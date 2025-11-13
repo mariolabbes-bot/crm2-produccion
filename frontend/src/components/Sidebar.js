@@ -120,36 +120,22 @@ const Sidebar = () => {
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <Box
           component="img"
-          src="/logo-lubricar-white.png"
-          alt="Lubricar INSA CRM"
+          src="/lubricar-logo.png"
+          alt="Lubricar INSA"
           sx={{
             width: '80%',
             maxWidth: 160,
             mb: 2,
-          }}
-          onError={(e) => {
-            e.target.style.display = 'none';
-            console.log('Logo no encontrado, usando texto');
+            filter: 'brightness(0) invert(1)', // Logo en blanco
           }}
         />
-        <Typography 
-          variant="subtitle2" 
-          sx={{ 
-            color: '#FFFFFF',
-            fontWeight: 600,
-            letterSpacing: '0.5px',
-            fontSize: '1.1rem'
-          }}
-        >
-          LUBRICAR INSA
-        </Typography>
         <Typography 
           variant="caption" 
           sx={{ 
             color: '#9CA3AF',
             fontWeight: 500,
             display: 'block',
-            mt: 0.5
+            letterSpacing: '0.5px'
           }}
         >
           CRM Dashboard
@@ -244,6 +230,7 @@ const Sidebar = () => {
                     primaryTypographyProps={{
                       fontSize: '0.9375rem',
                       fontWeight: isActive(item.path) ? 600 : 500,
+                      color: '#FFFFFF', // TEXTO BLANCO
                     }}
                   />
                 </ListItemButton>
@@ -287,6 +274,7 @@ const Sidebar = () => {
               primaryTypographyProps={{
                 fontSize: '0.9375rem',
                 fontWeight: 500,
+                color: '#FFFFFF', // TEXTO BLANCO
               }}
             />
           </ListItemButton>
