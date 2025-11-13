@@ -283,12 +283,33 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     if (canProceed && toImport.length > 0) {
       console.log(`✅ Iniciando importación de ${toImport.length} ventas...`);
       
+      // Pre-cargar todos los productos con litros_por_unidad para cálculo automático
+      const productosRes = await client.query('SELECT sku, litros_por_unidad FROM producto WHERE litros_por_unidad IS NOT NULL');
+      const productoMap = new Map();
+      productosRes.rows.forEach(p => {
+        productoMap.set(p.sku ? p.sku.toUpperCase().trim() : '', parseFloat(p.litros_por_unidad) || 0);
+      });
+      console.log(`📦 ${productoMap.size} productos cargados para cálculo de litros`);
+      
       try {
         // Inserciones independientes por fila (sin transacción global)
         for (let j = 0; j < toImport.length; j++) {
           const item = toImport[j];
           const excelRow = j + 2; // aproximado para referencia
           try {
+            // Calcular litros_vendidos automáticamente
+            let litrosVendidos = 0; // Por defecto 0 si no hay datos de litros
+            if (item.sku && item.cantidad) {
+              const skuKey = item.sku.toUpperCase().trim();
+              const litrosPorUnidad = productoMap.get(skuKey);
+              if (litrosPorUnidad && litrosPorUnidad > 0) {
+                litrosVendidos = item.cantidad * litrosPorUnidad;
+                console.log(`🔢 SKU ${item.sku}: ${item.cantidad} unidades × ${litrosPorUnidad} L/u = ${litrosVendidos} L`);
+              } else {
+                console.log(`📦 SKU ${item.sku}: sin litros_por_unidad → litros_vendidos = 0`);
+              }
+            }
+
             console.log(`⚡ Insertando venta fila ${excelRow}, folio: ${item.folio}`);
             console.log(`📋 Datos a insertar:`, {
               sucursal: item.sucursal,
@@ -298,23 +319,24 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
               identificador: item.identificador,
               clienteNombre: item.clienteNombre,
               vendedorClienteAlias: item.vendedorClienteAlias,
-              vendedorDocNombre: item.vendedorDocNombre
+              vendedorDocNombre: item.vendedorDocNombre,
+              litrosVendidos: litrosVendidos
             });
             await client.query(
             `INSERT INTO venta (
               sucursal, tipo_documento, folio, fecha_emision, identificador,
               cliente, vendedor_cliente, vendedor_documento,
               estado_sistema, estado_comercial, estado_sii, indice,
-              sku, descripcion, cantidad, precio, valor_total, vendedor_id
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+              sku, descripcion, cantidad, precio, valor_total, litros_vendidos, vendedor_id
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
               [
                 item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador,
                 item.clienteNombre, item.vendedorClienteAlias, item.vendedorDocNombre,
                 item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice,
-                item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, null
+                item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, litrosVendidos, null
               ]
             );
-            console.log(`✅ Venta ${item.folio} insertada correctamente`);
+            console.log(`✅ Venta ${item.folio} insertada correctamente${litrosVendidos ? ` (${litrosVendidos} L)` : ''}`);
             importedCount++;
           } catch (err) {
             console.error(`❌ Error en fila Excel ${excelRow} (folio ${item.folio || 'N/A'}):`, err.message);
