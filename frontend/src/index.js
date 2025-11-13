@@ -18,11 +18,14 @@ import ComparativoVentasAbonos from './components/ComparativoVentasAbonos';
 import ImportPanel from './components/ImportPanel';
 import Papa from 'papaparse';
 import { ThemeProvider } from '@mui/material/styles';
-import visionTheme from './theme/visionTheme';
+import lubricarTheme from './theme/lubricarTheme';
 import { Container, Box, Typography, TextField, Button, List, ListItem, ListItemText, Alert, Link, AppBar, Toolbar, IconButton } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import MainLayout from './components/MainLayout';
+import DashboardPage from './pages/DashboardPage';
+import { AuthProvider } from './contexts/AuthContext';
 
-const theme = visionTheme;
+const theme = lubricarTheme;
 
 const PrivateRoute = ({ children }) => {
   return getToken() ? children : <Navigate to="/login" />;
@@ -221,24 +224,32 @@ const ClientManager = () => {
 const App = () => {
   return (
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<ManagerRoute><Register /></ManagerRoute>} />
-          <Route path="/" element={<PrivateRoute><DashboardNuevo /></PrivateRoute>} />
-          <Route path="/clients" element={<PrivateRoute><ClientManager /></PrivateRoute>} />
-          <Route path="/activities" element={<PrivateRoute><ActivityList /></PrivateRoute>} />
-          <Route path="/activities/new" element={<PrivateRoute><ActivityEditor /></PrivateRoute>} />
-          <Route path="/activities/:id" element={<PrivateRoute><ActivityDetail /></PrivateRoute>} />
-          <Route path="/goals" element={<PrivateRoute><Goals /></PrivateRoute>} />
-          <Route path="/admin" element={<ManagerRoute><AdminManager /></ManagerRoute>} />
-          <Route path="/import-data" element={<ManagerRoute><ImportPanel /></ManagerRoute>} />
-          <Route path="/abonos" element={<PrivateRoute><Abonos /></PrivateRoute>} />
-          <Route path="/comparativo" element={<PrivateRoute><ComparativoVentasAbonos /></PrivateRoute>} />
-          <Route path="/dashboard-nuevo" element={<DashboardNuevo />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<ManagerRoute><Register /></ManagerRoute>} />
+            
+            {/* Rutas con MainLayout (nuevo diseño) */}
+            <Route path="/" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
+              <Route index element={<DashboardPage />} />
+            </Route>
+            
+            {/* Rutas antiguas (mantener temporalmente) */}
+            <Route path="/clients" element={<PrivateRoute><ClientManager /></PrivateRoute>} />
+            <Route path="/activities" element={<PrivateRoute><ActivityList /></PrivateRoute>} />
+            <Route path="/activities/new" element={<PrivateRoute><ActivityEditor /></PrivateRoute>} />
+            <Route path="/activities/:id" element={<PrivateRoute><ActivityDetail /></PrivateRoute>} />
+            <Route path="/goals" element={<PrivateRoute><Goals /></PrivateRoute>} />
+            <Route path="/admin" element={<ManagerRoute><AdminManager /></ManagerRoute>} />
+            <Route path="/import-data" element={<ManagerRoute><ImportPanel /></ManagerRoute>} />
+            <Route path="/abonos" element={<PrivateRoute><Abonos /></PrivateRoute>} />
+            <Route path="/comparativo" element={<PrivateRoute><ComparativoVentasAbonos /></PrivateRoute>} />
+            <Route path="/dashboard-nuevo" element={<DashboardNuevo />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 };

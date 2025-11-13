@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../api';
-import { setToken } from '../utils/auth';
+import { login as apiLogin } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import { TextField, Button, Container, Typography, Box, Alert } from '@mui/material';
 
 const Login = () => {
@@ -9,15 +9,15 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      const { token } = await login({ email, password });
-      setToken(token);
+      const { token } = await apiLogin({ email, password });
+      login(token); // Usa el método del contexto
       navigate('/');
-      window.location.reload(); // Force a reload to update the app state
     } catch (err) {
       setError(err.message);
     }

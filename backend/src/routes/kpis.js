@@ -130,6 +130,7 @@ router.get('/sales-summary', auth(), async (req, res) => {
 
 // @route   GET /api/kpis/mes-actual
 // @desc    Get KPIs for current month: sales, payments, YoY%, client count
+//          Supports optional ?mes=YYYY-MM parameter. If not provided, uses latest month with data.
 // @access  Private
 router.get('/mes-actual', auth(), async (req, res) => {
   try {
@@ -149,9 +150,20 @@ router.get('/mes-actual', auth(), async (req, res) => {
     const user = req.user;
     const isManager = user.rol === 'MANAGER';
 
-    // Determinar mes actual y mismo mes año anterior
-    const now = new Date();
-    const mesActual = now.toISOString().slice(0, 7); // YYYY-MM
+    // Determinar mes a consultar: parámetro ?mes=YYYY-MM o último mes con datos
+    let mesActual;
+    if (req.query.mes && /^\d{4}-\d{2}$/.test(req.query.mes)) {
+      mesActual = req.query.mes;
+    } else {
+      // Detectar último mes con datos en la tabla de ventas
+      const ultimoMesQuery = `
+        SELECT TO_CHAR(MAX(${dateCol}), 'YYYY-MM') AS ultimo_mes
+        FROM ${salesTable}
+      `;
+      const ultimoMesResult = await pool.query(ultimoMesQuery);
+      mesActual = ultimoMesResult.rows[0]?.ultimo_mes || new Date().toISOString().slice(0, 7);
+    }
+
     const [year, month] = mesActual.split('-').map(Number);
     const mesAnioAnterior = new Date(year - 1, month - 1, 1).toISOString().slice(0, 7);
 
@@ -284,6 +296,339 @@ router.get('/mes-actual', auth(), async (req, res) => {
   } catch (err) {
     console.error('Error en /api/kpis/mes-actual:', err.message);
     res.status(500).json({ success: false, error: 'Server Error', message: err.message });
+  }
+});
+
+// @route   GET /api/kpis/evolucion-mensual
+// @desc    Get monthly evolution of sales and payments for last N months
+//          Supports optional params: ?meses=12 (default), ?fechaInicio=YYYY-MM, ?fechaFin=YYYY-MM
+// @access  Private
+router.get('/evolucion-mensual', auth(), async (req, res) => {
+  try {
+    const { salesTable, amountCol, dateCol } = await getDetectedSales();
+    if (!salesTable || !amountCol || !dateCol) {
+      return res.json([]);
+    }
+
+    const user = req.user;
+    const isManager = user.rol === 'MANAGER';
+
+    // Parámetros opcionales
+    const mesesAtras = parseInt(req.query.meses) || 12;
+    const fechaInicio = req.query.fechaInicio; // YYYY-MM
+    const fechaFin = req.query.fechaFin;       // YYYY-MM
+
+    // Construir filtro de fechas
+    let fechaFilter = '';
+    let fechaParams = [];
+    
+    if (fechaInicio && fechaFin) {
+      // Rango específico
+      fechaFilter = `WHERE ${dateCol} >= $1::date AND ${dateCol} < ($2::text || '-01')::date + INTERVAL '1 month'`;
+      fechaParams = [`${fechaInicio}-01`, fechaFin];
+    } else if (fechaInicio) {
+      // Desde una fecha
+      fechaFilter = `WHERE ${dateCol} >= $1::date`;
+      fechaParams = [`${fechaInicio}-01`];
+    } else {
+      // Últimos N meses desde el último dato disponible
+      const ultimoMesQuery = `SELECT TO_CHAR(MAX(${dateCol}), 'YYYY-MM') AS ultimo_mes FROM ${salesTable}`;
+      const ultimoMesResult = await pool.query(ultimoMesQuery);
+      const ultimoMes = ultimoMesResult.rows[0]?.ultimo_mes;
+      
+      if (ultimoMes) {
+        const [year, month] = ultimoMes.split('-').map(Number);
+        const fechaLimite = new Date(year, month - mesesAtras, 1).toISOString().slice(0, 7);
+        fechaFilter = `WHERE ${dateCol} >= $1::date`;
+        fechaParams = [`${fechaLimite}-01`];
+      } else {
+        fechaFilter = `WHERE ${dateCol} >= CURRENT_DATE - INTERVAL '${mesesAtras} months'`;
+      }
+    }
+
+    // Detectar vendedor column
+    let vendedorCol = 'vendedor_id';
+    const vendedorColCheck = await pool.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = $1
+      AND column_name IN ('vendedor_id', 'vendedor_cliente')
+      LIMIT 1
+    `, [salesTable]);
+    if (vendedorColCheck.rows.length > 0) {
+      vendedorCol = vendedorColCheck.rows[0].column_name;
+    }
+
+    // Filtro vendedor
+    let vendedorFilter = '';
+    let params = [];
+    if (!isManager) {
+      if (vendedorCol === 'vendedor_cliente') {
+        if (user.nombre_vendedor) {
+          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
+          params = [user.nombre_vendedor];
+        }
+      } else {
+        vendedorFilter = `AND ${vendedorCol} = $1`;
+        params = [user.nombre_vendedor || user.rut];
+      }
+    }
+
+    // Generar consulta de ventas con filtros dinámicos
+    const baseParamCount = fechaParams.length;
+    const queryVentas = `
+      SELECT 
+        TO_CHAR(${dateCol}, 'YYYY-MM') AS mes,
+        COALESCE(SUM(${amountCol}), 0) AS ventas
+      FROM ${salesTable}
+      ${fechaFilter}
+      ${vendedorFilter}
+      GROUP BY TO_CHAR(${dateCol}, 'YYYY-MM')
+      ORDER BY mes
+    `;
+    
+    // Combinar parámetros de fecha y vendedor
+    const allParams = [...fechaParams, ...params];
+    
+    // Ajustar vendedorFilter si hay parámetros de fecha
+    let adjustedVendedorFilter = vendedorFilter;
+    if (baseParamCount > 0 && vendedorFilter) {
+      // Reemplazar $1 por $N donde N es baseParamCount + 1
+      adjustedVendedorFilter = vendedorFilter.replace('$1', `$${baseParamCount + 1}`);
+    }
+    
+    const finalQueryVentas = `
+      SELECT 
+        TO_CHAR(${dateCol}, 'YYYY-MM') AS mes,
+        COALESCE(SUM(${amountCol}), 0) AS ventas
+      FROM ${salesTable}
+      ${fechaFilter}
+      ${adjustedVendedorFilter}
+      GROUP BY TO_CHAR(${dateCol}, 'YYYY-MM')
+      ORDER BY mes
+    `;
+    
+    const ventasResult = await pool.query(finalQueryVentas, allParams);
+
+    // Obtener abonos (si existe tabla abono)
+    const abonoTableCheck = await pool.query(`
+      SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'abono') AS has_abono
+    `);
+
+    let abonosMap = {};
+    if (abonoTableCheck.rows[0]?.has_abono) {
+      const abonoColsQ = await pool.query(`
+        SELECT column_name FROM information_schema.columns WHERE table_name = 'abono'
+      `);
+      const abonoCols = new Set(abonoColsQ.rows.map(r => r.column_name));
+      
+      let abonoAmountCol = null;
+      let abonoDateCol = null;
+      let abonoVendedorCol = null;
+
+      if (abonoCols.has('monto')) abonoAmountCol = 'monto';
+      else if (abonoCols.has('monto_abono')) abonoAmountCol = 'monto_abono';
+      
+      if (abonoCols.has('fecha_abono')) abonoDateCol = 'fecha_abono';
+      else if (abonoCols.has('fecha')) abonoDateCol = 'fecha';
+      
+      if (abonoCols.has('vendedor_id')) abonoVendedorCol = 'vendedor_id';
+      else if (abonoCols.has('vendedor_cliente')) abonoVendedorCol = 'vendedor_cliente';
+
+        if (abonoAmountCol && abonoDateCol) {
+        let abonoVendedorFilter = '';
+        let abonoParams = [];
+        if (!isManager && abonoVendedorCol) {
+          if (abonoVendedorCol === 'vendedor_cliente') {
+            if (user.nombre_vendedor) {
+              abonoVendedorFilter = `AND UPPER(${abonoVendedorCol}) = UPPER($${fechaParams.length + 1})`;
+              abonoParams = [user.nombre_vendedor];
+            }
+          } else {
+            abonoVendedorFilter = `AND ${abonoVendedorCol} = $${fechaParams.length + 1}`;
+            abonoParams = [user.nombre_vendedor || user.rut];
+          }
+        }
+
+        // Construir filtro de fechas para abonos (igual que ventas)
+        let abonoFechaFilter = fechaFilter.replace(new RegExp(dateCol, 'g'), abonoDateCol);
+        
+        const queryAbonos = `
+          SELECT 
+            TO_CHAR(${abonoDateCol}, 'YYYY-MM') AS mes,
+            COALESCE(SUM(${abonoAmountCol}), 0) AS abonos
+          FROM abono
+          ${abonoFechaFilter}
+          ${abonoVendedorFilter}
+          GROUP BY TO_CHAR(${abonoDateCol}, 'YYYY-MM')
+          ORDER BY mes
+        `;
+        const allAbonoParams = [...fechaParams, ...abonoParams];
+        const abonosResult = await pool.query(queryAbonos, allAbonoParams);        abonosResult.rows.forEach(row => {
+          abonosMap[row.mes] = parseFloat(row.abonos);
+        });
+      }
+    }
+
+    // Combinar ventas y abonos
+    const evolucion = ventasResult.rows.map(row => ({
+      mes: row.mes,
+      ventas: parseFloat(row.ventas),
+      abonos: abonosMap[row.mes] || 0
+    }));
+
+    res.json(evolucion);
+  } catch (err) {
+    console.error('Error en /api/kpis/evolucion-mensual:', err.message);
+    res.status(500).json({ error: 'Server Error', message: err.message });
+  }
+});
+
+// @route   GET /api/kpis/ventas-por-familia
+// @desc    Get sales grouped by product family
+//          Supports optional params: ?limite=10 (default), ?meses=12, ?fechaInicio=YYYY-MM, ?fechaFin=YYYY-MM
+// @access  Private
+router.get('/ventas-por-familia', auth(), async (req, res) => {
+  try {
+    const { salesTable, amountCol, dateCol } = await getDetectedSales();
+    if (!salesTable || !amountCol || !dateCol) {
+      return res.json([]);
+    }
+
+    const user = req.user;
+    const isManager = user.rol === 'MANAGER';
+
+    // Parámetros opcionales
+    const limite = parseInt(req.query.limite) || 10;
+    const mesesAtras = parseInt(req.query.meses) || 12;
+    const fechaInicio = req.query.fechaInicio; // YYYY-MM
+    const fechaFin = req.query.fechaFin;       // YYYY-MM
+
+    // Verificar si existe tabla producto y relación
+    const productoTableCheck = await pool.query(`
+      SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'producto') AS has_producto
+    `);
+
+    if (!productoTableCheck.rows[0]?.has_producto) {
+      return res.json([]);
+    }
+
+    // Detectar columnas
+    const productoColsQ = await pool.query(`
+      SELECT column_name FROM information_schema.columns WHERE table_name = 'producto'
+    `);
+    const productoCols = new Set(productoColsQ.rows.map(r => r.column_name));
+
+    const salesColsQ = await pool.query(`
+      SELECT column_name FROM information_schema.columns WHERE table_name = $1
+    `, [salesTable]);
+    const salesCols = new Set(salesColsQ.rows.map(r => r.column_name));
+
+    let familiaCol = null;
+    let productoIdCol = null;
+    let salesProductoIdCol = null;
+
+    // Detectar columna familia en producto
+    if (productoCols.has('familia')) familiaCol = 'familia';
+    else if (productoCols.has('familia_producto')) familiaCol = 'familia_producto';
+
+    // Detectar ID de producto
+    if (productoCols.has('id')) productoIdCol = 'id';
+    else if (productoCols.has('codigo_producto')) productoIdCol = 'codigo_producto';
+
+    // Detectar FK en ventas
+    if (salesCols.has('producto_id')) salesProductoIdCol = 'producto_id';
+    else if (salesCols.has('codigo_producto')) salesProductoIdCol = 'codigo_producto';
+
+    if (!familiaCol || !productoIdCol || !salesProductoIdCol) {
+      return res.json([]);
+    }
+
+    // Detectar vendedor column
+    let vendedorCol = 'vendedor_id';
+    const vendedorColCheck = await pool.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = $1
+      AND column_name IN ('vendedor_id', 'vendedor_cliente')
+      LIMIT 1
+    `, [salesTable]);
+    if (vendedorColCheck.rows.length > 0) {
+      vendedorCol = vendedorColCheck.rows[0].column_name;
+    }
+
+    // Filtro vendedor
+    let vendedorFilter = '';
+    let params = [];
+    if (!isManager) {
+      if (vendedorCol === 'vendedor_cliente') {
+        if (user.nombre_vendedor) {
+          vendedorFilter = `AND UPPER(s.${vendedorCol}) = UPPER($1)`;
+          params = [user.nombre_vendedor];
+        }
+      } else {
+        vendedorFilter = `AND s.${vendedorCol} = $1`;
+        params = [user.nombre_vendedor || user.rut];
+      }
+    }
+
+    // Construir filtro de fechas
+    let fechaFilter = '';
+    let fechaParams = [];
+    
+    if (fechaInicio && fechaFin) {
+      // Rango específico
+      const paramOffset = params.length + 1;
+      fechaFilter = `AND s.${dateCol} >= $${paramOffset}::date AND s.${dateCol} < ($${paramOffset + 1}::text || '-01')::date + INTERVAL '1 month'`;
+      fechaParams = [`${fechaInicio}-01`, fechaFin];
+    } else if (fechaInicio) {
+      // Desde una fecha
+      const paramOffset = params.length + 1;
+      fechaFilter = `AND s.${dateCol} >= $${paramOffset}::date`;
+      fechaParams = [`${fechaInicio}-01`];
+    } else {
+      // Últimos N meses desde el último dato disponible
+      const ultimoMesQuery = `SELECT TO_CHAR(MAX(${dateCol}), 'YYYY-MM') AS ultimo_mes FROM ${salesTable}`;
+      const ultimoMesResult = await pool.query(ultimoMesQuery);
+      const ultimoMes = ultimoMesResult.rows[0]?.ultimo_mes;
+      
+      if (ultimoMes) {
+        const [year, month] = ultimoMes.split('-').map(Number);
+        const fechaLimite = new Date(year, month - mesesAtras, 1).toISOString().slice(0, 7);
+        const paramOffset = params.length + 1;
+        fechaFilter = `AND s.${dateCol} >= $${paramOffset}::date`;
+        fechaParams = [`${fechaLimite}-01`];
+      } else {
+        fechaFilter = `AND s.${dateCol} >= CURRENT_DATE - INTERVAL '${mesesAtras} months'`;
+      }
+    }
+
+    // Query ventas por familia con filtros dinámicos
+    const allParams = [...params, ...fechaParams];
+    
+    const query = `
+      SELECT 
+        p.${familiaCol} AS familia,
+        COALESCE(SUM(s.${amountCol}), 0) AS total
+      FROM ${salesTable} s
+      INNER JOIN producto p ON s.${salesProductoIdCol} = p.${productoIdCol}
+      WHERE 1=1
+      ${fechaFilter}
+      ${vendedorFilter}
+      GROUP BY p.${familiaCol}
+      ORDER BY total DESC
+      LIMIT ${limite}
+    `;
+    
+    const result = await pool.query(query, allParams);
+    
+    const ventasPorFamilia = result.rows.map(row => ({
+      familia: row.familia || 'Sin familia',
+      total: parseFloat(row.total)
+    }));
+
+    res.json(ventasPorFamilia);
+  } catch (err) {
+    console.error('Error en /api/kpis/ventas-por-familia:', err.message);
+    res.status(500).json({ error: 'Server Error', message: err.message });
   }
 });
 
