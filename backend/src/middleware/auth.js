@@ -27,8 +27,15 @@ module.exports = function(roles = []) {
       req.user = decoded.user;
 
       // Comparación case-insensitive para roles
-      if (roles.length && !roles.map(r => r.toLowerCase()).includes(req.user.rol.toLowerCase())) {
-        return res.status(403).json({ msg: 'Access denied. Insufficient permissions.' });
+      if (roles.length && req.user && req.user.rol) {
+        const userRol = req.user.rol.toLowerCase();
+        const allowedRoles = roles.map(r => r.toLowerCase());
+        if (!allowedRoles.includes(userRol)) {
+          return res.status(403).json({ msg: 'Access denied. Insufficient permissions.' });
+        }
+      } else if (roles.length) {
+        // Si se requieren roles pero no hay rol en el token
+        return res.status(403).json({ msg: 'Access denied. No role found in token.' });
       }
 
       next();
