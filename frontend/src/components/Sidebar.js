@@ -21,6 +21,7 @@ import {
   Assessment as ReportesIcon,
   Settings as SettingsIcon,
   ExitToApp as LogoutIcon,
+  UploadFile as ImportIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -68,6 +69,13 @@ const Sidebar = () => {
       path: '/reportes',
       color: '#14B8A6', // Teal
       divider: true
+    },
+    { 
+      title: 'Importar Datos', 
+      icon: <ImportIcon />, 
+      path: '/import-data',
+      color: '#F59E0B', // Amber
+      managerOnly: true
     },
     { 
       title: 'Configuración', 
@@ -176,50 +184,57 @@ const Sidebar = () => {
 
       {/* Menú Principal */}
       <List sx={{ px: 1, flex: 1 }}>
-        {menuItems.map((item) => (
-          <React.Fragment key={item.title}>
-            {item.divider && (
-              <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 1 }} />
-            )}
-            <ListItem disablePadding sx={{ mb: 0.5 }}>
-              <ListItemButton
-                onClick={() => handleNavigation(item.path)}
-                sx={{
-                  borderRadius: 2,
-                  color: isActive(item.path) ? '#FFFFFF' : '#D1D5DB',
-                  backgroundColor: isActive(item.path) 
-                    ? 'rgba(229, 122, 45, 0.15)' 
-                    : 'transparent',
-                  borderLeft: isActive(item.path) 
-                    ? '4px solid #E57A2D' 
-                    : '4px solid transparent',
-                  '&:hover': {
-                    backgroundColor: 'rgba(229, 122, 45, 0.1)',
-                    color: '#FFFFFF',
-                  },
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <ListItemIcon
+        {menuItems.map((item) => {
+          // Ocultar "Importar Datos" si no es manager
+          if (item.managerOnly && user?.rol !== 'MANAGER') {
+            return null;
+          }
+          
+          return (
+            <React.Fragment key={item.title}>
+              {item.divider && (
+                <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 1 }} />
+              )}
+              <ListItem disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  onClick={() => handleNavigation(item.path)}
                   sx={{
-                    color: isActive(item.path) ? '#E57A2D' : item.color,
-                    minWidth: 40,
-                    transition: 'color 0.2s ease',
+                    borderRadius: 2,
+                    color: '#FFFFFF', // TEXTO BLANCO SIEMPRE
+                    backgroundColor: isActive(item.path) 
+                      ? 'rgba(229, 122, 45, 0.15)' 
+                      : 'transparent',
+                    borderLeft: isActive(item.path) 
+                      ? '4px solid #E57A2D' 
+                      : '4px solid transparent',
+                    '&:hover': {
+                      backgroundColor: 'rgba(229, 122, 45, 0.1)',
+                      color: '#FFFFFF',
+                    },
+                    transition: 'all 0.2s ease',
                   }}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={item.title}
-                  primaryTypographyProps={{
-                    fontSize: '0.9375rem',
-                    fontWeight: isActive(item.path) ? 600 : 500,
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </React.Fragment>
-        ))}
+                  <ListItemIcon
+                    sx={{
+                      color: isActive(item.path) ? '#E57A2D' : item.color,
+                      minWidth: 40,
+                      transition: 'color 0.2s ease',
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={item.title}
+                    primaryTypographyProps={{
+                      fontSize: '0.9375rem',
+                      fontWeight: isActive(item.path) ? 600 : 500,
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </React.Fragment>
+          );
+        })}
       </List>
 
       {/* Logout */}
@@ -230,7 +245,7 @@ const Sidebar = () => {
             onClick={handleLogout}
             sx={{
               borderRadius: 2,
-              color: '#D1D5DB',
+              color: '#FFFFFF', // TEXTO BLANCO
               '&:hover': {
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
                 color: '#FFFFFF',

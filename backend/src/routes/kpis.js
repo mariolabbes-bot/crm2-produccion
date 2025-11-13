@@ -39,9 +39,9 @@ async function getDetectedSales() {
     else if (cols.has('total_venta')) amountCol = 'total_venta';
     else if (cols.has('monto_total')) amountCol = 'monto_total';
     // Date
-    if (cols.has('fecha_factura')) dateCol = 'fecha_factura';
+    if (cols.has('fecha_emision')) dateCol = 'fecha_emision';
+    else if (cols.has('fecha_factura')) dateCol = 'fecha_factura';
     else if (cols.has('invoice_date')) dateCol = 'invoice_date';
-    else if (cols.has('fecha_emision')) dateCol = 'fecha_emision';
     else if (cols.has('fecha')) dateCol = 'fecha';
     // Client FK
     if (cols.has('client_id')) clientIdCol = 'client_id';
