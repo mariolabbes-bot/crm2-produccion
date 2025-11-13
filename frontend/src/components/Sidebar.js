@@ -121,7 +121,7 @@ const Sidebar = () => {
         <Box
           component="img"
           src="/design-references/Lubricar LOGO.png"
-          alt="Lubricar INSA"
+          alt="Lubricar INSA CRM"
           sx={{
             width: '80%',
             maxWidth: 160,
