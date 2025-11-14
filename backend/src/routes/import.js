@@ -249,40 +249,39 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     console.log('  - Monto Total:', colMontoTotal);
 
     // Cargar usuarios (con matching flexible igual que en ventas)
-    const usersRes = await client.query("SELECT nombre_vendedor, rut FROM usuario WHERE rol_usuario = 'VENDEDOR'");
+  // Cargar TODOS los usuarios que tengan nombre_vendedor, independiente del rol (incluye MANAGER con funciones de venta)
+  const usersRes = await client.query("SELECT nombre_vendedor, rut FROM usuario WHERE nombre_vendedor IS NOT NULL");
     
     console.log(`👥 Vendedores cargados: ${usersRes.rows.length}`);
     usersRes.rows.forEach(u => {
       console.log(`   - ${u.rut}: "${u.nombre_vendedor}"`);
     });
     
-    // Crear 3 mapas de búsqueda para matching flexible (igual que en ventas)
+    // Crear 3 mapas de búsqueda para matching flexible (IGUAL QUE EN VENTAS)
     const usersByNormFull = new Map();
     const usersByFirstTwo = new Map();
     const usersByFirstWord = new Map();
     
-    usersRes.rows.forEach(u => {
-      if (u.nombre_vendedor) {
-        const fullNorm = norm(u.nombre_vendedor);
-        const words = fullNorm.split(/\s+/).filter(w => w.length > 0);
-        
-        // Mapa 1: Nombre completo normalizado
-        usersByNormFull.set(fullNorm, u.rut);
-        
-        // Mapa 2: Primeras dos palabras
-        if (words.length >= 2) {
-          const firstTwo = words.slice(0, 2).join(' ');
-          if (!usersByFirstTwo.has(firstTwo)) {
-            usersByFirstTwo.set(firstTwo, u.rut);
-          }
+    usersRes.rows.filter(u => u.nombre_vendedor).forEach(u => {
+      const fullNorm = norm(u.nombre_vendedor);
+      const words = fullNorm.split(/\s+/).filter(w => w.length > 0);
+      
+      // Mapa 1: Nombre completo normalizado → GUARDA NOMBRE_VENDEDOR (no RUT)
+      usersByNormFull.set(fullNorm, u.nombre_vendedor);
+      
+      // Mapa 2: Primeras dos palabras → GUARDA NOMBRE_VENDEDOR (no RUT)
+      if (words.length >= 2) {
+        const firstTwo = words.slice(0, 2).join(' ');
+        if (!usersByFirstTwo.has(firstTwo)) {
+          usersByFirstTwo.set(firstTwo, u.nombre_vendedor);
         }
-        
-        // Mapa 3: Primera palabra
-        if (words.length >= 1) {
-          const firstWord = words[0];
-          if (!usersByFirstWord.has(firstWord)) {
-            usersByFirstWord.set(firstWord, u.rut);
-          }
+      }
+      
+      // Mapa 3: Primera palabra → GUARDA NOMBRE_VENDEDOR (no RUT)
+      if (words.length >= 1) {
+        const firstWord = words[0];
+        if (!usersByFirstWord.has(firstWord)) {
+          usersByFirstWord.set(firstWord, u.nombre_vendedor);
         }
       }
     });
@@ -349,8 +348,8 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
         continue;
       }
 
-      // Buscar vendedor con matching flexible (igual que en ventas)
-      let vendedorRut = null;
+      // Buscar vendedor con matching flexible (IGUAL QUE EN VENTAS)
+      let vendedorNombre = null;
       if (vendedorClienteAlias) {
         console.log(`🔍 [Fila ${excelRow}] Buscando vendedor: "${vendedorClienteAlias}"`);
         const vendorNorm = norm(vendedorClienteAlias);
@@ -359,31 +358,31 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
         
         // Nivel 1: Nombre completo
         if (usersByNormFull.has(vendorNorm)) {
-          vendedorRut = usersByNormFull.get(vendorNorm);
-          console.log(`   ✅ Match nivel 1 (completo): ${vendedorRut}`);
+          vendedorNombre = usersByNormFull.get(vendorNorm);
+          console.log(`   ✅ Match nivel 1 (completo): ${vendedorNombre}`);
         }
         // Nivel 2: Primeras dos palabras
         else if (vendorWords.length >= 2) {
           const firstTwo = vendorWords.slice(0, 2).join(' ');
           if (usersByFirstTwo.has(firstTwo)) {
-            vendedorRut = usersByFirstTwo.get(firstTwo);
-            console.log(`   ✅ Match nivel 2 (dos palabras "${firstTwo}"): ${vendedorRut}`);
+            vendedorNombre = usersByFirstTwo.get(firstTwo);
+            console.log(`   ✅ Match nivel 2 (dos palabras "${firstTwo}"): ${vendedorNombre}`);
           }
         }
         // Nivel 3: Primera palabra
-        if (!vendedorRut && vendorWords.length >= 1) {
+        if (!vendedorNombre && vendorWords.length >= 1) {
           const firstWord = vendorWords[0];
           console.log(`   Intentando nivel 3 con primera palabra: "${firstWord}"`);
           if (usersByFirstWord.has(firstWord)) {
-            vendedorRut = usersByFirstWord.get(firstWord);
-            console.log(`   ✅ Match nivel 3 (una palabra "${firstWord}"): ${vendedorRut}`);
+            vendedorNombre = usersByFirstWord.get(firstWord);
+            console.log(`   ✅ Match nivel 3 (una palabra "${firstWord}"): ${vendedorNombre}`);
           } else {
             console.log(`   ❌ No encontrado en mapa de primera palabra`);
           }
         }
         
         // Si no se encontró, agregar a faltantes
-        if (!vendedorRut) {
+        if (!vendedorNombre) {
           missingVendors.add(vendedorClienteAlias);
           observations.push({ fila: excelRow, folio, campo: 'vendedor_cliente', detalle: `Vendedor no encontrado: ${vendedorClienteAlias}` });
         }
@@ -404,7 +403,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
 
       toImport.push({
         sucursal, folio, fecha, identificador: clienteRut, clienteNombre,
-        vendedorClienteRut: vendedorRut, cajaOperacion, usuarioIngreso,
+        vendedorClienteNombre: vendedorNombre, cajaOperacion, usuarioIngreso,
         montoTotal, saldoFavor, saldoFavorTotal, tipoPago,
         estadoAbono, identificadorAbono, fechaVencimiento,
         monto, montoNeto
@@ -467,7 +466,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
               [
                 item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
-                item.vendedorClienteRut, item.cajaOperacion, item.usuarioIngreso,
+                item.vendedorClienteNombre, item.cajaOperacion, item.usuarioIngreso,
                 item.montoTotal, item.saldoFavor, item.saldoFavorTotal, item.tipoPago,
                 item.estadoAbono, item.identificadorAbono, item.fechaVencimiento,
                 item.monto, item.montoNeto

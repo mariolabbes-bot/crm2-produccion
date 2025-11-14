@@ -172,7 +172,8 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
 
     // Cargar usuarios existentes (usando nombre_vendedor para match)
     // Crear múltiples mapas para match flexible: completo, primera palabra, primeras dos palabras
-    const usersRes = await client.query("SELECT nombre_vendedor, nombre_completo FROM usuario WHERE rol_usuario = 'VENDEDOR'");
+    // Incluir a cualquier usuario que tenga nombre_vendedor definido, sin filtrar por rol
+    const usersRes = await client.query("SELECT nombre_vendedor, nombre_completo FROM usuario WHERE nombre_vendedor IS NOT NULL");
     const usersByNormFull = new Map(); // Match por nombre completo
     const usersByFirstWord = new Map(); // Match por primera palabra
     const usersByFirstTwo = new Map(); // Match por primeras dos palabras
