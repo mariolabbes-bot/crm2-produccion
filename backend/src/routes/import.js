@@ -76,6 +76,7 @@ function parseNumeric(value) {
 
 // POST /api/import/ventas - Importar ventas desde Excel (ASÍNCRONO)
 router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res) => {
+  console.log('🟢 ====== ENDPOINT /ventas LLAMADO ====== 🟢');
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
@@ -162,6 +163,7 @@ router.get('/status/:jobId', auth(['manager']), async (req, res) => {
 
 // POST /api/import/abonos - Importar abonos desde Excel
 router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res) => {
+  console.log('🔵 ====== ENDPOINT /abonos LLAMADO ====== 🔵');
   const client = await pool.connect();
   
   try {
