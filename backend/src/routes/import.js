@@ -271,9 +271,20 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const clientsByRut = new Map(clientsRes.rows.map(c => [norm(c.rut), c.rut]));
     const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.rut]));
 
-    // Verificar duplicados
-    const existingAbonos = await client.query(`SELECT folio FROM abono WHERE folio IS NOT NULL`);
-    const existingFolios = new Set(existingAbonos.rows.map(a => norm(a.folio)));
+    // Verificar duplicados: CLAVE ÚNICA = FOLIO + FECHA + IDENTIFICADOR
+    const existingAbonos = await client.query(`
+      SELECT folio, fecha, identificador 
+      FROM abono 
+      WHERE folio IS NOT NULL
+    `);
+    const existingKeys = new Set(
+      existingAbonos.rows.map(a => {
+        const f = norm(a.folio || '');
+        const d = a.fecha || '';
+        const i = norm(a.identificador || '');
+        return `${f}|${d}|${i}`;
+      })
+    );
 
   const toImport = [];
   const duplicates = [];
@@ -290,13 +301,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
 
       if (!folio || !fecha || !montoNeto || montoNeto <= 0) continue;
 
-      // Validar duplicado
-      if (existingFolios.has(norm(folio))) {
-        duplicates.push({ folio, fecha, monto: montoNeto });
-        continue;
-      }
-
-      // Procesar datos opcionales
+      // Procesar datos primero para obtener identificador
       const sucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
       const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null;
       const clienteNombre = colCliente && row[colCliente] ? String(row[colCliente]).trim() : null;
@@ -311,6 +316,14 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       const estadoAbono = colEstadoAbono && row[colEstadoAbono] ? String(row[colEstadoAbono]).trim() : null;
       const identificadorAbono = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : null;
       const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
+
+      // Validar duplicado DESPUÉS de tener identificador
+      // CLAVE ÚNICA: FOLIO + FECHA + IDENTIFICADOR
+      const duplicateKey = `${norm(folio)}|${fecha}|${norm(identificador || '')}`;
+      if (existingKeys.has(duplicateKey)) {
+        duplicates.push({ folio, fecha, identificador, monto: montoNeto });
+        continue;
+      }
 
       // Buscar vendedor con matching flexible (igual que en ventas)
       let vendedorRut = null;
