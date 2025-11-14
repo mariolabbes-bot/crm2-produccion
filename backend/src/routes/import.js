@@ -287,9 +287,10 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const clientsByRut = new Map(clientsRes.rows.map(c => [norm(c.rut), c.rut]));
     const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.rut]));
 
-    // Verificar duplicados: CLAVE ÚNICA = FOLIO + FECHA + IDENTIFICADOR
+    // Verificar duplicados: CLAVE ÚNICA = FOLIO + IDENTIFICADOR_ABONO + FECHA
+    // (según constraint de BD: abono_unique_key)
     const existingAbonos = await client.query(`
-      SELECT folio, fecha, identificador 
+      SELECT folio, fecha, identificador_abono 
       FROM abono 
       WHERE folio IS NOT NULL
     `);
@@ -297,8 +298,8 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       existingAbonos.rows.map(a => {
         const f = norm(a.folio || '');
         const d = a.fecha || '';
-        const i = norm(a.identificador || '');
-        return `${f}|${d}|${i}`;
+        const ia = norm(a.identificador_abono || '');
+        return `${f}|${d}|${ia}`;
       })
     );
 
@@ -333,11 +334,11 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       const identificadorAbono = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : null;
       const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
 
-      // Validar duplicado DESPUÉS de tener identificador
-      // CLAVE ÚNICA: FOLIO + FECHA + IDENTIFICADOR
-      const duplicateKey = `${norm(folio)}|${fecha}|${norm(identificador || '')}`;
+      // Validar duplicado DESPUÉS de tener identificadorAbono
+      // CLAVE ÚNICA: FOLIO + IDENTIFICADOR_ABONO + FECHA (según constraint BD)
+      const duplicateKey = `${norm(folio)}|${fecha}|${norm(identificadorAbono || '')}`;
       if (existingKeys.has(duplicateKey)) {
-        duplicates.push({ folio, fecha, identificador, monto: montoNeto });
+        duplicates.push({ folio, fecha, identificadorAbono, monto: montoNeto });
         continue;
       }
 
