@@ -171,8 +171,29 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
     }
 
     // Cargar usuarios existentes (usando nombre_vendedor para match)
+    // Crear múltiples mapas para match flexible: completo, primera palabra, primeras dos palabras
     const usersRes = await client.query("SELECT nombre_vendedor, nombre_completo FROM usuario WHERE rol_usuario = 'VENDEDOR'");
-    const usersByNormAlias = new Map(usersRes.rows.filter(u => u.nombre_vendedor).map(u => [norm(u.nombre_vendedor), u.nombre_vendedor]));
+    const usersByNormFull = new Map(); // Match por nombre completo
+    const usersByFirstWord = new Map(); // Match por primera palabra
+    const usersByFirstTwo = new Map(); // Match por primeras dos palabras
+    
+    usersRes.rows.filter(u => u.nombre_vendedor).forEach(u => {
+      const nombreNorm = norm(u.nombre_vendedor);
+      const palabras = nombreNorm.split(/\s+/);
+      
+      // Map completo
+      usersByNormFull.set(nombreNorm, u.nombre_vendedor);
+      
+      // Map por primera palabra (ej: "Maiko" matchea "Maiko Ricardo Flores Maldonado")
+      if (palabras.length > 0) {
+        usersByFirstWord.set(palabras[0], u.nombre_vendedor);
+      }
+      
+      // Map por primeras dos palabras (ej: "Matias Felipe" matchea "Matias Felipe Felipe Tapia Valenzuela")
+      if (palabras.length >= 2) {
+        usersByFirstTwo.set(`${palabras[0]} ${palabras[1]}`, u.nombre_vendedor);
+      }
+    });
 
     // Cargar clientes existentes
     const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
@@ -225,9 +246,32 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
 
       let vendedorAlias = null;
       if (vendedorClienteAlias) {
-        const existe = usersByNormAlias.has(norm(vendedorClienteAlias));
-        if (existe) {
-          vendedorAlias = vendedorClienteAlias;
+        const vendedorNorm = norm(vendedorClienteAlias);
+        const palabras = vendedorNorm.split(/\s+/);
+        
+        // Intentar match en orden: completo → dos palabras → una palabra
+        let found = null;
+        
+        // 1. Match exacto (ej: "Eduardo Enrique Ponce Castillo")
+        if (usersByNormFull.has(vendedorNorm)) {
+          found = usersByNormFull.get(vendedorNorm);
+        }
+        // 2. Match por primeras dos palabras (ej: "Matias Felipe" → "Matias Felipe Felipe Tapia Valenzuela")
+        else if (palabras.length >= 2) {
+          const dosPalabras = `${palabras[0]} ${palabras[1]}`;
+          if (usersByFirstTwo.has(dosPalabras)) {
+            found = usersByFirstTwo.get(dosPalabras);
+          }
+        }
+        // 3. Match por primera palabra (ej: "Maiko" → "Maiko Ricardo Flores Maldonado")
+        if (!found && palabras.length > 0) {
+          if (usersByFirstWord.has(palabras[0])) {
+            found = usersByFirstWord.get(palabras[0]);
+          }
+        }
+        
+        if (found) {
+          vendedorAlias = found;
         } else {
           missingVendors.add(vendedorClienteAlias);
           observations.push({ fila: excelRow, folio, campo: 'vendedor_cliente', detalle: `Vendedor no encontrado: ${vendedorClienteAlias}` });
