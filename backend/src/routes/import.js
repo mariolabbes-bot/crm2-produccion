@@ -222,9 +222,39 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       });
     }
 
-    // Cargar usuarios
-    const usersRes = await client.query("SELECT alias, nombre_completo FROM usuario WHERE rol_usuario = 'vendedor'");
-    const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.alias]));
+    // Cargar usuarios (con matching flexible igual que en ventas)
+    const usersRes = await client.query("SELECT nombre_vendedor, rut FROM usuario WHERE rol_usuario = 'VENDEDOR'");
+    
+    // Crear 3 mapas de búsqueda para matching flexible (igual que en ventas)
+    const usersByNormFull = new Map();
+    const usersByFirstTwo = new Map();
+    const usersByFirstWord = new Map();
+    
+    usersRes.rows.forEach(u => {
+      if (u.nombre_vendedor) {
+        const fullNorm = norm(u.nombre_vendedor);
+        const words = fullNorm.split(/\s+/).filter(w => w.length > 0);
+        
+        // Mapa 1: Nombre completo normalizado
+        usersByNormFull.set(fullNorm, u.rut);
+        
+        // Mapa 2: Primeras dos palabras
+        if (words.length >= 2) {
+          const firstTwo = words.slice(0, 2).join(' ');
+          if (!usersByFirstTwo.has(firstTwo)) {
+            usersByFirstTwo.set(firstTwo, u.rut);
+          }
+        }
+        
+        // Mapa 3: Primera palabra
+        if (words.length >= 1) {
+          const firstWord = words[0];
+          if (!usersByFirstWord.has(firstWord)) {
+            usersByFirstWord.set(firstWord, u.rut);
+          }
+        }
+      }
+    });
 
     // Cargar clientes (por RUT y por nombre)
     const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
@@ -272,15 +302,35 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
       const montoNeto = colMontoNeto ? parseNumeric(row[colMontoNeto]) : null;
 
-      // Buscar vendedor por alias
-      let vendedorAlias = null;
+      // Buscar vendedor con matching flexible (igual que en ventas)
+      let vendedorRut = null;
       if (vendedorClienteAlias) {
-        const existe = usersByNormAlias.has(norm(vendedorClienteAlias));
-        if (existe) {
-          vendedorAlias = vendedorClienteAlias;
-        } else {
+        const vendorNorm = norm(vendedorClienteAlias);
+        const vendorWords = vendorNorm.split(/\s+/).filter(w => w.length > 0);
+        
+        // Nivel 1: Nombre completo
+        if (usersByNormFull.has(vendorNorm)) {
+          vendedorRut = usersByNormFull.get(vendorNorm);
+        }
+        // Nivel 2: Primeras dos palabras
+        else if (vendorWords.length >= 2) {
+          const firstTwo = vendorWords.slice(0, 2).join(' ');
+          if (usersByFirstTwo.has(firstTwo)) {
+            vendedorRut = usersByFirstTwo.get(firstTwo);
+          }
+        }
+        // Nivel 3: Primera palabra
+        if (!vendedorRut && vendorWords.length >= 1) {
+          const firstWord = vendorWords[0];
+          if (usersByFirstWord.has(firstWord)) {
+            vendedorRut = usersByFirstWord.get(firstWord);
+          }
+        }
+        
+        // Si no se encontró, agregar a faltantes
+        if (!vendedorRut) {
           missingVendors.add(vendedorClienteAlias);
-          observations.push({ fila: excelRow, folio, campo: 'vendedor_cliente', detalle: `Vendedor no encontrado (alias: ${vendedorClienteAlias})` });
+          observations.push({ fila: excelRow, folio, campo: 'vendedor_cliente', detalle: `Vendedor no encontrado: ${vendedorClienteAlias}` });
         }
       }
 
@@ -299,7 +349,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
 
       toImport.push({
         sucursal, folio, fecha, identificador: clienteRut, clienteNombre,
-        vendedorClienteAlias: vendedorAlias, cajaOperacion, usuarioIngreso,
+        vendedorClienteRut: vendedorRut, cajaOperacion, usuarioIngreso,
         montoTotal, saldoFavor, saldoFavorTotal, tipoPago,
         estadoAbono, identificadorAbono, fechaVencimiento,
         monto, montoNeto
@@ -362,7 +412,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
               [
                 item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
-                item.vendedorClienteAlias, item.cajaOperacion, item.usuarioIngreso,
+                item.vendedorClienteRut, item.cajaOperacion, item.usuarioIngreso,
                 item.montoTotal, item.saldoFavor, item.saldoFavorTotal, item.tipoPago,
                 item.estadoAbono, item.identificadorAbono, item.fechaVencimiento,
                 item.monto, item.montoNeto
