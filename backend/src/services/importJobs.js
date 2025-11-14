@@ -374,7 +374,7 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
             [
               item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador,
-              item.clienteNombre, item.vendedorClienteAlias, item.vendedorDocNombre,
+              item.clienteNombre, item.vendedorClienteAlias, null, // vendedor_documento = NULL (FK a alias vacío)
               item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice,
               item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, litrosVendidos, null
             ]
