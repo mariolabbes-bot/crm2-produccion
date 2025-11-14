@@ -222,7 +222,13 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const colSucursal = findCol([/^Sucursal$/i]);
     const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i]);
     const colCliente = findCol([/^Cliente$/i]);
-    const colVendedorCliente = findCol([/^Vendedor.*cliente$/i, /^Alias.*vendedor$/i]);
+    // Vendedor: buscar por varios nombres posibles (priorizar Alias)
+    const colVendedorCliente = findCol([
+      /^Alias.*vendedor$/i,      // "Alias Vendedor"
+      /^Alias.*Vende[cd]$/i,     // "Alias Vendec", "Alias Vended"
+      /^Vendedor.*cliente$/i,     // "Vendedor cliente"
+      /^Vendedor$/i               // "Vendedor"
+    ]);
     const colCajaOperacion = findCol([/^Caja.*operacion$/i]);
     const colUsuarioIngreso = findCol([/^Usuario.*ingreso$/i]);
     const colMonto = findCol([/^Monto$/i, /Monto.*abono/i]); // Monto sin "neto" ni "total"
@@ -233,6 +239,14 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const colEstadoAbono = findCol([/^Estado.*abono$/i]);
     const colIdentificadorAbono = findCol([/^Identificador.*abono$/i]);
     const colFechaVencimiento = findCol([/^Fecha.*vencimiento$/i]);
+
+    console.log('📋 Columnas opcionales detectadas:');
+    console.log('  - Sucursal:', colSucursal);
+    console.log('  - Identificador:', colIdentificador);
+    console.log('  - Cliente:', colCliente);
+    console.log('  - Vendedor Cliente:', colVendedorCliente);
+    console.log('  - Monto:', colMonto);
+    console.log('  - Monto Total:', colMontoTotal);
 
     // Cargar usuarios (con matching flexible igual que en ventas)
     const usersRes = await client.query("SELECT nombre_vendedor, rut FROM usuario WHERE rol_usuario = 'VENDEDOR'");
