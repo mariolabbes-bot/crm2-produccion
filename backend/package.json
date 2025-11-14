@@ -27,6 +27,7 @@
     "multer": "^2.0.2",
     "pg": "^8.11.1",
     "pg-copy-streams": "^7.0.0",
+    "uuid": "^9.0.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
