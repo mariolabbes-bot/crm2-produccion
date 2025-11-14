@@ -187,11 +187,35 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     console.log('🔎 Encabezados detectados (abonos):', headers);
     const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
     
-    // Columnas REQUERIDAS
-    const colFolio = findCol([/^Folio$/i]);
-    const colFecha = findCol([/^Fecha$/i]);
-    const colMonto = findCol([/^Monto$/i]);
+    // Columnas REQUERIDAS para abonos
+    const colFolio = findCol([/^Folio$/i, /Folio/i]);
+    const colFecha = findCol([/^Fecha$/i, /Fecha.*abono/i, /Fecha/i]);
+    const colMontoNeto = findCol([/^Monto.*neto$/i, /Monto.*neto/i]); // ← COLUMNA PRINCIPAL
     
+    console.log('📋 Columnas requeridas detectadas (ABONOS):');
+    console.log('  - Folio:', colFolio);
+    console.log('  - Fecha:', colFecha);
+    console.log('  - Monto Neto:', colMontoNeto);
+
+    if (!colFolio || !colFecha || !colMontoNeto) {
+      const faltantes = [
+        !colFolio ? 'Folio' : null,
+        !colFecha ? 'Fecha' : null,
+        !colMontoNeto ? 'Monto Neto' : null
+      ].filter(Boolean);
+      console.error('❌ Faltan columnas:', faltantes);
+      console.error('❌ Encabezados disponibles:', headers);
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        success: false,
+        msg: `Faltan columnas requeridas: ${faltantes.join(', ')}`,
+        detalles: { 
+          encabezadosDetectados: headers,
+          columnasRequeridas: ['Folio', 'Fecha', 'Monto Neto']
+        }
+      });
+    }
+
     // Columnas OPCIONALES
     const colSucursal = findCol([/^Sucursal$/i]);
     const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i]);
@@ -199,6 +223,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const colVendedorCliente = findCol([/^Vendedor.*cliente$/i, /^Alias.*vendedor$/i]);
     const colCajaOperacion = findCol([/^Caja.*operacion$/i]);
     const colUsuarioIngreso = findCol([/^Usuario.*ingreso$/i]);
+    const colMonto = findCol([/^Monto$/i, /Monto.*abono/i]); // Monto sin "neto" ni "total"
     const colMontoTotal = findCol([/^Monto.*total$/i]);
     const colSaldoFavor = findCol([/^Saldo.*favor$/i]);
     const colSaldoFavorTotal = findCol([/^Saldo.*favor.*total$/i]);
@@ -206,21 +231,6 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const colEstadoAbono = findCol([/^Estado.*abono$/i]);
     const colIdentificadorAbono = findCol([/^Identificador.*abono$/i]);
     const colFechaVencimiento = findCol([/^Fecha.*vencimiento$/i]);
-    const colMontoNeto = findCol([/^Monto.*neto$/i]);
-
-    if (!colFolio || !colFecha || !colMonto) {
-      const faltantes = [
-        !colFolio ? 'Folio' : null,
-        !colFecha ? 'Fecha' : null,
-        !colMonto ? 'Monto' : null
-      ].filter(Boolean);
-      fs.unlinkSync(req.file.path);
-      return res.status(400).json({
-        success: false,
-        msg: `Faltan columnas requeridas: ${faltantes.join(', ')}`,
-        detalles: { encabezadosDetectados: headers }
-      });
-    }
 
     // Cargar usuarios (con matching flexible igual que en ventas)
     const usersRes = await client.query("SELECT nombre_vendedor, rut FROM usuario WHERE rol_usuario = 'VENDEDOR'");
@@ -276,23 +286,24 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       const excelRow = i + 2;
       const folio = row[colFolio] ? String(row[colFolio]).trim() : null;
       const fecha = parseExcelDate(row[colFecha]);
-      const monto = colMonto ? parseNumeric(row[colMonto]) : null;
+      const montoNeto = parseNumeric(row[colMontoNeto]); // ← VALOR PRINCIPAL
 
-      if (!folio || !fecha || !monto || monto <= 0) continue;
+      if (!folio || !fecha || !montoNeto || montoNeto <= 0) continue;
 
       // Validar duplicado
       if (existingFolios.has(norm(folio))) {
-        duplicates.push({ folio, fecha, monto });
+        duplicates.push({ folio, fecha, monto: montoNeto });
         continue;
       }
 
-      // Procesar datos
+      // Procesar datos opcionales
       const sucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
       const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null;
       const clienteNombre = colCliente && row[colCliente] ? String(row[colCliente]).trim() : null;
       const vendedorClienteAlias = colVendedorCliente && row[colVendedorCliente] ? String(row[colVendedorCliente]).trim() : null;
       const cajaOperacion = colCajaOperacion && row[colCajaOperacion] ? String(row[colCajaOperacion]).trim() : null;
       const usuarioIngreso = colUsuarioIngreso && row[colUsuarioIngreso] ? String(row[colUsuarioIngreso]).trim() : null;
+      const monto = colMonto ? parseNumeric(row[colMonto]) : null; // Monto secundario/opcional
       const montoTotal = colMontoTotal ? parseNumeric(row[colMontoTotal]) : null;
       const saldoFavor = colSaldoFavor ? parseNumeric(row[colSaldoFavor]) : null;
       const saldoFavorTotal = colSaldoFavorTotal ? parseNumeric(row[colSaldoFavorTotal]) : null;
@@ -300,7 +311,6 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       const estadoAbono = colEstadoAbono && row[colEstadoAbono] ? String(row[colEstadoAbono]).trim() : null;
       const identificadorAbono = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : null;
       const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
-      const montoNeto = colMontoNeto ? parseNumeric(row[colMontoNeto]) : null;
 
       // Buscar vendedor con matching flexible (igual que en ventas)
       let vendedorRut = null;
