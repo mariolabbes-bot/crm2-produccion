@@ -6,6 +6,7 @@ const pool = require('../db');
 const auth = require('../middleware/auth');
 const path = require('path');
 const fs = require('fs');
+const { createJob, updateJobStatus, getJobStatus, processVentasFileAsync } = require('../services/importJobs');
 
 // Asegurar directorios de trabajo para uploads temporales y reportes
 const TEMP_DIR = 'uploads/temp';
@@ -73,345 +74,89 @@ function parseNumeric(value) {
   return isNaN(num) ? null : num;
 }
 
-// POST /api/import/ventas - Importar ventas desde Excel
+// POST /api/import/ventas - Importar ventas desde Excel (ASÍNCRONO)
 router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res) => {
-  const client = await pool.connect();
-  
   try {
-    console.log('🔵 VERSIÓN: import.js con cálculo litros + roles case-insensitive - commit 7d2156e');
-    
     if (!req.file) {
       return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
     }
 
-    console.log('📁 Procesando archivo:', req.file.originalname);
+    console.log('📁 [ASYNC] Archivo recibido:', req.file.originalname);
+
+    // Crear job y mover archivo a ubicación permanente temporal
+    const userRut = req.user?.rut || 'unknown';
+    const jobId = await createJob('ventas', req.file.originalname, userRut);
     
-    // Leer Excel
-    const workbook = XLSX.readFile(req.file.path);
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(sheet, { raw: true });
+    const permanentPath = path.join('uploads/pending', `${jobId}_${req.file.originalname}`);
+    const pendingDir = 'uploads/pending';
+    if (!fs.existsSync(pendingDir)) fs.mkdirSync(pendingDir, { recursive: true });
+    fs.renameSync(req.file.path, permanentPath);
 
-    console.log(`📊 Total filas en Excel: ${data.length}`);
-    if (!Array.isArray(data) || data.length === 0) {
-      fs.unlinkSync(req.file.path);
-      return res.status(400).json({ success: false, msg: 'El archivo Excel no contiene filas para procesar' });
-    }
-
-    // Detectar columnas
-    const headers = Object.keys(data[0] || {});
-    console.log('🔎 Encabezados detectados (ventas):', headers);
-    const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
-    
-    // Columnas REQUERIDAS
-    const colFolio = findCol([/^Folio$/i]);
-    const colTipoDoc = findCol([/^Tipo.*documento$/i, /^Tipo$/i]);
-    const colFecha = findCol([/^Fecha$/i, /^Fecha.*emision$/i]);
-    
-    // Columnas OPCIONALES
-    const colSucursal = findCol([/^Sucursal$/i]);
-    const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i]);
-    const colCliente = findCol([/^Cliente$/i]);
-    const colVendedorCliente = findCol([/^Vendedor.*cliente$/i, /^Alias.*vendedor$/i]);
-    const colVendedorDoc = findCol([/^Vendedor.*documento$/i, /^Vendedor$/i]);
-    const colEstadoSistema = findCol([/^Estado.*sistema$/i]);
-    const colEstadoComercial = findCol([/^Estado.*comercial$/i]);
-    const colEstadoSII = findCol([/^Estado.*SII$/i, /^Estado.*sii$/i]);
-    const colIndice = findCol([/^Indice$/i, /^Index$/i]);
-    const colSKU = findCol([/^SKU$/i, /^Codigo$/i]);
-    const colDescripcion = findCol([/^Descripcion$/i, /^Descripción$/i]);
-    const colCantidad = findCol([/^Cantidad$/i]);
-    const colPrecio = findCol([/^Precio$/i]);
-    const colValorTotal = findCol([/^Valor.*total$/i, /^Total$/i]);
-
-    if (!colFolio || !colTipoDoc || !colFecha) {
-      const faltantes = [
-        !colFolio ? 'Folio' : null,
-        !colTipoDoc ? 'Tipo documento' : null,
-        !colFecha ? 'Fecha' : null
-      ].filter(Boolean);
-      fs.unlinkSync(req.file.path);
-      return res.status(400).json({
-        success: false,
-        msg: `Faltan columnas requeridas: ${faltantes.join(', ')}`,
-        detalles: { encabezadosDetectados: headers }
-      });
-    }
-
-    // Cargar usuarios existentes
-    const usersRes = await client.query("SELECT alias, nombre_completo FROM usuario WHERE rol_usuario = 'vendedor'");
-    const usersByNormName = new Map(usersRes.rows.map(u => [norm(u.nombre_completo), u.alias]));
-    const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.alias]));
-
-    // Cargar clientes existentes
-    const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
-    const clientsByRut = new Map(clientsRes.rows.filter(c => c.rut).map(c => [norm(c.rut), c.rut]));
-    const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.rut]));
-
-    // Verificar duplicados existentes (por tipo_documento + folio)
-    const existingSales = await client.query(
-      "SELECT folio, tipo_documento FROM venta WHERE folio IS NOT NULL AND tipo_documento IS NOT NULL"
-    );
-    const existingKeys = new Set(
-      existingSales.rows.map(s => `${norm(s.tipo_documento)}|${norm(s.folio)}`)
-    );
-
-    // Procesar filas
-  const toImport = [];
-  const duplicates = [];
-  const missingVendors = new Set();
-  const missingClients = new Set();
-  const observations = [];
-
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i];
-      const excelRow = i + 2; // considerando fila de encabezados
-      const folio = row[colFolio] ? String(row[colFolio]).trim() : null;
-      const tipoDoc = row[colTipoDoc] ? String(row[colTipoDoc]).trim() : null;
-      const fecha = parseExcelDate(row[colFecha]);
-
-      if (!folio || !tipoDoc || !fecha) continue;
-
-      // Validar duplicado
-      const key = `${norm(tipoDoc)}|${norm(folio)}`;
-      if (existingKeys.has(key)) {
-        duplicates.push({ folio, tipoDoc, fecha });
-        continue;
-      }
-
-      // Procesar datos
-      const sucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
-      const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null;
-      const clienteNombre = colCliente && row[colCliente] ? String(row[colCliente]).trim() : null;
-      const vendedorClienteAlias = colVendedorCliente && row[colVendedorCliente] ? String(row[colVendedorCliente]).trim() : null;
-      const vendedorDocNombre = colVendedorDoc && row[colVendedorDoc] ? String(row[colVendedorDoc]).trim() : null;
-      const estadoSistema = colEstadoSistema && row[colEstadoSistema] ? String(row[colEstadoSistema]).trim() : null;
-      const estadoComercial = colEstadoComercial && row[colEstadoComercial] ? String(row[colEstadoComercial]).trim() : null;
-      const estadoSII = colEstadoSII && row[colEstadoSII] ? String(row[colEstadoSII]).trim() : null;
-      const indice = colIndice && row[colIndice] ? String(row[colIndice]).trim() : null;
-      const sku = colSKU && row[colSKU] ? String(row[colSKU]).trim() : null;
-      const descripcion = colDescripcion && row[colDescripcion] ? String(row[colDescripcion]).trim() : null;
-      const cantidad = colCantidad ? parseNumeric(row[colCantidad]) : null;
-      const precio = colPrecio ? parseNumeric(row[colPrecio]) : null;
-      const valorTotal = colValorTotal ? parseNumeric(row[colValorTotal]) : null;
-
-      // Buscar vendedor por alias (no por ID, la tabla usa alias directamente)
-      let vendedorAlias = null;
-      if (vendedorClienteAlias) {
-        // Verificar si existe el alias
-        const existe = usersByNormAlias.has(norm(vendedorClienteAlias));
-        if (existe) {
-          vendedorAlias = vendedorClienteAlias; // Usamos el alias tal cual
-        } else {
-          missingVendors.add(vendedorClienteAlias);
-          observations.push({ fila: excelRow, folio, campo: 'vendedor_cliente', detalle: `Vendedor no encontrado (alias: ${vendedorClienteAlias})` });
-        }
-      }
-
-      // Buscar cliente por RUT (no por ID, la tabla usa rut directamente)
-      let clienteRut = null;
-      if (identificador && /^\d{7,8}-[\dkK]$/.test(identificador)) {
-        const existe = clientsByRut.has(norm(identificador));
-        if (existe) {
-          clienteRut = identificador; // Usamos el RUT tal cual
-        }
-      }
-      if (!clienteRut && (clienteNombre || identificador)) {
-        missingClients.add(clienteNombre || identificador);
-        observations.push({ fila: excelRow, folio, campo: 'identificador', detalle: `Cliente no encontrado (${clienteNombre || identificador})` });
-      }
-
-      toImport.push({
-        sucursal,
-        tipoDoc,
-        folio,
-        fecha,
-        identificador: clienteRut, // RUT del cliente (FK a cliente.rut)
-        clienteNombre,
-        vendedorClienteAlias: vendedorAlias, // Alias del vendedor (FK a usuario.alias)
-        vendedorDocNombre,
-        estadoSistema,
-        estadoComercial,
-        estadoSII,
-        indice,
-        sku,
-        descripcion,
-        cantidad,
-        precio,
-        valorTotal
-      });
-    }
-
-    // Generar informe de faltantes
-  let pendingReportPath = null;
-  let observationsReportPath = null;
-    if (missingVendors.size > 0 || missingClients.size > 0) {
-      const reportWB = XLSX.utils.book_new();
-      
-      if (missingVendors.size > 0) {
-        const vendorData = Array.from(missingVendors).map(v => ({
-          'Nombre o Alias Vendedor': v,
-          'Email': '',
-          'Rol': 'vendedor'
-        }));
-        const vendorWS = XLSX.utils.json_to_sheet(vendorData);
-        XLSX.utils.book_append_sheet(reportWB, vendorWS, 'Vendedores Faltantes');
-      }
-
-      if (missingClients.size > 0) {
-        const clientData = Array.from(missingClients).map(c => {
-          // Si c parece un rut, lo ponemos en RUT, si no, en nombre
-          const rutRegex = /^\d{7,8}-[\dkK]$/;
-          return rutRegex.test(c)
-            ? { 'RUT': c, 'Nombre': '', 'Email': '', 'Teléfono': '' }
-            : { 'RUT': '', 'Nombre': c, 'Email': '', 'Teléfono': '' };
-        });
-        const clientWS = XLSX.utils.json_to_sheet(clientData);
-        XLSX.utils.book_append_sheet(reportWB, clientWS, 'Clientes Faltantes');
-      }
-
-      const reportDir = 'uploads/reports';
-      if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
-      pendingReportPath = path.join(reportDir, `faltantes_${Date.now()}.xlsx`);
-      XLSX.writeFile(reportWB, pendingReportPath);
-    }
-
-  // Flexibilizado: no bloqueamos por faltantes, seguimos con lo importable
-  const canProceed = true;
-    let importedCount = 0;
-
-    if (canProceed && toImport.length > 0) {
-      console.log(`✅ Iniciando importación de ${toImport.length} ventas...`);
-      
-      // Pre-cargar todos los productos con litros_por_unidad para cálculo automático
-      let productoMap = new Map();
-      try {
-        const productosRes = await client.query('SELECT sku, litros_por_unidad FROM producto WHERE litros_por_unidad IS NOT NULL');
-        productosRes.rows.forEach(p => {
-          productoMap.set(p.sku ? p.sku.toUpperCase().trim() : '', parseFloat(p.litros_por_unidad) || 0);
-        });
-        console.log(`📦 ${productoMap.size} productos cargados para cálculo de litros`);
-      } catch (prodError) {
-        console.warn('⚠️ No se pudieron cargar productos para cálculo de litros:', prodError.message);
-        console.warn('⚠️ Continuando importación con litros_vendidos = 0 para todos');
-      }
-      
-      try {
-        // Inserciones independientes por fila (sin transacción global)
-        for (let j = 0; j < toImport.length; j++) {
-          const item = toImport[j];
-          const excelRow = j + 2; // aproximado para referencia
-          try {
-            // Calcular litros_vendidos automáticamente
-            let litrosVendidos = 0; // Por defecto 0 si no hay datos de litros
-            if (item.sku && item.cantidad) {
-              const skuKey = item.sku.toUpperCase().trim();
-              const litrosPorUnidad = productoMap.get(skuKey);
-              if (litrosPorUnidad && litrosPorUnidad > 0) {
-                litrosVendidos = item.cantidad * litrosPorUnidad;
-                console.log(`🔢 SKU ${item.sku}: ${item.cantidad} unidades × ${litrosPorUnidad} L/u = ${litrosVendidos} L`);
-              } else {
-                console.log(`📦 SKU ${item.sku}: sin litros_por_unidad → litros_vendidos = 0`);
-              }
-            }
-
-            console.log(`⚡ Insertando venta fila ${excelRow}, folio: ${item.folio}`);
-            console.log(`📋 Datos a insertar:`, {
-              sucursal: item.sucursal,
-              tipoDoc: item.tipoDoc,
-              folio: item.folio,
-              fecha: item.fecha,
-              identificador: item.identificador,
-              clienteNombre: item.clienteNombre,
-              vendedorClienteAlias: item.vendedorClienteAlias,
-              vendedorDocNombre: item.vendedorDocNombre,
-              litrosVendidos: litrosVendidos
-            });
-            await client.query(
-            `INSERT INTO venta (
-              sucursal, tipo_documento, folio, fecha_emision, identificador,
-              cliente, vendedor_cliente, vendedor_documento,
-              estado_sistema, estado_comercial, estado_sii, indice,
-              sku, descripcion, cantidad, precio, valor_total, litros_vendidos, vendedor_id
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
-              [
-                item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador,
-                item.clienteNombre, item.vendedorClienteAlias, item.vendedorDocNombre,
-                item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice,
-                item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, litrosVendidos, null
-              ]
-            );
-            console.log(`✅ Venta ${item.folio} insertada correctamente${litrosVendidos ? ` (${litrosVendidos} L)` : ''}`);
-            importedCount++;
-          } catch (err) {
-            console.error(`❌ Error en fila Excel ${excelRow} (folio ${item.folio || 'N/A'}):`, err.message);
-            console.error('Detalle completo:', err);
-            // Propagar con contexto de fila
-            observations.push({ fila: excelRow, folio: item.folio || null, campo: 'DB', detalle: err.detail || err.message });
-            // Continuar con siguientes filas, no abortar toda la importación
-          }
-        }
-        console.log(`✅ Importación finalizada: ${importedCount} ventas guardadas, ${toImport.length - importedCount} con observaciones`);
-      } catch (error) {
-        console.error('❌ Error al guardar en base de datos:', error);
-        // Si hay un error fuera del loop, mantenerlo pero ya acumulamos observaciones
-        observations.push({ fila: null, folio: null, campo: 'TRANSACCION', detalle: error.message });
-      }
-    }
-
-    // Generar informe de observaciones si existen
-    if (observations.length > 0) {
-      const wbObs = XLSX.utils.book_new();
-      const wsObs = XLSX.utils.json_to_sheet(observations.map(o => ({
-        'Fila Excel': o.fila,
-        'Folio': o.folio,
-        'Campo': o.campo,
-        'Detalle': o.detalle
-      })));
-      XLSX.utils.book_append_sheet(wbObs, wsObs, 'Observaciones');
-      const reportDir = 'uploads/reports';
-      if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
-      observationsReportPath = path.join(reportDir, `observaciones_ventas_${Date.now()}.xlsx`);
-      XLSX.writeFile(wbObs, observationsReportPath);
-    }
-
-    // Resultado
-    const result = {
+    // Responder inmediatamente con 202 Accepted
+    res.status(202).json({
       success: true,
-      totalRows: data.length,
-      toImport: toImport.length,
-      imported: importedCount,
-      duplicates: duplicates.length,
-      duplicatesList: duplicates.slice(0, 10),
-      missingVendors: Array.from(missingVendors),
-      missingClients: Array.from(missingClients),
-      pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
-      observationsReportUrl: observationsReportPath ? `/api/import/download-report/${path.basename(observationsReportPath)}` : null,
-      canProceed: canProceed,
-      dataImported: importedCount > 0
-    };
+      jobId,
+      msg: 'Archivo recibido. Procesando en segundo plano...',
+      statusUrl: `/api/import/status/${jobId}`
+    });
 
-    // Limpiar archivo temporal
-    fs.unlinkSync(req.file.path);
-
-    res.json(result);
+    // Procesar archivo en background (no await)
+    processVentasFileAsync(jobId, permanentPath, req.file.originalname)
+      .then(() => {
+        console.log(`✅ [Job ${jobId}] Completado exitosamente`);
+      })
+      .catch(err => {
+        console.error(`❌ [Job ${jobId}] Falló:`, err.message);
+      });
 
   } catch (error) {
-    console.error('❌ Error en importación:', error);
-    console.error('Stack trace:', error.stack);
+    console.error('❌ Error al crear job:', error);
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
     res.status(500).json({ 
       success: false, 
-      msg: 'Error al procesar archivo', 
-      error: error.message,
-      errorDetail: error.detail,
-      errorHint: error.hint,
-      errorStack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      msg: 'Error al iniciar importación', 
+      error: error.message
     });
-  } finally {
-    client.release();
+  }
+});
+
+// GET /api/import/status/:jobId - Obtener estado de importación
+router.get('/status/:jobId', auth(['manager']), async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const job = await getJobStatus(jobId);
+
+    if (!job) {
+      return res.status(404).json({ success: false, msg: 'Job no encontrado' });
+    }
+
+    const response = {
+      success: true,
+      jobId: job.job_id,
+      tipo: job.tipo,
+      filename: job.filename,
+      status: job.status,
+      createdAt: job.created_at,
+      startedAt: job.started_at,
+      finishedAt: job.finished_at,
+      totalRows: job.total_rows,
+      importedRows: job.imported_rows,
+      duplicateRows: job.duplicate_rows,
+      errorRows: job.error_rows,
+      errorMessage: job.error_message
+    };
+
+    // Si está completado, incluir el resultado completo
+    if (job.status === 'completed' && job.result_data) {
+      response.result = job.result_data;
+    }
+
+    res.json(response);
+  } catch (error) {
+    console.error('❌ Error al obtener status:', error);
+    res.status(500).json({ success: false, msg: 'Error al obtener estado', error: error.message });
   }
 });
 

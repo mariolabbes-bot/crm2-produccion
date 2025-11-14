@@ -153,6 +153,44 @@ export const getComparativasMensuales = (params = {}) => {
 };
 
 // IMPORTACIÓN
+
+// Función auxiliar para polling del status de job
+const pollJobStatus = async (jobId, maxMinutes = 15) => {
+  const maxAttempts = (maxMinutes * 60) / 3; // Poll cada 3 segundos
+  
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise(resolve => setTimeout(resolve, 3000)); // 3s entre polls
+    
+    const token = getToken();
+    const response = await fetch(`${API_URL}/import/status/${jobId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al consultar estado del job');
+    }
+
+    const job = await response.json();
+    console.log(`📊 [Job ${jobId}] Status: ${job.status} | Progreso: ${job.importedRows || 0}/${job.totalRows || '?'}`);
+
+    if (job.status === 'completed') {
+      console.log('✅ Job completado:', job);
+      return job.result || job;
+    }
+    
+    if (job.status === 'failed') {
+      console.error('❌ Job falló:', job.errorMessage);
+      throw new Error(job.errorMessage || 'La importación falló');
+    }
+
+    // Si el status es 'processing' o 'pending', continuar polling
+  }
+
+  throw new Error(`Timeout: El job tardó más de ${maxMinutes} minutos en completarse`);
+};
+
 export const uploadVentasFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
@@ -160,21 +198,15 @@ export const uploadVentasFile = async (file) => {
   const token = getToken();
   console.log('📤 Iniciando upload de ventas:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
   
-  // Timeout de 5 minutos para archivos grandes
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
-  
   try {
+    // 1. Subir archivo y recibir jobId
     const response = await fetch(`${API_URL}/import/ventas`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
       },
-      body: formData,
-      signal: controller.signal
+      body: formData
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -186,15 +218,19 @@ export const uploadVentasFile = async (file) => {
     }
 
     const result = await response.json();
-    console.log('✅ Upload exitoso:', result);
-    return result;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      console.error('⏱️ Timeout: El archivo tardó más de 5 minutos en procesarse');
-      throw new Error('El archivo tardó demasiado en procesarse. Intenta con un archivo más pequeño.');
+    
+    // 2. Si es respuesta asíncrona (202), hacer polling
+    if (response.status === 202 && result.jobId) {
+      console.log('⏳ Importación iniciada (job:', result.jobId, ') - Polling status...');
+      return await pollJobStatus(result.jobId, 15); // 15 minutos máximo
     }
-    console.error('❌ Error en fetch:', error);
+    
+    // 3. Si es respuesta síncrona (200), retornar directamente
+    console.log('✅ Upload exitoso (síncrono):', result);
+    return result;
+    
+  } catch (error) {
+    console.error('❌ Error en import:', error);
     throw error;
   }
 };
@@ -206,21 +242,15 @@ export const uploadAbonosFile = async (file) => {
   const token = getToken();
   console.log('📤 Iniciando upload de abonos:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
   
-  // Timeout de 5 minutos para archivos grandes
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
-  
   try {
+    // 1. Subir archivo y recibir jobId
     const response = await fetch(`${API_URL}/import/abonos`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
       },
-      body: formData,
-      signal: controller.signal
+      body: formData
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -232,15 +262,19 @@ export const uploadAbonosFile = async (file) => {
     }
 
     const result = await response.json();
+    
+    // 2. Si es respuesta asíncrona (202), hacer polling (aunque abonos aún es síncrono)
+    if (response.status === 202 && result.jobId) {
+      console.log('⏳ Importación de abonos iniciada (job:', result.jobId, ') - Polling status...');
+      return await pollJobStatus(result.jobId, 15);
+    }
+    
+    // 3. Si es respuesta síncrona (200), retornar directamente
     console.log('✅ Upload exitoso:', result);
     return result;
+    
   } catch (error) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      console.error('⏱️ Timeout: El archivo tardó más de 5 minutos en procesarse');
-      throw new Error('El archivo tardó demasiado en procesarse. Intenta con un archivo más pequeño.');
-    }
-    console.error('❌ Error en fetch:', error);
+    console.error('❌ Error en import:', error);
     throw error;
   }
 };
