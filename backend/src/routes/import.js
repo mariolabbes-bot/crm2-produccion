@@ -226,8 +226,9 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     const usersRes = await client.query("SELECT alias, nombre_completo FROM usuario WHERE rol_usuario = 'vendedor'");
     const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.alias]));
 
-    // Cargar clientes
+    // Cargar clientes (por RUT y por nombre)
     const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
+    const clientsByRut = new Map(clientsRes.rows.map(c => [norm(c.rut), c.rut]));
     const clientsByName = new Map(clientsRes.rows.map(c => [norm(c.nombre), c.rut]));
 
     // Verificar duplicados
@@ -357,14 +358,14 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
               vendedor_cliente, caja_operacion, usuario_ingreso,
               monto_total, saldo_a_favor, saldo_a_favor_total, tipo_pago,
               estado_abono, identificador_abono, fecha_vencimiento,
-              monto, monto_neto, vendedor_id
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+              monto, monto_neto
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
               [
                 item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
                 item.vendedorClienteAlias, item.cajaOperacion, item.usuarioIngreso,
                 item.montoTotal, item.saldoFavor, item.saldoFavorTotal, item.tipoPago,
                 item.estadoAbono, item.identificadorAbono, item.fechaVencimiento,
-                item.monto, item.montoNeto, null
+                item.monto, item.montoNeto
               ]
             );
             importedCount++;
