@@ -170,9 +170,9 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
       throw new Error(`Faltan columnas requeridas: ${faltantes.join(', ')}`);
     }
 
-    // Cargar usuarios existentes
-    const usersRes = await client.query("SELECT alias, nombre_completo FROM usuario WHERE rol_usuario = 'vendedor'");
-    const usersByNormAlias = new Map(usersRes.rows.filter(u => u.alias).map(u => [norm(u.alias), u.alias]));
+    // Cargar usuarios existentes (usando nombre_vendedor para match)
+    const usersRes = await client.query("SELECT nombre_vendedor, nombre_completo FROM usuario WHERE rol_usuario = 'VENDEDOR'");
+    const usersByNormAlias = new Map(usersRes.rows.filter(u => u.nombre_vendedor).map(u => [norm(u.nombre_vendedor), u.nombre_vendedor]));
 
     // Cargar clientes existentes
     const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
