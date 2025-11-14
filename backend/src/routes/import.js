@@ -314,6 +314,8 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
   const missingVendors = new Set();
   const missingClients = new Set();
   const observations = [];
+  let skippedInvalid = 0;
+  const skippedReasons = [];
 
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
@@ -322,7 +324,17 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       const fecha = parseExcelDate(row[colFecha]);
       const montoNeto = parseNumeric(row[colMontoNeto]); // ← VALOR PRINCIPAL
 
-      if (!folio || !fecha || !montoNeto || montoNeto <= 0) continue;
+      if (!folio || !fecha || !montoNeto || montoNeto <= 0) {
+        skippedInvalid++;
+        if (skippedReasons.length < 10) {
+          skippedReasons.push({ fila: excelRow, folio, motivos: {
+            folioVacio: !folio,
+            fechaInvalida: !fecha,
+            montoNetoInvalido: (!montoNeto || montoNeto <= 0)
+          }});
+        }
+        continue;
+      }
 
       // Procesar datos primero para obtener identificador
       const sucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
@@ -475,7 +487,12 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
             importedCount++;
           } catch (err) {
             console.error(`❌ Error en fila Excel ${excelRow} (folio ${item.folio || 'N/A'}):`, err);
-            observations.push({ fila: excelRow, folio: item.folio || null, campo: 'DB', detalle: err.detail || err.message });
+            // Si es violación de clave única, contabilizar como DUPLICADO
+            if (err && err.code === '23505' && (err.constraint || '').includes('abono_unique')) {
+              duplicates.push({ folio: item.folio || null, fecha: item.fecha || null, identificadorAbono: item.identificadorAbono || null, motivo: 'duplicate key' });
+            } else {
+              observations.push({ fila: excelRow, folio: item.folio || null, campo: 'DB', detalle: err.detail || err.message });
+            }
           }
         }
         console.log(`✅ Importación finalizada: ${importedCount} abonos guardados, ${toImport.length - importedCount} con observaciones`);
@@ -512,6 +529,8 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
       observationsReportUrl: observationsReportPath ? `/api/import/download-report/${path.basename(observationsReportPath)}` : null,
       canProceed: canProceed,
+      skippedInvalid,
+      skippedSample: skippedReasons,
       dataImported: importedCount > 0
     };
 

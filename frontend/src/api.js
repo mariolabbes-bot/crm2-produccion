@@ -227,6 +227,11 @@ export const uploadVentasFile = async (file) => {
     
     // 3. Si es respuesta síncrona (200), retornar directamente
     console.log('✅ Upload exitoso (síncrono):', result);
+    // Exponer en ventana para inspección manual
+    if (typeof window !== 'undefined') {
+      window.__ultimaRespuestaImportVentas = result;
+      console.log('🪟 window.__ultimaRespuestaImportVentas disponible');
+    }
     return result;
     
   } catch (error) {
@@ -271,6 +276,10 @@ export const uploadAbonosFile = async (file) => {
     
     // 3. Si es respuesta síncrona (200), retornar directamente
     console.log('✅ Upload exitoso:', result);
+    if (typeof window !== 'undefined') {
+      window.__ultimaRespuestaImportAbonos = result;
+      console.log('🪟 window.__ultimaRespuestaImportAbonos disponible');
+    }
     return result;
     
   } catch (error) {
