@@ -251,6 +251,11 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     // Cargar usuarios (con matching flexible igual que en ventas)
     const usersRes = await client.query("SELECT nombre_vendedor, rut FROM usuario WHERE rol_usuario = 'VENDEDOR'");
     
+    console.log(`👥 Vendedores cargados: ${usersRes.rows.length}`);
+    usersRes.rows.forEach(u => {
+      console.log(`   - ${u.rut}: "${u.nombre_vendedor}"`);
+    });
+    
     // Crear 3 mapas de búsqueda para matching flexible (igual que en ventas)
     const usersByNormFull = new Map();
     const usersByFirstTwo = new Map();
@@ -281,6 +286,8 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
         }
       }
     });
+    
+    console.log(`🗺️  Mapa primera palabra: ${Array.from(usersByFirstWord.keys()).join(', ')}`);
 
     // Cargar clientes (por RUT y por nombre)
     const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
@@ -345,25 +352,33 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       // Buscar vendedor con matching flexible (igual que en ventas)
       let vendedorRut = null;
       if (vendedorClienteAlias) {
+        console.log(`🔍 [Fila ${excelRow}] Buscando vendedor: "${vendedorClienteAlias}"`);
         const vendorNorm = norm(vendedorClienteAlias);
         const vendorWords = vendorNorm.split(/\s+/).filter(w => w.length > 0);
+        console.log(`   Normalizado: "${vendorNorm}", Palabras: [${vendorWords.join(', ')}]`);
         
         // Nivel 1: Nombre completo
         if (usersByNormFull.has(vendorNorm)) {
           vendedorRut = usersByNormFull.get(vendorNorm);
+          console.log(`   ✅ Match nivel 1 (completo): ${vendedorRut}`);
         }
         // Nivel 2: Primeras dos palabras
         else if (vendorWords.length >= 2) {
           const firstTwo = vendorWords.slice(0, 2).join(' ');
           if (usersByFirstTwo.has(firstTwo)) {
             vendedorRut = usersByFirstTwo.get(firstTwo);
+            console.log(`   ✅ Match nivel 2 (dos palabras "${firstTwo}"): ${vendedorRut}`);
           }
         }
         // Nivel 3: Primera palabra
         if (!vendedorRut && vendorWords.length >= 1) {
           const firstWord = vendorWords[0];
+          console.log(`   Intentando nivel 3 con primera palabra: "${firstWord}"`);
           if (usersByFirstWord.has(firstWord)) {
             vendedorRut = usersByFirstWord.get(firstWord);
+            console.log(`   ✅ Match nivel 3 (una palabra "${firstWord}"): ${vendedorRut}`);
+          } else {
+            console.log(`   ❌ No encontrado en mapa de primera palabra`);
           }
         }
         
