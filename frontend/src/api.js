@@ -158,23 +158,45 @@ export const uploadVentasFile = async (file) => {
   formData.append('file', file);
   
   const token = getToken();
-  const response = await fetch(`${API_URL}/import/ventas`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    },
-    body: formData
-  });
+  console.log('📤 Iniciando upload de ventas:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
+  
+  // Timeout de 5 minutos para archivos grandes
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+  
+  try {
+    const response = await fetch(`${API_URL}/import/ventas`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData,
+      signal: controller.signal
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const err = new Error(errorData.msg || 'Error al subir archivo');
-    err.status = response.status;
-    err.data = errorData;
-    throw err;
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ Error response:', response.status, errorData);
+      const err = new Error(errorData.msg || 'Error al subir archivo');
+      err.status = response.status;
+      err.data = errorData;
+      throw err;
+    }
+
+    const result = await response.json();
+    console.log('✅ Upload exitoso:', result);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      console.error('⏱️ Timeout: El archivo tardó más de 5 minutos en procesarse');
+      throw new Error('El archivo tardó demasiado en procesarse. Intenta con un archivo más pequeño.');
+    }
+    console.error('❌ Error en fetch:', error);
+    throw error;
   }
-
-  return await response.json();
 };
 
 export const uploadAbonosFile = async (file) => {
@@ -182,23 +204,45 @@ export const uploadAbonosFile = async (file) => {
   formData.append('file', file);
   
   const token = getToken();
-  const response = await fetch(`${API_URL}/import/abonos`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    },
-    body: formData
-  });
+  console.log('📤 Iniciando upload de abonos:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
+  
+  // Timeout de 5 minutos para archivos grandes
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+  
+  try {
+    const response = await fetch(`${API_URL}/import/abonos`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData,
+      signal: controller.signal
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const err = new Error(errorData.msg || 'Error al subir archivo');
-    err.status = response.status;
-    err.data = errorData;
-    throw err;
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ Error response:', response.status, errorData);
+      const err = new Error(errorData.msg || 'Error al subir archivo');
+      err.status = response.status;
+      err.data = errorData;
+      throw err;
+    }
+
+    const result = await response.json();
+    console.log('✅ Upload exitoso:', result);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      console.error('⏱️ Timeout: El archivo tardó más de 5 minutos en procesarse');
+      throw new Error('El archivo tardó demasiado en procesarse. Intenta con un archivo más pequeño.');
+    }
+    console.error('❌ Error en fetch:', error);
+    throw error;
   }
-
-  return await response.json();
 };
 
 export const downloadPlantillaVentas = () => {
