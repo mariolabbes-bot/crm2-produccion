@@ -165,6 +165,11 @@ router.get('/status/:jobId', auth(['manager']), async (req, res) => {
 router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res) => {
   console.log('🔵 ====== ENDPOINT /abonos LLAMADO ====== 🔵');
   const client = await pool.connect();
+  // Modo actualización: si viene ?updateMissing=1 intentamos rellenar campos faltantes (identificador, cliente, vendedor_cliente)
+  const updateMissing = (req.query.updateMissing === '1' || req.query.updateMissing === 'true');
+  if (updateMissing) {
+    console.log('🛠️ Modo updateMissing ACTIVADO: se actualizarán abonos existentes con datos de cliente/vendedor faltantes.');
+  }
   
   try {
     if (!req.file) {
@@ -296,18 +301,22 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
     // Verificar duplicados: CLAVE ÚNICA = FOLIO + IDENTIFICADOR_ABONO + FECHA
     // (según constraint de BD: abono_unique_key)
     const existingAbonos = await client.query(`
-      SELECT folio, fecha, identificador_abono 
+      SELECT id, folio, fecha, identificador_abono, identificador, cliente, vendedor_cliente 
       FROM abono 
       WHERE folio IS NOT NULL
     `);
-    const existingKeys = new Set(
-      existingAbonos.rows.map(a => {
-        const f = norm(a.folio || '');
-        const d = a.fecha || '';
-        const ia = norm(a.identificador_abono || '');
-        return `${f}|${d}|${ia}`;
-      })
-    );
+    const existingKeys = new Set();
+    const existingByFolio = new Map();
+    existingAbonos.rows.forEach(a => {
+      const f = norm(a.folio || '');
+      const d = a.fecha || '';
+      const ia = norm(a.identificador_abono || '');
+      existingKeys.add(`${f}|${d}|${ia}`);
+      if (!existingByFolio.has(f)) {
+        existingByFolio.set(f, a); // guarda la primera coincidencia por folio
+      }
+    });
+    console.log(`📦 Abonos existentes cargados: ${existingAbonos.rows.length}`);
 
   const toImport = [];
   const duplicates = [];
@@ -316,6 +325,8 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
   const observations = [];
   let skippedInvalid = 0;
   const skippedReasons = [];
+  const updates = []; // registros a actualizar por updateMissing
+  let updatedMissing = 0;
 
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
@@ -353,9 +364,28 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
 
       // Validar duplicado DESPUÉS de tener identificadorAbono
-      // CLAVE ÚNICA: FOLIO + IDENTIFICADOR_ABONO + FECHA (según constraint BD)
-      const duplicateKey = `${norm(folio)}|${fecha}|${norm(identificadorAbono || '')}`;
-      if (existingKeys.has(duplicateKey)) {
+      // CLAVE ÚNICA lógica: FOLIO + IDENTIFICADOR_ABONO + FECHA (o solo FOLIO si la tabla tiene UNIQUE en folio)
+      const folioNorm = norm(folio);
+      const duplicateKey = `${folioNorm}|${fecha}|${norm(identificadorAbono || '')}`;
+      const existingRow = existingByFolio.get(folioNorm);
+      if (existingKeys.has(duplicateKey) || existingRow) {
+        // Si está activado updateMissing intentamos actualizar campos faltantes en vez de marcar como duplicado
+        if (updateMissing && existingRow) {
+          const needsIdentificador = (!existingRow.identificador && clienteRut);
+          const needsVendedor = (!existingRow.vendedor_cliente && vendedorNombre);
+          if (needsIdentificador || needsVendedor) {
+            updates.push({
+              id: existingRow.id,
+              folio,
+              identificador: needsIdentificador ? clienteRut : null,
+              clienteNombre: needsIdentificador ? clienteNombre : null,
+              vendedorClienteNombre: needsVendedor ? vendedorNombre : null
+            });
+            updatedMissing++;
+            continue; // no insertar ni contar como duplicado
+          }
+        }
+        // Caso normal: duplicado
         duplicates.push({ folio, fecha, identificadorAbono, monto: montoNeto });
         continue;
       }
@@ -502,6 +532,27 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       }
     }
 
+    // Aplicar actualizaciones si hay registros en modo updateMissing
+    if (updateMissing && updates.length > 0) {
+      console.log(`🛠️ Aplicando ${updates.length} actualizaciones a abonos existentes (relleno de cliente/vendedor)...`);
+      for (let u of updates) {
+        try {
+          await client.query(
+            `UPDATE abono 
+             SET identificador = COALESCE($2, identificador),
+                 cliente = COALESCE($3, cliente),
+                 vendedor_cliente = COALESCE($4, vendedor_cliente)
+             WHERE id = $1`,
+            [u.id, u.identificador, u.clienteNombre, u.vendedorClienteNombre]
+          );
+        } catch (e) {
+          console.error(`❌ Error actualizando abono folio ${u.folio}:`, e);
+          observations.push({ fila: null, folio: u.folio, campo: 'UPDATE', detalle: e.message });
+        }
+      }
+      console.log('🛠️ Actualizaciones completadas.');
+    }
+
     if (observations.length > 0) {
       const wbObs = XLSX.utils.book_new();
       const wsObs = XLSX.utils.json_to_sheet(observations.map(o => ({
@@ -531,7 +582,8 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       canProceed: canProceed,
       skippedInvalid,
       skippedSample: skippedReasons,
-      dataImported: importedCount > 0
+      dataImported: importedCount > 0,
+      updatedMissing // cantidad de abonos existentes actualizados con datos faltantes
     };
 
     fs.unlinkSync(req.file.path);
