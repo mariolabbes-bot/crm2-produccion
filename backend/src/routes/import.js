@@ -905,8 +905,8 @@ router.post('/clientes', auth(['manager']), upload.single('file'), async (req, r
   }
 });
 
-// GET /api/import/plantilla-clientes - Descargar plantilla de clientes
-router.get('/plantilla-clientes', (req, res) => {
+// GET /api/import/plantilla/clientes - Descargar plantilla de clientes
+router.get('/plantilla/clientes', (req, res) => {
   const sampleData = [
     {
       'RUT': '12.345.678-9',

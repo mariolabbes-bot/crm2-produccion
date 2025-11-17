@@ -300,7 +300,7 @@ export const downloadPlantillaAbonos = () => {
 
 export const downloadPlantillaClientes = () => {
   const token = getToken();
-  window.open(`${API_URL}/import/plantilla-clientes?token=${token}`, '_blank');
+  window.open(`${API_URL}/import/plantilla/clientes?token=${token}`, '_blank');
 };
 
 export const uploadClientesFile = async (file) => {

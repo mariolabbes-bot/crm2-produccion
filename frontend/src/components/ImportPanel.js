@@ -190,7 +190,10 @@ const ImportPanel = () => {
                 fullWidth
                 sx={{ mb: 3 }}
               >
-                Descargar Plantilla de {importType === 'ventas' ? 'Ventas' : 'Abonos'}
+                Descargar Plantilla de {
+                  importType === 'clientes' ? 'Clientes' :
+                  importType === 'ventas' ? 'Ventas' : 'Abonos'
+                }
               </Button>
 
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
