@@ -327,6 +327,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
   const skippedReasons = [];
   const updates = []; // registros a actualizar por updateMissing
   let updatedMissing = 0;
+  const updatedDetails = []; // para reporte de actualizaciones
 
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
@@ -537,6 +538,9 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       console.log(`🛠️ Aplicando ${updates.length} actualizaciones a abonos existentes (relleno de cliente/vendedor)...`);
       for (let u of updates) {
         try {
+          // Obtener estado antes
+          const beforeRes = await client.query('SELECT identificador, cliente, vendedor_cliente FROM abono WHERE id=$1', [u.id]);
+          const before = beforeRes.rows[0] || {};
           await client.query(
             `UPDATE abono 
              SET identificador = COALESCE($2, identificador),
@@ -545,12 +549,43 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
              WHERE id = $1`,
             [u.id, u.identificador, u.clienteNombre, u.vendedorClienteNombre]
           );
+          const afterRes = await client.query('SELECT identificador, cliente, vendedor_cliente FROM abono WHERE id=$1', [u.id]);
+          const after = afterRes.rows[0] || {};
+          updatedDetails.push({
+            folio: u.folio,
+            identificador_antes: before.identificador || null,
+            cliente_antes: before.cliente || null,
+            vendedor_antes: before.vendedor_cliente || null,
+            identificador_despues: after.identificador || null,
+            cliente_despues: after.cliente || null,
+            vendedor_despues: after.vendedor_cliente || null
+          });
         } catch (e) {
           console.error(`❌ Error actualizando abono folio ${u.folio}:`, e);
           observations.push({ fila: null, folio: u.folio, campo: 'UPDATE', detalle: e.message });
         }
       }
       console.log('🛠️ Actualizaciones completadas.');
+    }
+
+    // Generar reporte de actualizados si corresponde
+    let updatedReportPath = null;
+    if (updateMissing && updatedDetails.length > 0) {
+      const wbUpd = XLSX.utils.book_new();
+      const wsUpd = XLSX.utils.json_to_sheet(updatedDetails.map(r => ({
+        'Folio': r.folio,
+        'Identificador Antes': r.identificador_antes,
+        'Identificador Después': r.identificador_despues,
+        'Cliente Antes': r.cliente_antes,
+        'Cliente Después': r.cliente_despues,
+        'Vendedor Antes': r.vendedor_antes,
+        'Vendedor Después': r.vendedor_despues
+      })));
+      XLSX.utils.book_append_sheet(wbUpd, wsUpd, 'Abonos Actualizados');
+      const reportDir = 'uploads/reports';
+      if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
+      updatedReportPath = path.join(reportDir, `actualizados_abonos_${Date.now()}.xlsx`);
+      XLSX.writeFile(wbUpd, updatedReportPath);
     }
 
     if (observations.length > 0) {
@@ -579,6 +614,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       missingClients: Array.from(missingClients),
       pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
       observationsReportUrl: observationsReportPath ? `/api/import/download-report/${path.basename(observationsReportPath)}` : null,
+      updatedReportUrl: updatedReportPath ? `/api/import/download-report/${path.basename(updatedReportPath)}` : null,
       canProceed: canProceed,
       skippedInvalid,
       skippedSample: skippedReasons,
