@@ -33,6 +33,7 @@ const ImportPanel = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [updateMissingAbonos, setUpdateMissingAbonos] = useState(false); // modo actualización de abonos
 
   const handleLogout = () => {
     removeToken();
@@ -81,7 +82,28 @@ const ImportPanel = () => {
       } else if (importType === 'ventas') {
         response = await uploadVentasFile(selectedFile);
       } else {
-        response = await uploadAbonosFile(selectedFile);
+          // Abonos: si está activo updateMissing, hacemos llamada manual con query
+          if (updateMissingAbonos) {
+            const token = getToken();
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            const fetchUrl = `${API_URL}/import/abonos?updateMissing=1`;
+            const resp = await fetch(fetchUrl, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}` },
+              body: formData
+            });
+            if (!resp.ok) {
+              const errorData = await resp.json().catch(() => ({}));
+              const err = new Error(errorData.msg || 'Error al subir archivo');
+              err.status = resp.status;
+              err.data = errorData;
+              throw err;
+            }
+            response = await resp.json();
+          } else {
+            response = await uploadAbonosFile(selectedFile);
+          }
       }
 
       setResult(response);
@@ -199,6 +221,28 @@ const ImportPanel = () => {
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 3. Sube tu archivo
               </Typography>
+                {importType === 'abonos' && (
+                  <Box sx={{ mb: 2, mt: 1, p: 2, border: '1px solid #ddd', borderRadius: 2, bgcolor: '#fafafa' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                      Opciones avanzadas (Abonos)
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <input
+                        id="chk-update-missing"
+                        type="checkbox"
+                        checked={updateMissingAbonos}
+                        onChange={e => setUpdateMissingAbonos(e.target.checked)}
+                        style={{ transform: 'scale(1.2)', cursor: 'pointer' }}
+                      />
+                      <label htmlFor="chk-update-missing" style={{ cursor: 'pointer' }}>
+                        Actualizar datos faltantes (cliente / vendedor) sin duplicar
+                      </label>
+                    </Box>
+                    <Typography variant="caption" color="textSecondary" display="block" sx={{ mt: 1 }}>
+                      Usa esto después de cargar nuevos clientes o vendedores. Los folios existentes se completarán.
+                    </Typography>
+                  </Box>
+                )}
               <Box
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
