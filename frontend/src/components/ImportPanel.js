@@ -355,65 +355,51 @@ const ImportPanel = () => {
 
                       <Grid container spacing={2}>
                         {importType === 'clientes' && result.inserted !== undefined ? (
-                          // Vista específica para CLIENTES (UPSERT)
                           <>
                             <Grid item xs={4}>
-                              <Typography variant="caption" color="textSecondary">
-                                Nuevos
-                              </Typography>
-                              <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
-                                {result.inserted}
-                              </Typography>
+                              <Typography variant="caption" color="textSecondary">Nuevos</Typography>
+                              <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>{result.inserted}</Typography>
                             </Grid>
                             <Grid item xs={4}>
-                              <Typography variant="caption" color="textSecondary">
-                                Actualizados
-                              </Typography>
-                              <Typography variant="h4" sx={{ color: '#2196f3', fontWeight: 700 }}>
-                                {result.updated}
-                              </Typography>
+                              <Typography variant="caption" color="textSecondary">Actualizados</Typography>
+                              <Typography variant="h4" sx={{ color: '#2196f3', fontWeight: 700 }}>{result.updated}</Typography>
                             </Grid>
                             <Grid item xs={4}>
-                              <Typography variant="caption" color="textSecondary">
-                                Errores
-                              </Typography>
-                              <Typography variant="h4" sx={{ color: '#f44336', fontWeight: 700 }}>
-                                {result.errors || 0}
-                              </Typography>
+                              <Typography variant="caption" color="textSecondary">Errores</Typography>
+                              <Typography variant="h4" sx={{ color: '#f44336', fontWeight: 700 }}>{result.errors || 0}</Typography>
                             </Grid>
                           </>
                         ) : (
-                          // Vista normal para VENTAS y ABONOS
                           <>
                             <Grid item xs={6}>
-                                {result.dataImported ? (
-                                  <>
-                                    <Typography variant="caption" color="textSecondary">
-                                      Importados
-                                    </Typography>
-                                    <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
-                                      {result.imported}
-                                    </Typography>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Typography variant="caption" color="textSecondary">
-                                      Para importar
-                                    </Typography>
-                                    <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
-                                      {result.toImport}
-                                    </Typography>
-                                  </>
-                                )}
+                              <Typography variant="caption" color="textSecondary">{result.dataImported ? 'Importados' : 'Para importar'}</Typography>
+                              <Typography variant="h4" sx={{ color: result.dataImported ? '#4caf50' : '#1976d2', fontWeight: 700 }}>
+                                {result.dataImported ? result.imported : result.toImport}
+                              </Typography>
                             </Grid>
                             <Grid item xs={6}>
-                              <Typography variant="caption" color="textSecondary">
-                                Duplicados
-                              </Typography>
-                              <Typography variant="h4" sx={{ color: '#ff9800', fontWeight: 700 }}>
-                                {result.duplicates}
-                              </Typography>
+                              <Typography variant="caption" color="textSecondary">Duplicados</Typography>
+                              <Typography variant="h4" sx={{ color: '#ff9800', fontWeight: 700 }}>{result.duplicates}</Typography>
                             </Grid>
+                            {importType === 'abonos' && result.updatedMissing !== undefined && (
+                              <Grid item xs={12}>
+                                <Box sx={{ mt: 1, p: 1.5, border: '1px dashed #2196f3', borderRadius: 2, bgcolor: '#e3f2fd' }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#0d47a1' }}>
+                                    Abonos existentes actualizados: {result.updatedMissing}
+                                  </Typography>
+                                  {result.updatedReportUrl && (
+                                    <Button
+                                      size="small"
+                                      variant="outlined"
+                                      sx={{ mt: 1 }}
+                                      onClick={() => window.open(result.updatedReportUrl + `?token=${getToken()}`, '_blank')}
+                                    >
+                                      Descargar reporte de actualizados
+                                    </Button>
+                                  )}
+                                </Box>
+                              </Grid>
+                            )}
                           </>
                         )}
                       </Grid>
