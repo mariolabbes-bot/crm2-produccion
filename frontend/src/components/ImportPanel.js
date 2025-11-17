@@ -23,13 +23,13 @@ import {
   Warning as WarningIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
-import { uploadVentasFile, uploadAbonosFile, downloadPlantillaVentas, downloadPlantillaAbonos, downloadInformePendientes } from '../api';
+import { uploadVentasFile, uploadAbonosFile, uploadClientesFile, downloadPlantillaVentas, downloadPlantillaAbonos, downloadPlantillaClientes, downloadInformePendientes } from '../api';
 import { removeToken } from '../utils/auth';
 
 const ImportPanel = () => {
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState(null);
-  const [importType, setImportType] = useState('ventas'); // 'ventas' | 'abonos'
+  const [importType, setImportType] = useState('clientes'); // 'clientes' | 'ventas' | 'abonos'
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -76,7 +76,9 @@ const ImportPanel = () => {
 
     try {
       let response;
-      if (importType === 'ventas') {
+      if (importType === 'clientes') {
+        response = await uploadClientesFile(selectedFile);
+      } else if (importType === 'ventas') {
         response = await uploadVentasFile(selectedFile);
       } else {
         response = await uploadAbonosFile(selectedFile);
@@ -105,7 +107,9 @@ const ImportPanel = () => {
   };
 
   const handleDownloadPlantilla = () => {
-    if (importType === 'ventas') {
+    if (importType === 'clientes') {
+      downloadPlantillaClientes();
+    } else if (importType === 'ventas') {
       downloadPlantillaVentas();
     } else {
       downloadPlantillaAbonos();
@@ -152,6 +156,14 @@ const ImportPanel = () => {
                 1. Selecciona el tipo de datos
               </Typography>
               <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                <Button
+                  variant={importType === 'clientes' ? 'contained' : 'outlined'}
+                  onClick={() => setImportType('clientes')}
+                  fullWidth
+                  color="secondary"
+                >
+                  Clientes
+                </Button>
                 <Button
                   variant={importType === 'ventas' ? 'contained' : 'outlined'}
                   onClick={() => setImportType('ventas')}
@@ -295,35 +307,68 @@ const ImportPanel = () => {
                         )}
 
                       <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                            {result.dataImported ? (
-                              <>
-                                <Typography variant="caption" color="textSecondary">
-                                  Importados
-                                </Typography>
-                                <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
-                                  {result.imported}
-                                </Typography>
-                              </>
-                            ) : (
-                              <>
-                                <Typography variant="caption" color="textSecondary">
-                                  Para importar
-                                </Typography>
-                                <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
-                                  {result.toImport}
-                                </Typography>
-                              </>
-                            )}
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" color="textSecondary">
-                            Duplicados
-                          </Typography>
-                          <Typography variant="h4" sx={{ color: '#ff9800', fontWeight: 700 }}>
-                            {result.duplicates}
-                          </Typography>
-                        </Grid>
+                        {importType === 'clientes' && result.inserted !== undefined ? (
+                          // Vista específica para CLIENTES (UPSERT)
+                          <>
+                            <Grid item xs={4}>
+                              <Typography variant="caption" color="textSecondary">
+                                Nuevos
+                              </Typography>
+                              <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
+                                {result.inserted}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Typography variant="caption" color="textSecondary">
+                                Actualizados
+                              </Typography>
+                              <Typography variant="h4" sx={{ color: '#2196f3', fontWeight: 700 }}>
+                                {result.updated}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Typography variant="caption" color="textSecondary">
+                                Errores
+                              </Typography>
+                              <Typography variant="h4" sx={{ color: '#f44336', fontWeight: 700 }}>
+                                {result.errors || 0}
+                              </Typography>
+                            </Grid>
+                          </>
+                        ) : (
+                          // Vista normal para VENTAS y ABONOS
+                          <>
+                            <Grid item xs={6}>
+                                {result.dataImported ? (
+                                  <>
+                                    <Typography variant="caption" color="textSecondary">
+                                      Importados
+                                    </Typography>
+                                    <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
+                                      {result.imported}
+                                    </Typography>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Typography variant="caption" color="textSecondary">
+                                      Para importar
+                                    </Typography>
+                                    <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>
+                                      {result.toImport}
+                                    </Typography>
+                                  </>
+                                )}
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Typography variant="caption" color="textSecondary">
+                                Duplicados
+                              </Typography>
+                              <Typography variant="h4" sx={{ color: '#ff9800', fontWeight: 700 }}>
+                                {result.duplicates}
+                              </Typography>
+                            </Grid>
+                          </>
+                        )}
                       </Grid>
                     </CardContent>
                   </Card>

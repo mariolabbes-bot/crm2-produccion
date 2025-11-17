@@ -670,6 +670,285 @@ router.get('/plantilla/abonos', (req, res) => {
   res.send(buffer);
 });
 
+// POST /api/import/clientes - Importar clientes desde Excel (UPSERT)
+router.post('/clientes', auth(['manager']), upload.single('file'), async (req, res) => {
+  console.log('🟣 ====== ENDPOINT /clientes LLAMADO ====== 🟣');
+  const client = await pool.connect();
+  
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
+    }
+
+    console.log('📁 Archivo recibido:', req.file.originalname);
+
+    // Leer Excel
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(sheet, { raw: true });
+
+    console.log(`📊 Total filas en Excel: ${data.length}`);
+
+    if (!Array.isArray(data) || data.length === 0) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ success: false, msg: 'El archivo Excel no contiene filas para procesar' });
+    }
+
+    // Detectar columnas
+    const headers = Object.keys(data[0] || {});
+    const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
+    
+    const colRUT = findCol([/^RUT$/i, /^Rut$/i, /^Identificador$/i]);
+    const colNombre = findCol([/^Nombre$/i, /^Razon.*social$/i, /^Cliente$/i]);
+    const colEmail = findCol([/^Email$/i, /^Correo$/i, /^E-mail$/i]);
+    const colTelefono = findCol([/^Telefono.*principal$/i, /^Telefono$/i, /^Tel$/i, /^Fono$/i]);
+    const colSucursal = findCol([/^Sucursal$/i]);
+    const colCategoria = findCol([/^Categoria$/i, /^Categoría$/i]);
+    const colSubcategoria = findCol([/^Subcategoria$/i, /^Subcategoría$/i]);
+    const colComuna = findCol([/^Comuna$/i]);
+    const colCiudad = findCol([/^Ciudad$/i]);
+    const colDireccion = findCol([/^Direccion$/i, /^Dirección$/i]);
+    const colNumero = findCol([/^Numero$/i, /^Número$/i, /^N°$/i, /^Nro$/i]);
+    const colVendedor = findCol([/^Nombre.*vendedor$/i, /^Vendedor$/i]);
+
+    if (!colRUT || !colNombre) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ 
+        success: false, 
+        msg: 'Faltan columnas requeridas: RUT y Nombre son obligatorios' 
+      });
+    }
+
+    console.log('📋 Columnas detectadas:', {
+      RUT: colRUT,
+      Nombre: colNombre,
+      Email: colEmail,
+      Telefono: colTelefono,
+      Vendedor: colVendedor
+    });
+
+    // Procesar filas
+    const toImport = [];
+    let skippedInvalid = 0;
+    const skippedReasons = [];
+    const observations = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const excelRow = i + 2;
+      const rut = row[colRUT] ? String(row[colRUT]).trim() : null;
+      const nombre = row[colNombre] ? String(row[colNombre]).trim() : null;
+
+      // Validación mínima: RUT y Nombre obligatorios
+      if (!rut || !nombre) {
+        skippedInvalid++;
+        if (skippedReasons.length < 10) {
+          skippedReasons.push({
+            fila: excelRow,
+            rut,
+            motivos: {
+              rutVacio: !rut,
+              nombreVacio: !nombre
+            }
+          });
+        }
+        continue;
+      }
+
+      // Extraer demás campos
+      const email = colEmail && row[colEmail] ? String(row[colEmail]).trim() : null;
+      const telefono = colTelefono && row[colTelefono] ? String(row[colTelefono]).trim() : null;
+      const sucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
+      const categoria = colCategoria && row[colCategoria] ? String(row[colCategoria]).trim() : null;
+      const subcategoria = colSubcategoria && row[colSubcategoria] ? String(row[colSubcategoria]).trim() : null;
+      const comuna = colComuna && row[colComuna] ? String(row[colComuna]).trim() : null;
+      const ciudad = colCiudad && row[colCiudad] ? String(row[colCiudad]).trim() : null;
+      const direccion = colDireccion && row[colDireccion] ? String(row[colDireccion]).trim() : null;
+      const numero = colNumero && row[colNumero] ? String(row[colNumero]).trim() : null;
+      const vendedor = colVendedor && row[colVendedor] ? String(row[colVendedor]).trim() : null;
+
+      toImport.push({
+        rut,
+        nombre,
+        email,
+        telefono,
+        sucursal,
+        categoria,
+        subcategoria,
+        comuna,
+        ciudad,
+        direccion,
+        numero,
+        vendedor
+      });
+    }
+
+    console.log(`✅ Filas válidas para importar: ${toImport.length}`);
+    console.log(`⏭️  Filas saltadas por validación: ${skippedInvalid}`);
+
+    // Importar con UPSERT
+    let insertedCount = 0;
+    let updatedCount = 0;
+
+    if (toImport.length > 0) {
+      console.log(`🔄 Iniciando importación UPSERT de ${toImport.length} clientes...`);
+
+      for (let j = 0; j < toImport.length; j++) {
+        const item = toImport[j];
+        const excelRow = j + 2;
+
+        try {
+          const result = await client.query(
+            `INSERT INTO cliente (
+              rut, nombre, email, telefono_principal, sucursal,
+              categoria, subcategoria, comuna, ciudad, direccion,
+              numero, nombre_vendedor
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            ON CONFLICT (rut) DO UPDATE
+            SET nombre = EXCLUDED.nombre,
+                email = EXCLUDED.email,
+                telefono_principal = EXCLUDED.telefono_principal,
+                sucursal = EXCLUDED.sucursal,
+                categoria = EXCLUDED.categoria,
+                subcategoria = EXCLUDED.subcategoria,
+                comuna = EXCLUDED.comuna,
+                ciudad = EXCLUDED.ciudad,
+                direccion = EXCLUDED.direccion,
+                numero = EXCLUDED.numero,
+                nombre_vendedor = EXCLUDED.nombre_vendedor
+            RETURNING (xmax = 0) AS inserted`,
+            [
+              item.rut,
+              item.nombre,
+              item.email,
+              item.telefono,
+              item.sucursal,
+              item.categoria,
+              item.subcategoria,
+              item.comuna,
+              item.ciudad,
+              item.direccion,
+              item.numero,
+              item.vendedor
+            ]
+          );
+
+          // xmax = 0 significa INSERT, xmax > 0 significa UPDATE
+          if (result.rows[0].inserted) {
+            insertedCount++;
+          } else {
+            updatedCount++;
+          }
+
+          if ((insertedCount + updatedCount) % 100 === 0) {
+            console.log(`📊 Progreso: ${insertedCount + updatedCount}/${toImport.length}`);
+          }
+        } catch (err) {
+          console.error(`❌ Error en fila ${excelRow} (RUT ${item.rut}):`, err.message);
+          observations.push({
+            fila: excelRow,
+            rut: item.rut,
+            campo: 'DB',
+            detalle: err.detail || err.message
+          });
+        }
+      }
+
+      console.log(`✅ Importación finalizada: ${insertedCount} nuevos, ${updatedCount} actualizados`);
+    }
+
+    // Generar reporte de observaciones si hay errores
+    let observationsReportPath = null;
+    if (observations.length > 0) {
+      const wbObs = XLSX.utils.book_new();
+      const wsObs = XLSX.utils.json_to_sheet(observations.map(o => ({
+        'Fila Excel': o.fila,
+        'RUT': o.rut,
+        'Campo': o.campo,
+        'Detalle': o.detalle
+      })));
+      XLSX.utils.book_append_sheet(wbObs, wsObs, 'Observaciones');
+      const reportDir = 'uploads/reports';
+      if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
+      observationsReportPath = path.join(reportDir, `observaciones_clientes_${Date.now()}.xlsx`);
+      XLSX.writeFile(wbObs, observationsReportPath);
+    }
+
+    const result = {
+      success: true,
+      totalRows: data.length,
+      toImport: toImport.length,
+      inserted: insertedCount,
+      updated: updatedCount,
+      skippedInvalid,
+      skippedSample: skippedReasons,
+      errors: observations.length,
+      observationsReportUrl: observationsReportPath ? `/api/import/download-report/${path.basename(observationsReportPath)}` : null
+    };
+
+    fs.unlinkSync(req.file.path);
+    res.json(result);
+
+  } catch (error) {
+    console.error('❌ Error al importar clientes:', error);
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({
+      success: false,
+      msg: 'Error al procesar archivo',
+      error: error.message
+    });
+  } finally {
+    client.release();
+  }
+});
+
+// GET /api/import/plantilla-clientes - Descargar plantilla de clientes
+router.get('/plantilla-clientes', (req, res) => {
+  const sampleData = [
+    {
+      'RUT': '12.345.678-9',
+      'Nombre': 'EMPRESA EJEMPLO SPA',
+      'Email': 'contacto@ejemplo.cl',
+      'Telefono principal': '+56912345678',
+      'Sucursal': 'Santiago Centro',
+      'Categoria': 'Industrial',
+      'Subcategoria': 'Transporte',
+      'Comuna': 'Santiago',
+      'Ciudad': 'Santiago',
+      'Direccion': 'Av. Ejemplo',
+      'Numero': '1234',
+      'Nombre vendedor': 'Eduardo Enrique Ponce Castillo'
+    },
+    {
+      'RUT': '98.765.432-1',
+      'Nombre': 'COMERCIAL LOS AROMOS LTDA',
+      'Email': 'ventas@aromos.cl',
+      'Telefono principal': '+56987654321',
+      'Sucursal': 'Valparaíso',
+      'Categoria': 'Comercial',
+      'Subcategoria': 'Retail',
+      'Comuna': 'Viña del Mar',
+      'Ciudad': 'Valparaíso',
+      'Direccion': 'Calle Principal',
+      'Numero': '567',
+      'Nombre vendedor': 'Maiko Ricardo Flores Maldonado'
+    }
+  ];
+
+  const ws = XLSX.utils.json_to_sheet(sampleData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+
+  const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  
+  res.setHeader('Content-Disposition', 'attachment; filename=Plantilla_Clientes.xlsx');
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.send(buffer);
+});
+
 module.exports = router;
 
 // Manejador de errores específico para este router (multer y validaciones)
