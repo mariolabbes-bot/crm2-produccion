@@ -3,6 +3,9 @@ import { getToken } from './utils/auth';
 // API URL con fallback para desarrollo y producción
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
+// Exportar API_URL para uso en componentes
+export { API_URL };
+
 const getAuthHeaders = () => {
   const token = getToken();
   return token ? { 'Authorization': `Bearer ${token}` } : {};

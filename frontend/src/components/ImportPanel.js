@@ -23,7 +23,7 @@ import {
   Warning as WarningIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
-import { uploadVentasFile, uploadAbonosFile, uploadClientesFile, downloadPlantillaVentas, downloadPlantillaAbonos, downloadPlantillaClientes, downloadInformePendientes } from '../api';
+import { uploadVentasFile, uploadAbonosFile, uploadClientesFile, downloadPlantillaVentas, downloadPlantillaAbonos, downloadPlantillaClientes, downloadInformePendientes, API_URL } from '../api';
 import { removeToken, getToken } from '../utils/auth';
 
 const ImportPanel = () => {
