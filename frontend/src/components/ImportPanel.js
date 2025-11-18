@@ -24,7 +24,7 @@ import {
   Error as ErrorIcon
 } from '@mui/icons-material';
 import { uploadVentasFile, uploadAbonosFile, uploadClientesFile, downloadPlantillaVentas, downloadPlantillaAbonos, downloadPlantillaClientes, downloadInformePendientes } from '../api';
-import { removeToken } from '../utils/auth';
+import { removeToken, getToken } from '../utils/auth';
 
 const ImportPanel = () => {
   const navigate = useNavigate();
