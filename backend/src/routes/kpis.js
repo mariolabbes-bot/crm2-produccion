@@ -285,13 +285,32 @@ router.get('/mes-actual', auth(), async (req, res) => {
     const clientesResult = await pool.query(queryClientesConVenta, [...params, mesActual]);
     const numClientesConVenta = parseInt(clientesResult.rows[0]?.num_clientes || 0);
 
+    // 5. Promedio ventas del trimestre anterior al mes actual
+    // Calcular los 3 meses anteriores al mes actual
+    const fecha1MesAntes = new Date(year, month - 2, 1).toISOString().slice(0, 7);
+    const fecha2MesesAntes = new Date(year, month - 3, 1).toISOString().slice(0, 7);
+    const fecha3MesesAntes = new Date(year, month - 4, 1).toISOString().slice(0, 7);
+
+    const queryVentasTrimestreAnterior = `
+      SELECT COALESCE(SUM(${amountCol}), 0) AS monto_total
+      FROM ${salesTable}
+      WHERE TO_CHAR(${dateCol}, 'YYYY-MM') IN ($${params.length + 1}, $${params.length + 2}, $${params.length + 3})
+      ${vendedorFilter}
+    `;
+    const ventasTrimestreResult = await pool.query(queryVentasTrimestreAnterior, [...params, fecha3MesesAntes, fecha2MesesAntes, fecha1MesAntes]);
+    const montoVentasTrimestre = parseFloat(ventasTrimestreResult.rows[0]?.monto_total || 0);
+    const promedioVentasTrimestre = montoVentasTrimestre / 3;
+
     res.json({
       success: true,
       data: {
         monto_ventas_mes: montoVentasMes,
+        monto_ventas_anio_anterior: montoVentasAnioAnt,
         monto_abonos_mes: montoAbonosMes,
         variacion_vs_anio_anterior_pct: variacionPct,
-        numero_clientes_con_venta_mes: numClientesConVenta
+        promedio_ventas_trimestre_anterior: promedioVentasTrimestre,
+        numero_clientes_con_venta_mes: numClientesConVenta,
+        mes_consultado: mesActual
       }
     });
   } catch (err) {

@@ -538,52 +538,64 @@ const DashboardNuevo = () => {
   <>
           {/* Métricas principales - KPIs del mes actual */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
+            {/* VisionCard #1: Venta Actual con % vs Año Anterior */}
             <Grid item xs={12} sm={6} md={3}>
               <VisionCard 
-                title="Ventas Mes Actual" 
-                value={(() => {
-                  const val = kpisMesActual ? formatMoney(kpisMesActual.monto_ventas_mes) : '—';
-                  console.log('[Render] Ventas Mes Actual:', val, 'Raw:', kpisMesActual?.monto_ventas_mes);
-                  return val;
-                })()} 
-                gradient="primary" 
-                sx={{ minWidth: 180, mb: 2 }} 
+                title="Venta Mes Actual"
+                value={kpisMesActual ? formatMoney(kpisMesActual.monto_ventas_mes) : '—'}
+                subtitle={kpisMesActual ? (
+                  <span style={{ 
+                    color: kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? '#27ae60' : '#e74c3c',
+                    fontWeight: 600 
+                  }}>
+                    {kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? '↑' : '↓'} 
+                    {' '}
+                    {Math.abs(kpisMesActual.variacion_vs_anio_anterior_pct).toFixed(1)}% vs año anterior
+                  </span>
+                ) : '—'}
+                trend={kpisMesActual && kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? 'up' : 'down'}
+                icon="💰"
+                gradient="primary"
               />
             </Grid>
+
+            {/* VisionCard #2: Abonos con % vs Ventas del Mes */}
             <Grid item xs={12} sm={6} md={3}>
               <VisionCard 
-                title="Abonos Mes Actual" 
-                value={(() => {
-                  const val = kpisMesActual ? formatMoney(kpisMesActual.monto_abonos_mes) : '—';
-                  console.log('[Render] Abonos Mes Actual:', val, 'Raw:', kpisMesActual?.monto_abonos_mes);
-                  return val;
-                })()} 
-                gradient="success" 
-                sx={{ minWidth: 180, mb: 2 }} 
+                title="Abonos Mes Actual"
+                value={kpisMesActual ? formatMoney(kpisMesActual.monto_abonos_mes) : '—'}
+                subtitle={kpisMesActual && kpisMesActual.monto_ventas_mes > 0 ? (
+                  <span style={{ color: '#667eea', fontWeight: 600 }}>
+                    {((kpisMesActual.monto_abonos_mes / kpisMesActual.monto_ventas_mes) * 100).toFixed(1)}% de las ventas
+                  </span>
+                ) : '—'}
+                trend="neutral"
+                icon="📊"
+                gradient="success"
               />
             </Grid>
+
+            {/* VisionCard #3: Promedio Ventas Trimestre Anterior */}
             <Grid item xs={12} sm={6} md={3}>
               <VisionCard 
-                title="Variación vs Año Anterior" 
-                value={(() => {
-                  const val = kpisMesActual ? `${kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? '+' : ''}${kpisMesActual.variacion_vs_anio_anterior_pct.toFixed(1)}%` : '—';
-                  console.log('[Render] Variación:', val, 'Raw:', kpisMesActual?.variacion_vs_anio_anterior_pct);
-                  return val;
-                })()} 
-                gradient={kpisMesActual && kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? "success" : "warning"} 
-                sx={{ minWidth: 180, mb: 2 }} 
+                title="Promedio Ventas Trimestre"
+                value={kpisMesActual ? formatMoney(kpisMesActual.promedio_ventas_trimestre_anterior) : '—'}
+                subtitle="3 meses anteriores"
+                trend="neutral"
+                icon="📈"
+                gradient="warning"
               />
             </Grid>
+
+            {/* VisionCard #4: Saldos (Placeholder para futura implementación) */}
             <Grid item xs={12} sm={6} md={3}>
               <VisionCard 
-                title="Clientes con Venta" 
-                value={(() => {
-                  const val = kpisMesActual ? kpisMesActual.numero_clientes_con_venta_mes.toString() : '—';
-                  console.log('[Render] Clientes con Venta:', val, 'Raw:', kpisMesActual?.numero_clientes_con_venta_mes);
-                  return val;
-                })()} 
-                gradient="info" 
-                sx={{ minWidth: 180, mb: 2 }} 
+                title="Saldos Clientes"
+                value="Próximamente"
+                subtitle="En desarrollo..."
+                trend="neutral"
+                icon="💳"
+                gradient="info"
               />
             </Grid>
           </Grid>
