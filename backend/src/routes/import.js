@@ -478,6 +478,18 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
         });
         const clientWS = XLSX.utils.json_to_sheet(clientData);
         XLSX.utils.book_append_sheet(reportWB, clientWS, 'Clientes Faltantes');
+        
+        // Hoja adicional "Clientes No Encontrados" con extracción de RUT
+        const clientesNoEncontrados = Array.from(missingClients).map(c => {
+          // Buscar RUT en el nombre del cliente (formato 12345678-9 o 1234567-K)
+          const rutMatch = c.match(/\d{7,8}-[\dkK]/);
+          return {
+            'RUT': rutMatch ? rutMatch[0] : '',
+            'Nombre': c
+          };
+        });
+        const clientesNoEncontradosWS = XLSX.utils.json_to_sheet(clientesNoEncontrados);
+        XLSX.utils.book_append_sheet(reportWB, clientesNoEncontradosWS, 'Clientes No Encontrados');
       }
 
       const reportDir = 'uploads/reports';
