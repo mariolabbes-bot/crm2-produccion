@@ -536,6 +536,11 @@ const DashboardNuevo = () => {
         </Box>
       ) : (
   <>
+          {/* DEBUG: Mostrar estado de kpisMesActual */}
+          {console.log('[RENDER VisionCards] kpisMesActual:', kpisMesActual)}
+          {console.log('[RENDER VisionCards] kpisMesActual es null?:', kpisMesActual === null)}
+          {console.log('[RENDER VisionCards] kpisMesActual es undefined?:', kpisMesActual === undefined)}
+          
           {/* Métricas principales - KPIs del mes actual */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             {/* VisionCard #1: Venta Actual con % vs Año Anterior */}
