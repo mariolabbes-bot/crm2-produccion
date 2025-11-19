@@ -34,10 +34,51 @@ const ImportPanel = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [updateMissingAbonos, setUpdateMissingAbonos] = useState(false); // modo actualización de abonos
+  const [reassigning, setReassigning] = useState(false);
 
   const handleLogout = () => {
     removeToken();
     navigate('/login');
+  };
+
+  const handleReassignVendors = async () => {
+    if (!window.confirm('¿Confirmas reasignar los abonos de Alejandra→Luis y Octavio→Joaquín?')) {
+      return;
+    }
+
+    setReassigning(true);
+    setError(null);
+
+    try {
+      const token = getToken();
+      const response = await fetch(`${API_URL}/admin/reassign-vendors`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`✅ Reasignación completada!\n\nAlejandra → Luis: ${data.results.alejandra.updated} abonos\nOctavio → Joaquín: ${data.results.octavio.updated} abonos\nRestantes: ${data.results.remaining}`);
+        
+        // Actualizar el resultado para reflejar el cambio
+        if (result && result.missingVendors) {
+          setResult({
+            ...result,
+            missingVendors: result.missingVendors.filter(v => v !== 'Alejandra' && v !== 'Octavio')
+          });
+        }
+      } else {
+        setError('Error en la reasignación: ' + data.error);
+      }
+    } catch (err) {
+      setError('Error al conectar con el servidor: ' + err.message);
+    } finally {
+      setReassigning(false);
+    }
   };
 
   const handleFileSelect = (event) => {
@@ -226,7 +267,7 @@ const ImportPanel = () => {
                     <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                       Opciones avanzadas (Abonos)
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                       <input
                         id="chk-update-missing"
                         type="checkbox"
@@ -238,8 +279,22 @@ const ImportPanel = () => {
                         Actualizar datos faltantes (cliente / vendedor) sin duplicar
                       </label>
                     </Box>
-                    <Typography variant="caption" color="textSecondary" display="block" sx={{ mt: 1 }}>
+                    <Typography variant="caption" color="textSecondary" display="block" sx={{ mb: 2 }}>
                       Usa esto después de cargar nuevos clientes o vendedores. Los folios existentes se completarán.
+                    </Typography>
+                    <Divider sx={{ my: 2 }} />
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={handleReassignVendors}
+                      disabled={reassigning}
+                      fullWidth
+                      sx={{ textTransform: 'none' }}
+                    >
+                      {reassigning ? 'Reasignando...' : '🔄 Reasignar Alejandra→Luis y Octavio→Joaquín'}
+                    </Button>
+                    <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
+                      Usa este botón para reasignar automáticamente los abonos de vendedores no encontrados
                     </Typography>
                   </Box>
                 )}
