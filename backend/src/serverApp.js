@@ -46,6 +46,7 @@ app.use('/api/abonos', require('./routes/abonos'));
 app.use('/api/comparativas', require('./routes/comparativas'));
 app.use('/api/import', require('./routes/import'));
 app.use('/api/diagnostico', require('./routes/diagnostico'));
+app.use('/api/admin', require('./routes/admin'));
 
 app.get('/', (req, res) => {
   res.json({
