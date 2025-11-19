@@ -364,33 +364,6 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       const identificadorAbono = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : null;
       const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
 
-      // Validar duplicado DESPUÉS de tener identificadorAbono
-      // CLAVE ÚNICA lógica: FOLIO + IDENTIFICADOR_ABONO + FECHA (o solo FOLIO si la tabla tiene UNIQUE en folio)
-      const folioNorm = norm(folio);
-      const duplicateKey = `${folioNorm}|${fecha}|${norm(identificadorAbono || '')}`;
-      const existingRow = existingByFolio.get(folioNorm);
-      if (existingKeys.has(duplicateKey) || existingRow) {
-        // Si está activado updateMissing intentamos actualizar campos faltantes en vez de marcar como duplicado
-        if (updateMissing && existingRow) {
-          const needsIdentificador = (!existingRow.identificador && clienteRut);
-          const needsVendedor = (!existingRow.vendedor_cliente && vendedorNombre);
-          if (needsIdentificador || needsVendedor) {
-            updates.push({
-              id: existingRow.id,
-              folio,
-              identificador: needsIdentificador ? clienteRut : null,
-              clienteNombre: needsIdentificador ? clienteNombre : null,
-              vendedorClienteNombre: needsVendedor ? vendedorNombre : null
-            });
-            updatedMissing++;
-            continue; // no insertar ni contar como duplicado
-          }
-        }
-        // Caso normal: duplicado
-        duplicates.push({ folio, fecha, identificadorAbono, monto: montoNeto });
-        continue;
-      }
-
       // Buscar vendedor con matching flexible (IGUAL QUE EN VENTAS)
       let vendedorNombre = null;
       if (vendedorClienteAlias) {
@@ -442,6 +415,33 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
       if (!clienteRut && clienteNombre) {
         missingClients.add(clienteNombre);
         observations.push({ fila: excelRow, folio, campo: 'identificador', detalle: `Cliente no encontrado (${clienteNombre})` });
+      }
+
+      // Validar duplicado DESPUÉS de tener identificadorAbono, vendedorNombre y clienteRut
+      // CLAVE ÚNICA lógica: FOLIO + IDENTIFICADOR_ABONO + FECHA (o solo FOLIO si la tabla tiene UNIQUE en folio)
+      const folioNorm = norm(folio);
+      const duplicateKey = `${folioNorm}|${fecha}|${norm(identificadorAbono || '')}`;
+      const existingRow = existingByFolio.get(folioNorm);
+      if (existingKeys.has(duplicateKey) || existingRow) {
+        // Si está activado updateMissing intentamos actualizar campos faltantes en vez de marcar como duplicado
+        if (updateMissing && existingRow) {
+          const needsIdentificador = (!existingRow.identificador && clienteRut);
+          const needsVendedor = (!existingRow.vendedor_cliente && vendedorNombre);
+          if (needsIdentificador || needsVendedor) {
+            updates.push({
+              id: existingRow.id,
+              folio,
+              identificador: needsIdentificador ? clienteRut : null,
+              clienteNombre: needsIdentificador ? clienteNombre : null,
+              vendedorClienteNombre: needsVendedor ? vendedorNombre : null
+            });
+            updatedMissing++;
+            continue; // no insertar ni contar como duplicado
+          }
+        }
+        // Caso normal: duplicado
+        duplicates.push({ folio, fecha, identificadorAbono, monto: montoNeto });
+        continue;
       }
 
       toImport.push({
