@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 const { pool } = require('../db');
 
 // POST /api/admin/reassign-vendors - Reasignar vendedores Alejandra y Octavio
-router.post('/reassign-vendors', authenticateToken, requireRole(['manager']), async (req, res) => {
+router.post('/reassign-vendors', auth(['manager']), async (req, res) => {
   const client = await pool.connect();
   
   try {
