@@ -180,10 +180,30 @@ router.get('/mes-actual', auth(), async (req, res) => {
       vendedorCol = vendedorColCheck.rows[0].column_name;
     }
 
-    // Filtro vendedor
+    // Filtro vendedor: Managers pueden filtrar por vendedor_id, vendedores solo ven sus datos
     let vendedorFilter = '';
     let params = [];
-    if (!isManager) {
+    
+    // Si es manager y se proporciona vendedor_id en query, filtrar por ese vendedor
+    if (isManager && req.query.vendedor_id) {
+      const vendedorId = parseInt(req.query.vendedor_id, 10);
+      if (!isNaN(vendedorId)) {
+        // Buscar el nombre del vendedor por su ID
+        const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM users WHERE id = $1', [vendedorId]);
+        if (vendedorQuery.rows.length > 0) {
+          const nombreVendedor = vendedorQuery.rows[0].nombre_vendedor;
+          if (vendedorCol === 'vendedor_cliente') {
+            vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
+            params = [nombreVendedor];
+          } else {
+            vendedorFilter = `AND ${vendedorCol} = $1`;
+            params = [nombreVendedor];
+          }
+        }
+      }
+    }
+    // Si NO es manager, filtrar por sus propios datos
+    else if (!isManager) {
       if (vendedorCol === 'vendedor_cliente') {
         // Usar nombre_vendedor del token JWT
         if (user.nombre_vendedor) {
@@ -252,7 +272,21 @@ router.get('/mes-actual', auth(), async (req, res) => {
       if (abonoAmountCol && abonoDateCol) {
         let abonoVendedorFilter = '';
         let abonoParams = [];
-        if (!isManager && abonoVendedorCol) {
+        
+        // Aplicar el mismo filtro de vendedor que en ventas
+        // Si es manager con filtro vendedor_id, usar el nombre del vendedor ya obtenido
+        if (params.length > 0 && abonoVendedorCol) {
+          const nombreVendedor = params[0]; // Ya tenemos el nombre del vendedor de la query anterior
+          if (abonoVendedorCol === 'vendedor_cliente') {
+            abonoVendedorFilter = `AND UPPER(${abonoVendedorCol}) = UPPER($1)`;
+            abonoParams = [nombreVendedor];
+          } else {
+            abonoVendedorFilter = `AND ${abonoVendedorCol} = $1`;
+            abonoParams = [nombreVendedor];
+          }
+        }
+        // Si NO es manager, filtrar por sus propios datos
+        else if (!isManager && abonoVendedorCol) {
           if (abonoVendedorCol === 'vendedor_cliente') {
             if (user.nombre_vendedor) {
               abonoVendedorFilter = `AND UPPER(${abonoVendedorCol}) = UPPER($1)`;

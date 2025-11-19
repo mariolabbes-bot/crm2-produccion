@@ -1,0 +1,12007 @@
+-- VENTAS LOTE 42
+-- Máximo 1000 registros
+
+-- Inicio de carga
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317130', '2024-01-19',
+  '76221855-0', 'SOCIEDAD MULTIPROPOSITO GONZALEZ LTDA.', NULL, NULL,
+  '1', 'AP1015213', '245/75R16(POR) 120/116Q MUD TERRAIN A929 APLUS',
+  4, 74052, 296208
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317129', '2024-01-19',
+  '76679399-1', 'SERVITECA LAS TORRES SPA', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  5, 75781, 378905
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317129', '2024-01-19',
+  '76679399-1', 'SERVITECA LAS TORRES SPA', NULL, NULL,
+  '2', 'SHE-550048100', 'CAJA SHELL HELIX HX8 ECT  5W30 3X5',
+  5, 92415, 462075
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317128', '2024-01-19',
+  '76653720-0', 'TRANSPORTES VAN OOSTERWYK LIMITADA', NULL, NULL,
+  '1', 'AP1018164', '195/65R15 91V A609 APLUS',
+  2, 26607, 53214
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317127', '2024-01-19',
+  '76148235-1', 'SOC. COMERCIAL GRIMALDI TAMBURINI LTDA.', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  30, 77970, 2339100
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317126', '2024-01-19',
+  '77296338-6', 'SERVICIOS AUTOMOTRIZ GUERRERO SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  10, 57200, 572000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317125', '2024-01-19',
+  '13018313-1', 'MAIKO FLORES', NULL, NULL,
+  '1', 'AP1018176', '205/55R16 91V A609 APLUS',
+  4, 25943, 103772
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122762', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122762', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW67/1', 'W67/1',
+  1, 3342, 3342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317124', '2024-01-19',
+  '13224208-9', 'RUBEN CARMONA', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  2, 146069, 292138
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317124', '2024-01-19',
+  '13224208-9', 'RUBEN CARMONA', NULL, NULL,
+  '2', 'SERV-05D', 'SERVICIO MONTAJE CAMION GERMAN',
+  2, 12600, 25200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317123', '2024-01-19',
+  '8465891-K', 'SANDRA GODOY', NULL, NULL,
+  '1', 'AP1017199', '265/70R16 112T ALL TERRAIN A929 APLUS',
+  4, 61550, 246200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317123', '2024-01-19',
+  '8465891-K', 'SANDRA GODOY', NULL, NULL,
+  '2', '911-E', 'ANTICONGELANTE 911-GL ESPECIAL 1GLN',
+  12, 6327, 75924
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317123', '2024-01-19',
+  '8465891-K', 'SANDRA GODOY', NULL, NULL,
+  '3', '711-GL', 'ANTICONGELANTE 711-GL',
+  36, 3133, 112788
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317123', '2024-01-19',
+  '8465891-K', 'SANDRA GODOY', NULL, NULL,
+  '4', '911-GL', 'ANTICONGELANTE 911-GL 1GLN',
+  6, 6327, 37962
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317122', '2024-01-19',
+  '76310275-0', 'TRANSPORTES SALVADOR DOMINGO MAYA MORA', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  2, 146069, 292138
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122761', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122761', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW811/80', 'W811/80 FILTRO DE ACEITE SELLADO',
+  1, 3548, 3548
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317121', '2024-01-19',
+  '77286158-3', 'LUBRICENTRO KAFMA SPA', NULL, NULL,
+  '1', 'TOT-214083', 'CAJA TRAXIUM GEAR 8 75W80 6X2',
+  1, 78272, 78272
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317121', '2024-01-19',
+  '77286158-3', 'LUBRICENTRO KAFMA SPA', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317121', '2024-01-19',
+  '77286158-3', 'LUBRICENTRO KAFMA SPA', NULL, NULL,
+  '3', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  6, 3173, 19038
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317120', '2024-01-19',
+  '8131434-9', 'MARIO ALEJANDRO TABILO', NULL, NULL,
+  '1', 'AP1018103', '205/60R16 92V A609 APLUS',
+  1, 29635, 29635
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317119', '2024-01-19',
+  '76989152-8', 'INVERSIONES Y TRANSPORTES CORTES CORTEZ SPA', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  2, 146069, 292138
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317118', '2024-01-19',
+  '11537174-6', 'JUAN CARTES', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  4, 57200, 228800
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317118', '2024-01-19',
+  '11537174-6', 'JUAN CARTES', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317118', '2024-01-19',
+  '11537174-6', 'JUAN CARTES', NULL, NULL,
+  '3', 'SHE-550048100', 'CAJA SHELL HELIX HX8 ECT  5W30 3X5',
+  1, 92415, 92415
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122760', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550039983L', 'BIDON HELIX HX5 15W40 4 LTS. (EU)',
+  1, 18725, 18725
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122760', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/80', 'W68/80 Filtro de Aceite',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '317117', '2024-01-19',
+  '77666086-8', 'SERVICIO A LA MINERIA SPA', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '317117', '2024-01-19',
+  '77666086-8', 'SERVICIO A LA MINERIA SPA', NULL, NULL,
+  '2', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  1, 6878, 6878
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317116', '2024-01-19',
+  '8210442-9', 'JUAN ALVARADO', NULL, NULL,
+  '1', 'REC-114', '295/80R22,5 SERVICIO RECAUCHAJE  UZY ( SAM )',
+  4, 86650, 346600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317115', '2024-01-19',
+  '11148015-K', 'MILIANS ISABEL  OTAROLA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317114', '2024-01-19',
+  '11148015-K', 'MILIANS ISABEL  OTAROLA', NULL, NULL,
+  '1', '711-GL', 'ANTICONGELANTE 711-GL',
+  30, 3133, 93990
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317114', '2024-01-19',
+  '11148015-K', 'MILIANS ISABEL  OTAROLA', NULL, NULL,
+  '2', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  30, 3133, 93990
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317113', '2024-01-19',
+  '13015607-K', 'NEFI RODRIGO  CASTILLO', NULL, NULL,
+  '1', '711-GL', 'ANTICONGELANTE 711-GL',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317113', '2024-01-19',
+  '13015607-K', 'NEFI RODRIGO  CASTILLO', NULL, NULL,
+  '2', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317113', '2024-01-19',
+  '13015607-K', 'NEFI RODRIGO  CASTILLO', NULL, NULL,
+  '3', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  12, 1657, 19884
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317112', '2024-01-19',
+  '16733572-1', 'FRANCISCO REQUENA', NULL, NULL,
+  '1', 'AP7500062', '315/80R22.5 157/154M S201 APLUS',
+  4, 149668, 598672
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317111', '2024-01-19',
+  '76225790-4', 'SOC. COMERCIAL AUTOLINE LTDA', NULL, NULL,
+  '1', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317111', '2024-01-19',
+  '76225790-4', 'SOC. COMERCIAL AUTOLINE LTDA', NULL, NULL,
+  '2', '711-GL', 'ANTICONGELANTE 711-GL',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317111', '2024-01-19',
+  '76225790-4', 'SOC. COMERCIAL AUTOLINE LTDA', NULL, NULL,
+  '3', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317110', '2024-01-19',
+  '6776306-8', 'AMELIA LEIVA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317110', '2024-01-19',
+  '6776306-8', 'AMELIA LEIVA', NULL, NULL,
+  '2', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  1, 64456, 64456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317110', '2024-01-19',
+  '6776306-8', 'AMELIA LEIVA', NULL, NULL,
+  '3', 'NIS-KE90099942', 'CAJA NISSAN 10W40 SL/CF 3x5 litros',
+  1, 48761, 48761
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317110', '2024-01-19',
+  '6776306-8', 'AMELIA LEIVA', NULL, NULL,
+  '4', '711-GL', 'ANTICONGELANTE 711-GL',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317110', '2024-01-19',
+  '6776306-8', 'AMELIA LEIVA', NULL, NULL,
+  '5', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  12, 1657, 19884
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317110', '2024-01-19',
+  '6776306-8', 'AMELIA LEIVA', NULL, NULL,
+  '6', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  12, 1657, 19884
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317110', '2024-01-19',
+  '6776306-8', 'AMELIA LEIVA', NULL, NULL,
+  '7', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317109', '2024-01-19',
+  '8210442-9', 'JUAN ALVARADO', NULL, NULL,
+  '1', 'AP8004644', '295/80R22.5 154/151L D801+ APLUS',
+  4, 184866, 739464
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317108', '2024-01-19',
+  '5172048-2', 'RAMON DOMINGUEZ', NULL, NULL,
+  '1', 'GM-93165557', 'CAJA GM DEXOS 2 LONGLIFE 5W30 4X5',
+  2, 98585, 197170
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317108', '2024-01-19',
+  '5172048-2', 'RAMON DOMINGUEZ', NULL, NULL,
+  '2', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 77970, 155940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317108', '2024-01-19',
+  '5172048-2', 'RAMON DOMINGUEZ', NULL, NULL,
+  '3', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  1, 119600, 119600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317107', '2024-01-19',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '1', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  24, 1657, 39768
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317107', '2024-01-19',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '2', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  24, 1657, 39768
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317107', '2024-01-19',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '3', '711-GL', 'ANTICONGELANTE 711-GL',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317107', '2024-01-19',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '4', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317106', '2024-01-19',
+  '15043954-K', 'OSCAR ARAYA ARAYA', NULL, NULL,
+  '1', 'AP1017199', '265/70R16 112T ALL TERRAIN A929 APLUS',
+  4, 61550, 246200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317105', '2024-01-19',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '1', 'SHE-550044858', 'BALDE RIMULA R6 LM 10W40 20 LTS (EU)',
+  2, 100800, 201600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317105', '2024-01-19',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  4, 57200, 228800
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317105', '2024-01-19',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '3', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317105', '2024-01-19',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '4', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 77970, 155940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317104', '2024-01-19',
+  '77859463-3', 'CARTES SPA', NULL, NULL,
+  '1', 'AP1018158', '185/65R15 88H A609 APLUS',
+  1, 25902, 25902
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317104', '2024-01-19',
+  '77859463-3', 'CARTES SPA', NULL, NULL,
+  '2', 'AP1018176', '205/55R16 91V A609 APLUS',
+  6, 27566, 165396
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317104', '2024-01-19',
+  '77859463-3', 'CARTES SPA', NULL, NULL,
+  '3', 'AP1018103', '205/60R16 92V A609 APLUS',
+  6, 29635, 177810
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317103', '2024-01-19',
+  '17492941-6', 'EVANGELI VALDIVIA', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317103', '2024-01-19',
+  '17492941-6', 'EVANGELI VALDIVIA', NULL, NULL,
+  '2', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  1, 67661, 67661
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317103', '2024-01-19',
+  '17492941-6', 'EVANGELI VALDIVIA', NULL, NULL,
+  '3', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  1, 64456, 64456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122759', '2024-01-19',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'FW818/4', 'W818/4 FILTRO ACEITE TOYOTA-NISSAN-DAIHATS',
+  1, 3708, 3708
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122759', '2024-01-19',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317102', '2024-01-19',
+  '4393593-3', 'HECTOR VALDERRAMA', NULL, NULL,
+  '1', 'AP1014853', '235/60R16 100H A608 APLUS',
+  4, 43913, 175652
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317102', '2024-01-19',
+  '4393593-3', 'HECTOR VALDERRAMA', NULL, NULL,
+  '2', 'AP1018242', '175/65R14 82H A609 APLUS',
+  4, 21782, 87128
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317102', '2024-01-19',
+  '4393593-3', 'HECTOR VALDERRAMA', NULL, NULL,
+  '3', 'AP1018249', '185/65R14 86H A609 APLUS',
+  4, 24190, 96760
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317102', '2024-01-19',
+  '4393593-3', 'HECTOR VALDERRAMA', NULL, NULL,
+  '4', 'AP1018164', '195/65R15 91V A609 APLUS',
+  2, 26607, 53214
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317102', '2024-01-19',
+  '4393593-3', 'HECTOR VALDERRAMA', NULL, NULL,
+  '5', 'AP1008005', '185R14C 102/100R A867 APLUS',
+  2, 33057, 66114
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122758', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122758', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122758', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FC3585', 'C3585 FILTRO AIRE',
+  1, 7983, 7983
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317101', '2024-01-19',
+  '17491548-2', 'RUBEN FERNANDEZ', NULL, NULL,
+  '1', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  30, 1657, 49710
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122757', '2024-01-19',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'FW67/88', 'W67/88 FILTRO DE ACEITE LONG LIFE KIA',
+  1, 4456, 4456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122756', '2024-01-19',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122755', '2024-01-19',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'AP8003970', '7.50R16 112/118L S600 APLUS',
+  2, 122205, 244410
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317100', '2024-01-19',
+  '76694827-8', 'MANT. Y SUMINISTROS BARDAWIL FLOREZ SPA', NULL, NULL,
+  '1', 'SHE-550040209', 'TAMBOR HELIX ULTRA AG 5W30 209 LTS (EU)',
+  1, 798432, 798432
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317099', '2024-01-19',
+  '15544740-0', 'ROLANDO COYE', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 77970, 155940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317099', '2024-01-19',
+  '15544740-0', 'ROLANDO COYE', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317099', '2024-01-19',
+  '15544740-0', 'ROLANDO COYE', NULL, NULL,
+  '3', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317098', '2024-01-19',
+  '76865290-2', 'ALVARO BARRAZA Y CIA. LTDA.', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  1, 19895, 19895
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317097', '2024-01-19',
+  '76572565-8', 'TRANSPORTES CAMILA SOCIEDAD ANONIMA', NULL, NULL,
+  '1', 'AP501000015', '11R22.5 148/145M S600 APLUS',
+  4, 134255, 537020
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317096', '2024-01-19',
+  '76728877-8', 'FERRETERIA YERKO MOYANO VARAS E.I.R.L.', NULL, NULL,
+  '1', 'AP1011289', '155R12C 88/86Q A867 APLUS',
+  4, 25247, 100988
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317095', '2024-01-19',
+  '17866399-2', 'DANIEL ANDRES TAPIA', NULL, NULL,
+  '1', 'SHE-550044859', 'TAMBOR RIMULA R6 LM 10W40 209 LTS (EU)',
+  1, 954688, 954688
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317095', '2024-01-19',
+  '17866399-2', 'DANIEL ANDRES TAPIA', NULL, NULL,
+  '2', 'SHE-550040209', 'TAMBOR HELIX ULTRA AG 5W30 209 LTS (EU)',
+  1, 798432, 798432
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317094', '2024-01-19',
+  '76865290-2', 'ALVARO BARRAZA Y CIA. LTDA.', NULL, NULL,
+  '1', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  2, 74891, 149782
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317094', '2024-01-19',
+  '76865290-2', 'ALVARO BARRAZA Y CIA. LTDA.', NULL, NULL,
+  '2', 'SERV-03B', 'SERVICIO DE ENGRASE PEDRO',
+  1, 15750, 15750
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317094', '2024-01-19',
+  '76865290-2', 'ALVARO BARRAZA Y CIA. LTDA.', NULL, NULL,
+  '3', 'SERV-02B', 'SERVICIO CAMBIO DE FILTRO C/U PEDRO',
+  3, 3150, 9450
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317093', '2024-01-19',
+  '6390872-K', 'LUIS EDUARDO GUAJARDO', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122754', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122754', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/80', 'W68/80 Filtro de Aceite',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317092', '2024-01-19',
+  '11807250-2', 'HERNAN FERNANDO THENOUX', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  3, 77970, 233910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122753', '2024-01-19',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'AP1018153', '185/60R15 84H A609 APLUS',
+  1, 28962, 28962
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317091', '2024-01-19',
+  '7636071-5', 'OSVALDO GUILLERMO  FLANIGA', NULL, NULL,
+  '1', 'SERV-05D', 'SERVICIO MONTAJE CAMION GERMAN',
+  1, 12600, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317091', '2024-01-19',
+  '7636071-5', 'OSVALDO GUILLERMO  FLANIGA', NULL, NULL,
+  '2', 'SERV-06D', 'SERVICIO TRASLADO DE NEUMATICO GERMAN',
+  4, 3150, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317090', '2024-01-19',
+  '77750958-6', 'mecanica integral victor manuel santander luna spa', NULL, NULL,
+  '1', 'AP1018165', '205/60R15 91V A609 APLUS',
+  2, 31178, 62356
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122752', '2024-01-19',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'AP1018222', '175/70R13 82T A609 APLUS',
+  1, 28136, 28136
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '317089', '2024-01-19',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '1', 'AP7500581', '275/80R22.5 149/146M S201 APLUS',
+  8, 144408, 1155264
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317088', '2024-01-19',
+  '15572551-6', 'Eduardo Arriiagada', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317088', '2024-01-19',
+  '15572551-6', 'Eduardo Arriiagada', NULL, NULL,
+  '2', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317087', '2024-01-19',
+  '17491548-2', 'RUBEN FERNANDEZ', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317087', '2024-01-19',
+  '17491548-2', 'RUBEN FERNANDEZ', NULL, NULL,
+  '2', 'TOT-214107', 'CAJA TOTAL QUARTZ 7000 10W40 3X4',
+  2, 49680, 99360
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317087', '2024-01-19',
+  '17491548-2', 'RUBEN FERNANDEZ', NULL, NULL,
+  '3', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  2, 63600, 127200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '317086', '2024-01-19',
+  '77476564-6', 'MT SPA', NULL, NULL,
+  '1', 'AP1018164', '195/65R15 91V A609 APLUS',
+  8, 25042, 200336
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317085', '2024-01-19',
+  '76520607-3', 'AUTOMOTRIZ MAURICIO ANTONIO REYES EIRL', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317085', '2024-01-19',
+  '76520607-3', 'AUTOMOTRIZ MAURICIO ANTONIO REYES EIRL', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317085', '2024-01-19',
+  '76520607-3', 'AUTOMOTRIZ MAURICIO ANTONIO REYES EIRL', NULL, NULL,
+  '3', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317084', '2024-01-19',
+  '77587799-5', 'SERVICIOS DE MANTENCIONES MECANICAS SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  3, 57200, 171600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317084', '2024-01-19',
+  '77587799-5', 'SERVICIOS DE MANTENCIONES MECANICAS SPA', NULL, NULL,
+  '2', 'SHE-550040209', 'TAMBOR HELIX ULTRA AG 5W30 209 LTS (EU)',
+  1, 798432, 798432
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317083', '2024-01-19',
+  '76860920-9', 'TRANSPORTES LIRA DIVISION CAMIONES', NULL, NULL,
+  '1', 'BR19053002', '295/80R22.5 154/149L R269',
+  2, 289000, 578000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122751', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122751', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'SHE-550040352L', 'BIDON SHELL HELIX HX7 1 LT (EU)',
+  4, 5518, 22072
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122751', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FP927X', 'P927X FILTRO DE COMBUSTIBLE',
+  1, 6863, 6863
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122751', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '4', 'FW8018', 'W8018 FILTRO ACEITE LONG LIFE',
+  1, 6380, 6380
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122751', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '5', 'FC25140', 'C25140 FILTRO DE AIRE',
+  1, 9785, 9785
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122750', '2024-01-19',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'SHE-550039983L', 'BIDON HELIX HX5 15W40 4 LTS. (EU)',
+  1, 18725, 18725
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122750', '2024-01-19',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317082', '2024-01-19',
+  '77102973-6', 'MASCOTIENDAS SPA', NULL, NULL,
+  '1', 'SERV-RA02', 'REPARACI√ìN NEUMATICO AUTO-CAMIONETA PEDRO',
+  1, 10500, 10500
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '317081', '2024-01-19',
+  '76815336-1', 'HECTOR RICARDO REYES RAMIREZ TRANSPORTES E I R L', NULL, NULL,
+  '1', 'AP7500062', '315/80R22.5 157/154M S201 APLUS',
+  1, 149668, 149668
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '317080', '2024-01-19',
+  '77691674-9', 'TRANSPORTES JMORENOC SPA', NULL, NULL,
+  '1', 'AP7500062', '315/80R22.5 157/154M S201 APLUS',
+  1, 149668, 149668
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317079', '2024-01-19',
+  '76784919-2', 'EASY RENT A CAR SPA', NULL, NULL,
+  '1', 'AP7500186', '235/75R17.5 143/141J S201 APLUS',
+  2, 88829, 177658
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317078', '2024-01-19',
+  '9530253-K', 'JORGE CARVAJAL', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  4, 146069, 584276
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317077', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '1', 'SHE-550040209', 'TAMBOR HELIX ULTRA AG 5W30 209 LTS (EU)',
+  1, 798432, 798432
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317076', '2024-01-19',
+  '76567127-2', 'MUSAM SPA', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 77970, 155940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317076', '2024-01-19',
+  '76567127-2', 'MUSAM SPA', NULL, NULL,
+  '2', 'GG-751051003', 'CAJA GERMAN GOLD ENGINE POWER 5W30 C3 LOW SAPS 4X5',
+  1, 87474, 87474
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317075', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  4, 57200, 228800
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317075', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '2', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  3, 119600, 358800
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317075', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '3', 'AP1018222', '175/70R13 82T A609 APLUS',
+  2, 23915, 47830
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317075', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '4', 'AP1008032', '195R14C 106/104R A867 APLUS',
+  4, 37163, 148652
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317075', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '5', 'AP1018158', '185/65R15 88H A609 APLUS',
+  1, 25902, 25902
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317075', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '6', 'AP1010655', '195/70R15C 104/102R A867 APLUS',
+  3, 36870, 110610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317075', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '7', 'AP1018165', '205/60R15 91V A609 APLUS',
+  2, 31178, 62356
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317075', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '8', 'AP1018170', '205/65R15 94H A609 APLUS',
+  2, 28767, 57534
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122749', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  1, 74891, 74891
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317074', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  2, 146069, 292138
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317074', '2024-01-19',
+  '76873029-6', 'ECO RANCH SPA', NULL, NULL,
+  '2', '401004444', '295/80R22.5 154/151M D801 APLUS',
+  4, 160917, 643668
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122748', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122748', '2024-01-19',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW719/27', 'W719/27 FILTRO ACEITE EX W818/6',
+  1, 4199, 4199
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122747', '2024-01-19',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122747', '2024-01-19',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'FW610/3', 'W610/3',
+  1, 3457, 3457
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122746', '2024-01-19',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122746', '2024-01-19',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FC2556', 'C2556 FILTRO AIRE TOYOTA YARIS 2014',
+  1, 4327, 4327
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122746', '2024-01-19',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '3', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317073', '2024-01-19',
+  '10917723-7', 'MONICA DEL CARMEN GONZALEZ', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  5, 75781, 378905
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317072', '2024-01-19',
+  '77215107-1', 'ENERGIA LUIS ALBERTO SEGUEL MERINO E I R L', NULL, NULL,
+  '1', 'AP1018222', '175/70R13 82T A609 APLUS',
+  4, 23915, 95660
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '317071', '2024-01-19',
+  '96708670-3', 'LOGISTICA S.A.', NULL, NULL,
+  '1', 'AP7500581', '275/80R22.5 149/146M S201 APLUS',
+  4, 147355, 589420
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317070', '2024-01-19',
+  '76221855-0', 'SOCIEDAD MULTIPROPOSITO GONZALEZ LTDA.', NULL, NULL,
+  '1', 'AP1015213', '245/75R16(POR) 120/116Q MUD TERRAIN A929 APLUS',
+  4, 74052, 296208
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317069', '2024-01-19',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '1', 'AP1012955', '165R13C 91/89R A867 APLUS',
+  10, 24120, 241200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317069', '2024-01-19',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '2', 'AP1018249', '185/65R14 86H A609 APLUS',
+  7, 24189, 169323
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317069', '2024-01-19',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '3', 'AP1011289', '155R12C 88/86Q A867 APLUS',
+  4, 21460, 85840
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317069', '2024-01-19',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '4', 'AP1018158', '185/65R15 88H A609 APLUS',
+  8, 25902, 207216
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317069', '2024-01-19',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '5', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  2, 66542, 133084
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317069', '2024-01-19',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '6', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317069', '2024-01-19',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '7', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  24, 1657, 39768
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317068', '2024-01-19',
+  '7636071-5', 'OSVALDO GUILLERMO  FLANIGA', NULL, NULL,
+  '1', 'AP501000015', '11R22.5 148/145M S600 APLUS',
+  8, 134255, 1074040
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Nota Cr√©dito', '23706', '2024-01-19',
+  '76927820-6', 'TRANSPORTES JORGE HOLZ Y CIA. LTDA.', NULL, NULL,
+  '1', '401004448', '295/80R22.5 154/151M S201 APLUS',
+  4, -145221, -580884
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Nota Cr√©dito', '23705', '2024-01-19',
+  '76988916-7', 'RAUL ERNESTO RIVEROS LOPEZ AGRICOLA ERLOPEZ EMPRESA INDIVIDUAL DE RESP', NULL, NULL,
+  '1', 'AP8004644', '295/80R22.5 154/151L D801+ APLUS',
+  4, -184866, -739464
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Nota Cr√©dito', '23704', '2024-01-19',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'AP1018414', '175/70R14 88TXL A609 APLUS',
+  4, -27497, -109988
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317067', '2024-01-18',
+  '12817681-0', 'CATALINA NATALY OPAZO', NULL, NULL,
+  '1', 'SERV-03B', 'SERVICIO DE ENGRASE PEDRO',
+  1, 15750, 15750
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122745', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  2, 19895, 39790
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122745', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW930/26', 'W930/26',
+  1, 7505, 7505
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122744', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122744', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW67/81', 'W67/81 FILTRO ACEITE BALENO/CUORE/GIRO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317066', '2024-01-18',
+  '17133635-K', 'MAYKOL DAVID VALDIVIA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317066', '2024-01-18',
+  '17133635-K', 'MAYKOL DAVID VALDIVIA', NULL, NULL,
+  '2', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  1, 63600, 63600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317066', '2024-01-18',
+  '17133635-K', 'MAYKOL DAVID VALDIVIA', NULL, NULL,
+  '3', 'TOT-214107', 'CAJA TOTAL QUARTZ 7000 10W40 3X4',
+  1, 49680, 49680
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122743', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550039983L', 'BIDON HELIX HX5 15W40 4 LTS. (EU)',
+  1, 18725, 18725
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122743', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/80', 'W68/80 Filtro de Aceite',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122742', '2024-01-18',
+  '12570853-6', 'MILTON  MARIN', NULL, NULL,
+  '1', 'AP1008536', '225/65R17 102H A919 APLUS',
+  2, 43165, 86330
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122741', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'FW8018', 'W8018 FILTRO ACEITE LONG LIFE',
+  1, 6380, 6380
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122741', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122740', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122740', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW811/80', 'W811/80 FILTRO DE ACEITE SELLADO',
+  1, 3548, 3548
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122739', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'SHE-550046394L', 'BIDON HELIX HX8 ECT C3 5W30 5 LITROS (EU)',
+  1, 37337, 37337
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122739', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'FW610/6', 'W610/6 FILTRO DE ACEITE',
+  1, 4944, 4944
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122738', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122738', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW67/1', 'W67/1',
+  1, 3342, 3342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317065', '2024-01-18',
+  '76683179-6', 'TRANSPORTE WILLIAM ALEXANDER DINAMARCA M', NULL, NULL,
+  '1', 'SERV-01B', 'SERVICIO CAMBIO DE ACEITE PEDRO',
+  1, 21000, 21000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317065', '2024-01-18',
+  '76683179-6', 'TRANSPORTE WILLIAM ALEXANDER DINAMARCA M', NULL, NULL,
+  '2', 'SERV-02B', 'SERVICIO CAMBIO DE FILTRO C/U PEDRO',
+  5, 3150, 15750
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317064', '2024-01-18',
+  '77139552-K', 'HD ELECTRIC SPA', NULL, NULL,
+  '1', 'FHU712/11X', 'HU712/11X Filtro Aceite',
+  1, 9467, 9467
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317064', '2024-01-18',
+  '77139552-K', 'HD ELECTRIC SPA', NULL, NULL,
+  '2', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317063', '2024-01-18',
+  '76460242-0', 'CECIL SALFATE HURTADO E HIJOS CONTRATISTAS SOCIEDAD POR ACCIONES', NULL, NULL,
+  '1', 'AP1014694', '245/65R17 107T ALL TERRAIN A929 APLUS',
+  4, 63534, 254136
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122737', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122737', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW67/1', 'W67/1',
+  1, 3342, 3342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317062', '2024-01-18',
+  '7149474-8', 'JAIME HERNANDEZ', NULL, NULL,
+  '1', 'AP1017016', '245/75R16 120/116S ALL TERRAIN A929 APLUS',
+  4, 68041, 272164
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317061', '2024-01-18',
+  '76941929-2', 'COMERCIALIZADORA PRODUCTOS DEL MAR E INMOBILIARIA OSORIO E HIJOS SPA', NULL, NULL,
+  '1', 'TOT-214145', 'CAJA TOTAL TRAX DUAL 9 FE 75W90 12x1',
+  1, 115881, 115881
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317060', '2024-01-18',
+  '9888878-0', 'CECILIA CAMPUSANO', NULL, NULL,
+  '1', '711-GL', 'ANTICONGELANTE 711-GL',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317060', '2024-01-18',
+  '9888878-0', 'CECILIA CAMPUSANO', NULL, NULL,
+  '2', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  12, 1657, 19884
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122736', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122736', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW610/80', 'W610/80 FILTRO ACEITE VITARA/NOMADE/G.VITAR',
+  1, 4068, 4068
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122736', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FC2074', 'C2074 FILTRO AIRE',
+  1, 7408, 7408
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317059', '2024-01-18',
+  '76485877-8', 'ELECTRICIDAD H Y D LTDA', NULL, NULL,
+  '1', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  1, 74891, 74891
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317059', '2024-01-18',
+  '76485877-8', 'ELECTRICIDAD H Y D LTDA', NULL, NULL,
+  '2', 'SERV-02B', 'SERVICIO CAMBIO DE FILTRO C/U PEDRO',
+  1, 3150, 3150
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317059', '2024-01-18',
+  '76485877-8', 'ELECTRICIDAD H Y D LTDA', NULL, NULL,
+  '3', 'SERV-03B', 'SERVICIO DE ENGRASE PEDRO',
+  1, 15750, 15750
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317058', '2024-01-18',
+  '77384468-2', 'SOLO GOMAS SPA', NULL, NULL,
+  '1', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  1, 119600, 119600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317058', '2024-01-18',
+  '77384468-2', 'SOLO GOMAS SPA', NULL, NULL,
+  '2', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317058', '2024-01-18',
+  '77384468-2', 'SOLO GOMAS SPA', NULL, NULL,
+  '3', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  1, 64456, 64456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317058', '2024-01-18',
+  '77384468-2', 'SOLO GOMAS SPA', NULL, NULL,
+  '4', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317057', '2024-01-18',
+  '76860920-9', 'TRANSPORTES LIRA DIVISION CAMIONES', NULL, NULL,
+  '1', 'FI21388002', '295/80 R22.5 FS403 Classic PR16',
+  4, 225000, 900000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122735', '2024-01-18',
+  '12569531-0', 'EMILIO SANTOS', NULL, NULL,
+  '1', 'FW67/81', 'W67/81 FILTRO ACEITE BALENO/CUORE/GIRO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122735', '2024-01-18',
+  '12569531-0', 'EMILIO SANTOS', NULL, NULL,
+  '2', 'GG-751051003L', 'BIDON GERMAN GOLD ENGINE POWER 5W30 C3 LOW SAPS 5',
+  1, 22388, 22388
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122734', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'MOB-146235L', 'BIDON MOBIL 1 ESP 5W30 4 LT',
+  1, 41076, 41076
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122733', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122733', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317056', '2024-01-18',
+  '8917200-4', 'hector villalobos', NULL, NULL,
+  '1', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  2, 74891, 149782
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122732', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  1, 6878, 6878
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122731', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122731', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'FW712/52', 'W712/52 FILTRO ACEITE',
+  1, 5896, 5896
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122730', '2024-01-18',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 15490, 15490
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122730', '2024-01-18',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', 'FW713/16', 'W713/16 FILTRO ACEITE FIAT UNO IT',
+  1, 5092, 5092
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122729', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122729', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'FW67/81', 'W67/81 FILTRO ACEITE BALENO/CUORE/GIRO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317055', '2024-01-18',
+  '78410990-9', 'OMEGA SEAFOODS LTDA.', NULL, NULL,
+  '1', 'AP1018158', '185/65R15 88H A609 APLUS',
+  4, 30473, 121892
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122728', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'AP1018242', '175/65R14 82H A609 APLUS',
+  1, 25625, 25625
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122728', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  1, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317054', '2024-01-18',
+  '7977060-4', 'TOMAS ARDILES', NULL, NULL,
+  '1', 'AP7500186', '235/75R17.5 143/141J S201 APLUS',
+  2, 88829, 177658
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122727', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122726', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'FW610/3', 'W610/3',
+  1, 3457, 3457
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122726', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122726', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '3', 'SHE-550040352L', 'BIDON SHELL HELIX HX7 1 LT (EU)',
+  1, 5518, 5518
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317053', '2024-01-18',
+  '77062052-K', 'M T MANTENCIONES Y ARRIENDOS SPA', NULL, NULL,
+  '1', 'AP7500186', '235/75R17.5 143/141J S201 APLUS',
+  2, 88829, 177658
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122725', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122725', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/80', 'W68/80 Filtro de Aceite',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122725', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FC2419', 'C2419 FILTRO DE AIRE',
+  1, 5895, 5895
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122725', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '4', 'FCU1919', 'CU1919',
+  1, 5242, 5242
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122724', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'AP1018222', '175/70R13 82T A609 APLUS',
+  1, 28136, 28136
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122724', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  1, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122723', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  2, 19895, 39790
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122722', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122722', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW7023', 'W7023 FILTRE ACEITE',
+  1, 3979, 3979
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122721', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'AP1018176', '205/55R16 91V A609 APLUS',
+  2, 32429, 64858
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317052', '2024-01-18',
+  '18083626-8', 'ANGELINA CRISTAL BRAVO', NULL, NULL,
+  '1', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  3, 51116, 153348
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122720', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'AP1011979', '215/65R15C 104/102R A867 APLUS',
+  4, 52867, 211468
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122720', '2024-01-18',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  4, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122719', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'FC3585', 'C3585 FILTRO AIRE',
+  1, 7983, 7983
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122719', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122718', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122717', '2024-01-18',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'SERV-ROT1', 'SERVICIO ROTACION AUTO CAMIONETA',
+  1, 8403, 8403
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317051', '2024-01-18',
+  '13915302-2', 'VERONICA JESUS RAMIREZ', NULL, NULL,
+  '1', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  1, 63600, 63600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317051', '2024-01-18',
+  '13915302-2', 'VERONICA JESUS RAMIREZ', NULL, NULL,
+  '2', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  1, 119600, 119600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317051', '2024-01-18',
+  '13915302-2', 'VERONICA JESUS RAMIREZ', NULL, NULL,
+  '3', 'LIQ-8973', 'CAJA LIQUI MOLY TOP TEC 4200 5W30 4X5',
+  1, 176087, 176087
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317051', '2024-01-18',
+  '13915302-2', 'VERONICA JESUS RAMIREZ', NULL, NULL,
+  '4', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317051', '2024-01-18',
+  '13915302-2', 'VERONICA JESUS RAMIREZ', NULL, NULL,
+  '5', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122716', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122716', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122716', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '3', 'FC3585', 'C3585 FILTRO AIRE',
+  1, 7983, 7983
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317050', '2024-01-18',
+  '76938437-5', 'COMERCIAL ORIGENES CRISTIAN  JOEL OLIVARES CARRASCO EIRL', NULL, NULL,
+  '1', 'SERV-02B', 'SERVICIO CAMBIO DE FILTRO C/U PEDRO',
+  4, 3150, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317050', '2024-01-18',
+  '76938437-5', 'COMERCIAL ORIGENES CRISTIAN  JOEL OLIVARES CARRASCO EIRL', NULL, NULL,
+  '2', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  2, 19895, 39790
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122715', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122715', '2024-01-18',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FW67/1', 'W67/1',
+  1, 3342, 3342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122714', '2024-01-18',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122714', '2024-01-18',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '2', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  2, 6878, 13756
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122713', '2024-01-18',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  1, 16911, 16911
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122713', '2024-01-18',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 15490, 15490
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '317049', '2024-01-18',
+  '52002766-1', 'CARLOS TOSELLI RIVERA TRANSPORTES EIRL', NULL, NULL,
+  '1', 'REC-915', '295/80R22,5 B440 TODA POSICION CARRETERA 14 mm BANDAG',
+  5, 86000, 430000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '317049', '2024-01-18',
+  '52002766-1', 'CARLOS TOSELLI RIVERA TRANSPORTES EIRL', NULL, NULL,
+  '2', 'REC-918', '295/80R22,5 BTL-SA2 EJE LIBRE ALAS CARRETERA 13 MM BANDAG',
+  4, 91900, 367600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '317049', '2024-01-18',
+  '52002766-1', 'CARLOS TOSELLI RIVERA TRANSPORTES EIRL', NULL, NULL,
+  '3', NULL, '1 NR GUIA RECAMIC 71346',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317048', '2024-01-18',
+  '76577908-1', 'ALDO Y LUIS SPA', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317048', '2024-01-18',
+  '76577908-1', 'ALDO Y LUIS SPA', NULL, NULL,
+  '2', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  3, 77970, 233910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317047', '2024-01-18',
+  '77049288-2', 'CHOAPA MIX SPA', NULL, NULL,
+  '1', 'AP7500352', '385/65R22.5 160L S201 APLUS',
+  2, 194306, 388612
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122712', '2024-01-18',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'AP1008064', '235/65R17 104H A919 APLUS',
+  2, 56243, 112486
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317046', '2024-01-18',
+  '77476564-6', 'MT SPA', NULL, NULL,
+  '1', 'AP1018176', '205/55R16 91V A609 APLUS',
+  2, 25943, 51886
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317045', '2024-01-18',
+  '11537174-6', 'JUAN CARTES', NULL, NULL,
+  '1', 'AP1018164', '195/65R15 91V A609 APLUS',
+  4, 26607, 106428
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317045', '2024-01-18',
+  '11537174-6', 'JUAN CARTES', NULL, NULL,
+  '2', 'AP1018249', '185/65R14 86H A609 APLUS',
+  2, 24190, 48380
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317044', '2024-01-18',
+  '16743246-8', 'ALEXY ANDRES IBANEZ', NULL, NULL,
+  '1', 'AP1018249', '185/65R14 86H A609 APLUS',
+  4, 24190, 96760
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122711', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122711', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122711', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FC3585', 'C3585 FILTRO AIRE',
+  1, 7983, 7983
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122710', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122710', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW6002', 'W6002 FILTRO DE ACEITE SELLADO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317043', '2024-01-17',
+  '18952296-7', 'CRISTIAN ANDRES VARGAS', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 77970, 155940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317043', '2024-01-17',
+  '18952296-7', 'CRISTIAN ANDRES VARGAS', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317042', '2024-01-17',
+  '77606059-3', 'HIDRAMEC SPA', NULL, NULL,
+  '1', 'AP1018164', '195/65R15 91V A609 APLUS',
+  2, 26607, 53214
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317042', '2024-01-17',
+  '77606059-3', 'HIDRAMEC SPA', NULL, NULL,
+  '2', 'AP1018242', '175/65R14 82H A609 APLUS',
+  2, 21782, 43564
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317041', '2024-01-17',
+  '77364985-5', 'FLC LIMITADA', NULL, NULL,
+  '1', 'AP1008582', '195/75R16C 107/105R A867 APLUS',
+  6, 41194, 247164
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122709', '2024-01-17',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'AP1018181', '195/50R15 82V A 609 APLUS',
+  1, 24163, 24163
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122709', '2024-01-17',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  1, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317040', '2024-01-17',
+  '76245050-K', 'CONSTRUCTORA VALLE DE ELQUI LIMITADA', NULL, NULL,
+  '1', 'AP1018159', '195/60R15 88H A609 APLUS',
+  4, 30499, 121996
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122708', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122708', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW7023', 'W7023 FILTRE ACEITE',
+  1, 3979, 3979
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122707', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122707', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW6002', 'W6002 FILTRO DE ACEITE SELLADO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317039', '2024-01-17',
+  '11422569-K', 'MAURICIO CORTES', NULL, NULL,
+  '1', 'REC-114', '295/80R22,5 SERVICIO RECAUCHAJE  UZY ( SAM )',
+  2, 86650, 173300
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317038', '2024-01-17',
+  '77336715-9', 'TRANSPORTES VYTT SPA', NULL, NULL,
+  '1', 'AP8004104', '215/75R17.5 127/124M S201 APLUS',
+  2, 77489, 154978
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317037', '2024-01-17',
+  '77274642-3', 'SOCIEDAD DE SERVICIOS INGESAT II SPA', NULL, NULL,
+  '1', 'SHE-550040209', 'TAMBOR HELIX ULTRA AG 5W30 209 LTS (EU)',
+  1, 798432, 798432
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317036', '2024-01-17',
+  '77090138-3', 'TRANSPORTES DO√ëA CARLITA SPA', NULL, NULL,
+  '1', 'REC431', '295/80R22,5 TRACCION OFF ROAD WHL 24 mm BANDAG',
+  1, 116000, 116000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317035', '2024-01-17',
+  '76724196-8', 'VICTOR DIAZ CARVAJAL TRANSPORTE DE CARGA', NULL, NULL,
+  '1', 'AP1017148', '245/70R16 111SXL ALL TERRAIN A929 APLUS',
+  4, 55046, 220184
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317034', '2024-01-17',
+  '76422450-7', 'NU√ëEZ Y NU√ëEZ LTDA', NULL, NULL,
+  '1', 'AP1017016', '245/75R16 120/116S ALL TERRAIN A929 APLUS',
+  3, 68041, 204123
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317034', '2024-01-17',
+  '76422450-7', 'NU√ëEZ Y NU√ëEZ LTDA', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317034', '2024-01-17',
+  '76422450-7', 'NU√ëEZ Y NU√ëEZ LTDA', NULL, NULL,
+  '3', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  1, 64456, 64456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317034', '2024-01-17',
+  '76422450-7', 'NU√ëEZ Y NU√ëEZ LTDA', NULL, NULL,
+  '4', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317034', '2024-01-17',
+  '76422450-7', 'NU√ëEZ Y NU√ëEZ LTDA', NULL, NULL,
+  '5', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  1, 67661, 67661
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317033', '2024-01-17',
+  '15039490-2', 'ARINDO PASTEN', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122706', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122706', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317032', '2024-01-17',
+  '7613432-4', 'CARLOS VARGAS', NULL, NULL,
+  '1', 'AP1008453', '265/60R18 110H A919 APLUS',
+  2, 61337, 122674
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317032', '2024-01-17',
+  '7613432-4', 'CARLOS VARGAS', NULL, NULL,
+  '2', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  2, 51506, 103012
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122705', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122705', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '1', 'AP1018414', '175/70R14 88TXL A609 APLUS',
+  4, 23372, 93488
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '2', 'AP1018158', '185/65R15 88H A609 APLUS',
+  4, 25902, 103608
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '3', 'AP1018181', '195/50R15 82V A 609 APLUS',
+  8, 25673, 205384
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '4', 'AP1018159', '195/60R15 88H A609 APLUS',
+  4, 25926, 103704
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '5', 'AP1018176', '205/55R16 91V A609 APLUS',
+  4, 27566, 110264
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '6', 'AP1018077', '215/65R16 98H A609 APLUS',
+  2, 34491, 68982
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '7', 'AP1007515', '205/45R17 88WXL A607 APLUS',
+  2, 35718, 71436
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '8', 'AP1008536', '225/65R17 102H A919 APLUS',
+  4, 43165, 172660
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '9', 'AP1014853', '235/60R16 100H A608 APLUS',
+  4, 43913, 175652
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '10', 'AP1009604', '215/45R17 91WXL A607 APLUS',
+  2, 32624, 65248
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317031', '2024-01-17',
+  '76372674-6', 'SERVICIOS INTEGRALES ILLAPEL LIMITADA', NULL, NULL,
+  '11', 'AP1017016', '245/75R16 120/116S ALL TERRAIN A929 APLUS',
+  4, 68041, 272164
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317030', '2024-01-17',
+  '77291716-3', 'FIVE SPA', NULL, NULL,
+  '1', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  36, 1657, 59652
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317030', '2024-01-17',
+  '77291716-3', 'FIVE SPA', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  3, 57200, 171600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '317029', '2024-01-17',
+  '77774919-6', 'TRANSPORTES SEBASTIAN VELIZ SPA', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317028', '2024-01-17',
+  '12520249-7', 'MARIO RODRIGUEZ', NULL, NULL,
+  '1', 'AP8003970', '7.50R16 112/118L S600 APLUS',
+  1, 122205, 122205
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317027', '2024-01-17',
+  '76960442-1', 'COLZA SPA', NULL, NULL,
+  '1', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  2, 51506, 103012
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317027', '2024-01-17',
+  '76960442-1', 'COLZA SPA', NULL, NULL,
+  '2', 'SHE-550054436', 'CAJA SHELL RIMULA R6 10W40 3x5',
+  1, 89924, 89924
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317026', '2024-01-17',
+  '12983754-3', 'BERNARDO RIQUELME', NULL, NULL,
+  '1', 'AP1018427', '195/55R16 91VXL A609 APLUS',
+  8, 28590, 228720
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317025', '2024-01-17',
+  '15456641-4', 'CRISTIAN MERINO', NULL, NULL,
+  '1', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  3, 51506, 154518
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317025', '2024-01-17',
+  '15456641-4', 'CRISTIAN MERINO', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317024', '2024-01-17',
+  '14100763-7', 'EMILIO BUGUE√ëO', NULL, NULL,
+  '1', 'AP1018140', '185/70R14 88H A609 APLUS',
+  2, 24394, 48788
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317024', '2024-01-17',
+  '14100763-7', 'EMILIO BUGUE√ëO', NULL, NULL,
+  '2', 'AP1017086', 'P215/75R15 100T ALL TERRAIN A929 APLUS',
+  2, 48574, 97148
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317024', '2024-01-17',
+  '14100763-7', 'EMILIO BUGUE√ëO', NULL, NULL,
+  '3', '1018183', '195/55R15 85V A609 APLUS',
+  1, 26337, 26337
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317024', '2024-01-17',
+  '14100763-7', 'EMILIO BUGUE√ëO', NULL, NULL,
+  '4', 'AP1017148', '245/70R16 111SXL ALL TERRAIN A929 APLUS',
+  2, 55046, 110092
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317024', '2024-01-17',
+  '14100763-7', 'EMILIO BUGUE√ëO', NULL, NULL,
+  '5', 'AP1009604', '215/45R17 91WXL A607 APLUS',
+  2, 32624, 65248
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317024', '2024-01-17',
+  '14100763-7', 'EMILIO BUGUE√ëO', NULL, NULL,
+  '6', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  2, 64456, 128912
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317023', '2024-01-17',
+  '8846836-8', 'JUAN CARLOS CAMPOS', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 77970, 155940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317023', '2024-01-17',
+  '8846836-8', 'JUAN CARLOS CAMPOS', NULL, NULL,
+  '2', 'TOT-214107', 'CAJA TOTAL QUARTZ 7000 10W40 3X4',
+  1, 49680, 49680
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317023', '2024-01-17',
+  '8846836-8', 'JUAN CARLOS CAMPOS', NULL, NULL,
+  '3', 'LIQ-8973', 'CAJA LIQUI MOLY TOP TEC 4200 5W30 4X5',
+  1, 176087, 176087
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317023', '2024-01-17',
+  '8846836-8', 'JUAN CARLOS CAMPOS', NULL, NULL,
+  '4', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  1, 51116, 51116
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317022', '2024-01-17',
+  '6287442-2', 'MIREYA BANDA', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  4, 77970, 311880
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317022', '2024-01-17',
+  '6287442-2', 'MIREYA BANDA', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317022', '2024-01-17',
+  '6287442-2', 'MIREYA BANDA', NULL, NULL,
+  '3', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  1, 51506, 51506
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '317022', '2024-01-17',
+  '6287442-2', 'MIREYA BANDA', NULL, NULL,
+  '4', 'TOT-214107', 'CAJA TOTAL QUARTZ 7000 10W40 3X4',
+  4, 49680, 198720
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317021', '2024-01-17',
+  '9172121-K', 'MAURICIO ROMERO', NULL, NULL,
+  '1', 'AP1010566', '195R15C 106/104R A867 APLUS',
+  2, 45936, 91872
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317021', '2024-01-17',
+  '9172121-K', 'MAURICIO ROMERO', NULL, NULL,
+  '2', 'AP1008032', '195R14C 106/104R A867 APLUS',
+  2, 43721, 87442
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317021', '2024-01-17',
+  '9172121-K', 'MAURICIO ROMERO', NULL, NULL,
+  '3', 'AP1012955', '165R13C 91/89R A867 APLUS',
+  4, 28376, 113504
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122704', '2024-01-17',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  1, 6878, 6878
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122704', '2024-01-17',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122704', '2024-01-17',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '3', 'FWP928/83', 'FILTRO WP928/83',
+  1, 7934, 7934
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122704', '2024-01-17',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '4', 'FPU835X', 'PU835X FILTRO COMBUSTIBLE',
+  1, 4711, 4711
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122703', '2024-01-17',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'AP8004507', '7.00R16 118/114 L S602 APLUS',
+  2, 74632, 149264
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122702', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122702', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/85', 'W65/85 FILTRO ACEITE SPARK-SAIL',
+  1, 4068, 4068
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '317020', '2024-01-17',
+  '77570492-6', 'TRANSPORTES LEFU SPA', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '317020', '2024-01-17',
+  '77570492-6', 'TRANSPORTES LEFU SPA', NULL, NULL,
+  '2', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  2, 6878, 13756
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317019', '2024-01-17',
+  '12350511-5', 'CESAR GODOY', NULL, NULL,
+  '1', 'TOT-214145', 'CAJA TOTAL TRAX DUAL 9 FE 75W90 12x1',
+  1, 115881, 115881
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122701', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'FCU1919', 'CU1919',
+  1, 5242, 5242
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122701', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122701', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317018', '2024-01-17',
+  '14099067-1', 'JOSE CARVAJAL', NULL, NULL,
+  '1', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  1, 119600, 119600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317017', '2024-01-17',
+  '96966420-8', 'SERVICIOS PARA MINERIA Y CONSTRUCCION LIMITADA', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  2, 146069, 292138
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317017', '2024-01-17',
+  '96966420-8', 'SERVICIOS PARA MINERIA Y CONSTRUCCION LIMITADA', NULL, NULL,
+  '2', '401004444', '295/80R22.5 154/151M D801 APLUS',
+  4, 160917, 643668
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317016', '2024-01-17',
+  '77749711-1', 'TRANSPORTES MORENO HERMANOS SPA', NULL, NULL,
+  '1', 'AP8004643', '295/80R22.5 152/149M S201+ APLUS',
+  2, 173484, 346968
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317015', '2024-01-17',
+  '77500195-K', 'GALVEZ AUTOMECANICA SPA', NULL, NULL,
+  '1', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  1, 1657, 1657
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122700', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122700', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317014', '2024-01-17',
+  '8183523-3', 'ROSA CONTRERAS', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317014', '2024-01-17',
+  '8183523-3', 'ROSA CONTRERAS', NULL, NULL,
+  '2', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  1, 51116, 51116
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317014', '2024-01-17',
+  '8183523-3', 'ROSA CONTRERAS', NULL, NULL,
+  '3', 'LIQ-8973', 'CAJA LIQUI MOLY TOP TEC 4200 5W30 4X5',
+  1, 176087, 176087
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317014', '2024-01-17',
+  '8183523-3', 'ROSA CONTRERAS', NULL, NULL,
+  '4', 'AP1014546', '205R14C 109/107R A867 APLUS',
+  2, 39788, 79576
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317014', '2024-01-17',
+  '8183523-3', 'ROSA CONTRERAS', NULL, NULL,
+  '5', 'PT100023', 'ADHESIVO EPOXICO 4 MINUTOS VERSACHEM 56',
+  36, 2935, 105660
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317013', '2024-01-17',
+  '14099067-1', 'JOSE CARVAJAL', NULL, NULL,
+  '1', 'LIQ-6948', 'CAJA LIQUI MOLY MOS2 LEICHTLAUF  10W40 4X4 LITROS',
+  1, 98162, 98162
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317013', '2024-01-17',
+  '14099067-1', 'JOSE CARVAJAL', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317012', '2024-01-17',
+  '9164489-4', 'JULIA ERCIRA DIAZ', NULL, NULL,
+  '1', 'AP8004494', '7.00R16 118/114L S600 APLUS',
+  2, 76581, 153162
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122699', '2024-01-17',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317011', '2024-01-17',
+  '6707572-2', 'PEDRO ELGUETA', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  2, 146069, 292138
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122698', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122698', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122698', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FC3585', 'C3585 FILTRO AIRE',
+  1, 7983, 7983
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122697', '2024-01-17',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122697', '2024-01-17',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FW811/80', 'W811/80 FILTRO DE ACEITE SELLADO',
+  1, 3548, 3548
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122697', '2024-01-17',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '3', 'FC26026', 'C26026 FILTRO DE AIRE',
+  1, 6976, 6976
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317010', '2024-01-17',
+  '10351653-6', 'VICENTE ALBARNEZ', NULL, NULL,
+  '1', 'AP1018427', '195/55R16 91VXL A609 APLUS',
+  6, 28590, 171540
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317010', '2024-01-17',
+  '10351653-6', 'VICENTE ALBARNEZ', NULL, NULL,
+  '2', 'AP1014694', '245/65R17 107T ALL TERRAIN A929 APLUS',
+  4, 54004, 216016
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122696', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122696', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  2, 6878, 13756
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122696', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FHU7019X', 'HU7019X FILTRO DE ACEITE',
+  1, 5639, 5639
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317009', '2024-01-17',
+  '10351653-6', 'VICENTE ALBARNEZ', NULL, NULL,
+  '1', 'AP1011980', '215/70R15C 109/107R A867 APLUS',
+  4, 43777, 175108
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122695', '2024-01-17',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'FW67/1', 'W67/1',
+  1, 3342, 3342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122695', '2024-01-17',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122694', '2024-01-17',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'FW924/10', 'W924/10 FILTRO ACEITE',
+  1, 7983, 7983
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122694', '2024-01-17',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317008', '2024-01-17',
+  '76226608-3', 'TRANS HECTOR W HENRIQUEZ VICENCIO EIRL', NULL, NULL,
+  '1', 'AP8003931', '8.25R16 128/124K S600 APLUS',
+  2, 104296, 208592
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317007', '2024-01-17',
+  '12815918-5', 'JORGE CONTRERAS', NULL, NULL,
+  '1', 'REA647498', '295/80R22.5 MICHELIN SEGUNDA VIDA XDE2',
+  8, 150000, 1200000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317006', '2024-01-17',
+  '8131434-9', 'MARIO ALEJANDRO TABILO', NULL, NULL,
+  '1', 'AP1017094', '235/70R16 104T ALL TERRAIN A929 APLUS',
+  2, 50733, 101466
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122693', '2024-01-17',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'AP1018158', '185/65R15 88H A609 APLUS',
+  2, 30473, 60946
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317005', '2024-01-17',
+  '9844443-2', 'MARIA CECILIA  PIZARRO', NULL, NULL,
+  '1', 'FW712/75', 'W712/75 FILTRO DE ACEITE LONG LIFE CHEVROLET',
+  1, 4258, 4258
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '317005', '2024-01-17',
+  '9844443-2', 'MARIA CECILIA  PIZARRO', NULL, NULL,
+  '2', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Boleta', '122692', '2024-01-17',
+  '66666666-6', 'Cliente ANTILLANCA Generico', NULL, NULL,
+  '1', 'AP1018158', '185/65R15 88H A609 APLUS',
+  2, 30473, 60946
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317004', '2024-01-17',
+  '77100686-8', 'COMERCIALIZADORA Y DISTRIBUIDORA DOS VALLES SPA', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317004', '2024-01-17',
+  '77100686-8', 'COMERCIALIZADORA Y DISTRIBUIDORA DOS VALLES SPA', NULL, NULL,
+  '2', 'FW920/48', 'W920/48 FILTRO ACEITE',
+  1, 7673, 7673
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317004', '2024-01-17',
+  '77100686-8', 'COMERCIALIZADORA Y DISTRIBUIDORA DOS VALLES SPA', NULL, NULL,
+  '3', 'FWK850/1', 'WK850/1 FILTRO COMBUSTIBLE',
+  1, 10344, 10344
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122691', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'CG-451058002L', 'BIDON GERMAN GOLD 20W50 SUPER 4 LTS',
+  1, 14378, 14378
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122691', '2024-01-17',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW712/75', 'W712/75 FILTRO DE ACEITE LONG LIFE CHEVROLET',
+  1, 4258, 4258
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317003', '2024-01-17',
+  '77273263-5', 'TRANSPORTES TAURUS SPA', NULL, NULL,
+  '1', 'SHE-550027904', 'BALDE SPIRAX S2 A 80W90 (EU) 20 LTS',
+  2, 83907, 167814
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317003', '2024-01-17',
+  '77273263-5', 'TRANSPORTES TAURUS SPA', NULL, NULL,
+  '2', 'SERV-02B', 'SERVICIO CAMBIO DE FILTRO C/U PEDRO',
+  1, 3150, 3150
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317002', '2024-01-17',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '1', 'AP1008720', '205/65R16C 107/105T A867 APLUS',
+  12, 50608, 607296
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317001', '2024-01-17',
+  '79575680-9', 'COMARA LTDA.', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '317001', '2024-01-17',
+  '79575680-9', 'COMARA LTDA.', NULL, NULL,
+  '2', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '317000', '2024-01-17',
+  '76158928-8', 'MARCELO ANDRES OSORIO DIAZ TRANSPORTES', NULL, NULL,
+  '1', 'AP7500186', '235/75R17.5 143/141J S201 APLUS',
+  8, 88829, 710632
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316999', '2024-01-17',
+  '77129287-9', 'SOCIEDAD GESTION MEDITERRANEA SPA', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316998', '2024-01-17',
+  '76241619-0', 'GUSTAVO GONZALEZ CUGAT T DE CARGA EIRL', NULL, NULL,
+  '1', 'REC-923', '295/80R22.5 B-269 TODA POSICION CARRETERA 15 mm BANDAG',
+  5, 99000, 495000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316998', '2024-01-17',
+  '76241619-0', 'GUSTAVO GONZALEZ CUGAT T DE CARGA EIRL', NULL, NULL,
+  '2', NULL, 'GUIA RECAMIC 67041',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316997', '2024-01-17',
+  '10381917-2', 'ANDRES MARCELO ALEJANDRO GODOY', NULL, NULL,
+  '1', 'AP1014677', '225/60R18 104HXL A919 APLUS',
+  2, 44666, 89332
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316996', '2024-01-17',
+  '76873734-7', 'LUBRICENTRO ESTEBAN ANTONIO TOLEDO LOPEZ', NULL, NULL,
+  '1', 'LIQ-9505', 'CAJA SUPER LEICHTLAUF 10W40 4X5',
+  2, 108070, 216140
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316996', '2024-01-17',
+  '76873734-7', 'LUBRICENTRO ESTEBAN ANTONIO TOLEDO LOPEZ', NULL, NULL,
+  '2', 'LIQ-8973', 'CAJA LIQUI MOLY TOP TEC 4200 5W30 4X5',
+  2, 176087, 352174
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316996', '2024-01-17',
+  '76873734-7', 'LUBRICENTRO ESTEBAN ANTONIO TOLEDO LOPEZ', NULL, NULL,
+  '3', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 77970, 155940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316995', '2024-01-17',
+  '5949984-K', 'oscar miranda', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316995', '2024-01-17',
+  '5949984-K', 'oscar miranda', NULL, NULL,
+  '2', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316994', '2024-01-17',
+  '6390872-K', 'LUIS EDUARDO GUAJARDO', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  4, 57200, 228800
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316994', '2024-01-17',
+  '6390872-K', 'LUIS EDUARDO GUAJARDO', NULL, NULL,
+  '2', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  1, 51116, 51116
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316994', '2024-01-17',
+  '6390872-K', 'LUIS EDUARDO GUAJARDO', NULL, NULL,
+  '3', 'LIQ-8973', 'CAJA LIQUI MOLY TOP TEC 4200 5W30 4X5',
+  1, 176087, 176087
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316994', '2024-01-17',
+  '6390872-K', 'LUIS EDUARDO GUAJARDO', NULL, NULL,
+  '4', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  1, 119600, 119600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316994', '2024-01-17',
+  '6390872-K', 'LUIS EDUARDO GUAJARDO', NULL, NULL,
+  '5', 'MOB-151059', 'CAJA MOBIL 1 ESP 5W30 12X1',
+  1, 108652, 108652
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316993', '2024-01-17',
+  '77129287-9', 'SOCIEDAD GESTION MEDITERRANEA SPA', NULL, NULL,
+  '1', 'GM-93165554', 'CAJA GENERAL MOTORS DEXOS 2 LONGLIFE 5W30 20x1',
+  10, 98099, 980990
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316992', '2024-01-17',
+  '15573613-5', 'MARIO CORTES', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  4, 146069, 584276
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316991', '2024-01-17',
+  '88994200-2', 'SOC. TRANSPORTADORA SAN CRISTOBAL LTDA.', NULL, NULL,
+  '1', 'REC-27575', '295/75R22,5 BTL-SA2 EJE LIBRE ALAS CARRETERA 13 MM',
+  4, 91900, 367600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316991', '2024-01-17',
+  '88994200-2', 'SOC. TRANSPORTADORA SAN CRISTOBAL LTDA.', NULL, NULL,
+  '2', 'REC-918', '295/80R22,5 BTL-SA2 EJE LIBRE ALAS CARRETERA 13 MM BANDAG',
+  8, 91900, 735200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316991', '2024-01-17',
+  '88994200-2', 'SOC. TRANSPORTADORA SAN CRISTOBAL LTDA.', NULL, NULL,
+  '3', NULL, 'GUIAS RECAMIC 72208-72209',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316990', '2024-01-17',
+  '77247588-8', 'IMPORTADORA Y COMERCIALIZADORA ELECTROCAR SPA', NULL, NULL,
+  '1', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  60, 1657, 99420
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316989', '2024-01-17',
+  '77273263-5', 'TRANSPORTES TAURUS SPA', NULL, NULL,
+  '1', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  2, 74891, 149782
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316989', '2024-01-17',
+  '77273263-5', 'TRANSPORTES TAURUS SPA', NULL, NULL,
+  '2', '401004448', '295/80R22.5 154/151M S201 APLUS',
+  2, 148945, 297890
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316989', '2024-01-17',
+  '77273263-5', 'TRANSPORTES TAURUS SPA', NULL, NULL,
+  '3', 'SERV-02B', 'SERVICIO CAMBIO DE FILTRO C/U PEDRO',
+  4, 3150, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316989', '2024-01-17',
+  '77273263-5', 'TRANSPORTES TAURUS SPA', NULL, NULL,
+  '4', 'SERV-03B', 'SERVICIO DE ENGRASE PEDRO',
+  1, 15750, 15750
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316989', '2024-01-17',
+  '77273263-5', 'TRANSPORTES TAURUS SPA', NULL, NULL,
+  '5', 'SERV-05B', 'SERVICIO MONTAJE CAMION PEDRO',
+  1, 12600, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122690', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122690', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122689', '2024-01-16',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'AP1018249', '185/65R14 86H A609 APLUS',
+  1, 28458, 28458
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316988', '2024-01-16',
+  '6276438-4', 'IVAR TORRES', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316988', '2024-01-16',
+  '6276438-4', 'IVAR TORRES', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316987', '2024-01-16',
+  '76723567-4', 'MANT. AUTOMOTRICES JOSE LUIS PARADA EMPRESA INDIVIDUAL', NULL, NULL,
+  '1', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  3, 51506, 154518
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316986', '2024-01-16',
+  '9530253-K', 'JORGE CARVAJAL', NULL, NULL,
+  '1', '401004444', '295/80R22.5 154/151M D801 APLUS',
+  4, 160917, 643668
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122688', '2024-01-16',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122688', '2024-01-16',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122687', '2024-01-16',
+  '12570853-6', 'MILTON  MARIN', NULL, NULL,
+  '1', 'AP1014611', '225/55R18 98H A919 APLUS',
+  4, 44758, 179032
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122686', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122686', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW6002', 'W6002 FILTRO DE ACEITE SELLADO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122685', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122685', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW75/3', 'W75/3',
+  1, 5349, 5349
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122684', '2024-01-16',
+  '12569531-0', 'EMILIO SANTOS', NULL, NULL,
+  '1', 'AP1018176', '205/55R16 91V A609 APLUS',
+  2, 27566, 55132
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122683', '2024-01-16',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'AP1018249', '185/65R14 86H A609 APLUS',
+  2, 28458, 56916
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316985', '2024-01-16',
+  '5978837-K', 'JOSE CONCHA', NULL, NULL,
+  '1', 'AP1018215', '165/65R13 77T A609 APLUS',
+  4, 18977, 75908
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316984', '2024-01-16',
+  '78351920-8', 'SOC.COM. TAMAYA LIMITADA', NULL, NULL,
+  '1', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  18, 1657, 29826
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316983', '2024-01-16',
+  '77500195-K', 'GALVEZ AUTOMECANICA SPA', NULL, NULL,
+  '1', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  1, 1657, 1657
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316982', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '1', 'REC930', '295/80R22,5  BRMS2 BANDAG MIXTO TODA POSICION UZY',
+  15, 82950, 1244250
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316982', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '2', 'REC434', '275/80R22,5 BRMS2 BANDAG MIXTO TODA POSICION UZY',
+  1, 82950, 82950
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316982', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '3', 'REC-912', '295/80R22,5 B736 TRACCION CARRETERA BANDAG',
+  3, 115000, 345000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316982', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '4', NULL, '05 NEUM NR GUIA REC 72278-72279-72280-72277',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316981', '2024-01-16',
+  '13090423-8', 'CARLOS ANTONIO ARIAS', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316981', '2024-01-16',
+  '13090423-8', 'CARLOS ANTONIO ARIAS', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316980', '2024-01-16',
+  '13141223-1', 'DENISSE ANDREA', NULL, NULL,
+  '1', 'TOY-08880-83389', 'CAJA TOYOTA PFE SAE 5W30 3X5',
+  2, 86970, 173940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316980', '2024-01-16',
+  '13141223-1', 'DENISSE ANDREA', NULL, NULL,
+  '2', 'NIS-KE90090043', 'CAJA NISSAN 5W30 DPF 3X5',
+  2, 80453, 160906
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316979', '2024-01-16',
+  '10827326-7', 'NELSON MONROY', NULL, NULL,
+  '1', 'AP1018242', '175/65R14 82H A609 APLUS',
+  1, 25625, 25625
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122682', '2024-01-16',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  2, 15490, 30980
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122682', '2024-01-16',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', 'FW610/3', 'W610/3',
+  1, 3029, 3029
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316978', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '1', 'AP7500175', '255/70R22.5 140/137M  S201 APLUS',
+  6, 100922, 605532
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316977', '2024-01-16',
+  '96694600-8', 'INVERSIONES QUILAPILUN S.A.', NULL, NULL,
+  '1', 'REA-925', '295/80R22,5 REFORMADO WHL TRACCION OFF ROAD BANDAG T3',
+  4, 120000, 480000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316976', '2024-01-16',
+  '12887970-6', 'CELSO SAMUEL MIRANDA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316976', '2024-01-16',
+  '12887970-6', 'CELSO SAMUEL MIRANDA', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316975', '2024-01-16',
+  '10837871-9', 'OSCAR EDUARDO SOTO', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122681', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122681', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/80', 'W68/80 Filtro de Aceite',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122680', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  2, 19362, 38724
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122680', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW930/26', 'W930/26',
+  1, 7505, 7505
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316974', '2024-01-16',
+  '6093861-K', 'ALEJANDRO DAMIAN GOMEZ', NULL, NULL,
+  '1', 'FI21388002', '295/80 R22.5 FS403 Classic PR16',
+  2, 225000, 450000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316974', '2024-01-16',
+  '6093861-K', 'ALEJANDRO DAMIAN GOMEZ', NULL, NULL,
+  '2', 'SERV-05C', 'SERVICIO MONTAJE CAMION HUGO HIDALGO',
+  2, 12600, 25200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122679', '2024-01-16',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'AP1008921', '255/70R16 111T ALL TERRAIN A929 APLUS',
+  1, 77720, 77720
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316973', '2024-01-16',
+  '16743246-8', 'ALEXY ANDRES IBANEZ', NULL, NULL,
+  '1', 'AP1018176', '205/55R16 91V A609 APLUS',
+  3, 27566, 82698
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316972', '2024-01-16',
+  '76046294-2', 'TRANSPORTES DURAN CASTILLO LTDA.', NULL, NULL,
+  '1', 'AP1010387', '225/65R16C 112/110T A867 APLUS',
+  6, 45128, 270768
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122678', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'FW6002', 'W6002 FILTRO DE ACEITE SELLADO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122678', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316971', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '1', 'REA-923', '295/80R22,5  B736 REFORMADO T1 TRACCION CARRETERA BANDAG',
+  12, 130000, 1560000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316971', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '2', 'REA295/80R22UZY', '295/80R22.5 UZY REFORMADO T1',
+  4, 105000, 420000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316971', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '3', 'REA-400', '295/80R22,5 RZE2 REFORMADO  T3',
+  8, 95000, 760000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316971', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '4', NULL, 'GUIA REF 67070',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316970', '2024-01-16',
+  '12426619-K', 'ANA ARAYA', NULL, NULL,
+  '1', 'MI749050', '235/75R17,5 X MULTI Z TL 132/130 M VM',
+  6, 271681, 1630086
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122677', '2024-01-16',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'AP1018140', '185/70R14 88H A609 APLUS',
+  2, 28699, 57398
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122676', '2024-01-16',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'AP1018414', '175/70R14 88TXL A609 APLUS',
+  2, 27497, 54994
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122675', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'FC2775', 'C2775 FILTRO AIRE',
+  1, 6028, 6028
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122675', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FHU7001X', 'HU7001X FILTRO DE ACEITE HYUNDAI ACCENT DIESEL',
+  1, 4893, 4893
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122674', '2024-01-16',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'AP1018140', '185/70R14 88H A609 APLUS',
+  2, 28699, 57398
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122673', '2024-01-16',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 15490, 15490
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122673', '2024-01-16',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316969', '2024-01-16',
+  '76259057-3', 'COMERCIAL Y TRANSPORTES V & V LIMITADA', NULL, NULL,
+  '1', 'FI16744002', '295/80R22.5 152/148M 16 FS440Z',
+  2, 308754, 617508
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122672', '2024-01-16',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122671', '2024-01-16',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'FW610/3', 'W610/3',
+  1, 3457, 3457
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122671', '2024-01-16',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122671', '2024-01-16',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '3', 'SHE-550040352L', 'BIDON SHELL HELIX HX7 1 LT (EU)',
+  1, 5518, 5518
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122670', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122670', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW67/81', 'W67/81 FILTRO ACEITE BALENO/CUORE/GIRO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122670', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FC2408', 'C2408',
+  1, 4621, 4621
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316968', '2024-01-16',
+  '79906540-1', 'CARGO TRADER SPA', NULL, NULL,
+  '1', 'REA-400', '295/80R22,5 RZE2 REFORMADO  T3',
+  14, 95000, 1330000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122669', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122669', '2024-01-16',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW610/3', 'W610/3',
+  1, 3457, 3457
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122668', '2024-01-16',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'FW68/3', 'FILTRO ACEITE SELLADO W68/3',
+  1, 4610, 4610
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122668', '2024-01-16',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'MOB-150018L', 'BIDON MOBIL SUPER 2000 10W40 SN PLUS 4 LT',
+  1, 21177, 21177
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316967', '2024-01-16',
+  '12844515-3', 'YURI BARRAZA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316966', '2024-01-16',
+  '81515100-3', 'SELIM DABED Y CIA. LTDA.', NULL, NULL,
+  '1', 'AP7500586', '275/80R22.5 149/146M D801 APLUS',
+  4, 147202, 588808
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316965', '2024-01-16',
+  '76192640-3', 'TRANSPORTES HUERTA LIMITADA', NULL, NULL,
+  '1', 'REC-101', '295/75R22,5 XTEB RECAMIC.',
+  7, 102522, 717654
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316965', '2024-01-16',
+  '76192640-3', 'TRANSPORTES HUERTA LIMITADA', NULL, NULL,
+  '2', 'REC-035', '295/80R22,5 XTEB RECAMIC.',
+  4, 103500, 414000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316965', '2024-01-16',
+  '76192640-3', 'TRANSPORTES HUERTA LIMITADA', NULL, NULL,
+  '3', 'REC-011', '11R22,5 XTEB RECAMIC.',
+  6, 106000, 636000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316965', '2024-01-16',
+  '76192640-3', 'TRANSPORTES HUERTA LIMITADA', NULL, NULL,
+  '4', 'REC-034', '295/80R22,5 XDE2 RECAMIC.',
+  1, 125600, 125600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316965', '2024-01-16',
+  '76192640-3', 'TRANSPORTES HUERTA LIMITADA', NULL, NULL,
+  '5', NULL, '4 neum NR /GUIA 72207-72205-72206',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316964', '2024-01-16',
+  '76307828-0', 'PLASTICOS PAN DE AZUCAR SPA', NULL, NULL,
+  '1', 'AP8004357', '12R22.5 152/149K D860 APLUS',
+  2, 202673, 405346
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316963', '2024-01-16',
+  '76723567-4', 'MANT. AUTOMOTRICES JOSE LUIS PARADA EMPRESA INDIVIDUAL', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  10, 75781, 757810
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316963', '2024-01-16',
+  '76723567-4', 'MANT. AUTOMOTRICES JOSE LUIS PARADA EMPRESA INDIVIDUAL', NULL, NULL,
+  '2', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  2, 67661, 135322
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316963', '2024-01-16',
+  '76723567-4', 'MANT. AUTOMOTRICES JOSE LUIS PARADA EMPRESA INDIVIDUAL', NULL, NULL,
+  '3', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  10, 77970, 779700
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316963', '2024-01-16',
+  '76723567-4', 'MANT. AUTOMOTRICES JOSE LUIS PARADA EMPRESA INDIVIDUAL', NULL, NULL,
+  '4', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  10, 57200, 572000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316963', '2024-01-16',
+  '76723567-4', 'MANT. AUTOMOTRICES JOSE LUIS PARADA EMPRESA INDIVIDUAL', NULL, NULL,
+  '5', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  2, 51116, 102232
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122667', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122667', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW75/3', 'W75/3',
+  1, 5349, 5349
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316962', '2024-01-15',
+  '76226608-3', 'TRANS HECTOR W HENRIQUEZ VICENCIO EIRL', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  2, 146069, 292138
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122666', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'FW830/3', 'W830/3 FILTRO ACEITE',
+  1, 4992, 4992
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122666', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  1, 6878, 6878
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122665', '2024-01-15',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', '711-GL', 'ANTICONGELANTE 711-GL',
+  1, 3966, 3966
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316961', '2024-01-15',
+  '77129051-5', 'TRANSPORTE Y LOGISTICA C S SPA', NULL, NULL,
+  '1', 'AP8004643', '295/80R22.5 152/149M S201+ APLUS',
+  4, 173484, 693936
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316961', '2024-01-15',
+  '77129051-5', 'TRANSPORTE Y LOGISTICA C S SPA', NULL, NULL,
+  '2', 'SERV-06D', 'SERVICIO TRASLADO DE NEUMATICO GERMAN',
+  4, 3150, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316961', '2024-01-15',
+  '77129051-5', 'TRANSPORTE Y LOGISTICA C S SPA', NULL, NULL,
+  '3', 'SERV-06C', 'SERVICIO TRASLADO DE NEUATICO HUGO HIDALGO',
+  3, 3150, 9450
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122664', '2024-01-15',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'MOB-151059L', 'BIDON MOBIL 1 ESP 5W30 1 LT',
+  1, 10180, 10180
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316960', '2024-01-15',
+  '77726515-6', 'COMERCIAL COMALI SPA', NULL, NULL,
+  '1', 'AP1010655', '195/70R15C 104/102R A867 APLUS',
+  8, 36870, 294960
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316959', '2024-01-15',
+  '76776447-2', 'TRANSPORTES MINERIA Y ARIDOS C & Y LIMITADA', NULL, NULL,
+  '1', 'MI875678', '31*10.50R15 ALL TERRAIN T/A KO2',
+  2, 228334, 456668
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316958', '2024-01-15',
+  '77982260-5', 'SOC. ALTAMIRANO BUONO CORE HNOS LTDA', NULL, NULL,
+  '1', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316958', '2024-01-15',
+  '77982260-5', 'SOC. ALTAMIRANO BUONO CORE HNOS LTDA', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316957', '2024-01-15',
+  '16743246-8', 'ALEXY ANDRES IBANEZ', NULL, NULL,
+  '1', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  1, 119600, 119600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316956', '2024-01-15',
+  '7804462-4', 'MOISES URREA', NULL, NULL,
+  '1', 'MI631431', '215/75R17.5 XZE2 TL126/124M VM',
+  2, 177804, 355608
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122663', '2024-01-15',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'MOB-150018L', 'BIDON MOBIL SUPER 2000 10W40 SN PLUS 4 LT',
+  1, 21177, 21177
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122663', '2024-01-15',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'FW67/1', 'W67/1',
+  1, 3342, 3342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122663', '2024-01-15',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '3', 'MOB-150562L', 'BIDON MOBIL SUPER 2000 10W40 SN PLUS 1 LT',
+  1, 5342, 5342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316955', '2024-01-15',
+  '77307843-2', 'COMERCIAL PAULA FRANCISCA MILLA ORTIZ EIRL', NULL, NULL,
+  '1', 'AP1018249', '185/65R14 86H A609 APLUS',
+  2, 24190, 48380
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316955', '2024-01-15',
+  '77307843-2', 'COMERCIAL PAULA FRANCISCA MILLA ORTIZ EIRL', NULL, NULL,
+  '2', 'AP1018222', '175/70R13 82T A609 APLUS',
+  2, 23915, 47830
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122662', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122662', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'SHE-550040352L', 'BIDON SHELL HELIX HX7 1 LT (EU)',
+  1, 5518, 5518
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122662', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FW610/80', 'W610/80 FILTRO ACEITE VITARA/NOMADE/G.VITAR',
+  1, 4068, 4068
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316954', '2024-01-15',
+  '7576617-3', 'ALEJANDRA DEL CARMEN HENRIQUEZ ROMERO', NULL, NULL,
+  '1', 'AP1018249', '185/65R14 86H A609 APLUS',
+  4, 24189, 96756
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316953', '2024-01-15',
+  '76577908-1', 'ALDO Y LUIS SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316953', '2024-01-15',
+  '76577908-1', 'ALDO Y LUIS SPA', NULL, NULL,
+  '2', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  4, 63600, 254400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122661', '2024-01-15',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'AP1018249', '185/65R14 86H A609 APLUS',
+  2, 28458, 56916
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316952', '2024-01-15',
+  '9994376-9', 'MANUEL QUILODR√ÅN', NULL, NULL,
+  '1', 'AP1018158', '185/65R15 88H A609 APLUS',
+  3, 30473, 91419
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122660', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122660', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/80', 'W68/80 Filtro de Aceite',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122660', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FC2419', 'C2419 FILTRO DE AIRE',
+  1, 5895, 5895
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122659', '2024-01-15',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'LIQ-2184L', 'BIDON LIQUI MOLY MOS 2 LEICHTLAUF 10W40 5 LITROS',
+  1, 39485, 39485
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122659', '2024-01-15',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FW75/3', 'W75/3',
+  1, 5349, 5349
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122658', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  2, 19895, 39790
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122658', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW930/26', 'W930/26',
+  1, 7505, 7505
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122658', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FC24011', 'C24011 FILTRO DE AIRE',
+  1, 9012, 9012
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316951', '2024-01-15',
+  '7576617-3', 'ALEJANDRA DEL CARMEN HENRIQUEZ ROMERO', NULL, NULL,
+  '1', 'AP1018176', '205/55R16 91V A609 APLUS',
+  4, 27565, 110260
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316951', '2024-01-15',
+  '7576617-3', 'ALEJANDRA DEL CARMEN HENRIQUEZ ROMERO', NULL, NULL,
+  '2', 'AP1018249', '185/65R14 86H A609 APLUS',
+  4, 24189, 96756
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316950', '2024-01-15',
+  '12350511-5', 'CESAR GODOY', NULL, NULL,
+  '1', 'LIQ-9505', 'CAJA SUPER LEICHTLAUF 10W40 4X5',
+  1, 108070, 108070
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316949', '2024-01-15',
+  '77772361-8', 'INVERSIONES JP CORTES SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  3, 57200, 171600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316948', '2024-01-15',
+  '11099578-4', 'MIRIAM GALLEGUILLOS', NULL, NULL,
+  '1', 'SHE-550044446', 'CAJA ADVANCE 4T AX7 10W40 NEW 12X1 (EU)',
+  1, 57615, 57615
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316948', '2024-01-15',
+  '11099578-4', 'MIRIAM GALLEGUILLOS', NULL, NULL,
+  '2', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316948', '2024-01-15',
+  '11099578-4', 'MIRIAM GALLEGUILLOS', NULL, NULL,
+  '3', '711-GL', 'ANTICONGELANTE 711-GL',
+  6, 3133, 18798
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316947', '2024-01-15',
+  '10447980-4', 'PATRICIO VIDAL', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316947', '2024-01-15',
+  '10447980-4', 'PATRICIO VIDAL', NULL, NULL,
+  '2', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  2, 64456, 128912
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122657', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'CG-451058002L', 'BIDON GERMAN GOLD 20W50 SUPER 4 LTS',
+  1, 14378, 14378
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122657', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW719/9', 'W719/9 FILTRO ACEITE DODGE-MAZDA-GALANT',
+  1, 4199, 4199
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316946', '2024-01-15',
+  '77043814-4', 'SERVICIOS AUTOMOTRIZ TP SPA', NULL, NULL,
+  '1', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  1, 67661, 67661
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316946', '2024-01-15',
+  '77043814-4', 'SERVICIOS AUTOMOTRIZ TP SPA', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316946', '2024-01-15',
+  '77043814-4', 'SERVICIOS AUTOMOTRIZ TP SPA', NULL, NULL,
+  '3', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  1, 64456, 64456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316946', '2024-01-15',
+  '77043814-4', 'SERVICIOS AUTOMOTRIZ TP SPA', NULL, NULL,
+  '4', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  1, 63600, 63600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316946', '2024-01-15',
+  '77043814-4', 'SERVICIOS AUTOMOTRIZ TP SPA', NULL, NULL,
+  '5', 'MOB-150562', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 12X1',
+  1, 54655, 54655
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316946', '2024-01-15',
+  '77043814-4', 'SERVICIOS AUTOMOTRIZ TP SPA', NULL, NULL,
+  '6', 'AP1018249', '185/65R14 86H A609 APLUS',
+  4, 24190, 96760
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316946', '2024-01-15',
+  '77043814-4', 'SERVICIOS AUTOMOTRIZ TP SPA', NULL, NULL,
+  '7', 'AP1018222', '175/70R13 82T A609 APLUS',
+  4, 23915, 95660
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316945', '2024-01-15',
+  '76983559-8', 'COMERCIAL TOTEM SPA', NULL, NULL,
+  '1', '401004448', '295/80R22.5 154/151M S201 APLUS',
+  2, 148945, 297890
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122656', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122656', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW830/3', 'W830/3 FILTRO ACEITE',
+  1, 4992, 4992
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316944', '2024-01-15',
+  '77869495-6', 'TALLER AUTOMOTRIZ M√ÅSTER MECHANIC ALBERTO JOSE PEREZ RUIZ E.I.R.L.', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316944', '2024-01-15',
+  '77869495-6', 'TALLER AUTOMOTRIZ M√ÅSTER MECHANIC ALBERTO JOSE PEREZ RUIZ E.I.R.L.', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316943', '2024-01-15',
+  '77278991-2', 'COMERCIAL IZQUIERDO OSSANDON SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  10, 57200, 572000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316943', '2024-01-15',
+  '77278991-2', 'COMERCIAL IZQUIERDO OSSANDON SPA', NULL, NULL,
+  '2', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  1, 67661, 67661
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316943', '2024-01-15',
+  '77278991-2', 'COMERCIAL IZQUIERDO OSSANDON SPA', NULL, NULL,
+  '3', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  2, 63600, 127200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316942', '2024-01-15',
+  '6846711-K', 'CECILIA RUBINA', NULL, NULL,
+  '1', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316942', '2024-01-15',
+  '6846711-K', 'CECILIA RUBINA', NULL, NULL,
+  '2', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  12, 1657, 19884
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316941', '2024-01-15',
+  '13835232-3', 'JAIME MAURICIO  PONTIGO', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316940', '2024-01-15',
+  '77273337-2', 'KERAMIK SERVICE SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  3, 57200, 171600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316939', '2024-01-15',
+  '13141223-1', 'DENISSE ANDREA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  5, 57200, 286000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316939', '2024-01-15',
+  '13141223-1', 'DENISSE ANDREA', NULL, NULL,
+  '2', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  5, 63600, 318000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316939', '2024-01-15',
+  '13141223-1', 'DENISSE ANDREA', NULL, NULL,
+  '3', 'LIQ-9505', 'CAJA SUPER LEICHTLAUF 10W40 4X5',
+  2, 108070, 216140
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316938', '2024-01-15',
+  '76226608-3', 'TRANS HECTOR W HENRIQUEZ VICENCIO EIRL', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  2, 146069, 292138
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316937', '2024-01-15',
+  '77432244-2', 'ALAMOS TRANSPORTE SPA', NULL, NULL,
+  '1', 'AP1014592', '175/70R14C 95/93S A867 APLUS',
+  2, 29414, 58828
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316936', '2024-01-15',
+  '77307843-2', 'COMERCIAL PAULA FRANCISCA MILLA ORTIZ EIRL', NULL, NULL,
+  '1', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  1, 51116, 51116
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316936', '2024-01-15',
+  '77307843-2', 'COMERCIAL PAULA FRANCISCA MILLA ORTIZ EIRL', NULL, NULL,
+  '2', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316935', '2024-01-15',
+  '76560971-2', 'COMERCIALIZADORA Y SERVICIOS DO√ëA SOFIA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316934', '2024-01-15',
+  '78941620-6', 'AGUAS RIO CRISTAL LTDA.', NULL, NULL,
+  '1', 'SERV-06D', 'SERVICIO TRASLADO DE NEUMATICO GERMAN',
+  4, 3150, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122655', '2024-01-15',
+  '12569531-0', 'EMILIO SANTOS', NULL, NULL,
+  '1', 'AP1014546', '205R14C 109/107R A867 APLUS',
+  4, 39788, 159152
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122654', '2024-01-15',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'FW713/15', 'W713/15 FILTRO ACEITE ROVER',
+  1, 6234, 6234
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122654', '2024-01-15',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316933', '2024-01-15',
+  '77756827-2', 'INVERSIONES RCV SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  3, 57200, 171600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316932', '2024-01-15',
+  '76477645-3', 'PATRICIO PIZARRO MIRANDA VIBRADOS EIRL', NULL, NULL,
+  '1', 'FWK920/1', 'WK920/1 FILTRO COMBUSTIBLE ROCKY/KIA/MAZDA',
+  1, 9170, 9170
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122653', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040352L', 'BIDON SHELL HELIX HX7 1 LT (EU)',
+  1, 5518, 5518
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122652', '2024-01-15',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'SHE-550040352L', 'BIDON SHELL HELIX HX7 1 LT (EU)',
+  1, 5518, 5518
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316931', '2024-01-15',
+  '8370811-5', 'VICENTE TORO', NULL, NULL,
+  '1', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  1, 69990, 69990
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316931', '2024-01-15',
+  '8370811-5', 'VICENTE TORO', NULL, NULL,
+  '2', 'FW920/48', 'W920/48 FILTRO ACEITE',
+  1, 7673, 7673
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316931', '2024-01-15',
+  '8370811-5', 'VICENTE TORO', NULL, NULL,
+  '3', 'FC2735/4', 'C2735/4 FILTRO DE AIRE',
+  1, 7559, 7559
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316931', '2024-01-15',
+  '8370811-5', 'VICENTE TORO', NULL, NULL,
+  '4', 'FHU7001X', 'HU7001X FILTRO DE ACEITE HYUNDAI ACCENT DIESEL',
+  1, 4893, 4893
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316931', '2024-01-15',
+  '8370811-5', 'VICENTE TORO', NULL, NULL,
+  '5', 'FC26026', 'C26026 FILTRO DE AIRE',
+  1, 6976, 6976
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316930', '2024-01-15',
+  '78941620-6', 'AGUAS RIO CRISTAL LTDA.', NULL, NULL,
+  '1', 'AP8004494', '7.00R16 118/114L S600 APLUS',
+  2, 76581, 153162
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Boleta', '122651', '2024-01-15',
+  '17428348-6', 'NICOLAS BELTRAN', NULL, NULL,
+  '1', 'AP1018414', '175/70R14 88TXL A609 APLUS',
+  2, 19248, 38496
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316929', '2024-01-15',
+  '16710362-6', 'GIANFRANCO ECCHER', NULL, NULL,
+  '1', 'AP1014694', '245/65R17 107T ALL TERRAIN A929 APLUS',
+  4, 54004, 216016
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316928', '2024-01-15',
+  '76477645-3', 'PATRICIO PIZARRO MIRANDA VIBRADOS EIRL', NULL, NULL,
+  '1', 'FW930/26', 'W930/26',
+  1, 7505, 7505
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316928', '2024-01-15',
+  '76477645-3', 'PATRICIO PIZARRO MIRANDA VIBRADOS EIRL', NULL, NULL,
+  '2', 'FWK8019/1', 'WK8019/1',
+  1, 11303, 11303
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316928', '2024-01-15',
+  '76477645-3', 'PATRICIO PIZARRO MIRANDA VIBRADOS EIRL', NULL, NULL,
+  '3', 'FC18195', 'C18195 FILTRO AIRE KIA FRONTIER',
+  1, 15297, 15297
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122650', '2024-01-15',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  1, 19895, 19895
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122649', '2024-01-15',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', '1018183', '195/55R15 85V A609 APLUS',
+  1, 30985, 30985
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316927', '2024-01-15',
+  '79610000-1', 'DAROCH Y BULHER LTDA.', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  10, 57200, 572000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316927', '2024-01-15',
+  '79610000-1', 'DAROCH Y BULHER LTDA.', NULL, NULL,
+  '2', '711-GL', 'ANTICONGELANTE 711-GL',
+  18, 3133, 56394
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316926', '2024-01-15',
+  '76597628-6', 'SILVIA ALEJANDRA COLLADO ZUNIGA CORRETAJE INDUSTRIAL EMPRESA INDIVIDUAL DE RESPO', NULL, NULL,
+  '1', 'SERV-RA01', 'REPARACI√ìN NEUMATICO AUTO-CAMIONETA HUGO HIDALGO',
+  1, 10500, 10500
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316925', '2024-01-15',
+  '77045798-K', 'TRANSPORTES CITY VAN', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316925', '2024-01-15',
+  '77045798-K', 'TRANSPORTES CITY VAN', NULL, NULL,
+  '2', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  1, 6878, 6878
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316925', '2024-01-15',
+  '77045798-K', 'TRANSPORTES CITY VAN', NULL, NULL,
+  '3', 'FW914/3', 'W914/3 FILTRO ACEITE RENAULT 19 D/ENCORE',
+  1, 4430, 4430
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316924', '2024-01-15',
+  '8131434-9', 'MARIO ALEJANDRO TABILO', NULL, NULL,
+  '1', 'AP1017016', '245/75R16 120/116S ALL TERRAIN A929 APLUS',
+  2, 68041, 136082
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122648', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122648', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/85', 'W65/85 FILTRO ACEITE SPARK-SAIL',
+  1, 4068, 4068
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316923', '2024-01-15',
+  '79575680-9', 'COMARA LTDA.', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316923', '2024-01-15',
+  '79575680-9', 'COMARA LTDA.', NULL, NULL,
+  '2', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316922', '2024-01-15',
+  '76432317-3', 'LUBRICENTRO LA FLORIDA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  5, 57200, 286000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122647', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  2, 19895, 39790
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122647', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FHU7019X', 'HU7019X FILTRO DE ACEITE',
+  1, 5639, 5639
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122647', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FC28011', 'C28 011 FILTRO DE AIRE SANTAFE 2.2 CRDI',
+  1, 7531, 7531
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316921', '2024-01-15',
+  '76673478-2', 'REPUESTOS GARAGE 400 LTDA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  6, 57200, 343200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316921', '2024-01-15',
+  '76673478-2', 'REPUESTOS GARAGE 400 LTDA', NULL, NULL,
+  '2', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  2, 51506, 103012
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316921', '2024-01-15',
+  '76673478-2', 'REPUESTOS GARAGE 400 LTDA', NULL, NULL,
+  '3', 'TOT-214107', 'CAJA TOTAL QUARTZ 7000 10W40 3X4',
+  1, 49680, 49680
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316920', '2024-01-15',
+  '77608185-K', 'SOCIEDAD COMERCIAL A&E SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  5, 57200, 286000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316920', '2024-01-15',
+  '77608185-K', 'SOCIEDAD COMERCIAL A&E SPA', NULL, NULL,
+  '2', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  1, 51116, 51116
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316920', '2024-01-15',
+  '77608185-K', 'SOCIEDAD COMERCIAL A&E SPA', NULL, NULL,
+  '3', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  2, 63600, 127200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316919', '2024-01-15',
+  '14724817-2', 'GUIDO RUBEN BUSTOS', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  6, 57200, 343200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316919', '2024-01-15',
+  '14724817-2', 'GUIDO RUBEN BUSTOS', NULL, NULL,
+  '2', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  6, 63600, 381600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316919', '2024-01-15',
+  '14724817-2', 'GUIDO RUBEN BUSTOS', NULL, NULL,
+  '3', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 77970, 155940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316918', '2024-01-15',
+  '79698310-8', 'SOCIEDAD TORRES Y AGUILERA LIMITADA', NULL, NULL,
+  '1', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  6, 63600, 381600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316918', '2024-01-15',
+  '79698310-8', 'SOCIEDAD TORRES Y AGUILERA LIMITADA', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  5, 75781, 378905
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316918', '2024-01-15',
+  '79698310-8', 'SOCIEDAD TORRES Y AGUILERA LIMITADA', NULL, NULL,
+  '3', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  2, 119600, 239200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316917', '2024-01-15',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '1', 'AP1018222', '175/70R13 82T A609 APLUS',
+  7, 23915, 167405
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316917', '2024-01-15',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '2', 'AP1011051', '215/65R16C 109/107T A867 APLUS',
+  2, 42235, 84470
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316917', '2024-01-15',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '3', 'AP1018140', '185/70R14 88H A609 APLUS',
+  3, 24394, 73182
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316917', '2024-01-15',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '4', 'AP1018176', '205/55R16 91V A609 APLUS',
+  3, 27566, 82698
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316917', '2024-01-15',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '5', 'AP1009604', '215/45R17 91WXL A607 APLUS',
+  5, 32624, 163120
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316917', '2024-01-15',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '6', 'AP1014546', '205R14C 109/107R A867 APLUS',
+  1, 39788, 39788
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316917', '2024-01-15',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '7', 'AP1008005', '185R14C 102/100R A867 APLUS',
+  2, 33057, 66114
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316917', '2024-01-15',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '8', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  1, 134463, 134463
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316917', '2024-01-15',
+  '18922495-8', 'CRISTIAN BHAIRON CEBALLOS', NULL, NULL,
+  '9', 'AP1018249', '185/65R14 86H A609 APLUS',
+  7, 24189, 169323
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316916', '2024-01-15',
+  '9565219-0', 'ADRIANA VALLE', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  6, 57200, 343200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316916', '2024-01-15',
+  '9565219-0', 'ADRIANA VALLE', NULL, NULL,
+  '2', 'SHE-550040310', 'TAMBOR SHELL HELIX HX7 209 LTS (EU)',
+  1, 686031, 686031
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316915', '2024-01-15',
+  '86020700-1', 'MICHELIN CHILE LTDA.', NULL, NULL,
+  '1', 'SGF', 'SERVICIO GRANDES FLOTAS',
+  1, 445000, 445000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316915', '2024-01-15',
+  '86020700-1', 'MICHELIN CHILE LTDA.', NULL, NULL,
+  '2', NULL, 'SERVICIOS DICIEMBRE 2023',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122646', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  1, 19895, 19895
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122646', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FHU616X', 'HU616X FILTRO ACEITE',
+  1, 5433, 5433
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316914', '2024-01-15',
+  '96708670-3', 'LOGISTICA S.A.', NULL, NULL,
+  '1', 'AP7500581', '275/80R22.5 149/146M S201 APLUS',
+  4, 147355, 589420
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122645', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122645', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW712/8', 'W712/8 FILTRO ACEITE CITROEN/PEUGEOT/REN 1',
+  1, 4068, 4068
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122645', '2024-01-15',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FPU1021X', 'PU1021X FILTRO COMBUSTIBLE',
+  1, 4248, 4248
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122644', '2024-01-15',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'AP1018242', '175/65R14 82H A609 APLUS',
+  2, 25625, 51250
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316913', '2024-01-15',
+  '11935930-9', 'CARLOS EDUARDO VEAS', NULL, NULL,
+  '1', 'AP501000015', '11R22.5 148/145M S600 APLUS',
+  2, 134255, 268510
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316913', '2024-01-15',
+  '11935930-9', 'CARLOS EDUARDO VEAS', NULL, NULL,
+  '2', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  1, 74891, 74891
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316912', '2024-01-15',
+  '77102057-7', 'INVERSIONES Y SERVICIOS SEGEMIX DUO LIMITADA', NULL, NULL,
+  '1', 'AP1011980', '215/70R15C 109/107R A867 APLUS',
+  2, 43777, 87554
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316911', '2024-01-15',
+  '77674855-2', 'SERCAR CHILE SPA', NULL, NULL,
+  '1', 'AP1018158', '185/65R15 88H A609 APLUS',
+  5, 25902, 129510
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316910', '2024-01-15',
+  '17336748-1', 'DAVID ALEJANDRO RIVEROS ZAMORANO', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316909', '2024-01-15',
+  '6276438-4', 'IVAR TORRES', NULL, NULL,
+  '1', 'AP1018427', '195/55R16 91VXL A609 APLUS',
+  2, 28590, 57180
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316908', '2024-01-15',
+  '76132820-4', 'MILLA TIRES CO LIMITADA', NULL, NULL,
+  '1', 'REC600', '295/80R22,5  B163 TODA POSICION URBANO 17 mm BANDAG',
+  6, 93500, 561000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316908', '2024-01-15',
+  '76132820-4', 'MILLA TIRES CO LIMITADA', NULL, NULL,
+  '2', NULL, '1 NR GUIA RECAMIC 68439',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122643', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550039983L', 'BIDON HELIX HX5 15W40 4 LTS. (EU)',
+  1, 18725, 18725
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316907', '2024-01-13',
+  '77115917-6', 'CONSTRUCTORA VPA SPA', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  1, 19895, 19895
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316907', '2024-01-13',
+  '77115917-6', 'CONSTRUCTORA VPA SPA', NULL, NULL,
+  '2', 'FHU616X', 'HU616X FILTRO ACEITE',
+  1, 5433, 5433
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316907', '2024-01-13',
+  '77115917-6', 'CONSTRUCTORA VPA SPA', NULL, NULL,
+  '3', 'FWK758', 'WK758 FILTRO PETROL RANGER 2.5',
+  1, 7983, 7983
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316906', '2024-01-13',
+  '10195981-3', 'JUAN FERNANDO ZEPEDA', NULL, NULL,
+  '1', 'SERV-02B', 'SERVICIO CAMBIO DE FILTRO C/U PEDRO',
+  1, 3150, 3150
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122642', '2024-01-13',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'FW610/3', 'W610/3',
+  1, 3457, 3457
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122642', '2024-01-13',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316905', '2024-01-13',
+  '77331804-2', 'TRANSPORTES S MORENO SPA', NULL, NULL,
+  '1', 'SERV-05B', 'SERVICIO MONTAJE CAMION PEDRO',
+  1, 12600, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316905', '2024-01-13',
+  '77331804-2', 'TRANSPORTES S MORENO SPA', NULL, NULL,
+  '2', 'SERV-05D', 'SERVICIO MONTAJE CAMION GERMAN',
+  1, 12600, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122641', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'LIQ-8973L', 'BIDON LIQUI MOLY TOP TEC 4200 5W30 5 LITROS',
+  1, 52653, 52653
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122641', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FW610/3', 'W610/3',
+  1, 3457, 3457
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122640', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'SHE-550033233L', 'GRANEL RIMULA R4 L 15W40 CJ4 (EU)',
+  6.5, 3338, 21697
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122640', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FW930/26', 'W930/26',
+  1, 7505, 7505
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316904', '2024-01-13',
+  '77750958-6', 'mecanica integral victor manuel santander luna spa', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122639', '2024-01-13',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122639', '2024-01-13',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'FW67/81', 'W67/81 FILTRO ACEITE BALENO/CUORE/GIRO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316903', '2024-01-13',
+  '77750958-6', 'mecanica integral victor manuel santander luna spa', NULL, NULL,
+  '1', 'AP1018159', '195/60R15 88H A609 APLUS',
+  2, 25926, 51852
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122638', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122638', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FHU616X', 'HU616X FILTRO ACEITE',
+  1, 5433, 5433
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122638', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'SHE-550040352L', 'BIDON SHELL HELIX HX7 1 LT (EU)',
+  1, 5518, 5518
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122637', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'AP1018249', '185/65R14 86H A609 APLUS',
+  2, 28458, 56916
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316902', '2024-01-13',
+  '76575812-2', 'SOC. DE TRANSPORTES GUERRERO LIMITADA', NULL, NULL,
+  '1', 'SERV-06D', 'SERVICIO TRASLADO DE NEUMATICO GERMAN',
+  3, 3150, 9450
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316901', '2024-01-13',
+  '77776221-4', 'TRANSPORTES ANGEL PINO SPA', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316901', '2024-01-13',
+  '77776221-4', 'TRANSPORTES ANGEL PINO SPA', NULL, NULL,
+  '2', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316901', '2024-01-13',
+  '77776221-4', 'TRANSPORTES ANGEL PINO SPA', NULL, NULL,
+  '3', 'FC3585', 'C3585 FILTRO AIRE',
+  1, 7983, 7983
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122636', '2024-01-13',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'SHE-550039983L', 'BIDON HELIX HX5 15W40 4 LTS. (EU)',
+  1, 15916, 15916
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122636', '2024-01-13',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', 'FW713/1', 'W713/1 FILTRO ACEITE NISSAN /SUBARU LOYALE',
+  1, 4264, 4264
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316900', '2024-01-13',
+  '76584330-8', 'GUSTAVO MAURICIO ROJAS ARAYA IMPORT AUTOMOTORA REPUESTOS Y REP Y COMPANIA LIMITADA', NULL, NULL,
+  '1', 'SHE-550027959', 'BALDE SPIRAX S3 G 80W 20 Litros (EU)',
+  1, 82724, 82724
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122635', '2024-01-13',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'AP1018222', '175/70R13 82T A609 APLUS',
+  3, 19593, 58779
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122635', '2024-01-13',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  3, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122634', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'FHU7001X', 'HU7001X FILTRO DE ACEITE HYUNDAI ACCENT DIESEL',
+  1, 4893, 4893
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122634', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316899', '2024-01-13',
+  '17721198-2', 'LESLEY PARRA', NULL, NULL,
+  '1', 'SERV-05D', 'SERVICIO MONTAJE CAMION GERMAN',
+  2, 12600, 25200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122633', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122633', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW67/81', 'W67/81 FILTRO ACEITE BALENO/CUORE/GIRO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122633', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FW920/21', 'W920/21 FILTRO ACEITE FIAT 147/125/LADA ETC',
+  1, 3889, 3889
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122632', '2024-01-13',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'SHE-550047337L', 'BIDON RIMULA R4 L 15W40 CK4 5 LTS (EU)',
+  1, 16911, 16911
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122632', '2024-01-13',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 15490, 15490
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122632', '2024-01-13',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '3', 'FW67/1', 'W67/1',
+  1, 3342, 3342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122631', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  2, 6878, 13756
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122631', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122631', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '3', 'FW712/19', 'W712/19 FILTRO ACEITE HILUX 2.0/FIAT TIPO',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122631', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '4', 'FC23107', 'C23107 FILTRO DE AIRE',
+  1, 15994, 15994
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122631', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '5', 'FPU835X', 'PU835X FILTRO COMBUSTIBLE',
+  1, 4711, 4711
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316898', '2024-01-13',
+  '76951236-5', 'AGRO CEBALLOS SPA', NULL, NULL,
+  '1', 'SERV-06D', 'SERVICIO TRASLADO DE NEUMATICO GERMAN',
+  1, 3150, 3150
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122630', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'AP1018222', '175/70R13 82T A609 APLUS',
+  1, 28136, 28136
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122630', '2024-01-13',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  1, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316897', '2024-01-13',
+  '8131434-9', 'MARIO ALEJANDRO TABILO', NULL, NULL,
+  '1', 'AP1008774', '225/45R18 95WXL A607 APLUS',
+  4, 39856, 159424
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316896', '2024-01-13',
+  '77331804-2', 'TRANSPORTES S MORENO SPA', NULL, NULL,
+  '1', 'SERV-06D', 'SERVICIO TRASLADO DE NEUMATICO GERMAN',
+  4, 3150, 12600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316895', '2024-01-13',
+  '77215581-6', 'TRANSPORTES CATALINA SPA', NULL, NULL,
+  '1', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  1, 74891, 74891
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122629', '2024-01-13',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'AP1018248', '185/60R14 82H A609 APLUS',
+  4, 26381, 105524
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122629', '2024-01-13',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '2', 'FW65/85', 'W68/85',
+  1, 4068, 4068
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122629', '2024-01-13',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '3', 'GG-751051003L', 'BIDON GERMAN GOLD ENGINE POWER 5W30 C3 LOW SAPS 5',
+  1, 22388, 22388
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122628', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'CG-451058002L', 'BIDON GERMAN GOLD 20W50 SUPER 4 LTS',
+  1, 14378, 14378
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316894', '2024-01-13',
+  '77129051-5', 'TRANSPORTE Y LOGISTICA C S SPA', NULL, NULL,
+  '1', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  8, 146069, 1168552
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316893', '2024-01-13',
+  '76026604-3', 'CARVAJAL HERMANOS LTDA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  3, 57200, 171600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316893', '2024-01-13',
+  '76026604-3', 'CARVAJAL HERMANOS LTDA', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316893', '2024-01-13',
+  '76026604-3', 'CARVAJAL HERMANOS LTDA', NULL, NULL,
+  '3', 'GG-751040002', 'CAJA GERMAN GOLD ENGINE POWER 10W40 4X4 LITROS',
+  1, 55526, 55526
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316893', '2024-01-13',
+  '76026604-3', 'CARVAJAL HERMANOS LTDA', NULL, NULL,
+  '4', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  6, 1657, 9942
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316893', '2024-01-13',
+  '76026604-3', 'CARVAJAL HERMANOS LTDA', NULL, NULL,
+  '5', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  6, 1657, 9942
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316893', '2024-01-13',
+  '76026604-3', 'CARVAJAL HERMANOS LTDA', NULL, NULL,
+  '6', '711-GL', 'ANTICONGELANTE 711-GL',
+  6, 3133, 18798
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316893', '2024-01-13',
+  '76026604-3', 'CARVAJAL HERMANOS LTDA', NULL, NULL,
+  '7', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  6, 3133, 18798
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316892', '2024-01-13',
+  '8080354-0', 'CARLOS TAPIA', NULL, NULL,
+  '1', 'AP1008921', '255/70R16 111T ALL TERRAIN A929 APLUS',
+  2, 66062, 132124
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316892', '2024-01-13',
+  '8080354-0', 'CARLOS TAPIA', NULL, NULL,
+  '2', 'AP1017199', '265/70R16 112T ALL TERRAIN A929 APLUS',
+  2, 61550, 123100
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316891', '2024-01-13',
+  '10195981-3', 'JUAN FERNANDO ZEPEDA', NULL, NULL,
+  '1', 'AP8004494', '7.00R16 118/114L S600 APLUS',
+  4, 76581, 306324
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316891', '2024-01-13',
+  '10195981-3', 'JUAN FERNANDO ZEPEDA', NULL, NULL,
+  '2', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  1, 51506, 51506
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316890', '2024-01-13',
+  '5172048-2', 'RAMON DOMINGUEZ', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  5, 57200, 286000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122627', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'MOB-150018L', 'BIDON MOBIL SUPER 2000 10W40 SN PLUS 4 LT',
+  1, 21177, 21177
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122627', '2024-01-13',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FW7023', 'W7023 FILTRE ACEITE',
+  1, 3979, 3979
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316889', '2024-01-13',
+  '6276438-4', 'IVAR TORRES', NULL, NULL,
+  '1', 'AP1014677', '225/60R18 104HXL A919 APLUS',
+  4, 44666, 178664
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316888', '2024-01-13',
+  '77331804-2', 'TRANSPORTES S MORENO SPA', NULL, NULL,
+  '1', '401004444', '295/80R22.5 154/151M D801 APLUS',
+  4, 160917, 643668
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316887', '2024-01-13',
+  '17721198-2', 'LESLEY PARRA', NULL, NULL,
+  '1', '401004444', '295/80R22.5 154/151M D801 APLUS',
+  4, 160917, 643668
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316886', '2024-01-12',
+  '76633102-5', 'SERVIMOVIL COPIAPO GONZALO GARROTE G.', NULL, NULL,
+  '1', '711-GL', 'ANTICONGELANTE 711-GL',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316886', '2024-01-12',
+  '76633102-5', 'SERVIMOVIL COPIAPO GONZALO GARROTE G.', NULL, NULL,
+  '2', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316886', '2024-01-12',
+  '76633102-5', 'SERVIMOVIL COPIAPO GONZALO GARROTE G.', NULL, NULL,
+  '3', '911-GL', 'ANTICONGELANTE 911-GL 1GLN',
+  6, 6327, 37962
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122626', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'AP1018249', '185/65R14 86H A609 APLUS',
+  4, 28458, 113832
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122626', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  4, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316885', '2024-01-12',
+  '77767537-0', 'LUBRICENTRO ROBINSON SPA', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316885', '2024-01-12',
+  '77767537-0', 'LUBRICENTRO ROBINSON SPA', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316885', '2024-01-12',
+  '77767537-0', 'LUBRICENTRO ROBINSON SPA', NULL, NULL,
+  '3', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316884', '2024-01-12',
+  '76694827-8', 'MANT. Y SUMINISTROS BARDAWIL FLOREZ SPA', NULL, NULL,
+  '1', 'PTMO04', 'PURGANTE RADIADOR 19-PB 50 GRS VERSACHEM',
+  12, 1049, 12588
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316883', '2024-01-12',
+  '10463915-1', 'BARTOLOME BRUNA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316883', '2024-01-12',
+  '10463915-1', 'BARTOLOME BRUNA', NULL, NULL,
+  '2', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  1, 51116, 51116
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316883', '2024-01-12',
+  '10463915-1', 'BARTOLOME BRUNA', NULL, NULL,
+  '3', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  1, 67661, 67661
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316883', '2024-01-12',
+  '10463915-1', 'BARTOLOME BRUNA', NULL, NULL,
+  '4', '711-GL', 'ANTICONGELANTE 711-GL',
+  6, 3133, 18798
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316883', '2024-01-12',
+  '10463915-1', 'BARTOLOME BRUNA', NULL, NULL,
+  '5', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  6, 3133, 18798
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316882', '2024-01-12',
+  '76526284-4', 'SERVICIOS AGUILERA HERMANOS LTDA', NULL, NULL,
+  '1', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  60, 1657, 99420
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316881', '2024-01-12',
+  '6276438-4', 'IVAR TORRES', NULL, NULL,
+  '1', 'AP1018414', '175/70R14 88TXL A609 APLUS',
+  4, 23372, 93488
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316880', '2024-01-12',
+  '76907317-5', 'COMERCIAL MICHAEL FLORES CABRERA E.I.R.L', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  5, 57200, 286000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316880', '2024-01-12',
+  '76907317-5', 'COMERCIAL MICHAEL FLORES CABRERA E.I.R.L', NULL, NULL,
+  '2', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  2, 64456, 128912
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316880', '2024-01-12',
+  '76907317-5', 'COMERCIAL MICHAEL FLORES CABRERA E.I.R.L', NULL, NULL,
+  '3', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316880', '2024-01-12',
+  '76907317-5', 'COMERCIAL MICHAEL FLORES CABRERA E.I.R.L', NULL, NULL,
+  '4', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316880', '2024-01-12',
+  '76907317-5', 'COMERCIAL MICHAEL FLORES CABRERA E.I.R.L', NULL, NULL,
+  '5', 'LIQ-9505', 'CAJA SUPER LEICHTLAUF 10W40 4X5',
+  1, 108070, 108070
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316880', '2024-01-12',
+  '76907317-5', 'COMERCIAL MICHAEL FLORES CABRERA E.I.R.L', NULL, NULL,
+  '6', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  6, 1657, 9942
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316880', '2024-01-12',
+  '76907317-5', 'COMERCIAL MICHAEL FLORES CABRERA E.I.R.L', NULL, NULL,
+  '7', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  6, 1657, 9942
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316880', '2024-01-12',
+  '76907317-5', 'COMERCIAL MICHAEL FLORES CABRERA E.I.R.L', NULL, NULL,
+  '8', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  6, 3133, 18798
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316879', '2024-01-12',
+  '78484370-K', 'SERVICIOS DE CONSTRUCCIONES E & G LIMITADA', NULL, NULL,
+  '1', 'AP1010655', '195/70R15C 104/102R A867 APLUS',
+  2, 43377, 86754
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316879', '2024-01-12',
+  '78484370-K', 'SERVICIOS DE CONSTRUCCIONES E & G LIMITADA', NULL, NULL,
+  '2', 'AP1012955', '165R13C 91/89R A867 APLUS',
+  4, 28376, 113504
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316878', '2024-01-12',
+  '74819500-9', 'SINDICATO DE DUENOS IND. TAXIS COL. L-24', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 77970, 77970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316878', '2024-01-12',
+  '74819500-9', 'SINDICATO DE DUENOS IND. TAXIS COL. L-24', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316877', '2024-01-12',
+  '76089249-1', 'HUGO PONCE SANTANDER EIRL', NULL, NULL,
+  '1', 'AP1015213', '245/75R16(POR) 120/116Q MUD TERRAIN A929 APLUS',
+  8, 74052, 592416
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316877', '2024-01-12',
+  '76089249-1', 'HUGO PONCE SANTANDER EIRL', NULL, NULL,
+  '2', 'FWK854/1', 'WK854/1 FILTRO KIA',
+  1, 10979, 10979
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316877', '2024-01-12',
+  '76089249-1', 'HUGO PONCE SANTANDER EIRL', NULL, NULL,
+  '3', 'FWP1045', 'WP1045 FILTRO ACEITE CANTER Y',
+  1, 12416, 12416
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316877', '2024-01-12',
+  '76089249-1', 'HUGO PONCE SANTANDER EIRL', NULL, NULL,
+  '4', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  2, 33569, 67138
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122625', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'MOB-150562L', 'BIDON MOBIL SUPER 2000 10W40 SN PLUS 1 LT',
+  2, 5342, 10684
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122624', '2024-01-12',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'GG-751051003L', 'BIDON GERMAN GOLD ENGINE POWER 5W30 C3 LOW SAPS 5',
+  1, 22388, 22388
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122624', '2024-01-12',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'FHU7001X', 'HU7001X FILTRO DE ACEITE HYUNDAI ACCENT DIESEL',
+  1, 4893, 4893
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122624', '2024-01-12',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '3', 'FC26026', 'C26026 FILTRO DE AIRE',
+  1, 6976, 6976
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122623', '2024-01-12',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'MOB-146235L', 'BIDON MOBIL 1 ESP 5W30 4 LT',
+  1, 32861, 32861
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122623', '2024-01-12',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', 'FHU7001X', 'HU7001X FILTRO DE ACEITE HYUNDAI ACCENT DIESEL',
+  1, 4893, 4893
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122623', '2024-01-12',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '3', 'FC26026', 'C26026 FILTRO DE AIRE',
+  1, 6976, 6976
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122622', '2024-01-12',
+  '7661407-5', 'ROSARIO CACERES', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122622', '2024-01-12',
+  '7661407-5', 'ROSARIO CACERES', NULL, NULL,
+  '2', 'FW610/6', 'W610/6 FILTRO DE ACEITE',
+  1, 4944, 4944
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122622', '2024-01-12',
+  '7661407-5', 'ROSARIO CACERES', NULL, NULL,
+  '3', 'FC26026', 'C26026 FILTRO DE AIRE',
+  1, 6976, 6976
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316876', '2024-01-12',
+  '77418193-8', 'SOCIEDAD COMERCIAL A Y R SPA', NULL, NULL,
+  '1', 'SHE-550044858', 'BALDE RIMULA R6 LM 10W40 20 LTS (EU)',
+  2, 100800, 201600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316875', '2024-01-12',
+  '5092498-K', 'DIONISIO JOSE UBALDO   ROJAS', NULL, NULL,
+  '1', 'AP1018222', '175/70R13 82T A609 APLUS',
+  8, 23915, 191320
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316875', '2024-01-12',
+  '5092498-K', 'DIONISIO JOSE UBALDO   ROJAS', NULL, NULL,
+  '2', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  1, 64456, 64456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316874', '2024-01-12',
+  '74819500-9', 'SINDICATO DE DUENOS IND. TAXIS COL. L-24', NULL, NULL,
+  '1', 'AP1016891', '235/75R15 104/101S ALL TERRAIN A929 APLUS',
+  4, 59486, 237944
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316873', '2024-01-12',
+  '77602677-8', 'REPUESTOS DAYTONA SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316872', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 77970, 155940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316872', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '2', 'SHE-550012345', 'CAJA HELIX HX8 ECT 5W40 3X5 LTS.',
+  2, 87405, 174810
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  4, 57200, 228800
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '3', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  2, 51506, 103012
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '4', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  1, 64456, 64456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '5', 'GG-751040002', 'CAJA GERMAN GOLD ENGINE POWER 10W40 4X4 LITROS',
+  3, 55526, 166578
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '6', 'GG-751051003', 'CAJA GERMAN GOLD ENGINE POWER 5W30 C3 LOW SAPS 4X5',
+  2, 87474, 174948
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '7', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  2, 63600, 127200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '8', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  1, 119600, 119600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '9', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  3, 77970, 233910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '10', '911-E', 'ANTICONGELANTE 911-GL ESPECIAL 1GLN',
+  12, 6327, 75924
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '11', '711-GL', 'ANTICONGELANTE 711-GL',
+  18, 3133, 56394
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '12', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  18, 3133, 56394
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '13', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  6, 1657, 9942
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316871', '2024-01-12',
+  '3376926-1', 'EDGARDO ASTUDILLO', NULL, NULL,
+  '14', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  6, 1657, 9942
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316870', '2024-01-12',
+  '17492941-6', 'EVANGELI VALDIVIA', NULL, NULL,
+  '1', 'GM-93165215', 'CAJA GENERAL MOTOR MOTOROIL 10W40 4X4',
+  2, 56144, 112288
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316870', '2024-01-12',
+  '17492941-6', 'EVANGELI VALDIVIA', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316870', '2024-01-12',
+  '17492941-6', 'EVANGELI VALDIVIA', NULL, NULL,
+  '3', 'NIS-KE90090043', 'CAJA NISSAN 5W30 DPF 3X5',
+  1, 80453, 80453
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316870', '2024-01-12',
+  '17492941-6', 'EVANGELI VALDIVIA', NULL, NULL,
+  '4', 'NIS-KE90090033', 'CAJA NISSAN 5W30 DPF 12X1',
+  1, 68631, 68631
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316870', '2024-01-12',
+  '17492941-6', 'EVANGELI VALDIVIA', NULL, NULL,
+  '5', 'LIQ-2184', 'CAJA LIQUI MOLY MOS2-LEICHTLAUF 10W40 4X5',
+  1, 119052, 119052
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316869', '2024-01-12',
+  '5588746-2', 'CORNELIO ARAYA', NULL, NULL,
+  '1', 'TOT-214107', 'CAJA TOTAL QUARTZ 7000 10W40 3X4',
+  2, 49680, 99360
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122621', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122621', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW67/1', 'W67/1',
+  1, 3342, 3342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316868', '2024-01-12',
+  '76297433-9', 'HERNAN GONZALEZ C. REP AUTOMOTRICES EIRL', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  4, 57200, 228800
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316868', '2024-01-12',
+  '76297433-9', 'HERNAN GONZALEZ C. REP AUTOMOTRICES EIRL', NULL, NULL,
+  '2', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  2, 64456, 128912
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316868', '2024-01-12',
+  '76297433-9', 'HERNAN GONZALEZ C. REP AUTOMOTRICES EIRL', NULL, NULL,
+  '3', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316868', '2024-01-12',
+  '76297433-9', 'HERNAN GONZALEZ C. REP AUTOMOTRICES EIRL', NULL, NULL,
+  '4', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  2, 51506, 103012
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316867', '2024-01-12',
+  '76274900-9', 'SOC. TRANSPORTES TRANS JAVIER LTDA', NULL, NULL,
+  '1', '401004444', '295/80R22.5 154/151M D801 APLUS',
+  2, 160917, 321834
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316866', '2024-01-12',
+  '76988551-K', 'COMERCIAL LUIS VERGARA VELASQUEZ', NULL, NULL,
+  '1', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  3, 64456, 193368
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122620', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122620', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW67/1', 'W67/1',
+  1, 3342, 3342
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122619', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122619', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW818/8', 'W818/8 FILTRO ACEITE LUV 89/ - SUBARU',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316865', '2024-01-12',
+  '76587344-4', 'SOC. COMERCIAL G Y G REPUESTOS LTDA.', NULL, NULL,
+  '1', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316864', '2024-01-12',
+  '76913854-4', 'COMERCIAL EDWARDS REPUESTOS LIMITADA', NULL, NULL,
+  '1', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316863', '2024-01-12',
+  '77462005-2', 'SERVICIOS AUTOMOTRICES VENEZCAR LIMITADA', NULL, NULL,
+  '1', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316862', '2024-01-12',
+  '7661407-5', 'ROSARIO CACERES', NULL, NULL,
+  '1', 'AP501000015', '11R22.5 148/145M S600 APLUS',
+  2, 134255, 268510
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316861', '2024-01-12',
+  '5776265-9', 'EDUARDO FLORES', NULL, NULL,
+  '1', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316860', '2024-01-12',
+  '11537174-6', 'JUAN CARTES', NULL, NULL,
+  '1', 'SHE-550039941', 'CAJA SHELL HELIX HX5 15W40 (EU) 12X1 LT',
+  1, 49685, 49685
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316859', '2024-01-12',
+  '77227052-6', 'EL RENACER SERVICIO AUTOMOTRIZ SPA', NULL, NULL,
+  '1', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  1, 67661, 67661
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316859', '2024-01-12',
+  '77227052-6', 'EL RENACER SERVICIO AUTOMOTRIZ SPA', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316859', '2024-01-12',
+  '77227052-6', 'EL RENACER SERVICIO AUTOMOTRIZ SPA', NULL, NULL,
+  '3', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 74970, 149940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316859', '2024-01-12',
+  '77227052-6', 'EL RENACER SERVICIO AUTOMOTRIZ SPA', NULL, NULL,
+  '4', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 59600, 119200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316859', '2024-01-12',
+  '77227052-6', 'EL RENACER SERVICIO AUTOMOTRIZ SPA', NULL, NULL,
+  '5', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  2, 63600, 127200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316859', '2024-01-12',
+  '77227052-6', 'EL RENACER SERVICIO AUTOMOTRIZ SPA', NULL, NULL,
+  '6', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  1, 51116, 51116
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316859', '2024-01-12',
+  '77227052-6', 'EL RENACER SERVICIO AUTOMOTRIZ SPA', NULL, NULL,
+  '7', 'LIQ-8998', 'CAJA LIQUI MOLY LEICHTLAUF PERFORMANCE  10W40 4X4 LITROS',
+  1, 78228, 78228
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316858', '2024-01-12',
+  '77695488-8', 'LUBRICENTRO MUNOZ HERMANOS SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  3, 57200, 171600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316858', '2024-01-12',
+  '77695488-8', 'LUBRICENTRO MUNOZ HERMANOS SPA', NULL, NULL,
+  '2', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 74970, 149940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122618', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122618', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW610/3', 'W610/3',
+  1, 3457, 3457
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Boleta', '122617', '2024-01-12',
+  '66666666-6', 'Cliente GERONIMO MENDEZ Generico', NULL, NULL,
+  '1', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  2, 2097, 4194
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122616', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'MOB-146235L', 'BIDON MOBIL 1 ESP 5W30 4 LT',
+  2, 41076, 82152
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122615', '2024-01-12',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'AP1018231', '165/60R14 75H A609 APLUS',
+  2, 23307, 46614
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316857', '2024-01-12',
+  '7140998-8', 'HUGO BERRIOS', NULL, NULL,
+  '1', 'TOT-157103L', 'BIDON TOTAL QUARTZ INEO MC3 5W30 5 LT',
+  1, 28590, 28590
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316857', '2024-01-12',
+  '7140998-8', 'HUGO BERRIOS', NULL, NULL,
+  '2', 'FHU716/2X', 'HU716/2X FILTRO ACEITE',
+  1, 3910, 3910
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316856', '2024-01-12',
+  '76575812-2', 'SOC. DE TRANSPORTES GUERRERO LIMITADA', NULL, NULL,
+  '1', 'AP8004643', '295/80R22.5 152/149M S201+ APLUS',
+  4, 173484, 693936
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122614', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316855', '2024-01-12',
+  '77725379-4', 'TOMITRI SERVICIOS SPA', NULL, NULL,
+  '1', 'AP1018176', '205/55R16 91V A609 APLUS',
+  4, 27566, 110264
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122613', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'MI889474', '215/65 R16 102H XL TL PRIMACY 4',
+  3, 135294, 405882
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122613', '2024-01-12',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  3, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316854', '2024-01-12',
+  '76335362-1', 'SOC. TRANS. Y GRUAS JORGE CONTADOR LTDA.', NULL, NULL,
+  '1', 'AP7500186', '235/75R17.5 143/141J S201 APLUS',
+  1, 88829, 88829
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316853', '2024-01-12',
+  '77294215-K', 'SALE MOTORS SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316852', '2024-01-12',
+  '77716738-3', 'SERVICIOS MEDICOS ANA LEDESMA SPA', NULL, NULL,
+  '1', 'SEREXTER', 'SERV. DE ARRIENDO',
+  1, 250000, 250000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316851', '2024-01-12',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '1', 'REC-915', '295/80R22,5 B440 TODA POSICION CARRETERA 14 mm BANDAG',
+  7, 86000, 602000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316851', '2024-01-12',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '2', NULL, '71342-5, APLUS S 201, Cod: 57C',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316851', '2024-01-12',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '3', NULL, '71342-8, PIRELLI FR-85, Cod: 71J',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316851', '2024-01-12',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '4', NULL, 'GUIA 71342',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316850', '2024-01-12',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '1', 'REC-918', '295/80R22,5 BTL-SA2 EJE LIBRE ALAS CARRETERA 13 MM BANDAG',
+  1, 91900, 91900
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316850', '2024-01-12',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '2', NULL, '71857-2, TRIANGLE TR-666, Cod: 45A',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316850', '2024-01-12',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '3', NULL, '71857-3, TRAMAX 800, Cod: 57C',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316850', '2024-01-12',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '4', NULL, '71857-4, APLUS S 201, Cod: 57C',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316850', '2024-01-12',
+  '76936880-9', 'TRANSPORTES SANTA ALBERTA LIMITADA', NULL, NULL,
+  '5', NULL, 'GUIA 71857',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316849', '2024-01-12',
+  '5588746-2', 'CORNELIO ARAYA', NULL, NULL,
+  '1', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  3, 64456, 193368
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316849', '2024-01-12',
+  '5588746-2', 'CORNELIO ARAYA', NULL, NULL,
+  '2', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  2, 57200, 114400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316849', '2024-01-12',
+  '5588746-2', 'CORNELIO ARAYA', NULL, NULL,
+  '3', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  3, 75781, 227343
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316849', '2024-01-12',
+  '5588746-2', 'CORNELIO ARAYA', NULL, NULL,
+  '4', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  1, 67661, 67661
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316849', '2024-01-12',
+  '5588746-2', 'CORNELIO ARAYA', NULL, NULL,
+  '5', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  3, 51506, 154518
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316849', '2024-01-12',
+  '5588746-2', 'CORNELIO ARAYA', NULL, NULL,
+  '6', 'PTAF18', 'BALDE ANTICONGELANTE 711 20 LTS.',
+  4, 17096, 68384
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316849', '2024-01-12',
+  '5588746-2', 'CORNELIO ARAYA', NULL, NULL,
+  '7', 'AP8003931', '8.25R16 128/124K S600 APLUS',
+  1, 104296, 104296
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316848', '2024-01-12',
+  '77229557-K', 'TRANSPORTE WILSON ANTONIO IRIARTE FLORES E I R L', NULL, NULL,
+  '1', 'MI443664', '295/80R22,5 X MULTI Z + TL 152/148 L VG',
+  1, 418400, 418400
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316848', '2024-01-12',
+  '77229557-K', 'TRANSPORTE WILSON ANTONIO IRIARTE FLORES E I R L', NULL, NULL,
+  '2', 'AP6500137', '295/80R22.5 152/149M S202 APLUS',
+  4, 146069, 584276
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316847', '2024-01-12',
+  '76124495-7', 'PAUL ROJAS GOMEZ TRANSP. Y SERV. EIR', NULL, NULL,
+  '1', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  2, 69990, 139980
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316846', '2024-01-12',
+  '12968530-1', 'MARCOS ELIU  GODOY', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  10, 57200, 572000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316846', '2024-01-12',
+  '12968530-1', 'MARCOS ELIU  GODOY', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  5, 75781, 378905
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122612', '2024-01-12',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'FWK8019', 'WK8019 FILTRO COMBUSTIBLE BLINDADO',
+  1, 10660, 10660
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Boleta', '122611', '2024-01-12',
+  '66666666-6', 'Cliente ROJAS MAGALLANES Generico', NULL, NULL,
+  '1', 'TOT-214083L', 'BIDON TRAXIUM GEAR 8 75W80 2 LITROS',
+  1, 16423, 16423
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316845', '2024-01-12',
+  '76668592-7', 'REPUESTOS AUT. PEDRO REYNUABA E.I.R.L.', NULL, NULL,
+  '1', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  12, 1657, 19884
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316845', '2024-01-12',
+  '76668592-7', 'REPUESTOS AUT. PEDRO REYNUABA E.I.R.L.', NULL, NULL,
+  '2', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  12, 1657, 19884
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316845', '2024-01-12',
+  '76668592-7', 'REPUESTOS AUT. PEDRO REYNUABA E.I.R.L.', NULL, NULL,
+  '3', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316845', '2024-01-12',
+  '76668592-7', 'REPUESTOS AUT. PEDRO REYNUABA E.I.R.L.', NULL, NULL,
+  '4', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316844', '2024-01-12',
+  '76954022-9', 'REPUESTOS OBKES SPA', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316844', '2024-01-12',
+  '76954022-9', 'REPUESTOS OBKES SPA', NULL, NULL,
+  '2', 'LIQ-2184', 'CAJA LIQUI MOLY MOS2-LEICHTLAUF 10W40 4X5',
+  1, 119052, 119052
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316844', '2024-01-12',
+  '76954022-9', 'REPUESTOS OBKES SPA', NULL, NULL,
+  '3', 'LIQ-9505', 'CAJA SUPER LEICHTLAUF 10W40 4X5',
+  1, 108070, 108070
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316844', '2024-01-12',
+  '76954022-9', 'REPUESTOS OBKES SPA', NULL, NULL,
+  '4', 'LIQ-8973', 'CAJA LIQUI MOLY TOP TEC 4200 5W30 4X5',
+  1, 176087, 176087
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316843', '2024-01-12',
+  '76954022-9', 'REPUESTOS OBKES SPA', NULL, NULL,
+  '1', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  30, 1657, 49710
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316843', '2024-01-12',
+  '76954022-9', 'REPUESTOS OBKES SPA', NULL, NULL,
+  '2', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  30, 1657, 49710
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316843', '2024-01-12',
+  '76954022-9', 'REPUESTOS OBKES SPA', NULL, NULL,
+  '3', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  30, 3133, 93990
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316843', '2024-01-12',
+  '76954022-9', 'REPUESTOS OBKES SPA', NULL, NULL,
+  '4', '711-GL', 'ANTICONGELANTE 711-GL',
+  30, 3133, 93990
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316842', '2024-01-12',
+  '9210869-4', 'CARLOS OLIVARES', NULL, NULL,
+  '1', 'AP1018181', '195/50R15 82V A 609 APLUS',
+  2, 25673, 51346
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316841', '2024-01-12',
+  '12803010-7', 'ALFREDO LOPEZ', NULL, NULL,
+  '1', 'AP8004104', '215/75R17.5 127/124M S201 APLUS',
+  7, 77489, 542423
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316840', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '1', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  36, 1657, 59652
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316840', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '2', 'PTMO02', 'ANTICONGELANTE 611-GL 1GLN',
+  36, 1657, 59652
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316840', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '3', '911-E', 'ANTICONGELANTE 911-GL ESPECIAL 1GLN',
+  12, 6327, 75924
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316840', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '4', '911-GL', 'ANTICONGELANTE 911-GL 1GLN',
+  6, 6327, 37962
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316840', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '5', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316840', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '6', '711-GL', 'ANTICONGELANTE 711-GL',
+  12, 3133, 37596
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316839', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  4, 57200, 228800
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316839', '2024-01-12',
+  '76284404-4', 'CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L', NULL, NULL,
+  '2', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  2, 51506, 103012
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316838', '2024-01-12',
+  '76960442-1', 'COLZA SPA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  3, 57200, 171600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316838', '2024-01-12',
+  '76960442-1', 'COLZA SPA', NULL, NULL,
+  '2', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  1, 64456, 64456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '1', 'AP1012955', '165R13C 91/89R A867 APLUS',
+  4, 24120, 96480
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '2', 'AP1010362', '205/40R17 84WXL A607 APLUS',
+  2, 29921, 59842
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '3', 'AP1007515', '205/45R17 88WXL A607 APLUS',
+  1, 35718, 35718
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '4', 'AP1009604', '215/45R17 91WXL A607 APLUS',
+  3, 32624, 97872
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '5', 'AP1018181', '195/50R15 82V A 609 APLUS',
+  1, 25673, 25673
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '6', '1018183', '195/55R15 85V A609 APLUS',
+  1, 26337, 26337
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '7', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  2, 51116, 102232
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '8', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  1, 67661, 67661
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '9', 'GG-751051003', 'CAJA GERMAN GOLD ENGINE POWER 5W30 C3 LOW SAPS 4X5',
+  2, 87474, 174948
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '10', 'GG-751040002', 'CAJA GERMAN GOLD ENGINE POWER 10W40 4X4 LITROS',
+  2, 55526, 111052
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '11', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  2, 63600, 127200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '12', 'MOB-146235', 'CAJA MOBIL 1 ESP 5W30 4X4',
+  1, 119600, 119600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '13', 'MOB-151059', 'CAJA MOBIL 1 ESP 5W30 12X1',
+  1, 108652, 108652
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '14', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  1, 51506, 51506
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '15', 'SHE-550044446', 'CAJA ADVANCE 4T AX7 10W40 NEW 12X1 (EU)',
+  1, 57615, 57615
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '16', '711-GL', 'ANTICONGELANTE 711-GL',
+  90, 3133, 281970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316837', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '17', '711-E', 'ANTICONGELANTE 711-GL ESPECIAL 1GLN',
+  60, 3133, 187980
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316836', '2024-01-12',
+  '79648980-4', 'SOCIEDAD COMERCIAL DELARD Y CIA.', NULL, NULL,
+  '1', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  5, 51506, 257530
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316835', '2024-01-12',
+  '5738887-0', 'JOVEL LEYTON', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  5, 57200, 286000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316835', '2024-01-12',
+  '5738887-0', 'JOVEL LEYTON', NULL, NULL,
+  '2', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  2, 51506, 103012
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316834', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '1', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  1, 51506, 51506
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316834', '2024-01-12',
+  '13533193-7', 'DAVID MORALES', NULL, NULL,
+  '2', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  3, 51116, 153348
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316833', '2024-01-12',
+  '5825326-K', 'MARIA SALINAS', NULL, NULL,
+  '1', 'AP8004052', '12.00R24 160/157K S600 APLUS',
+  2, 201842, 403684
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316833', '2024-01-12',
+  '5825326-K', 'MARIA SALINAS', NULL, NULL,
+  '2', 'AP8004501', '12.00R24 160/157K D860 APLUS',
+  2, 228386, 456772
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316832', '2024-01-12',
+  '76970414-0', 'TRANSPORTES RENE VICENCIO AVILES E I R L', NULL, NULL,
+  '1', 'SHE-550040618L', 'BIDON HELIX ULTRA AG 5W30 1 LTS (EU)',
+  2, 6878, 13756
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316832', '2024-01-12',
+  '76970414-0', 'TRANSPORTES RENE VICENCIO AVILES E I R L', NULL, NULL,
+  '2', 'SHE-550040557L', 'BIDON HELIX ULTRA AG 5W30 5 LTS (EU)',
+  1, 33569, 33569
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316832', '2024-01-12',
+  '76970414-0', 'TRANSPORTES RENE VICENCIO AVILES E I R L', NULL, NULL,
+  '3', 'FW930/26', 'W930/26',
+  1, 7505, 7505
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Factura Venta', '316832', '2024-01-12',
+  '76970414-0', 'TRANSPORTES RENE VICENCIO AVILES E I R L', NULL, NULL,
+  '4', 'FC16006', 'C16006 FILTRO DE AIRE',
+  1, 9888, 9888
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316831', '2024-01-12',
+  '76750560-4', 'LOGISTICA HUALPEN LIMITADA', NULL, NULL,
+  '1', 'SHE-550033232', 'BALDE RIMULA R4 L 15W-40 20 LTS (EU)',
+  2, 74891, 149782
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316830', '2024-01-12',
+  '77139503-1', 'SERVIMOTORS STORE SPA', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316829', '2024-01-12',
+  '76092907-7', 'TRANSPORTES Y SERVICIOS AGRICOLAS POMAROLLI S A', NULL, NULL,
+  '1', 'AP8004644', '295/80R22.5 154/151L D801+ APLUS',
+  4, 184866, 739464
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '1', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  5, 63600, 318000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '2', 'MOB-150562', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 12X1',
+  2, 54655, 109310
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '3', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  2, 67661, 135322
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '4', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  5, 75781, 378905
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '5', 'SHE-550047337BO', 'CAJA RIMULA R4 L 15W40 CK4 3X5 (EU) BONIFICADO',
+  3, 46805, 140415
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '6', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  10, 57200, 572000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '7', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 74970, 149940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '8', 'LIQ-8998', 'CAJA LIQUI MOLY LEICHTLAUF PERFORMANCE  10W40 4X4 LITROS',
+  3, 78228, 234684
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '9', 'LIQ-6948', 'CAJA LIQUI MOLY MOS2 LEICHTLAUF  10W40 4X4 LITROS',
+  1, 98162, 98162
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316828', '2024-01-12',
+  '12870166-4', 'ROBERTO ANDRES CORNEJO', NULL, NULL,
+  '10', 'LIQ-2626', 'CAJA LIQUI MOLY MOS2-LEICHTLAUF 10W40 12X1',
+  1, 83870, 83870
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316827', '2024-01-12',
+  '7707625-5', 'JORGE ALBERTO HERNANDEZ', NULL, NULL,
+  '1', 'REC930', '295/80R22,5  BRMS2 BANDAG MIXTO TODA POSICION UZY',
+  3, 82950, 248850
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316827', '2024-01-12',
+  '7707625-5', 'JORGE ALBERTO HERNANDEZ', NULL, NULL,
+  '2', 'REC-912', '295/80R22,5 B736 TRACCION CARRETERA BANDAG',
+  4, 115000, 460000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316827', '2024-01-12',
+  '7707625-5', 'JORGE ALBERTO HERNANDEZ', NULL, NULL,
+  '3', NULL, '72202-1, BRIDGESTONE R268, Cod: 45A',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316827', '2024-01-12',
+  '7707625-5', 'JORGE ALBERTO HERNANDEZ', NULL, NULL,
+  '4', NULL, '72202-3, MICHELIN XZA-2, Cod: 45A',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316827', '2024-01-12',
+  '7707625-5', 'JORGE ALBERTO HERNANDEZ', NULL, NULL,
+  '5', NULL, 'GUIA 72202',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316826', '2024-01-12',
+  '77792779-5', 'REPUESTOS CARFAT LIMITADA', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  1, 57200, 57200
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316826', '2024-01-12',
+  '77792779-5', 'REPUESTOS CARFAT LIMITADA', NULL, NULL,
+  '2', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  1, 51116, 51116
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316826', '2024-01-12',
+  '77792779-5', 'REPUESTOS CARFAT LIMITADA', NULL, NULL,
+  '3', 'MOB-150562', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 12X1',
+  1, 54655, 54655
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316826', '2024-01-12',
+  '77792779-5', 'REPUESTOS CARFAT LIMITADA', NULL, NULL,
+  '4', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  1, 63600, 63600
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316826', '2024-01-12',
+  '77792779-5', 'REPUESTOS CARFAT LIMITADA', NULL, NULL,
+  '5', 'SHE-550039983', 'CAJA SHELL HELIX HX5 15W40 4X4 (EU)',
+  1, 64456, 64456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316826', '2024-01-12',
+  '77792779-5', 'REPUESTOS CARFAT LIMITADA', NULL, NULL,
+  '6', 'MOB-151059', 'CAJA MOBIL 1 ESP 5W30 12X1',
+  1, 108652, 108652
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316825', '2024-01-12',
+  '78048910-3', 'TRANSPORTES SAE LTDA.', NULL, NULL,
+  '1', 'REC-033', '295/80R22,5 XZE2 RECAMIC.',
+  10, 112000, 1120000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316824', '2024-01-12',
+  '78048910-3', 'TRANSPORTES SAE LTDA.', NULL, NULL,
+  '1', 'REC-113', '11R22,5 SERVICIO RECAUCHAJE UZY (SAM).',
+  9, 82000, 738000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316823', '2024-01-12',
+  '78048910-3', 'TRANSPORTES SAE LTDA.', NULL, NULL,
+  '1', 'REC-033', '295/80R22,5 XZE2 RECAMIC.',
+  4, 112000, 448000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316822', '2024-01-12',
+  '13015607-K', 'NEFI RODRIGO  CASTILLO', NULL, NULL,
+  '1', 'AP1017086', 'P215/75R15 100T ALL TERRAIN A929 APLUS',
+  2, 48574, 97148
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316821', '2024-01-12',
+  '12803010-7', 'ALFREDO LOPEZ', NULL, NULL,
+  '1', 'AP1017148', '245/70R16 111SXL ALL TERRAIN A929 APLUS',
+  10, 55046, 550460
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316820', '2024-01-12',
+  '99528240-2', 'INVERSIONES QUILLEN SPA', NULL, NULL,
+  '1', 'REC-918', '295/80R22,5 BTL-SA2 EJE LIBRE ALAS CARRETERA 13 MM BANDAG',
+  5, 91900, 459500
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316820', '2024-01-12',
+  '99528240-2', 'INVERSIONES QUILLEN SPA', NULL, NULL,
+  '2', NULL, 'GUIA  72204',
+  NULL, NULL, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316819', '2024-01-11',
+  '11537174-6', 'JUAN CARTES', NULL, NULL,
+  '1', 'PT100023', 'ADHESIVO EPOXICO 4 MINUTOS VERSACHEM 56',
+  36, 2935, 105660
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122610', '2024-01-11',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122610', '2024-01-11',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', 'FW68/80', 'W68/80 Filtro de Aceite',
+  1, 3475, 3475
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122609', '2024-01-11',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'AP1018222', '175/70R13 82T A609 APLUS',
+  4, 28136, 112544
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122609', '2024-01-11',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  4, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316818', '2024-01-11',
+  '76694827-8', 'MANT. Y SUMINISTROS BARDAWIL FLOREZ SPA', NULL, NULL,
+  '1', '911-GL', 'ANTICONGELANTE 911-GL 1GLN',
+  6, 6327, 37962
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316818', '2024-01-11',
+  '76694827-8', 'MANT. Y SUMINISTROS BARDAWIL FLOREZ SPA', NULL, NULL,
+  '2', '911-E', 'ANTICONGELANTE 911-GL ESPECIAL 1GLN',
+  6, 6327, 37962
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316818', '2024-01-11',
+  '76694827-8', 'MANT. Y SUMINISTROS BARDAWIL FLOREZ SPA', NULL, NULL,
+  '3', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  1, 51506, 51506
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316818', '2024-01-11',
+  '76694827-8', 'MANT. Y SUMINISTROS BARDAWIL FLOREZ SPA', NULL, NULL,
+  '4', 'GM-93165556', 'CAJA GM DEXOS 2 LONGLIFE 5W30 4X4',
+  1, 85559, 85559
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122608', '2024-01-11',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'AP1018231', '165/60R14 75H A609 APLUS',
+  2, 23307, 46614
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122608', '2024-01-11',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  2, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122607', '2024-01-11',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316817', '2024-01-11',
+  '77750958-6', 'mecanica integral victor manuel santander luna spa', NULL, NULL,
+  '1', 'AP1017086', 'P215/75R15 100T ALL TERRAIN A929 APLUS',
+  2, 48574, 97148
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316816', '2024-01-11',
+  '76148235-1', 'SOC. COMERCIAL GRIMALDI TAMBURINI LTDA.', NULL, NULL,
+  '1', 'SHE-550047337', 'Caja Rimula R4 L 15W40 CK4 3X5 (EU)',
+  5, 51506, 257530
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316815', '2024-01-11',
+  '76565298-7', 'GAETE & SOLIS LIMITADA', NULL, NULL,
+  '1', 'AP1018158', '185/65R15 88H A609 APLUS',
+  5, 25902, 129510
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316814', '2024-01-11',
+  '77059064-7', 'TRANSPORTES Y SERVICIOS HUGO ERNESTO ARANCIBIA AROSTICA E I R L', NULL, NULL,
+  '1', 'AP1017016', '245/75R16 120/116S ALL TERRAIN A929 APLUS',
+  4, 68041, 272164
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Factura Venta', '316813', '2024-01-11',
+  '11939093-1', 'JOSE LUIS COFRE', NULL, NULL,
+  '1', 'AP1018158', '185/65R15 88H A609 APLUS',
+  4, 30446, 121784
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316812', '2024-01-11',
+  '76148235-1', 'SOC. COMERCIAL GRIMALDI TAMBURINI LTDA.', NULL, NULL,
+  '1', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  3, 67661, 202983
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316812', '2024-01-11',
+  '76148235-1', 'SOC. COMERCIAL GRIMALDI TAMBURINI LTDA.', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  30, 75781, 2273430
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316812', '2024-01-11',
+  '76148235-1', 'SOC. COMERCIAL GRIMALDI TAMBURINI LTDA.', NULL, NULL,
+  '3', 'SHE-550040352', 'CAJA SHELL HELIX HX7 12X1 (EU)',
+  2, 51116, 102232
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316811', '2024-01-11',
+  '9811782-2', 'IVAN FLORES', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  10, 75781, 757810
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316811', '2024-01-11',
+  '9811782-2', 'IVAN FLORES', NULL, NULL,
+  '2', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  2, 67661, 135322
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316811', '2024-01-11',
+  '9811782-2', 'IVAN FLORES', NULL, NULL,
+  '3', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  10, 57200, 572000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316810', '2024-01-11',
+  '77529278-4', 'SOCIEDAD COMERCIAL ANDYAUTOS SPA', NULL, NULL,
+  '1', 'MOB-150018', 'CAJA MOBIL SUPER 2000 10W40 SN PLUS 4X4',
+  5, 63600, 318000
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316810', '2024-01-11',
+  '77529278-4', 'SOCIEDAD COMERCIAL ANDYAUTOS SPA', NULL, NULL,
+  '2', 'SHE-550040618', 'CAJA HELIX ULTRA PRO AG 5W30 12X1 (EU)',
+  6, 67661, 405966
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316810', '2024-01-11',
+  '77529278-4', 'SOCIEDAD COMERCIAL ANDYAUTOS SPA', NULL, NULL,
+  '3', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  2, 75781, 151562
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316810', '2024-01-11',
+  '77529278-4', 'SOCIEDAD COMERCIAL ANDYAUTOS SPA', NULL, NULL,
+  '4', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  6, 74970, 449820
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316809', '2024-01-11',
+  '77329933-1', 'MOTOR HIGH TECH SPA', NULL, NULL,
+  '1', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  2, 74970, 149940
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316809', '2024-01-11',
+  '77329933-1', 'MOTOR HIGH TECH SPA', NULL, NULL,
+  '2', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Antillanca', 'Factura Venta', '316808', '2024-01-11',
+  '77203696-5', 'SOCIEDAD DE TRANSPORTE LONCONAO LIMITADA', NULL, NULL,
+  '1', '401004448', '295/80R22.5 154/151M S201 APLUS',
+  10, 148945, 1489450
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122606', '2024-01-11',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '1', 'FW67/88', 'W67/88 FILTRO DE ACEITE LONG LIFE KIA',
+  1, 4456, 4456
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Ovalle', 'Boleta', '122606', '2024-01-11',
+  '66666666-6', 'Cliente OVALLE Generico', NULL, NULL,
+  '2', 'LIQ-8973L', 'BIDON LIQUI MOLY TOP TEC 4200 5W30 5 LITROS',
+  1, 52653, 52653
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316807', '2024-01-11',
+  '8359398-9', 'JOSE ROJAS', NULL, NULL,
+  '1', 'AP1008921', '255/70R16 111T ALL TERRAIN A929 APLUS',
+  2, 66062, 132124
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122605', '2024-01-11',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '1', 'AP1018158', '185/65R15 88H A609 APLUS',
+  4, 22834, 91336
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122605', '2024-01-11',
+  '9262987-2', 'EDUARDO ENRIQUE  PONCE', NULL, NULL,
+  '2', '21-172C', 'VALVULA PARA AUTO TR413 CORTA',
+  4, 0, 0
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122604', '2024-01-11',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316806', '2024-01-11',
+  '13015607-K', 'NEFI RODRIGO  CASTILLO', NULL, NULL,
+  '1', 'AP1014694', '245/65R17 107T ALL TERRAIN A929 APLUS',
+  4, 53717, 214868
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Linares', 'Boleta', '122603', '2024-01-11',
+  '66666666-6', 'Cliente LINARES Generico', NULL, NULL,
+  '1', 'SHE-550040331L', 'BIDON HELIX HX7 10W40 (EU) 4 LTS',
+  1, 19362, 19362
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316805', '2024-01-11',
+  '76854475-1', 'TRANSPORTES GL SPA', NULL, NULL,
+  '1', 'AP8004104', '215/75R17.5 127/124M S201 APLUS',
+  4, 77489, 309956
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316804', '2024-01-11',
+  '6409451-3', 'VICTOR ROBERTO ARANEDA', NULL, NULL,
+  '1', 'SERV-03B', 'SERVICIO DE ENGRASE PEDRO',
+  1, 15750, 15750
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316803', '2024-01-11',
+  '77476804-1', 'CALDERONES Y ATENCIO SPA', NULL, NULL,
+  '1', 'SHE-550040557', 'CAJA HELIX ULTRA AG 5W30 3X5 LT (EU)',
+  1, 75781, 75781
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316803', '2024-01-11',
+  '77476804-1', 'CALDERONES Y ATENCIO SPA', NULL, NULL,
+  '2', 'TOT-157103', 'CAJA TOTAL QUARTZ INEO MC3 5W30 3X5',
+  1, 74970, 74970
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Rojas Magallanes', 'Factura Venta', '316803', '2024-01-11',
+  '77476804-1', 'CALDERONES Y ATENCIO SPA', NULL, NULL,
+  '3', 'LIQ-8973', 'CAJA LIQUI MOLY TOP TEC 4200 5W30 4X5',
+  1, 176087, 176087
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316802', '2024-01-11',
+  '12841173-9', 'MICHAEL ALEJANDRO RICHARDS', NULL, NULL,
+  '1', 'PTGR02', 'GRASA GRIS 250 VEP-2 VERSAMOLY',
+  12, 2586, 31032
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316802', '2024-01-11',
+  '12841173-9', 'MICHAEL ALEJANDRO RICHARDS', NULL, NULL,
+  '2', 'PTMO15', 'ANTICONGELANTE 611-E ESPECIAL',
+  6, 1657, 9942
+);
+
+INSERT INTO venta (
+  sucursal, tipo_documento, folio, fecha_emision,
+  identificador, cliente, vendedor_cliente, vendedor_documento,
+  indice, sku, descripcion,
+  cantidad, precio, valor_total
+) VALUES (
+  'Geronimo Mendez', 'Factura Venta', '316801', '2024-01-11',
+  '12983754-3', 'BERNARDO RIQUELME', NULL, NULL,
+  '1', 'SHE-550040331', 'CAJA GENERIC OIL 4 LITROS',
+  5, 59600, 298000
+);
+
+-- Parcial: 43000 registros cargados
+SELECT COUNT(*) as total_ventas FROM venta;

@@ -287,7 +287,7 @@ const DashboardNuevo = () => {
           console.error('[loadData] Error en getComparativasMensuales:', e);
           return { success: false, error: e.message, status: e.status };
         }),
-        getKPIsMesActual().catch(e => {
+        getKPIsMesActual(params).catch(e => {
           console.error('[loadData] Error en getKPIsMesActual:', e);
           return { success: false, error: e.message, status: e.status };
         })
