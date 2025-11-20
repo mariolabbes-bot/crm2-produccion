@@ -50,6 +50,7 @@ async function getDetectedSales() {
 
   detectedSales = { salesTable, amountCol, dateCol, clientIdCol };
   detectedAt = Date.now();
+  console.log('[getDetectedSales] Detección:', detectedSales);
   return detectedSales;
 }
 
