@@ -566,6 +566,15 @@ const DashboardNuevo = () => {
 
             {/* VisionCard #2: Abonos con % vs Ventas del Mes */}
             <Grid item xs={12} sm={6} md={3}>
+              {console.log('[DEBUG Abonos]', {
+                kpisMesActual,
+                ventas: kpisMesActual?.monto_ventas_mes,
+                abonos: kpisMesActual?.monto_abonos_mes,
+                condicion: kpisMesActual && kpisMesActual.monto_ventas_mes > 0,
+                calculo: kpisMesActual && kpisMesActual.monto_ventas_mes > 0 
+                  ? ((kpisMesActual.monto_abonos_mes / kpisMesActual.monto_ventas_mes) * 100).toFixed(1)
+                  : 'N/A'
+              })}
               <VisionCard 
                 title="Abonos Mes Actual"
                 value={kpisMesActual ? formatMoney(kpisMesActual.monto_abonos_mes) : '—'}
