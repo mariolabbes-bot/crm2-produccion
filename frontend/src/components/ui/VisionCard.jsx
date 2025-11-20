@@ -12,6 +12,7 @@ const VisionCard = ({
   title, 
   value, 
   subtitle, 
+  subtitleColor,
   icon, 
   trend, 
   gradient = 'neutral', 
@@ -92,8 +93,10 @@ const VisionCard = ({
             <Typography 
               variant="body2" 
               sx={{ 
-                opacity: 0.9,
+                color: subtitleColor || 'inherit',
+                opacity: subtitleColor ? 1 : 0.9,
                 fontSize: '0.875rem',
+                fontWeight: subtitleColor ? 600 : 400,
                 mt: 0.5
               }}
             >

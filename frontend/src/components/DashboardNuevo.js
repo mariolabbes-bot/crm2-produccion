@@ -569,11 +569,12 @@ const DashboardNuevo = () => {
               <VisionCard 
                 title="Abonos Mes Actual"
                 value={kpisMesActual ? formatMoney(kpisMesActual.monto_abonos_mes) : '—'}
-                subtitle={kpisMesActual && kpisMesActual.monto_ventas_mes > 0 ? (
-                  <span style={{ color: '#667eea', fontWeight: 600 }}>
-                    {((kpisMesActual.monto_abonos_mes / kpisMesActual.monto_ventas_mes) * 100).toFixed(1)}% de las ventas
-                  </span>
-                ) : '—'}
+                subtitle={
+                  kpisMesActual && kpisMesActual.monto_ventas_mes > 0 
+                    ? `${((kpisMesActual.monto_abonos_mes / kpisMesActual.monto_ventas_mes) * 100).toFixed(1)}% de las ventas`
+                    : 'Sin datos de ventas'
+                }
+                subtitleColor="#667eea"
                 trend="neutral"
                 icon="📊"
                 gradient="success"
