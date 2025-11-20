@@ -72,8 +72,16 @@ export const getOverdueActivities = () => apiFetch(`${API_URL}/activities/overdu
 // KPIS
 export const getTopClients = () => apiFetch(`${API_URL}/kpis/top-clients`);
 export const getSalesSummary = () => apiFetch(`${API_URL}/kpis/sales-summary`);
-export const getKPIsMesActual = (params = {}) => apiFetch(`${API_URL}/kpis/dashboard-current`, params);
-export const getKpisMesActual = (params = {}) => apiFetch(`${API_URL}/kpis/dashboard-current`, params);
+export const getKPIsMesActual = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  const url = queryString ? `${API_URL}/kpis/dashboard-current?${queryString}` : `${API_URL}/kpis/dashboard-current`;
+  return apiFetch(url);
+};
+export const getKpisMesActual = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  const url = queryString ? `${API_URL}/kpis/dashboard-current?${queryString}` : `${API_URL}/kpis/dashboard-current`;
+  return apiFetch(url);
+};
 export const getEvolucionMensual = () => apiFetch(`${API_URL}/kpis/evolucion-mensual`);
 export const getVentasPorFamilia = () => apiFetch(`${API_URL}/kpis/ventas-por-familia`);
 

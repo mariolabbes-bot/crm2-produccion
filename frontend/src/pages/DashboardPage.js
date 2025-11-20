@@ -67,10 +67,15 @@ const DashboardPage = () => {
         if (isManager() && vendedorSeleccionado !== 'todos') {
           params.vendedor_id = vendedorSeleccionado;
         }
+        
+        console.log('🔄 Cargando dashboard con params:', params);
+        console.log('🔄 Vendedor seleccionado:', vendedorSeleccionado);
 
         // KPIs del mes actual
         const kpisResponse = await getKpisMesActual(params);
         const kpisData = kpisResponse.data || kpisResponse; // Manejar ambos formatos
+        
+        console.log('📊 KPIs recibidos:', kpisData);
         
         setKpis({
           ventasMes: kpisData.monto_ventas_mes || 0,
