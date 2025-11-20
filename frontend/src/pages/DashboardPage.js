@@ -49,7 +49,10 @@ const DashboardPage = () => {
           clientesActivos: kpisData.numero_clientes_con_venta_mes || 0,
           productosVendidos: 0, // Este dato vendría de otro endpoint
           trendVentas: kpisData.variacion_vs_anio_anterior_pct || 0,
-          trendAbonos: 0, // Se puede calcular después si es necesario
+          // Calcular % de abonos respecto a ventas del mes
+          trendAbonos: kpisData.monto_ventas_mes > 0 
+            ? (kpisData.monto_abonos_mes / kpisData.monto_ventas_mes) * 100 
+            : 0,
         });
 
         // Evolución mensual (últimos 12 meses)
@@ -98,13 +101,9 @@ const DashboardPage = () => {
           <KPICard
             title="Abonos del Mes"
             value={formatCurrency(kpis.abonosMes)}
-            subtitle="del mes actual"
-            highlightedSubtitle={
-              kpis.ventasMes > 0 
-                ? `${((kpis.abonosMes / kpis.ventasMes) * 100).toFixed(1)}% de las ventas`
-                : null
-            }
-            highlightedColor="#3478C3"
+            subtitle="de las ventas"
+            trend={kpis.trendAbonos}
+            trendAsPercentage={true}
             color="#3478C3"
             icon={<AbonosIcon />}
             loading={loading}

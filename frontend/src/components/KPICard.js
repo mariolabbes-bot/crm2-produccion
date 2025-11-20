@@ -11,6 +11,7 @@ import { TrendingUp, TrendingDown } from '@mui/icons-material';
  * @param {string} highlightedSubtitle - Subtítulo destacado a la derecha (ej: "97.5% de las ventas")
  * @param {string} highlightedColor - Color del subtítulo destacado
  * @param {number} trend - Tendencia en porcentaje (ej: 12.5 = +12.5%)
+ * @param {boolean} trendAsPercentage - Si true, muestra el trend como porcentaje sin flechas
  * @param {string} color - Color del módulo (ej: "#10B981" para ventas)
  * @param {React.ReactNode} icon - Ícono del módulo
  * @param {boolean} loading - Estado de carga
@@ -21,7 +22,8 @@ const KPICard = ({
   subtitle = null,
   highlightedSubtitle = null,
   highlightedColor = null,
-  trend = null, 
+  trend = null,
+  trendAsPercentage = false,
   color = '#2B4F6F',
   icon = null,
   loading = false 
@@ -117,25 +119,40 @@ const KPICard = ({
               {highlightedSubtitle}
             </Typography>
           ) : trend !== null && (
-            <Box 
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 0.5,
-                color: isPositiveTrend ? '#10B981' : '#EF4444',
-                fontWeight: 600,
-                fontSize: '0.875rem'
-              }}
-            >
-              {isPositiveTrend ? (
-                <TrendingUp sx={{ fontSize: 20 }} />
-              ) : (
-                <TrendingDown sx={{ fontSize: 20 }} />
-              )}
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {isPositiveTrend ? '+' : ''}{trend.toFixed(1)}%
+            trendAsPercentage ? (
+              // Modo porcentaje: sin flechas, color del módulo
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: color,
+                  fontWeight: 700,
+                  fontSize: '0.875rem'
+                }}
+              >
+                {trend.toFixed(1)}%
               </Typography>
-            </Box>
+            ) : (
+              // Modo tendencia: con flechas, color verde/rojo
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 0.5,
+                  color: isPositiveTrend ? '#10B981' : '#EF4444',
+                  fontWeight: 600,
+                  fontSize: '0.875rem'
+                }}
+              >
+                {isPositiveTrend ? (
+                  <TrendingUp sx={{ fontSize: 20 }} />
+                ) : (
+                  <TrendingDown sx={{ fontSize: 20 }} />
+                )}
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {isPositiveTrend ? '+' : ''}{trend.toFixed(1)}%
+                </Typography>
+              </Box>
+            )
           )}
         </Box>
       </CardContent>
