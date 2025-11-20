@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Box } from '@mui/material';
+import { Grid, Box, FormControl, InputLabel, Select, MenuItem, Typography, Paper } from '@mui/material';
 import {
   ShoppingCart as VentasIcon,
   Payment as AbonosIcon,
@@ -20,9 +20,13 @@ import {
   Legend, 
   ResponsiveContainer 
 } from 'recharts';
-import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia } from '../api';
+import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedores } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 
 const DashboardPage = () => {
+  const { user, isManager } = useAuth();
+  const [vendedores, setVendedores] = useState([]);
+  const [vendedorSeleccionado, setVendedorSeleccionado] = useState('todos');
   const [kpis, setKpis] = useState({
     ventasMes: 0,
     abonosMes: 0,
@@ -37,12 +41,33 @@ const DashboardPage = () => {
   const [ventasPorFamilia, setVentasPorFamilia] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Cargar lista de vendedores si es manager
+  useEffect(() => {
+    const fetchVendedores = async () => {
+      if (isManager()) {
+        try {
+          const vendedoresData = await getVendedores();
+          setVendedores(vendedoresData || []);
+        } catch (error) {
+          console.error('Error cargando vendedores:', error);
+        }
+      }
+    };
+    fetchVendedores();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Construir parámetros según el vendedor seleccionado
+        const params = {};
+        if (isManager() && vendedorSeleccionado !== 'todos') {
+          params.vendedor_id = vendedorSeleccionado;
+        }
+
         // KPIs del mes actual
-        const kpisResponse = await getKpisMesActual();
+        const kpisResponse = await getKpisMesActual(params);
         const kpisData = kpisResponse.data || kpisResponse; // Manejar ambos formatos
         
         setKpis({
@@ -77,7 +102,7 @@ const DashboardPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [vendedorSeleccionado]); // Re-cargar cuando cambie el vendedor seleccionado
 
   // Formatear números como moneda chilena
   const formatCurrency = (value) => {
@@ -91,6 +116,29 @@ const DashboardPage = () => {
 
   return (
     <Box>
+      {/* Selector de vendedor (solo para managers) */}
+      {isManager() && (
+        <Box sx={{ mb: 3 }}>
+          <FormControl fullWidth>
+            <InputLabel id="vendedor-select-label">Filtrar por Vendedor</InputLabel>
+            <Select
+              labelId="vendedor-select-label"
+              id="vendedor-select"
+              value={vendedorSeleccionado}
+              label="Filtrar por Vendedor"
+              onChange={(e) => setVendedorSeleccionado(e.target.value)}
+            >
+              <MenuItem value="todos">Todos los vendedores</MenuItem>
+              {vendedores.map((v) => (
+                <MenuItem key={v.id} value={v.id}>
+                  {v.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      )}
+
       {/* Fila 1: KPIs principales */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
