@@ -95,67 +95,46 @@ router.post('/login', async (req, res) => {
 // Obtener todos los vendedores
 router.get('/vendedores', async (req, res) => {
   try {
-    // Primero verificar qué tabla existe
-    const tableCheck = await pool.query(`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
-      AND table_name IN ('usuario', 'users')
-    `);
+    console.log('📋 [GET /vendedores] Iniciando consulta de vendedores...');
     
-    const tableNames = tableCheck.rows.map(r => r.table_name);
-    console.log('📋 Tablas encontradas:', tableNames);
-    
-    // Determinar qué tabla usar
-    let tableName = 'usuario';
-    if (tableNames.includes('users')) {
-      tableName = 'users';
-    }
-    
-    console.log(`📋 Usando tabla: ${tableName}`);
-    
-    // Obtener columnas de la tabla
-    const columnsCheck = await pool.query(`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_schema = 'public' 
-      AND table_name = $1
-    `, [tableName]);
-    
-    const columnNames = columnsCheck.rows.map(r => r.column_name);
-    console.log('📋 Columnas disponibles:', columnNames);
-    
-    // Construir query según columnas disponibles
-    let query;
-    if (tableName === 'users') {
-      query = `
+    // Intentar primero con la tabla 'users'
+    let vendedores;
+    try {
+      const queryUsers = `
         SELECT 
           id,
           nombre_vendedor as nombre,
           email as correo,
           rol
         FROM users
-        WHERE rol = 'VENDEDOR' OR rol = 'vendedor'
+        WHERE LOWER(rol) = 'vendedor'
         ORDER BY nombre_vendedor ASC
       `;
-    } else {
-      query = `
+      console.log('📋 Intentando con tabla "users"...');
+      vendedores = await pool.query(queryUsers);
+      console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores en tabla "users"`);
+    } catch (err1) {
+      console.log('📋 Tabla "users" no disponible, intentando con "usuario"...');
+      
+      // Si falla, intentar con la tabla 'usuario'
+      const queryUsuario = `
         SELECT 
           id,
           nombre_vendedor as nombre,
           correo,
           rol_usuario as rol
         FROM usuario
-        WHERE rol_usuario = 'VENDEDOR'
+        WHERE LOWER(rol_usuario) = 'vendedor'
         ORDER BY nombre_completo ASC
       `;
+      vendedores = await pool.query(queryUsuario);
+      console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores en tabla "usuario"`);
     }
     
-    const vendedores = await pool.query(query);
-    console.log(`📋 Vendedores encontrados: ${vendedores.rows.length}`);
     res.json(vendedores.rows);
   } catch (err) {
-    console.error('Error al obtener vendedores:', err.message);
+    console.error('❌ Error al obtener vendedores:', err.message);
+    console.error('❌ Stack:', err.stack);
     res.status(500).json({ 
       msg: 'Error al obtener vendedores', 
       error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
