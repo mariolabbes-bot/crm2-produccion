@@ -26,10 +26,12 @@ const DashboardPage = () => {
   const [kpis, setKpis] = useState({
     ventasMes: 0,
     abonosMes: 0,
+    promedioTrimestre: 0,
     clientesActivos: 0,
     productosVendidos: 0,
     trendVentas: 0,
     trendAbonos: 0,
+    trendPromedioTrimestre: 0,
   });
   const [evolucionMensual, setEvolucionMensual] = useState([]);
   const [ventasPorFamilia, setVentasPorFamilia] = useState([]);
@@ -46,12 +48,17 @@ const DashboardPage = () => {
         setKpis({
           ventasMes: kpisData.monto_ventas_mes || 0,
           abonosMes: kpisData.monto_abonos_mes || 0,
+          promedioTrimestre: kpisData.promedio_ventas_trimestre_anterior || 0,
           clientesActivos: kpisData.numero_clientes_con_venta_mes || 0,
           productosVendidos: 0, // Este dato vendría de otro endpoint
           trendVentas: kpisData.variacion_vs_anio_anterior_pct || 0,
           // Calcular % de abonos respecto a ventas del mes
           trendAbonos: kpisData.monto_ventas_mes > 0 
             ? (kpisData.monto_abonos_mes / kpisData.monto_ventas_mes) * 100 
+            : 0,
+          // Calcular % de ventas mes actual vs promedio trimestre anterior
+          trendPromedioTrimestre: kpisData.promedio_ventas_trimestre_anterior > 0
+            ? ((kpisData.monto_ventas_mes - kpisData.promedio_ventas_trimestre_anterior) / kpisData.promedio_ventas_trimestre_anterior) * 100
             : 0,
         });
 
@@ -111,9 +118,10 @@ const DashboardPage = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <KPICard
-            title="Clientes Activos"
-            value={kpis.clientesActivos.toLocaleString('es-CL')}
-            subtitle="con compras este mes"
+            title="Promedio Trimestre"
+            value={formatCurrency(kpis.promedioTrimestre)}
+            subtitle="vs mes actual"
+            trend={kpis.trendPromedioTrimestre}
             color="#A855F7"
             icon={<ClientesIcon />}
             loading={loading}
