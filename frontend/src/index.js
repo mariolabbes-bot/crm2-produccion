@@ -1,9 +1,8 @@
-// Trigger Vercel redeploy: 2025-11-04
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, Link as RouterLink } from 'react-router-dom';
 import { getClients, addClient, bulkAddClients, getVendedores } from './api';
-import { getToken, removeToken, getUser } from './utils/auth';
+import { removeToken } from './utils/auth';
 import Login from './components/Login';
 import Register from './components/Register';
 import ActivityList from './components/ActivityList';
@@ -19,21 +18,40 @@ import ImportPanel from './components/ImportPanel';
 import Papa from 'papaparse';
 import { ThemeProvider } from '@mui/material/styles';
 import lubricarTheme from './theme/lubricarTheme';
-import { Container, Box, Typography, TextField, Button, List, ListItem, ListItemText, Alert, Link, AppBar, Toolbar, IconButton } from '@mui/material';
+import { Container, Box, Typography, TextField, Button, List, ListItem, ListItemText, Alert, Link, AppBar, Toolbar, IconButton, CircularProgress } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MainLayout from './components/MainLayout';
 import DashboardPage from './pages/DashboardPage';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 const theme = lubricarTheme;
 
 const PrivateRoute = ({ children }) => {
-  return getToken() ? children : <Navigate to="/login" />;
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+  
+  return user ? children : <Navigate to="/login" />;
 };
 
 const ManagerRoute = ({ children }) => {
-    const user = getUser();
-    return user && user.rol?.toUpperCase() === 'MANAGER' ? children : <Navigate to="/" />;
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+  
+  return user && user.rol?.toUpperCase() === 'MANAGER' ? children : <Navigate to="/" />;
 }
 
 const ClientManager = () => {
