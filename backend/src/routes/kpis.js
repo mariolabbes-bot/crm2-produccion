@@ -335,6 +335,20 @@ router.get('/mes-actual', auth(), async (req, res) => {
     const montoVentasTrimestre = parseFloat(ventasTrimestreResult.rows[0]?.monto_total || 0);
     const promedioVentasTrimestre = montoVentasTrimestre / 3;
 
+    console.log('[KPIs] Respuesta final:', {
+      mes: mesActual,
+      ventas: montoVentasMes,
+      abonos: montoAbonosMes,
+      promedio_trimestre: promedioVentasTrimestre,
+      isManager,
+      vendedorFilter: vendedorFilter || 'SIN FILTRO'
+    });
+
+    // Headers para evitar caché
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     res.json({
       success: true,
       data: {
