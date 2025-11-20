@@ -97,39 +97,23 @@ router.get('/vendedores', async (req, res) => {
   try {
     console.log('📋 [GET /vendedores] Iniciando consulta de vendedores...');
     
-    // Intentar primero con la tabla 'users'
-    let vendedores;
-    try {
-      const queryUsers = `
-        SELECT 
-          id,
-          nombre_vendedor as nombre,
-          email as correo,
-          rol
-        FROM users
-        WHERE LOWER(rol) = 'vendedor'
-        ORDER BY nombre_vendedor ASC
-      `;
-      console.log('📋 Intentando con tabla "users"...');
-      vendedores = await pool.query(queryUsers);
-      console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores en tabla "users"`);
-    } catch (err1) {
-      console.log('📋 Tabla "users" no disponible, intentando con "usuario"...');
-      
-      // Si falla, intentar con la tabla 'usuario'
-      const queryUsuario = `
-        SELECT 
-          id,
-          nombre_vendedor as nombre,
-          correo,
-          rol_usuario as rol
-        FROM usuario
-        WHERE LOWER(rol_usuario) = 'vendedor'
-        ORDER BY nombre_completo ASC
-      `;
-      vendedores = await pool.query(queryUsuario);
-      console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores en tabla "usuario"`);
-    }
+    const query = `
+      SELECT 
+        rut as id,
+        nombre_vendedor as nombre,
+        correo,
+        rol_usuario as rol,
+        nombre_completo,
+        cargo,
+        local
+      FROM usuario
+      WHERE LOWER(rol_usuario) = 'vendedor'
+      AND nombre_vendedor IS NOT NULL
+      ORDER BY nombre_vendedor ASC
+    `;
+    
+    const vendedores = await pool.query(query);
+    console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores`);
     
     res.json(vendedores.rows);
   } catch (err) {

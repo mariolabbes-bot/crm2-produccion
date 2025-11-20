@@ -190,19 +190,18 @@ router.get('/mes-actual', auth(), async (req, res) => {
     
     // Si es manager y se proporciona vendedor_id en query, filtrar por ese vendedor
     if (isManager && req.query.vendedor_id) {
-      const vendedorId = parseInt(req.query.vendedor_id, 10);
-      if (!isNaN(vendedorId)) {
-        // Buscar el nombre del vendedor por su ID
-        const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM users WHERE id = $1', [vendedorId]);
-        if (vendedorQuery.rows.length > 0) {
-          const nombreVendedor = vendedorQuery.rows[0].nombre_vendedor;
-          if (vendedorCol === 'vendedor_cliente') {
-            vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-            params = [nombreVendedor];
-          } else {
-            vendedorFilter = `AND ${vendedorCol} = $1`;
-            params = [nombreVendedor];
-          }
+      const vendedorRut = req.query.vendedor_id; // Ahora es RUT, no ID numérico
+      
+      // Buscar el nombre del vendedor por su RUT
+      const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
+      if (vendedorQuery.rows.length > 0) {
+        const nombreVendedor = vendedorQuery.rows[0].nombre_vendedor;
+        if (vendedorCol === 'vendedor_cliente') {
+          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
+          params = [nombreVendedor];
+        } else {
+          vendedorFilter = `AND ${vendedorCol} = $1`;
+          params = [nombreVendedor];
         }
       }
     }
@@ -425,18 +424,18 @@ router.get('/dashboard-current', auth(), async (req, res) => {
     let params = [];
     
     if (isManager && req.query.vendedor_id) {
-      const vendedorId = parseInt(req.query.vendedor_id, 10);
-      if (!isNaN(vendedorId)) {
-        const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM users WHERE id = $1', [vendedorId]);
-        if (vendedorQuery.rows.length > 0) {
-          const nombreVendedor = vendedorQuery.rows[0].nombre_vendedor;
-          if (vendedorCol === 'vendedor_cliente') {
-            vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-            params = [nombreVendedor];
-          } else {
-            vendedorFilter = `AND ${vendedorCol} = $1`;
-            params = [nombreVendedor];
-          }
+      const vendedorRut = req.query.vendedor_id; // Ahora es RUT, no ID numérico
+      
+      // Buscar el nombre del vendedor por RUT
+      const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
+      if (vendedorQuery.rows.length > 0) {
+        const nombreVendedor = vendedorQuery.rows[0].nombre_vendedor;
+        if (vendedorCol === 'vendedor_cliente') {
+          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
+          params = [nombreVendedor];
+        } else {
+          vendedorFilter = `AND ${vendedorCol} = $1`;
+          params = [nombreVendedor];
         }
       }
     } else if (!isManager) {
