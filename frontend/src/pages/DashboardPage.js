@@ -47,6 +47,8 @@ const DashboardPage = () => {
       if (isManager()) {
         try {
           const vendedoresData = await getVendedores();
+          console.log('📋 Vendedores recibidos:', vendedoresData);
+          console.log('📋 Cantidad:', vendedoresData?.length);
           setVendedores(vendedoresData || []);
         } catch (error) {
           console.error('Error cargando vendedores:', error);

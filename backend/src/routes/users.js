@@ -95,22 +95,64 @@ router.post('/login', async (req, res) => {
 // Obtener todos los vendedores
 router.get('/vendedores', async (req, res) => {
   try {
-    // Obtener todos los usuarios con rol vendedor
-    const query = `
-      SELECT 
-        rut, 
-        nombre_completo, 
-        correo, 
-        rol_usuario, 
-        alias, 
-        nombre_vendedor,
-        cargo,
-        local
-      FROM usuario
-      WHERE rol_usuario = 'VENDEDOR'
-      ORDER BY nombre_completo ASC
-    `;
+    // Primero verificar qué tabla existe
+    const tableCheck = await pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_name IN ('usuario', 'users')
+    `);
+    
+    const tableNames = tableCheck.rows.map(r => r.table_name);
+    console.log('📋 Tablas encontradas:', tableNames);
+    
+    // Determinar qué tabla usar
+    let tableName = 'usuario';
+    if (tableNames.includes('users')) {
+      tableName = 'users';
+    }
+    
+    console.log(`📋 Usando tabla: ${tableName}`);
+    
+    // Obtener columnas de la tabla
+    const columnsCheck = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = $1
+    `, [tableName]);
+    
+    const columnNames = columnsCheck.rows.map(r => r.column_name);
+    console.log('📋 Columnas disponibles:', columnNames);
+    
+    // Construir query según columnas disponibles
+    let query;
+    if (tableName === 'users') {
+      query = `
+        SELECT 
+          id,
+          nombre_vendedor as nombre,
+          email as correo,
+          rol
+        FROM users
+        WHERE rol = 'VENDEDOR' OR rol = 'vendedor'
+        ORDER BY nombre_vendedor ASC
+      `;
+    } else {
+      query = `
+        SELECT 
+          id,
+          nombre_vendedor as nombre,
+          correo,
+          rol_usuario as rol
+        FROM usuario
+        WHERE rol_usuario = 'VENDEDOR'
+        ORDER BY nombre_completo ASC
+      `;
+    }
+    
     const vendedores = await pool.query(query);
+    console.log(`📋 Vendedores encontrados: ${vendedores.rows.length}`);
     res.json(vendedores.rows);
   } catch (err) {
     console.error('Error al obtener vendedores:', err.message);
