@@ -8,6 +8,8 @@ import { TrendingUp, TrendingDown } from '@mui/icons-material';
  * @param {string} title - Título del KPI (ej: "Ventas del Mes")
  * @param {string|number} value - Valor principal (ej: "$3,456,789")
  * @param {string} subtitle - Subtítulo opcional (ej: "vs mes anterior")
+ * @param {string} highlightedSubtitle - Subtítulo destacado a la derecha (ej: "97.5% de las ventas")
+ * @param {string} highlightedColor - Color del subtítulo destacado
  * @param {number} trend - Tendencia en porcentaje (ej: 12.5 = +12.5%)
  * @param {string} color - Color del módulo (ej: "#10B981" para ventas)
  * @param {React.ReactNode} icon - Ícono del módulo
@@ -16,7 +18,9 @@ import { TrendingUp, TrendingDown } from '@mui/icons-material';
 const KPICard = ({ 
   title, 
   value, 
-  subtitle = null, 
+  subtitle = null,
+  highlightedSubtitle = null,
+  highlightedColor = null,
   trend = null, 
   color = '#2B4F6F',
   icon = null,
@@ -86,7 +90,7 @@ const KPICard = ({
           </Typography>
         )}
 
-        {/* Footer: Subtítulo + Tendencia */}
+        {/* Footer: Subtítulo + Tendencia o Highlighted Subtitle */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
           {subtitle && (
             <Typography 
@@ -100,7 +104,19 @@ const KPICard = ({
             </Typography>
           )}
 
-          {trend !== null && (
+          {/* Si hay highlightedSubtitle, mostrarlo en lugar del trend */}
+          {highlightedSubtitle ? (
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: highlightedColor || color,
+                fontWeight: 700,
+                fontSize: '0.875rem'
+              }}
+            >
+              {highlightedSubtitle}
+            </Typography>
+          ) : trend !== null && (
             <Box 
               sx={{ 
                 display: 'flex', 

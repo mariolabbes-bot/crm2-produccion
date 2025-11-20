@@ -98,12 +98,13 @@ const DashboardPage = () => {
           <KPICard
             title="Abonos del Mes"
             value={formatCurrency(kpis.abonosMes)}
-            subtitle={
+            subtitle="del mes actual"
+            highlightedSubtitle={
               kpis.ventasMes > 0 
                 ? `${((kpis.abonosMes / kpis.ventasMes) * 100).toFixed(1)}% de las ventas`
-                : 'Sin datos de ventas'
+                : null
             }
-            trend={kpis.trendAbonos}
+            highlightedColor="#3478C3"
             color="#3478C3"
             icon={<AbonosIcon />}
             loading={loading}
