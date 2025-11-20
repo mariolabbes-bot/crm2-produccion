@@ -46,6 +46,9 @@ async function getDetectedSales() {
     // Client FK
     if (cols.has('client_id')) clientIdCol = 'client_id';
     else if (cols.has('cliente_id')) clientIdCol = 'cliente_id';
+    else if (cols.has('rut_cliente')) clientIdCol = 'rut_cliente';
+    else if (cols.has('cliente_rut')) clientIdCol = 'cliente_rut';
+    else if (cols.has('rut')) clientIdCol = 'rut';
   }
 
   detectedSales = { salesTable, amountCol, dateCol, clientIdCol };
@@ -374,7 +377,7 @@ router.get('/mes-actual', auth(), async (req, res) => {
 router.get('/dashboard-current', auth(), async (req, res) => {
   try {
     const { salesTable, amountCol, dateCol, clientIdCol } = await getDetectedSales();
-    if (!salesTable || !amountCol || !dateCol || !clientIdCol) {
+    if (!salesTable || !amountCol || !dateCol) {
       return res.json({
         success: true,
         data: {
@@ -521,15 +524,18 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       }
     }
 
-    // Clientes con venta
-    const queryClientesConVenta = `
-      SELECT COUNT(DISTINCT ${clientIdCol}) AS num_clientes
-      FROM ${salesTable}
-      WHERE TO_CHAR(${dateCol}, 'YYYY-MM') = $${params.length + 1}
-      ${vendedorFilter}
-    `;
-    const clientesResult = await pool.query(queryClientesConVenta, [...params, mesActual]);
-    const numClientesConVenta = parseInt(clientesResult.rows[0]?.num_clientes || 0);
+    // Clientes con venta (solo si tenemos columna de cliente)
+    let numClientesConVenta = 0;
+    if (clientIdCol) {
+      const queryClientesConVenta = `
+        SELECT COUNT(DISTINCT ${clientIdCol}) AS num_clientes
+        FROM ${salesTable}
+        WHERE TO_CHAR(${dateCol}, 'YYYY-MM') = $${params.length + 1}
+        ${vendedorFilter}
+      `;
+      const clientesResult = await pool.query(queryClientesConVenta, [...params, mesActual]);
+      numClientesConVenta = parseInt(clientesResult.rows[0]?.num_clientes || 0);
+    }
 
     // Promedio trimestre anterior
     const fecha1MesAntes = new Date(year, month - 2, 1).toISOString().slice(0, 7);
