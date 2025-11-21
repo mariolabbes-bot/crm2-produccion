@@ -3,7 +3,7 @@ services:
     name: crm2-backend
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: rm -rf node_modules && npm install
     startCommand: npm start
     envVars:
       - key: NODE_ENV
