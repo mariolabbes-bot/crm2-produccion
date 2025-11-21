@@ -32,14 +32,17 @@ const ClientesPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
+      console.log('🔍 Cargando datos de clientes...');
       const [topData, impagasData] = await Promise.all([
         getTopClientesByVentas(),
         getClientesFacturasImpagas(),
       ]);
+      console.log('📊 Top Clientes recibidos:', topData);
+      console.log('⚠️ Facturas Impagas recibidas:', impagasData);
       setTopClientes(topData || []);
       setFacturasImpagas(impagasData || []);
     } catch (error) {
-      console.error('Error cargando datos de clientes:', error);
+      console.error('❌ Error cargando datos de clientes:', error);
     } finally {
       setLoading(false);
     }
