@@ -66,6 +66,52 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// DEBUG: listar todas las rutas registradas
+app.get('/api/debug/all-routes', (req, res) => {
+  const extract = (stack) => stack
+    .filter(l => l.route && l.route.path)
+    .map(l => ({ method: Object.keys(l.route.methods)[0], path: l.route.path }));
+  const main = extract(app._router.stack);
+  res.json({ main });
+});
+
+// DEBUG: columnas reales de tabla venta (global)
+const { Pool } = require('pg');
+let _pool;
+function getPool() {
+  if (!_pool) {
+    _pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  }
+  return _pool;
+}
+
+app.get('/api/debug/venta-columns', async (req, res) => {
+  try {
+    const q = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'venta' ORDER BY ordinal_position";
+    const r = await getPool().query(q);
+    res.json({ columns: r.rows });
+  } catch (e) {
+    console.error('❌ /api/debug/venta-columns error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/debug/top-query', async (req, res) => {
+  try {
+    const q = `SELECT UPPER(TRIM(c.nombre)) as nombre, c.rut, COUNT(*) as ventas, SUM(v.valor_total) as total
+               FROM cliente c INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
+               WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
+               GROUP BY c.rut, c.nombre
+               ORDER BY total DESC
+               LIMIT 5`;
+    const r = await getPool().query(q);
+    res.json(r.rows);
+  } catch (e) {
+    console.error('❌ /api/debug/top-query error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Endpoint temporal para depuración: muestra la cadena de conexión actual
 app.get('/api/debug/dburl', (req, res) => {
   res.json({
