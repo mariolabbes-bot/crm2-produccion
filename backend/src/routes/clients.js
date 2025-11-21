@@ -266,8 +266,11 @@ router.get('/top-ventas', auth(), async (req, res) => {
     
     if (!isManager) {
       // Vendedor solo ve sus propios clientes
-      vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
-      params.push(user.nombre_vendedor || user.alias || '');
+      const nombreVendedor = user.nombre_vendedor || user.alias || '';
+      if (nombreVendedor) {
+        vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+        params.push(nombreVendedor);
+      }
     } else if (req.query.vendedor_id) {
       // Manager puede filtrar por vendedor específico
       const vendedorRut = req.query.vendedor_id;
@@ -289,7 +292,7 @@ router.get('/top-ventas', auth(), async (req, res) => {
         COALESCE(SUM(v.valor_total), 0) as total_ventas,
         COUNT(v.id) as cantidad_ventas
       FROM cliente c
-      INNER JOIN venta v ON c.rut = v.rut_cliente
+      INNER JOIN venta v ON c.rut = v.rut
       WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
       ${vendedorFilter}
       GROUP BY c.rut, c.nombre, c.direccion, c.ciudad, c.telefono, c.email
@@ -325,8 +328,11 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
     let params = [];
     
     if (!isManager) {
-      vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
-      params.push(user.nombre_vendedor || user.alias || '');
+      const nombreVendedor = user.nombre_vendedor || user.alias || '';
+      if (nombreVendedor) {
+        vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+        params.push(nombreVendedor);
+      }
     } else if (req.query.vendedor_id) {
       const vendedorRut = req.query.vendedor_id;
       const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
@@ -339,25 +345,25 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
     // Query simplificado: clientes con ventas recientes y facturas antiguas sin pago completo
     const query = `
       WITH ventas_recientes AS (
-        SELECT DISTINCT v.rut_cliente
+        SELECT DISTINCT v.rut
         FROM venta v
         WHERE v.fecha_emision >= NOW() - INTERVAL '3 months'
         ${vendedorFilter}
       ),
       facturas_antiguas AS (
         SELECT 
-          v.rut_cliente,
+          v.rut,
           COUNT(*) as cantidad_facturas_impagas,
           SUM(v.valor_total) as monto_total_facturado,
           MIN(v.fecha_emision) as factura_mas_antigua
         FROM venta v
         WHERE v.fecha_emision <= NOW() - INTERVAL '30 days'
         ${vendedorFilter}
-        GROUP BY v.rut_cliente
+        GROUP BY v.rut
       ),
       abonos_por_cliente AS (
         SELECT 
-          a.rut_cliente,
+          a.rut_cliente as rut,
           SUM(COALESCE(a.monto, a.monto_abono, 0)) as total_abonado
         FROM abono a
         GROUP BY a.rut_cliente
@@ -376,12 +382,12 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
         fa.factura_mas_antigua,
         EXTRACT(DAY FROM NOW() - fa.factura_mas_antigua)::INTEGER as dias_mora
       FROM cliente c
-      INNER JOIN ventas_recientes vr ON c.rut = vr.rut_cliente
-      INNER JOIN facturas_antiguas fa ON c.rut = fa.rut_cliente
-      LEFT JOIN abonos_por_cliente ab ON c.rut = ab.rut_cliente
+      INNER JOIN ventas_recientes vr ON c.rut = vr.rut
+      INNER JOIN facturas_antiguas fa ON c.rut = fa.rut
+      LEFT JOIN abonos_por_cliente ab ON c.rut = ab.rut
       WHERE (fa.monto_total_facturado - COALESCE(ab.total_abonado, 0)) > 0
       ORDER BY monto_total_impago DESC
-      LIMIT 50
+      LIMIT 20
     `;
     
     const result = await pool.query(query, params);
@@ -420,17 +426,20 @@ router.get('/search', auth(), async (req, res) => {
     
     if (!isManager) {
       // Vendedor solo ve sus propios clientes (con ventas asociadas)
-      vendedorFilter = `
-        AND EXISTS (
-          SELECT 1 FROM venta v 
-          WHERE v.rut_cliente = c.rut 
-          AND (
-            UPPER(v.vendedor_cliente) = UPPER($3)
-            OR v.vendedor_cliente LIKE $3
+      const nombreVendedor = user.nombre_vendedor || user.alias || '';
+      if (nombreVendedor) {
+        vendedorFilter = `
+          AND EXISTS (
+            SELECT 1 FROM venta v 
+            WHERE v.rut = c.rut 
+            AND (
+              UPPER(v.vendedor_cliente) = UPPER($3)
+              OR v.vendedor_cliente LIKE $3
+            )
           )
-        )
-      `;
-      params.push(user.nombre_vendedor || user.alias || '');
+        `;
+        params.push(nombreVendedor);
+      }
     } else if (req.query.vendedor_id) {
       // Manager filtrando por vendedor específico
       const vendedorRut = req.query.vendedor_id;
@@ -439,7 +448,7 @@ router.get('/search', auth(), async (req, res) => {
         vendedorFilter = `
           AND EXISTS (
             SELECT 1 FROM venta v 
-            WHERE v.rut_cliente = c.rut 
+            WHERE v.rut = c.rut 
             AND (
               UPPER(v.vendedor_cliente) = UPPER($3)
               OR v.vendedor_cliente LIKE $3
@@ -461,7 +470,7 @@ router.get('/search', auth(), async (req, res) => {
         (
           SELECT COALESCE(SUM(v.valor_total), 0)
           FROM venta v
-          WHERE v.rut_cliente = c.rut
+          WHERE v.rut = c.rut
           AND v.fecha_emision >= NOW() - INTERVAL '12 months'
         ) as ventas_12m
       FROM cliente c
