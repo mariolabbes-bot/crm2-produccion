@@ -267,7 +267,7 @@ router.get('/top-ventas', auth(), async (req, res) => {
     if (!isManager) {
       // Vendedor solo ve sus propios clientes
       vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
-      params.push(user.nombre_vendedor || user.alias);
+      params.push(user.nombre_vendedor || user.alias || '');
     } else if (req.query.vendedor_id) {
       // Manager puede filtrar por vendedor específico
       const vendedorRut = req.query.vendedor_id;
@@ -297,12 +297,14 @@ router.get('/top-ventas', auth(), async (req, res) => {
       LIMIT 20
     `;
     
+    console.log('📊 Query params:', params);
     const result = await pool.query(query, params);
     console.log(`📊 Top 20 clientes: ${result.rows.length} encontrados`);
     
     res.json(result.rows);
   } catch (err) {
     console.error('❌ Error obteniendo top clientes:', err.message);
+    console.error('Stack:', err.stack);
     res.status(500).json({ 
       msg: 'Error al obtener top clientes', 
       error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
@@ -324,7 +326,7 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
     
     if (!isManager) {
       vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
-      params.push(user.nombre_vendedor || user.alias);
+      params.push(user.nombre_vendedor || user.alias || '');
     } else if (req.query.vendedor_id) {
       const vendedorRut = req.query.vendedor_id;
       const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
@@ -334,6 +336,7 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
       }
     }
     
+    // Query simplificado: clientes con ventas recientes y facturas antiguas sin pago completo
     const query = `
       WITH ventas_recientes AS (
         SELECT DISTINCT v.rut_cliente
@@ -341,18 +344,23 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
         WHERE v.fecha_emision >= NOW() - INTERVAL '3 months'
         ${vendedorFilter}
       ),
-      facturas_impagas AS (
+      facturas_antiguas AS (
         SELECT 
           v.rut_cliente,
           COUNT(*) as cantidad_facturas_impagas,
-          SUM(v.valor_total) as monto_total_impago,
+          SUM(v.valor_total) as monto_total_facturado,
           MIN(v.fecha_emision) as factura_mas_antigua
         FROM venta v
-        LEFT JOIN abono a ON v.id = a.venta_id
         WHERE v.fecha_emision <= NOW() - INTERVAL '30 days'
         ${vendedorFilter}
         GROUP BY v.rut_cliente
-        HAVING SUM(COALESCE(a.monto, 0)) < SUM(v.valor_total)
+      ),
+      abonos_por_cliente AS (
+        SELECT 
+          a.rut_cliente,
+          SUM(COALESCE(a.monto, a.monto_abono, 0)) as total_abonado
+        FROM abono a
+        GROUP BY a.rut_cliente
       )
       SELECT 
         c.rut,
@@ -361,14 +369,18 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
         c.ciudad,
         c.telefono,
         c.email,
-        fi.cantidad_facturas_impagas,
-        fi.monto_total_impago,
-        fi.factura_mas_antigua,
-        EXTRACT(DAY FROM NOW() - fi.factura_mas_antigua) as dias_mora
+        fa.cantidad_facturas_impagas,
+        fa.monto_total_facturado,
+        COALESCE(ab.total_abonado, 0) as total_abonado,
+        (fa.monto_total_facturado - COALESCE(ab.total_abonado, 0)) as monto_total_impago,
+        fa.factura_mas_antigua,
+        EXTRACT(DAY FROM NOW() - fa.factura_mas_antigua)::INTEGER as dias_mora
       FROM cliente c
       INNER JOIN ventas_recientes vr ON c.rut = vr.rut_cliente
-      INNER JOIN facturas_impagas fi ON c.rut = fi.rut_cliente
-      ORDER BY fi.monto_total_impago DESC
+      INNER JOIN facturas_antiguas fa ON c.rut = fa.rut_cliente
+      LEFT JOIN abonos_por_cliente ab ON c.rut = ab.rut_cliente
+      WHERE (fa.monto_total_facturado - COALESCE(ab.total_abonado, 0)) > 0
+      ORDER BY monto_total_impago DESC
       LIMIT 50
     `;
     
@@ -378,6 +390,7 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error('❌ Error obteniendo clientes con facturas impagas:', err.message);
+    console.error('Stack:', err.stack);
     res.status(500).json({ 
       msg: 'Error al obtener clientes con facturas impagas', 
       error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
@@ -399,19 +412,27 @@ router.get('/search', auth(), async (req, res) => {
     const user = req.user;
     const isManager = user.rol?.toLowerCase() === 'manager';
     
+    // Construir filtro más flexible - buscar en cualquier parte del nombre o RUT
+    const searchTerm = `%${q.trim()}%`;
+    
     let vendedorFilter = '';
-    let params = [`%${q}%`, `%${q}%`];
+    let params = [searchTerm, searchTerm];
     
     if (!isManager) {
+      // Vendedor solo ve sus propios clientes (con ventas asociadas)
       vendedorFilter = `
         AND EXISTS (
           SELECT 1 FROM venta v 
           WHERE v.rut_cliente = c.rut 
-          AND UPPER(v.vendedor_cliente) = UPPER($3)
+          AND (
+            UPPER(v.vendedor_cliente) = UPPER($3)
+            OR v.vendedor_cliente LIKE $3
+          )
         )
       `;
-      params.push(user.nombre_vendedor || user.alias);
+      params.push(user.nombre_vendedor || user.alias || '');
     } else if (req.query.vendedor_id) {
+      // Manager filtrando por vendedor específico
       const vendedorRut = req.query.vendedor_id;
       const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
       if (vendedorQuery.rows.length > 0) {
@@ -419,7 +440,10 @@ router.get('/search', auth(), async (req, res) => {
           AND EXISTS (
             SELECT 1 FROM venta v 
             WHERE v.rut_cliente = c.rut 
-            AND UPPER(v.vendedor_cliente) = UPPER($3)
+            AND (
+              UPPER(v.vendedor_cliente) = UPPER($3)
+              OR v.vendedor_cliente LIKE $3
+            )
           )
         `;
         params.push(vendedorQuery.rows[0].nombre_vendedor);
@@ -443,19 +467,25 @@ router.get('/search', auth(), async (req, res) => {
       FROM cliente c
       WHERE (
         UPPER(c.nombre) LIKE UPPER($1)
-        OR c.rut LIKE $2
+        OR UPPER(c.rut) LIKE UPPER($2)
       )
       ${vendedorFilter}
-      ORDER BY ventas_12m DESC
+      ORDER BY 
+        CASE 
+          WHEN UPPER(c.nombre) LIKE UPPER($1) THEN 1
+          ELSE 2
+        END,
+        ventas_12m DESC
       LIMIT 20
     `;
     
     const result = await pool.query(query, params);
-    console.log(`🔍 Búsqueda: ${result.rows.length} clientes encontrados`);
+    console.log(`🔍 Búsqueda "${q}": ${result.rows.length} clientes encontrados`);
     
     res.json(result.rows);
   } catch (err) {
     console.error('❌ Error en búsqueda de clientes:', err.message);
+    console.error('Stack:', err.stack);
     res.status(500).json({ 
       msg: 'Error al buscar clientes', 
       error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
