@@ -59,6 +59,19 @@ export const getClientsInactivosMesActual = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return apiFetch(`${API_URL}/clients/inactivos-mes-actual${qs ? `?${qs}` : ''}`);
 };
+export const getTopClientesByVentas = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/clients/top-ventas${qs ? `?${qs}` : ''}`);
+};
+export const getClientesFacturasImpagas = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/clients/facturas-impagas${qs ? `?${qs}` : ''}`);
+};
+export const searchClientes = (q, params = {}) => {
+  const allParams = { ...params, q };
+  const qs = new URLSearchParams(allParams).toString();
+  return apiFetch(`${API_URL}/clients/search?${qs}`);
+};
 
 // ACTIVITIES (New generalized workflow)
 export const getActivities = () => apiFetch(`${API_URL}/activities`);

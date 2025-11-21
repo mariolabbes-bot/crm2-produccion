@@ -22,6 +22,7 @@ import { Container, Box, Typography, TextField, Button, List, ListItem, ListItem
 import LogoutIcon from '@mui/icons-material/Logout';
 import MainLayout from './components/MainLayout';
 import DashboardPage from './pages/DashboardPage';
+import ClientesPage from './pages/ClientesPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 const theme = lubricarTheme;
@@ -251,6 +252,7 @@ const App = () => {
             {/* Rutas con MainLayout (nuevo diseño) */}
             <Route path="/" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
               <Route index element={<DashboardPage />} />
+              <Route path="clientes" element={<ClientesPage />} />
             </Route>
             
             {/* Rutas antiguas (mantener temporalmente) */}

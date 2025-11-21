@@ -1,4 +1,4 @@
-# Resumen de Implementación: Tabla Abonos y API
+# Resumen de ImplementaCACHE_BUSTER_VERSION=v2ión: Tabla Abonos y API
 
 ## ✅ Completado
 

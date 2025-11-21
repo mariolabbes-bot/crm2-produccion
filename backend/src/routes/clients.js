@@ -252,4 +252,215 @@ router.delete('/:id', auth(), async (req, res) => {
   }
 });
 
+// GET /api/clients/top-ventas - Top 20 clientes con más ventas
+router.get('/top-ventas', auth(), async (req, res) => {
+  try {
+    console.log('📊 [GET /clients/top-ventas] Obteniendo top 20 clientes por ventas...');
+    
+    const user = req.user;
+    const isManager = user.rol?.toLowerCase() === 'manager';
+    
+    // Construir filtro de vendedor
+    let vendedorFilter = '';
+    let params = [];
+    
+    if (!isManager) {
+      // Vendedor solo ve sus propios clientes
+      vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+      params.push(user.nombre_vendedor || user.alias);
+    } else if (req.query.vendedor_id) {
+      // Manager puede filtrar por vendedor específico
+      const vendedorRut = req.query.vendedor_id;
+      const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
+      if (vendedorQuery.rows.length > 0) {
+        vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+        params.push(vendedorQuery.rows[0].nombre_vendedor);
+      }
+    }
+    
+    const query = `
+      SELECT 
+        c.rut,
+        c.nombre,
+        c.direccion,
+        c.ciudad,
+        c.telefono,
+        c.email,
+        COALESCE(SUM(v.valor_total), 0) as total_ventas,
+        COUNT(v.id) as cantidad_ventas
+      FROM cliente c
+      INNER JOIN venta v ON c.rut = v.rut_cliente
+      WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
+      ${vendedorFilter}
+      GROUP BY c.rut, c.nombre, c.direccion, c.ciudad, c.telefono, c.email
+      ORDER BY total_ventas DESC
+      LIMIT 20
+    `;
+    
+    const result = await pool.query(query, params);
+    console.log(`📊 Top 20 clientes: ${result.rows.length} encontrados`);
+    
+    res.json(result.rows);
+  } catch (err) {
+    console.error('❌ Error obteniendo top clientes:', err.message);
+    res.status(500).json({ 
+      msg: 'Error al obtener top clientes', 
+      error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
+    });
+  }
+});
+
+// GET /api/clients/facturas-impagas - Clientes con ventas recientes pero facturas impagas >30 días
+router.get('/facturas-impagas', auth(), async (req, res) => {
+  try {
+    console.log('⚠️  [GET /clients/facturas-impagas] Obteniendo clientes con facturas impagas...');
+    
+    const user = req.user;
+    const isManager = user.rol?.toLowerCase() === 'manager';
+    
+    // Construir filtro de vendedor
+    let vendedorFilter = '';
+    let params = [];
+    
+    if (!isManager) {
+      vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+      params.push(user.nombre_vendedor || user.alias);
+    } else if (req.query.vendedor_id) {
+      const vendedorRut = req.query.vendedor_id;
+      const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
+      if (vendedorQuery.rows.length > 0) {
+        vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+        params.push(vendedorQuery.rows[0].nombre_vendedor);
+      }
+    }
+    
+    const query = `
+      WITH ventas_recientes AS (
+        SELECT DISTINCT v.rut_cliente
+        FROM venta v
+        WHERE v.fecha_emision >= NOW() - INTERVAL '3 months'
+        ${vendedorFilter}
+      ),
+      facturas_impagas AS (
+        SELECT 
+          v.rut_cliente,
+          COUNT(*) as cantidad_facturas_impagas,
+          SUM(v.valor_total) as monto_total_impago,
+          MIN(v.fecha_emision) as factura_mas_antigua
+        FROM venta v
+        LEFT JOIN abono a ON v.id = a.venta_id
+        WHERE v.fecha_emision <= NOW() - INTERVAL '30 days'
+        ${vendedorFilter}
+        GROUP BY v.rut_cliente
+        HAVING SUM(COALESCE(a.monto, 0)) < SUM(v.valor_total)
+      )
+      SELECT 
+        c.rut,
+        c.nombre,
+        c.direccion,
+        c.ciudad,
+        c.telefono,
+        c.email,
+        fi.cantidad_facturas_impagas,
+        fi.monto_total_impago,
+        fi.factura_mas_antigua,
+        EXTRACT(DAY FROM NOW() - fi.factura_mas_antigua) as dias_mora
+      FROM cliente c
+      INNER JOIN ventas_recientes vr ON c.rut = vr.rut_cliente
+      INNER JOIN facturas_impagas fi ON c.rut = fi.rut_cliente
+      ORDER BY fi.monto_total_impago DESC
+      LIMIT 50
+    `;
+    
+    const result = await pool.query(query, params);
+    console.log(`⚠️  Clientes con facturas impagas: ${result.rows.length} encontrados`);
+    
+    res.json(result.rows);
+  } catch (err) {
+    console.error('❌ Error obteniendo clientes con facturas impagas:', err.message);
+    res.status(500).json({ 
+      msg: 'Error al obtener clientes con facturas impagas', 
+      error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
+    });
+  }
+});
+
+// GET /api/clients/search - Buscar clientes por nombre o RUT
+router.get('/search', auth(), async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q || q.trim().length < 2) {
+      return res.json([]);
+    }
+    
+    console.log(`🔍 [GET /clients/search] Buscando: "${q}"`);
+    
+    const user = req.user;
+    const isManager = user.rol?.toLowerCase() === 'manager';
+    
+    let vendedorFilter = '';
+    let params = [`%${q}%`, `%${q}%`];
+    
+    if (!isManager) {
+      vendedorFilter = `
+        AND EXISTS (
+          SELECT 1 FROM venta v 
+          WHERE v.rut_cliente = c.rut 
+          AND UPPER(v.vendedor_cliente) = UPPER($3)
+        )
+      `;
+      params.push(user.nombre_vendedor || user.alias);
+    } else if (req.query.vendedor_id) {
+      const vendedorRut = req.query.vendedor_id;
+      const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
+      if (vendedorQuery.rows.length > 0) {
+        vendedorFilter = `
+          AND EXISTS (
+            SELECT 1 FROM venta v 
+            WHERE v.rut_cliente = c.rut 
+            AND UPPER(v.vendedor_cliente) = UPPER($3)
+          )
+        `;
+        params.push(vendedorQuery.rows[0].nombre_vendedor);
+      }
+    }
+    
+    const query = `
+      SELECT 
+        c.rut,
+        c.nombre,
+        c.direccion,
+        c.ciudad,
+        c.telefono,
+        c.email,
+        (
+          SELECT COALESCE(SUM(v.valor_total), 0)
+          FROM venta v
+          WHERE v.rut_cliente = c.rut
+          AND v.fecha_emision >= NOW() - INTERVAL '12 months'
+        ) as ventas_12m
+      FROM cliente c
+      WHERE (
+        UPPER(c.nombre) LIKE UPPER($1)
+        OR c.rut LIKE $2
+      )
+      ${vendedorFilter}
+      ORDER BY ventas_12m DESC
+      LIMIT 20
+    `;
+    
+    const result = await pool.query(query, params);
+    console.log(`🔍 Búsqueda: ${result.rows.length} clientes encontrados`);
+    
+    res.json(result.rows);
+  } catch (err) {
+    console.error('❌ Error en búsqueda de clientes:', err.message);
+    res.status(500).json({ 
+      msg: 'Error al buscar clientes', 
+      error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
+    });
+  }
+});
+
 module.exports = router;
