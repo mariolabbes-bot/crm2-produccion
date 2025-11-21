@@ -256,9 +256,11 @@ router.delete('/:id', auth(), async (req, res) => {
 router.get('/top-ventas', auth(), async (req, res) => {
   try {
     console.log('📊 [GET /clients/top-ventas] Obteniendo top 20 clientes por ventas...');
+    console.log('👤 Usuario:', JSON.stringify(req.user, null, 2));
     
     const user = req.user;
     const isManager = user.rol?.toLowerCase() === 'manager';
+    console.log('🔑 Es manager:', isManager);
     
     // Construir filtro de vendedor
     let vendedorFilter = '';
@@ -301,6 +303,7 @@ router.get('/top-ventas', auth(), async (req, res) => {
     `;
     
     console.log('📊 Query params:', params);
+    console.log('📊 Query a ejecutar:', query);
     const result = await pool.query(query, params);
     console.log(`📊 Top 20 clientes: ${result.rows.length} encontrados`);
     
