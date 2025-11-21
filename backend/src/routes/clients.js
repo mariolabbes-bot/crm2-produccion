@@ -255,9 +255,15 @@ router.delete('/:id', auth(), async (req, res) => {
   }
 });
 
+// INTERCEPTOR - Log antes de definir la ruta
+console.log('🟢 Definiendo ruta GET /top-ventas-v2');
+
 // GET /api/clients/top-ventas-v2 - Top 20 clientes con más ventas
-router.get('/top-ventas-v2', auth(), async (req, res) => {
-  console.log('🎯🎯🎯 ENDPOINT /top-ventas-v2 INICIADO 🎯🎯🎯');
+router.get('/top-ventas-v2', (req, res, next) => {
+  console.log('🎯 PRE-AUTH: Petición recibida en /top-ventas-v2');
+  next();
+}, auth(), async (req, res) => {
+  console.log('🎯🎯🎯 ENDPOINT /top-ventas-v2 POST-AUTH INICIADO 🎯🎯🎯');
   try {
     console.log('📊 [TOP-VENTAS v2.0] Obteniendo top 20 clientes por ventas...');
     console.log('👤 Usuario:', JSON.stringify(req.user, null, 2));
