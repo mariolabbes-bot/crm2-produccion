@@ -7,6 +7,14 @@ const axios = require('axios');
 console.log('🔥🔥🔥 CARGANDO ROUTES/CLIENTS.JS - VERSIÓN 2.0.1 - COUNT(*) FIX 🔥🔥🔥');
 console.log('🕐 Timestamp de carga: 1763750166');
 
+// DEBUG: listar rutas registradas en este router
+router.get('/debug/routes', (req, res) => {
+  const stack = router.stack
+    .filter(l => l.route && l.route.path)
+    .map(l => ({ method: Object.keys(l.route.methods)[0], path: l.route.path }));
+  res.json({ registered: stack });
+});
+
 // DEBUG: columnas reales de tabla venta
 router.get('/debug/venta-columns', async (req, res) => {
   try {
