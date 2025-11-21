@@ -292,7 +292,7 @@ router.get('/top-ventas', auth(), async (req, res) => {
         c.telefono_principal as telefono,
         c.email,
         COALESCE(SUM(v.valor_total), 0) as total_ventas,
-        COUNT(v.id) as cantidad_ventas
+        COUNT(*) as cantidad_ventas
       FROM cliente c
       INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
       WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
