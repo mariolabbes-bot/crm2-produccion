@@ -257,6 +257,7 @@ router.delete('/:id', auth(), async (req, res) => {
 
 // GET /api/clients/top-ventas - Top 20 clientes con más ventas
 router.get('/top-ventas', auth(), async (req, res) => {
+  console.log('🎯🎯🎯 ENDPOINT /top-ventas INICIADO 🎯🎯🎯');
   try {
     console.log('📊 [TOP-VENTAS v2.0] Obteniendo top 20 clientes por ventas...');
     console.log('👤 Usuario:', JSON.stringify(req.user, null, 2));
@@ -323,6 +324,7 @@ router.get('/top-ventas', auth(), async (req, res) => {
 
 // GET /api/clients/facturas-impagas - Clientes con ventas recientes pero facturas impagas >30 días
 router.get('/facturas-impagas', auth(), async (req, res) => {
+  console.log('🎯🎯🎯 ENDPOINT /facturas-impagas INICIADO 🎯🎯🎯');
   try {
     console.log('⚠️  [FACTURAS-IMPAGAS v2.0] Obteniendo clientes con facturas impagas...');
     console.log('👤 Usuario:', JSON.stringify(req.user, null, 2));
