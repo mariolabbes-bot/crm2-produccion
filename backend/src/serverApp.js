@@ -68,11 +68,42 @@ app.get('/api/health', (req, res) => {
 
 // DEBUG: listar todas las rutas registradas
 app.get('/api/debug/all-routes', (req, res) => {
-  const extract = (stack) => stack
-    .filter(l => l.route && l.route.path)
-    .map(l => ({ method: Object.keys(l.route.methods)[0], path: l.route.path }));
-  const main = extract(app._router.stack);
-  res.json({ main });
+  // Recorre el stack principal y también los routers montados para listar rutas completas.
+  const routes = [];
+  const stack = app._router.stack;
+  stack.forEach(layer => {
+    // Rutas directas (no montadas)
+    if (layer.route && layer.route.path) {
+      const methods = Object.keys(layer.route.methods).map(m => m.toUpperCase());
+      routes.push({ path: layer.route.path, methods });
+    }
+    // Routers montados (layer.name === 'router')
+    else if (layer.name === 'router' && layer.handle && layer.handle.stack) {
+      // Intentar derivar el path base desde la regexp del layer
+      let base = '';
+      if (layer.regexp && layer.regexp.source) {
+        // Convierte la regexp en una ruta de montaje aproximada
+        base = layer.regexp.source
+          .replace(/^\^\\\//, '/')         // inicio ^\/
+          .replace(/\/?\(\?=\\\/\|\$\)\$\/i/, '') // parte final opcional
+          .replace(/\(\?:\(\[\^\\\/\]\+\?\)\)/g, '') // parámetros dinámicos (simplificación)
+          .replace(/\\\//g, '/')           // barras escapadas
+          .replace(/\^|\$/g, '')            // anchors
+          .replace(/\/?\(\?=\/|$\)/, '') // trailing
+          .trim();
+        // Si queda algo como "/api/clients" seguido de basura, recortar a antes de (? o $.
+        const idx = base.indexOf('(?');
+        if (idx !== -1) base = base.substring(0, idx);
+      }
+      layer.handle.stack.forEach(sub => {
+        if (sub.route && sub.route.path) {
+          const methods = Object.keys(sub.route.methods).map(m => m.toUpperCase());
+          routes.push({ path: `${base}${sub.route.path}`.replace(/\/+/g, '/'), methods });
+        }
+      });
+    }
+  });
+  res.json({ total: routes.length, routes });
 });
 
 // DEBUG: columnas reales de tabla venta (global)
@@ -108,6 +139,40 @@ app.get('/api/debug/top-query', async (req, res) => {
     res.json(r.rows);
   } catch (e) {
     console.error('❌ /api/debug/top-query error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// DEBUG: columnas de tabla cliente
+app.get('/api/debug/cliente-columns', async (req, res) => {
+  try {
+    const q = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'cliente' ORDER BY ordinal_position";
+    const r = await getPool().query(q);
+    res.json({ columns: r.rows });
+  } catch (e) {
+    console.error('❌ /api/debug/cliente-columns error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// DEBUG: top ventas directo SIN auth (para aislar middleware auth)
+app.get('/api/debug/top-ventas-direct', async (req, res) => {
+  try {
+    const q = `SELECT 
+      c.rut,
+      c.nombre,
+      COALESCE(SUM(v.valor_total), 0) AS total_ventas,
+      COUNT(*) AS cantidad_ventas
+    FROM cliente c
+    INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
+    WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
+    GROUP BY c.rut, c.nombre
+    ORDER BY total_ventas DESC
+    LIMIT 20`;
+    const r = await getPool().query(q);
+    res.json(r.rows);
+  } catch (e) {
+    console.error('❌ /api/debug/top-ventas-direct error:', e.message);
     res.status(500).json({ error: e.message });
   }
 });
