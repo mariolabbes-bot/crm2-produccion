@@ -4,6 +4,9 @@ const pool = require('../db');
 const auth = require('../middleware/auth');
 const axios = require('axios');
 
+console.log('🔥🔥🔥 CARGANDO ROUTES/CLIENTS.JS - VERSIÓN 2.0.1 - COUNT(*) FIX 🔥🔥🔥');
+console.log('🕐 Timestamp de carga: 1763750166');
+
 // GET top 20 clientes con mayor venta en últimos 12 meses pero sin ventas en el mes actual
 router.get('/inactivos-mes-actual', auth(), async (req, res) => {
   try {
