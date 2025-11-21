@@ -255,9 +255,9 @@ router.delete('/:id', auth(), async (req, res) => {
   }
 });
 
-// GET /api/clients/top-ventas - Top 20 clientes con más ventas
-router.get('/top-ventas', auth(), async (req, res) => {
-  console.log('🎯🎯🎯 ENDPOINT /top-ventas INICIADO 🎯🎯🎯');
+// GET /api/clients/top-ventas-v2 - Top 20 clientes con más ventas
+router.get('/top-ventas-v2', auth(), async (req, res) => {
+  console.log('🎯🎯🎯 ENDPOINT /top-ventas-v2 INICIADO 🎯🎯🎯');
   try {
     console.log('📊 [TOP-VENTAS v2.0] Obteniendo top 20 clientes por ventas...');
     console.log('👤 Usuario:', JSON.stringify(req.user, null, 2));

@@ -61,7 +61,7 @@ export const getClientsInactivosMesActual = (params = {}) => {
 };
 export const getTopClientesByVentas = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
-  return apiFetch(`${API_URL}/clients/top-ventas${qs ? `?${qs}` : ''}`);
+  return apiFetch(`${API_URL}/clients/top-ventas-v2${qs ? `?${qs}` : ''}`);
 };
 export const getClientesFacturasImpagas = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
