@@ -7,6 +7,35 @@ const axios = require('axios');
 console.log('🔥🔥🔥 CARGANDO ROUTES/CLIENTS.JS - VERSIÓN 2.0.1 - COUNT(*) FIX 🔥🔥🔥');
 console.log('🕐 Timestamp de carga: 1763750166');
 
+// DEBUG: columnas reales de tabla venta
+router.get('/debug/venta-columns', async (req, res) => {
+  try {
+    const q = `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'venta' ORDER BY ordinal_position`;
+    const r = await pool.query(q);
+    res.json({ columns: r.rows });
+  } catch (e) {
+    console.error('❌ /debug/venta-columns error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// DEBUG: ejecutar query mínima para top ventas
+router.get('/debug/top-query', async (req, res) => {
+  try {
+    const q = `SELECT UPPER(TRIM(c.nombre)) as nombre, c.rut, COUNT(*) as ventas, SUM(v.valor_total) as total
+               FROM cliente c INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
+               WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
+               GROUP BY c.rut, c.nombre
+               ORDER BY total DESC
+               LIMIT 5`;
+    const r = await pool.query(q);
+    res.json(r.rows);
+  } catch (e) {
+    console.error('❌ /debug/top-query error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // GET top 20 clientes con mayor venta en últimos 12 meses pero sin ventas en el mes actual
 router.get('/inactivos-mes-actual', auth(), async (req, res) => {
   try {
