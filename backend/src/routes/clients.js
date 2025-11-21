@@ -302,44 +302,59 @@ router.get('/top-ventas-v2', (req, res, next) => {
 }, auth(), async (req, res) => {
   console.log('🎯🎯🎯 ENDPOINT /top-ventas-v2 POST-AUTH INICIADO 🎯🎯🎯');
   try {
-    console.log('📊 [TOP-VENTAS v2.0] Obteniendo top 20 clientes por ventas...');
+    console.log('📊 [TOP-VENTAS v2.1] Obteniendo top 20 clientes por ventas...');
     console.log('👤 Usuario:', JSON.stringify(req.user, null, 2));
-    
+
     const user = req.user;
     const isManager = user.rol?.toLowerCase() === 'manager';
     console.log('🔑 Es manager:', isManager);
-    
-    // Construir filtro de vendedor
+
+    // Construir filtro de vendedor (resuelve nombre vendedor robustamente)
     let vendedorFilter = '';
     let params = [];
-    
+    let vendedorNombreFinal = null;
+
     if (!isManager) {
-      // Vendedor solo ve sus propios clientes
-      const nombreVendedor = user.nombre_vendedor || user.alias || '';
-      if (nombreVendedor) {
+      vendedorNombreFinal = user.nombre_vendedor || user.alias || null;
+      if (!vendedorNombreFinal) {
+        try {
+          const qVend = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE id = $1', [user.id]);
+          if (qVend.rows.length > 0) {
+            vendedorNombreFinal = qVend.rows[0].nombre_vendedor || qVend.rows[0].alias || null;
+          }
+        } catch (eVend) {
+          console.warn('⚠️ No se pudo resolver nombre vendedor via DB:', eVend.message);
+        }
+      }
+      if (vendedorNombreFinal) {
         vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
-        params.push(nombreVendedor);
+        params.push(vendedorNombreFinal);
       }
     } else if (req.query.vendedor_id) {
-      // Manager puede filtrar por vendedor específico
       const vendedorRut = req.query.vendedor_id;
       const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
       if (vendedorQuery.rows.length > 0) {
+        vendedorNombreFinal = vendedorQuery.rows[0].nombre_vendedor;
         vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
-        params.push(vendedorQuery.rows[0].nombre_vendedor);
+        params.push(vendedorNombreFinal);
       }
     }
-    
+
+    console.log('🧪 Filtro vendedor aplicado:', vendedorFilter || '(ninguno)');
+    if (params.length) console.log('🧪 Params:', params);
+
     const query = `
       SELECT 
         c.rut,
         c.nombre,
         c.direccion,
         c.ciudad,
-        c.telefono_principal as telefono,
+        c.telefono_principal AS telefono,
         c.email,
-        COALESCE(SUM(v.valor_total), 0) as total_ventas,
-        COUNT(*) as cantidad_ventas
+        COALESCE(SUM(v.valor_total), 0) AS total_ventas,
+        COUNT(*) AS cantidad_ventas,
+        COUNT(*) AS ventas,
+        COALESCE(SUM(v.valor_total), 0) AS total
       FROM cliente c
       INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
       WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
@@ -348,19 +363,21 @@ router.get('/top-ventas-v2', (req, res, next) => {
       ORDER BY total_ventas DESC
       LIMIT 20
     `;
-    
-    console.log('📊 Query params:', params);
-    console.log('📊 Query a ejecutar:', query);
+
+    console.log('📊 Query a ejecutar (top-ventas-v2):', query);
     const result = await pool.query(query, params);
-    console.log(`📊 Top 20 clientes: ${result.rows.length} encontrados`);
-    
+    console.log(`📊 Top clientes obtenidos: ${result.rows.length}`);
+    if (result.rows.length) {
+      console.log('📌 Primer registro ejemplo:', result.rows[0]);
+    }
+
     res.json(result.rows);
   } catch (err) {
     console.error('❌ Error obteniendo top clientes:', err.message);
     console.error('Stack:', err.stack);
-    res.status(500).json({ 
-      msg: 'Error al obtener top clientes', 
-      error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
+    res.status(500).json({
+      msg: 'Error al obtener top clientes',
+      error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message
     });
   }
 });
