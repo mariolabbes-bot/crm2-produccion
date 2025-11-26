@@ -336,6 +336,7 @@ router.get('/top-ventas-v2', (req, res, next) => {
 
     console.log('📊 Query a ejecutar (top-ventas-v2):', query);
     console.log('📊 Params:', params);
+    console.log('📊 Longitud params:', params.length);
     
     const result = await pool.query(query, params);
     console.log(`📊 Top clientes obtenidos: ${result.rows.length}`);

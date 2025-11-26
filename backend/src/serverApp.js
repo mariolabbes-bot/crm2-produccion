@@ -189,6 +189,23 @@ app.get('/api/debug/top-ventas-direct', async (req, res) => {
   }
 });
 
+// DEBUG: valores únicos de vendedor_cliente en venta
+app.get('/api/debug/vendedores-en-ventas', async (req, res) => {
+  try {
+    const q = `SELECT DISTINCT vendedor_cliente, COUNT(*) as cantidad_ventas
+               FROM venta 
+               WHERE fecha_emision >= NOW() - INTERVAL '12 months'
+               GROUP BY vendedor_cliente 
+               ORDER BY cantidad_ventas DESC 
+               LIMIT 50`;
+    const r = await getPool().query(q);
+    res.json(r.rows);
+  } catch (e) {
+    console.error('❌ /api/debug/vendedores-en-ventas error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Endpoint temporal para depuración: muestra la cadena de conexión actual
 app.get('/api/debug/dburl', (req, res) => {
   res.json({
