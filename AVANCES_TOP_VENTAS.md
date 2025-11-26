@@ -94,9 +94,54 @@ app.use('/api/clients', require('./routes/clients'));
 
 ---
 
+## ✅ RESUELTO (26-nov-2025 - 12:48 UTC)
+
+### 🎉 ENDPOINT `/api/clients/top-ventas-v2` FUNCIONANDO
+
+**Causa raíz del error 500:**
+- Ruta dinámica `/:id` capturaba `/top-ventas-v2` antes que la ruta específica
+- Express evaluaba `GET /api/clients/:id` con `id = "top-ventas-v2"`
+- Query intentaba `SELECT * FROM cliente WHERE id = $1` pero columna `id` no existe (tabla usa `rut`)
+
+**Solución definitiva:**
+1. ✅ Mover definición de `/:id` al FINAL del archivo (después de todas las rutas específicas)
+2. ✅ Cambiar query `/:id` para buscar por `rut` en lugar de `id` no existente
+3. ✅ Eliminar consultas anidadas que usaban `req.user.id` (JWT no tiene `id`, solo `rut`)
+
+**Resultado validado:**
+```json
+{
+  "rut": "77549160-4",
+  "nombre": "SERVICIOS SAN IGNACIO SPA",
+  "direccion": "LOS CARRERAS N° 380  DPTO 326",
+  "ciudad": "LA SERENA",
+  "telefono": "56512212004",
+  "email": null,
+  "total_ventas": "155929842.00",
+  "cantidad_ventas": "393",
+  "ventas": "393",
+  "total": "155929842.00"
+}
+```
+
+✅ **20 registros** devueltos correctamente
+✅ **Datos coinciden** con `/api/debug/top-ventas-direct`
+✅ **Estructura completa**: rut, nombre, dirección, ciudad, teléfono, email, métricas
+✅ **Alias duales** para compatibilidad frontend: `total_ventas`/`total`, `cantidad_ventas`/`ventas`
+
+**Commits finales:**
+```
+1a107c9 - CRITICAL FIX: mover /:id al final para evitar captura de /top-ventas-v2
+18c9264 - SIMPLIFY: top-ventas-v2 sin consultas nested
+5d520eb - DEBUG: agregar endpoint usuario-columns
+ef1c0f4 - FIX: buscar usuario por rut en lugar de id (JWT no tiene id)
+```
+
+---
+
 ## PENDIENTE (SIGUIENTE SESIÓN)
 
-### ⚠️ BLOQUEO CRÍTICO IDENTIFICADO (26-nov-2025)
+### ⚠️ DESCUBRIMIENTO ESTRUCTURAL (documentado pero NO bloqueante para top-ventas)
 
 **Problema:** Error 500 persistente en `/api/clients/top-ventas-v2` a pesar de correcciones.
 
