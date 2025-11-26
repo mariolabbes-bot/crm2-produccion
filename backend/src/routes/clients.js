@@ -405,10 +405,10 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
       ),
       abonos_por_cliente AS (
         SELECT 
-          a.rut_cliente as rut,
+          UPPER(TRIM(a.cliente)) as cliente_normalizado,
           SUM(COALESCE(a.monto, a.monto_abono, 0)) as total_abonado
         FROM abono a
-        GROUP BY a.rut_cliente
+        GROUP BY UPPER(TRIM(a.cliente))
       )
       SELECT 
         c.rut,
@@ -426,7 +426,7 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
       FROM cliente c
       INNER JOIN ventas_recientes vr ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(vr.cliente))
       INNER JOIN facturas_antiguas fa ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(fa.cliente))
-      LEFT JOIN abonos_por_cliente ab ON c.rut = ab.rut
+      LEFT JOIN abonos_por_cliente ab ON UPPER(TRIM(c.nombre)) = ab.cliente_normalizado
       WHERE (fa.monto_total_facturado - COALESCE(ab.total_abonado, 0)) > 0
       ORDER BY monto_total_impago DESC
       LIMIT 20
