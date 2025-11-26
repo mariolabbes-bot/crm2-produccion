@@ -143,6 +143,18 @@ app.get('/api/debug/top-query', async (req, res) => {
   }
 });
 
+// DEBUG: columnas tabla usuario
+app.get('/api/debug/usuario-columns', async (req, res) => {
+  try {
+    const q = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'usuario' ORDER BY ordinal_position";
+    const r = await getPool().query(q);
+    res.json({ columns: r.rows });
+  } catch (e) {
+    console.error('❌ /api/debug/usuario-columns error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // DEBUG: columnas de tabla cliente
 app.get('/api/debug/cliente-columns', async (req, res) => {
   try {
