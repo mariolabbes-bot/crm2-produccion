@@ -167,6 +167,18 @@ app.get('/api/debug/cliente-columns', async (req, res) => {
   }
 });
 
+// DEBUG: columnas de tabla abono
+app.get('/api/debug/abono-columns', async (req, res) => {
+  try {
+    const q = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'abono' ORDER BY ordinal_position";
+    const r = await getPool().query(q);
+    res.json({ columns: r.rows });
+  } catch (e) {
+    console.error('❌ /api/debug/abono-columns error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // DEBUG: top ventas directo SIN auth (para aislar middleware auth)
 app.get('/api/debug/top-ventas-direct', async (req, res) => {
   try {
