@@ -96,7 +96,43 @@ app.use('/api/clients', require('./routes/clients'));
 
 ## PENDIENTE (SIGUIENTE SESIÓN)
 
-### 1. Validación con autenticación (CRÍTICO)
+### ⚠️ BLOQUEO CRÍTICO IDENTIFICADO (26-nov-2025)
+
+**Problema:** Error 500 persistente en `/api/clients/top-ventas-v2` a pesar de correcciones.
+
+**Causa raíz descubierta:**
+- Tabla `usuario` usa `rut` como PK (NO tiene columna `id`)
+- Tabla `cliente` NO tiene columna `vendedor_id` (solo `nombre_vendedor` texto)
+- TODO el archivo `clients.js` asume que existen `usuario.id` y `cliente.vendedor_id`
+- JWT solo contiene `{rut, alias, nombre, nombre_vendedor, rol}` - NO tiene `id`
+
+**Correcciones aplicadas:**
+1. ✅ Endpoint `/top-ventas-v2` simplificado (v2.2) para no usar `user.id`
+2. ✅ Cambio `WHERE id = $1` → `WHERE rut = $1` en queries de vendedor
+3. ✅ Eliminada lógica nested que fallaba con vendedores
+
+**Pendiente URGENTE:**
+1. 🔴 **Acceder a logs de Render** y copiar stacktrace completo del error 500
+   - Dashboard Render → Backend service → pestaña "Logs"
+   - Buscar timestamp reciente con "❌ Error obteniendo top clientes"
+   - Copiar Stack trace completo
+2. 🔴 **Verificar si hay error SQL** o error de Node.js
+3. 🟡 Considerar agregar endpoint `/api/clients/top-ventas-simple` sin auth para aislar problema
+4. 🟡 Refactorizar otros endpoints que usan `req.user.id` (GET /, GET /:id, POST, PUT, DELETE)
+
+**Commits relevantes (26-nov):**
+```
+18c9264 - SIMPLIFY: top-ventas-v2 sin consultas nested
+5d520eb - DEBUG: agregar endpoint usuario-columns
+ef1c0f4 - FIX: buscar usuario por rut en lugar de id (JWT no tiene id)
+```
+
+**Endpoints debug disponibles:**
+- `/api/debug/usuario-columns` - confirma que usuario NO tiene id
+- `/api/debug/cliente-columns` - confirma que cliente NO tiene vendedor_id
+- `/api/debug/top-ventas-direct` - funciona (20 registros sin auth)
+
+### 1. Validación con autenticación (BLOQUEADO - necesita logs)
 **Usuario debe probar:**
 ```bash
 # Paso 1: Login
