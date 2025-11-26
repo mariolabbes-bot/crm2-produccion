@@ -302,46 +302,35 @@ router.get('/top-ventas-v2', (req, res, next) => {
 }, auth(), async (req, res) => {
   console.log('🎯🎯🎯 ENDPOINT /top-ventas-v2 POST-AUTH INICIADO 🎯🎯🎯');
   try {
-    console.log('📊 [TOP-VENTAS v2.1] Obteniendo top 20 clientes por ventas...');
+    console.log('📊 [TOP-VENTAS v2.2] Obteniendo top 20 clientes por ventas...');
     console.log('👤 Usuario:', JSON.stringify(req.user, null, 2));
 
     const user = req.user;
     const isManager = user.rol?.toLowerCase() === 'manager';
     console.log('🔑 Es manager:', isManager);
 
-    // Construir filtro de vendedor (resuelve nombre vendedor robustamente)
+    // Simplificado: Manager ve todos, vendedor necesita filtro manual
     let vendedorFilter = '';
     let params = [];
-    let vendedorNombreFinal = null;
 
-    if (!isManager) {
-      vendedorNombreFinal = user.nombre_vendedor || user.alias || null;
-      if (!vendedorNombreFinal) {
-        try {
-          const qVend = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE rut = $1', [user.rut]);
-          if (qVend.rows.length > 0) {
-            vendedorNombreFinal = qVend.rows[0].nombre_vendedor || qVend.rows[0].alias || null;
-          }
-        } catch (eVend) {
-          console.warn('⚠️ No se pudo resolver nombre vendedor via DB:', eVend.message);
-        }
-      }
-      if (vendedorNombreFinal) {
-        vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
-        params.push(vendedorNombreFinal);
-      }
+    // Si es vendedor Y tiene nombre_vendedor en el token, filtrar
+    if (!isManager && user.nombre_vendedor) {
+      vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+      params.push(user.nombre_vendedor);
+      console.log('🧪 Filtro vendedor aplicado para:', user.nombre_vendedor);
     } else if (req.query.vendedor_id) {
-      const vendedorRut = req.query.vendedor_id;
-      const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
-      if (vendedorQuery.rows.length > 0) {
-        vendedorNombreFinal = vendedorQuery.rows[0].nombre_vendedor;
-        vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
-        params.push(vendedorNombreFinal);
+      // Manager filtrando por vendedor específico
+      try {
+        const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [req.query.vendedor_id]);
+        if (vendedorQuery.rows.length > 0 && vendedorQuery.rows[0].nombre_vendedor) {
+          vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+          params.push(vendedorQuery.rows[0].nombre_vendedor);
+          console.log('🧪 Filtro vendedor aplicado por query:', vendedorQuery.rows[0].nombre_vendedor);
+        }
+      } catch (eVend) {
+        console.warn('⚠️ Error buscando vendedor por rut:', eVend.message);
       }
     }
-
-    console.log('🧪 Filtro vendedor aplicado:', vendedorFilter || '(ninguno)');
-    if (params.length) console.log('🧪 Params:', params);
 
     const query = `
       SELECT 
@@ -365,6 +354,8 @@ router.get('/top-ventas-v2', (req, res, next) => {
     `;
 
     console.log('📊 Query a ejecutar (top-ventas-v2):', query);
+    console.log('📊 Params:', params);
+    
     const result = await pool.query(query, params);
     console.log(`📊 Top clientes obtenidos: ${result.rows.length}`);
     if (result.rows.length) {
@@ -374,7 +365,7 @@ router.get('/top-ventas-v2', (req, res, next) => {
     res.json(result.rows);
   } catch (err) {
     console.error('❌ Error obteniendo top clientes:', err.message);
-    console.error('Stack:', err.stack);
+    console.error('❌ Stack:', err.stack);
     res.status(500).json({
       msg: 'Error al obtener top clientes',
       error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message
