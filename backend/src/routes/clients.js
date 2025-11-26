@@ -338,10 +338,24 @@ router.get('/top-ventas-v2', (req, res, next) => {
     console.log('📊 Params:', params);
     console.log('📊 Longitud params:', params.length);
     
+    // DEBUG: Si es vendedor, mostrar cuántas ventas tiene en total
+    if (!isManager && user.nombre_vendedor) {
+      const debugQuery = await pool.query(
+        `SELECT COUNT(*) as total_ventas_vendedor 
+         FROM venta v 
+         WHERE UPPER(v.vendedor_cliente) = UPPER($1) 
+         AND v.fecha_emision >= NOW() - INTERVAL '12 months'`,
+        [user.nombre_vendedor]
+      );
+      console.log('🔍 DEBUG Vendedor - Total ventas en DB:', debugQuery.rows[0]);
+    }
+    
     const result = await pool.query(query, params);
     console.log(`📊 Top clientes obtenidos: ${result.rows.length}`);
     if (result.rows.length) {
       console.log('📌 Primer registro ejemplo:', result.rows[0]);
+    } else if (!isManager) {
+      console.log('⚠️ VENDEDOR SIN RESULTADOS - Verificar coincidencia de nombres');
     }
 
     res.json(result.rows);
