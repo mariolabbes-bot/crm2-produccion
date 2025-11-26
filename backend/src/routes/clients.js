@@ -296,15 +296,16 @@ router.get('/top-ventas-v2', (req, res, next) => {
 
     // Si es vendedor Y tiene nombre_vendedor en el token, filtrar
     if (!isManager && user.nombre_vendedor) {
-      vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+      vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
       params.push(user.nombre_vendedor);
       console.log('🧪 Filtro vendedor aplicado para:', user.nombre_vendedor);
+      console.log('🧪 Valor UPPER TRIM:', user.nombre_vendedor.toUpperCase().trim());
     } else if (req.query.vendedor_id) {
       // Manager filtrando por vendedor específico
       try {
         const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [req.query.vendedor_id]);
         if (vendedorQuery.rows.length > 0 && vendedorQuery.rows[0].nombre_vendedor) {
-          vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+          vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
           params.push(vendedorQuery.rows[0].nombre_vendedor);
           console.log('🧪 Filtro vendedor aplicado por query:', vendedorQuery.rows[0].nombre_vendedor);
         }
@@ -343,7 +344,7 @@ router.get('/top-ventas-v2', (req, res, next) => {
       const debugQuery = await pool.query(
         `SELECT COUNT(*) as total_ventas_vendedor 
          FROM venta v 
-         WHERE UPPER(v.vendedor_cliente) = UPPER($1) 
+         WHERE UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))
          AND v.fecha_emision >= NOW() - INTERVAL '12 months'`,
         [user.nombre_vendedor]
       );
