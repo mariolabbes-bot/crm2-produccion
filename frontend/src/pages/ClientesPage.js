@@ -207,7 +207,7 @@ const ClientesPage = () => {
       headerClassName: 'data-grid-header',
       renderCell: (params) => (
         <Typography variant="body2" sx={{ fontWeight: 600, color: '#1976d2' }}>
-          {formatCurrency(params.value)}
+          {params.value ? formatCurrency(params.value) : '-'}
         </Typography>
       ),
     },
