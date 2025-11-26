@@ -318,7 +318,7 @@ router.get('/top-ventas-v2', (req, res, next) => {
       vendedorNombreFinal = user.nombre_vendedor || user.alias || null;
       if (!vendedorNombreFinal) {
         try {
-          const qVend = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE id = $1', [user.id]);
+          const qVend = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE rut = $1', [user.rut]);
           if (qVend.rows.length > 0) {
             vendedorNombreFinal = qVend.rows[0].nombre_vendedor || qVend.rows[0].alias || null;
           }
