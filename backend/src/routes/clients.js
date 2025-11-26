@@ -144,26 +144,7 @@ router.get('/', auth(), async (req, res) => {
   }
 });
 
-// GET a single client by ID
-router.get('/:id', auth(), async (req, res) => {
-  try {
-    const { id } = req.params;
-    let result;
-  if (req.user.rol === 'manager') {
-    result = await pool.query('SELECT * FROM cliente WHERE id = $1', [id]);
-  } else {
-    result = await pool.query('SELECT * FROM cliente WHERE id = $1 AND vendedor_id = $2', [id, req.user.id]);
-  }
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ msg: 'Client not found' });
-    }
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-});
+// NOTA: Ruta /:id movida al final del archivo para evitar que capture rutas específicas como /top-ventas-v2
 
 // CREATE a new client with geocoding
 router.post('/', auth(), async (req, res) => {
@@ -559,6 +540,35 @@ router.get('/search', auth(), async (req, res) => {
       msg: 'Error al buscar clientes', 
       error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
     });
+  }
+});
+
+// GET a single client by ID - RUTA DINÁMICA AL FINAL para no capturar rutas específicas
+router.get('/:id', auth(), async (req, res) => {
+  try {
+    const { id } = req.params;
+    let result;
+    if (req.user.rol === 'manager') {
+      result = await pool.query('SELECT * FROM cliente WHERE rut = $1', [id]);
+    } else {
+      // Vendedor: buscar cliente por rut Y verificar que le pertenece (via nombre_vendedor)
+      result = await pool.query('SELECT * FROM cliente WHERE rut = $1', [id]);
+      if (result.rows.length > 0) {
+        // Verificar que el vendedor del cliente coincide con el usuario
+        if (result.rows[0].nombre_vendedor !== req.user.nombre_vendedor && 
+            result.rows[0].nombre_vendedor !== req.user.alias) {
+          return res.status(403).json({ msg: 'Access denied' });
+        }
+      }
+    }
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ msg: 'Client not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
 });
 
