@@ -71,8 +71,7 @@ async function resolveVendorName(raw) {
   if (c.map.has(n)) return c.map.get(n);
   if (c.map.has(soft)) return c.map.get(soft);
   // Official list
-  if (c.officals?.has?.(n)) return c.officals.get(n);
-  if (c.officials.has(n)) return c.officials.get(n);
+  if (c.officials && c.officials.has(n)) return c.officials.get(n);
   // Try partial contains match
   for (const [key, val] of c.officials.entries()) {
     if (n.includes(key)) return val;
