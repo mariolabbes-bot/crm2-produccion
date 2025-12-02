@@ -293,15 +293,17 @@ router.get('/top-ventas-v2', (req, res, next) => {
     // Simplificado: Manager ve todos, vendedor necesita filtro manual
     let vendedorFilter = '';
     let params = [];
-
-    // Si es vendedor Y tiene nombre_vendedor en el token, filtrar
+        vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
+        params.push(nombreVendedor);
+        console.log('🧪 Filtro vendedor (facturas-impagas) aplicado para:', nombreVendedor, '->', nombreVendedor.toUpperCase().trim());
     if (!isManager && user.nombre_vendedor) {
       vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
       params.push(user.nombre_vendedor);
       console.log('🧪 Filtro vendedor aplicado para:', user.nombre_vendedor);
       console.log('🧪 Valor UPPER TRIM:', user.nombre_vendedor.toUpperCase().trim());
-    } else if (req.query.vendedor_id) {
-      // Manager filtrando por vendedor específico
+        vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
+        params.push(vendedorQuery.rows[0].nombre_vendedor);
+        console.log('🧪 Filtro vendedor (facturas-impagas) aplicado por query:', vendedorQuery.rows[0].nombre_vendedor);
       try {
         const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [req.query.vendedor_id]);
         if (vendedorQuery.rows.length > 0 && vendedorQuery.rows[0].nombre_vendedor) {
@@ -327,7 +329,14 @@ router.get('/top-ventas-v2', (req, res, next) => {
         COUNT(*) AS ventas,
         COALESCE(SUM(v.valor_total), 0) AS total
       FROM cliente c
-      INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
+          SUM(
+            COALESCE(
+              NULLIF(a.monto_neto, 0),
+              NULLIF(a.monto, 0),
+              NULLIF(a.monto_total, 0),
+              0
+            )
+          ) as total_abonado
       WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
       ${vendedorFilter}
       GROUP BY c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal, c.email
