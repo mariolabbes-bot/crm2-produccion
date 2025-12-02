@@ -293,17 +293,15 @@ router.get('/top-ventas-v2', (req, res, next) => {
     // Simplificado: Manager ve todos, vendedor necesita filtro manual
     let vendedorFilter = '';
     let params = [];
-        vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
-        params.push(nombreVendedor);
-        console.log('🧪 Filtro vendedor (facturas-impagas) aplicado para:', nombreVendedor, '->', nombreVendedor.toUpperCase().trim());
+
+    // Si es vendedor Y tiene nombre_vendedor en el token, filtrar
     if (!isManager && user.nombre_vendedor) {
       vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
       params.push(user.nombre_vendedor);
       console.log('🧪 Filtro vendedor aplicado para:', user.nombre_vendedor);
       console.log('🧪 Valor UPPER TRIM:', user.nombre_vendedor.toUpperCase().trim());
-        vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
-        params.push(vendedorQuery.rows[0].nombre_vendedor);
-        console.log('🧪 Filtro vendedor (facturas-impagas) aplicado por query:', vendedorQuery.rows[0].nombre_vendedor);
+    } else if (req.query.vendedor_id) {
+      // Manager filtrando por vendedor específico
       try {
         const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [req.query.vendedor_id]);
         if (vendedorQuery.rows.length > 0 && vendedorQuery.rows[0].nombre_vendedor) {
@@ -329,14 +327,7 @@ router.get('/top-ventas-v2', (req, res, next) => {
         COUNT(*) AS ventas,
         COALESCE(SUM(v.valor_total), 0) AS total
       FROM cliente c
-          SUM(
-            COALESCE(
-              NULLIF(a.monto_neto, 0),
-              NULLIF(a.monto, 0),
-              NULLIF(a.monto_total, 0),
-              0
-            )
-          ) as total_abonado
+      INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
       WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
       ${vendedorFilter}
       GROUP BY c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal, c.email
@@ -396,14 +387,14 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
     if (!isManager) {
       const nombreVendedor = user.nombre_vendedor || user.alias || '';
       if (nombreVendedor) {
-        vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+        vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
         params.push(nombreVendedor);
       }
     } else if (req.query.vendedor_id) {
       const vendedorRut = req.query.vendedor_id;
       const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
       if (vendedorQuery.rows.length > 0) {
-        vendedorFilter = 'AND UPPER(v.vendedor_cliente) = UPPER($1)';
+        vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
         params.push(vendedorQuery.rows[0].nombre_vendedor);
       }
     }
@@ -430,7 +421,7 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
       abonos_por_cliente AS (
         SELECT 
           UPPER(TRIM(a.cliente)) as cliente_normalizado,
-          SUM(COALESCE(a.monto, a.monto_abono, 0)) as total_abonado
+          SUM(COALESCE(a.monto_neto, a.monto, a.monto_total, 0)) as total_abonado
         FROM abono a
         GROUP BY UPPER(TRIM(a.cliente))
       )
