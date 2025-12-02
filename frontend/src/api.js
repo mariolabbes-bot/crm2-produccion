@@ -97,6 +97,11 @@ export const getKpisMesActual = (params = {}) => {
 };
 export const getEvolucionMensual = () => apiFetch(`${API_URL}/kpis/evolucion-mensual`);
 export const getVentasPorFamilia = () => apiFetch(`${API_URL}/kpis/ventas-por-familia`);
+export const getSaldoCreditoTotal = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  const url = `${API_URL}/kpis/saldo-credito-total${qs ? `?${qs}` : ''}`;
+  return apiFetch(url);
+};
 
 // ACTIVITY TYPES
 export const getActivityTypes = () => apiFetch(`${API_URL}/activity-types`);

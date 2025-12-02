@@ -584,6 +584,73 @@ router.get('/dashboard-current', auth(), async (req, res) => {
   }
 });
 
+// @route   GET /api/kpis/saldo-credito-total
+// @desc    Get total outstanding credit (saldo_factura) from saldo_credito table
+//          Managers see global total by default, can filter by vendedor (?vendedor_id=RUT)
+//          Vendors see only their own total (by nombre_vendedor)
+// @access  Private
+router.get('/saldo-credito-total', auth(), async (req, res) => {
+  try {
+    // Check if saldo_credito table exists
+    const existsQ = `
+      SELECT EXISTS(
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'saldo_credito'
+      ) AS exists
+    `;
+    const existsRes = await pool.query(existsQ);
+    const tableExists = existsRes.rows[0]?.exists;
+    if (!tableExists) {
+      return res.json({ success: true, data: { total_saldo_credito: 0 } });
+    }
+
+    const user = req.user || {};
+    const isManager = (user.rol || '').toUpperCase() === 'MANAGER';
+
+    // Base query
+    let sql = 'SELECT COALESCE(SUM(saldo_factura), 0) AS total FROM saldo_credito';
+    const params = [];
+    let where = '';
+
+    if (isManager) {
+      // Allow optional filter by vendedor_id (RUT) -> map to nombre_vendedor
+      if (req.query.vendedor_id) {
+        const rut = String(req.query.vendedor_id);
+        const vRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [rut]);
+        if (vRes.rows.length > 0) {
+          where = ' WHERE UPPER(TRIM(nombre_vendedor)) = UPPER(TRIM($1))';
+          params.push(vRes.rows[0].nombre_vendedor);
+        }
+      }
+    } else {
+      // Vendors: filter by their nombre_vendedor when available, fallback to rut if needed
+      if (user.nombre_vendedor) {
+        where = ' WHERE UPPER(TRIM(nombre_vendedor)) = UPPER(TRIM($1))';
+        params.push(user.nombre_vendedor);
+      } else if (user.rut) {
+        // Try to resolve nombre_vendedor from rut
+        const vRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [user.rut]);
+        const nombreVend = vRes.rows[0]?.nombre_vendedor || user.rut;
+        where = ' WHERE UPPER(TRIM(nombre_vendedor)) = UPPER(TRIM($1))';
+        params.push(nombreVend);
+      }
+    }
+
+    const { rows } = await pool.query(sql + where, params);
+    const total = parseFloat(rows[0]?.total || 0);
+
+    // Prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    return res.json({ success: true, data: { total_saldo_credito: total } });
+  } catch (err) {
+    console.error('Error en /api/kpis/saldo-credito-total:', err.message);
+    res.status(500).json({ success: false, error: 'Server Error', message: err.message });
+  }
+});
+
 // @route   GET /api/kpis/evolucion-mensual
 // @desc    Get monthly evolution of sales and payments for last N months
 //          Supports optional params: ?meses=12 (default), ?fechaInicio=YYYY-MM, ?fechaFin=YYYY-MM

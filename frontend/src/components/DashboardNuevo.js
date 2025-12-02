@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select, useTheme, useMediaQuery } from '@mui/material';
 import VisionCard from './ui/VisionCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual } from '../api';
+import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual, getSaldoCreditoTotal } from '../api';
 import { removeToken, getUser } from '../utils/auth';
 import './DashboardNuevo.css';
 import Papa from 'papaparse';
@@ -67,6 +67,7 @@ const DashboardNuevo = () => {
   const [vendedores, setVendedores] = useState([]);
   const [comparativasMensuales, setComparativasMensuales] = useState(null);
   const [kpisMesActual, setKpisMesActual] = useState(null); // KPIs personalizados del mes actual
+  const [saldoCreditoTotal, setSaldoCreditoTotal] = useState(null);
   // Datos pivoteados para la tabla inferior
   const [pivotMonths, setPivotMonths] = useState([]); // ['YYYY-MM', ...]
   const [pivotRows, setPivotRows] = useState([]);     // [{ vendedor_id, vendedor_nombre, 'YYYY-MM': {ventas, abonos}, totalVentas, totalAbonos }, ...]
@@ -266,7 +267,7 @@ const DashboardNuevo = () => {
       if (!isManager && user?.id) {
         params.vendedor_id = user.id;
       }
-      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData] = await Promise.all([
+      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData, saldoCreditoData] = await Promise.all([
         getAbonosEstadisticas(params).catch(e => {
           console.error('[loadData] Error en getAbonosEstadisticas:', e);
           return { success: false, error: e.message, status: e.status };
@@ -289,6 +290,10 @@ const DashboardNuevo = () => {
         }),
         getKPIsMesActual(params).catch(e => {
           console.error('[loadData] Error en getKPIsMesActual:', e);
+          return { success: false, error: e.message, status: e.status };
+        }),
+        getSaldoCreditoTotal(params).catch(e => {
+          console.error('[loadData] Error en getSaldoCreditoTotal:', e);
           return { success: false, error: e.message, status: e.status };
         })
       ]);
@@ -340,6 +345,13 @@ const DashboardNuevo = () => {
       } else {
         console.warn('[KPIs Mes Actual] No se recibieron datos o respuesta inválida:', kpisMesData);
         setKpisMesActual(null);
+      }
+
+      // Cargar Saldo Crédito Total
+      if (saldoCreditoData && saldoCreditoData.success && saldoCreditoData.data) {
+        setSaldoCreditoTotal(parseFloat(saldoCreditoData.data.total_saldo_credito || 0));
+      } else {
+        setSaldoCreditoTotal(0);
       }
 
       // Construir pivote: filas = vendedores, columnas = meses en rango, celdas = total_ventas
@@ -602,12 +614,12 @@ const DashboardNuevo = () => {
               />
             </Grid>
 
-            {/* VisionCard #4: Saldos (Placeholder para futura implementación) */}
+            {/* VisionCard #4: Saldos (Saldo Crédito Total) */}
             <Grid item xs={12} sm={6} md={3}>
               <VisionCard 
-                title="Saldos Clientes"
-                value="Próximamente"
-                subtitle="En desarrollo..."
+                title="Saldo Crédito Total"
+                value={saldoCreditoTotal != null ? formatMoney(saldoCreditoTotal) : '—'}
+                subtitle={isManager && filtroVendedor ? 'Filtrado por vendedor' : (isManager ? 'Global' : 'Tu cartera')}
                 trend="neutral"
                 icon="💳"
                 gradient="info"
