@@ -47,6 +47,7 @@ app.use('/api/comparativas', require('./routes/comparativas'));
 app.use('/api/import', require('./routes/import'));
 app.use('/api/diagnostico', require('./routes/diagnostico'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/vendor-aliases', require('./routes/vendorAliases'));
 
 app.get('/', (req, res) => {
   res.json({
