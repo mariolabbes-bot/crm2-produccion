@@ -616,15 +616,22 @@ router.get('/saldo-credito-total', auth(), async (req, res) => {
       // Allow optional filter by vendedor_id (RUT) -> map to nombre_vendedor
       if (req.query.vendedor_id) {
         const rut = String(req.query.vendedor_id);
+        console.log('[Saldo Crédito] RUT recibido:', rut);
+        
         const vRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [rut]);
         const nombreVend = vRes.rows[0]?.nombre_vendedor || null;
+        console.log('[Saldo Crédito] Nombre vendedor desde usuario:', nombreVend);
+        
         if (nombreVend) {
+          // Verificar qué nombres existen en saldo_credito
+          const checkRes = await pool.query('SELECT DISTINCT nombre_vendedor FROM saldo_credito WHERE nombre_vendedor IS NOT NULL');
+          console.log('[Saldo Crédito] Nombres en saldo_credito:', checkRes.rows.map(r => r.nombre_vendedor));
+          
           where = ' WHERE UPPER(TRIM(nombre_vendedor)) = UPPER(TRIM($1))';
           params.push(nombreVend);
+          console.log('[Saldo Crédito] Filtro aplicado:', nombreVend);
         } else {
-          // Fallback: si no hay nombre, comparar por rut textual si existiera en saldo_credito
-          where = ' WHERE EXISTS (SELECT 1 FROM usuario u WHERE u.rut = $1 AND UPPER(TRIM(saldo_credito.nombre_vendedor)) = UPPER(TRIM(u.nombre_vendedor)))';
-          params.push(rut);
+          console.log('[Saldo Crédito] No se encontró nombre_vendedor para RUT:', rut);
         }
       }
     } else {
@@ -642,8 +649,14 @@ router.get('/saldo-credito-total', auth(), async (req, res) => {
       }
     }
 
-    const { rows } = await pool.query(sql + where, params);
+    const finalQuery = sql + where;
+    console.log('[Saldo Crédito] Query final:', finalQuery);
+    console.log('[Saldo Crédito] Params:', params);
+    
+    const { rows } = await pool.query(finalQuery, params);
     const total = parseFloat(rows[0]?.total || 0);
+    
+    console.log('[Saldo Crédito] Total calculado:', total);
 
     // Prevent caching
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
