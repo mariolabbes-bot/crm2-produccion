@@ -15,6 +15,49 @@ async function ensureTable() {
   `);
 }
 
+// Seed aliases with known mappings
+router.post('/seed', auth(['manager']), async (req, res) => {
+  try {
+    await ensureTable();
+    
+    // Clear existing aliases
+    await pool.query('TRUNCATE TABLE usuario_alias');
+    
+    // Insert known mappings
+    const aliases = [
+      ['Alex Mondaca', 'Alex Mauricio Mondaca Cortes'],
+      ['Eduardo Ponce', 'Eduardo Enrique Ponce Castillo'],
+      ['Eduardo Rojas Rojas', 'Eduardo Rojas Andres Rojas Del Campo'],
+      ['Emilio Santos', 'Emilio Alberto Santos Castillo'],
+      ['JOAQUIN MANRIQUEZ', 'JOAQUIN ALEJANDRO MANRIQUEZ MUNIZAGA'],
+      ['Jorge Gutierrez', 'Jorge Heriberto Gutierrez Silva'],
+      ['Luis Esquivel', 'Luis Ramon Esquivel Oyamadel'],
+      ['Maiko Flores', 'Maiko Ricardo Flores Maldonado'],
+      ['Marcelo Troncoso', 'Marcelo Hernan Troncoso Molina'],
+      ['Marisol Sanchez', 'Marisol De Lourdes Sanchez Roitman'],
+      ['Matias Felipe Tapia', 'Matias Felipe Felipe Tapia Valenzuela'],
+      ['Milton Marin', 'Milton Marin Blanco'],
+      ['Nataly Carrasco', 'Nataly Andrea Carrasco Rojas'],
+      ['Nelson Muñoz', 'Nelson Antonio Muñoz Cortes'],
+      ['Nelson Mu√±oz', 'Nelson Antonio Muñoz Cortes'],
+      ['Omar Maldonado', 'Omar Antonio Maldonado Castillo'],
+      ['Roberto Oyarzun', 'Roberto Otilio Oyarzun Alvarez'],
+      ['Victoria Hurtado', 'Victoria Andrea Hurtado Olivares']
+    ];
+    
+    for (const [alias, oficial] of aliases) {
+      await pool.query(
+        'INSERT INTO usuario_alias (alias, nombre_vendedor_oficial) VALUES ($1, $2)',
+        [alias, oficial]
+      );
+    }
+    
+    res.json({ success: true, msg: 'Aliases cargados exitosamente', count: aliases.length });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // List aliases
 router.get('/', auth(['manager']), async (req, res) => {
   try {
