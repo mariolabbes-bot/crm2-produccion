@@ -260,7 +260,7 @@ const ClientesPage = () => {
       <Grid container spacing={3}>
         {/* Top 20 Clientes por Ventas */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, height: '600px', display: 'flex', flexDirection: 'column' }}>
+          <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TrendingUpIcon sx={{ color: '#1976d2', mr: 1 }} />
               <Typography variant="h6" component="h2">
@@ -271,11 +271,11 @@ const ClientesPage = () => {
               Últimos 12 meses
             </Typography>
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <Box sx={{ flex: 1 }}>
+              <Box sx={{ height: 600, width: '100%' }}>
                 <DataGrid
                   rows={topClientes}
                   columns={topClientesColumns}
@@ -297,7 +297,7 @@ const ClientesPage = () => {
 
         {/* Clientes con Facturas Impagas */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, height: '600px', display: 'flex', flexDirection: 'column' }}>
+          <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <WarningIcon sx={{ color: '#d32f2f', mr: 1 }} />
               <Typography variant="h6" component="h2">
@@ -308,11 +308,11 @@ const ClientesPage = () => {
               Con ventas en últimos 3 meses y facturas pendientes &gt;30 días
             </Typography>
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <Box sx={{ flex: 1 }}>
+              <Box sx={{ height: 600, width: '100%' }}>
                 <DataGrid
                   rows={facturasImpagas}
                   columns={facturasImpagasColumns}
