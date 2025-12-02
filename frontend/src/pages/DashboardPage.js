@@ -20,7 +20,7 @@ import {
   Legend, 
   ResponsiveContainer 
 } from 'recharts';
-import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedores } from '../api';
+import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedores, getSaldoCreditoTotal } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
 const DashboardPage = () => {
@@ -32,7 +32,7 @@ const DashboardPage = () => {
     abonosMes: 0,
     promedioTrimestre: 0,
     clientesActivos: 0,
-    productosVendidos: 0,
+    saldoCreditoTotal: 0,
     trendVentas: 0,
     trendAbonos: 0,
     trendPromedioTrimestre: 0,
@@ -75,14 +75,19 @@ const DashboardPage = () => {
         const kpisResponse = await getKpisMesActual(params);
         const kpisData = kpisResponse.data || kpisResponse; // Manejar ambos formatos
         
+        // Saldo Crédito Total
+        const saldoCreditoResponse = await getSaldoCreditoTotal(params);
+        const saldoCreditoData = saldoCreditoResponse.data || saldoCreditoResponse;
+        
         console.log('📊 KPIs recibidos:', kpisData);
+        console.log('💳 Saldo Crédito recibido:', saldoCreditoData);
         
         setKpis({
           ventasMes: kpisData.monto_ventas_mes || 0,
           abonosMes: kpisData.monto_abonos_mes || 0,
           promedioTrimestre: kpisData.promedio_ventas_trimestre_anterior || 0,
           clientesActivos: kpisData.numero_clientes_con_venta_mes || 0,
-          productosVendidos: 0, // Este dato vendría de otro endpoint
+          saldoCreditoTotal: saldoCreditoData.total_saldo_credito || 0,
           trendVentas: kpisData.variacion_vs_anio_anterior_pct || 0,
           // Calcular % de abonos respecto a ventas del mes
           trendAbonos: kpisData.monto_ventas_mes > 0 
@@ -184,9 +189,9 @@ const DashboardPage = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <KPICard
-            title="Productos Vendidos"
-            value={kpis.productosVendidos.toLocaleString('es-CL')}
-            subtitle="unidades este mes"
+            title="Saldo Crédito Total"
+            value={formatCurrency(kpis.saldoCreditoTotal)}
+            subtitle={isManager() && vendedorSeleccionado !== 'todos' ? 'del vendedor' : (isManager() ? 'global' : 'tu cartera')}
             color="#E57A2D"
             icon={<ProductosIcon />}
             loading={loading}
