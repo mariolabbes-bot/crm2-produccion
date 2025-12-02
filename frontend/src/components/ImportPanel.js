@@ -23,13 +23,13 @@ import {
   Warning as WarningIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
-import { uploadVentasFile, uploadAbonosFile, uploadClientesFile, downloadPlantillaVentas, downloadPlantillaAbonos, downloadPlantillaClientes, downloadInformePendientes, API_URL } from '../api';
+import { uploadVentasFile, uploadAbonosFile, uploadClientesFile, uploadSaldoCreditoFile, downloadPlantillaVentas, downloadPlantillaAbonos, downloadPlantillaClientes, downloadInformePendientes, API_URL } from '../api';
 import { removeToken, getToken } from '../utils/auth';
 
 const ImportPanel = () => {
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState(null);
-  const [importType, setImportType] = useState('clientes'); // 'clientes' | 'ventas' | 'abonos'
+  const [importType, setImportType] = useState('clientes'); // 'clientes' | 'ventas' | 'abonos' | 'saldo-credito'
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -122,6 +122,8 @@ const ImportPanel = () => {
         response = await uploadClientesFile(selectedFile);
       } else if (importType === 'ventas') {
         response = await uploadVentasFile(selectedFile);
+      } else if (importType === 'saldo-credito') {
+        response = await uploadSaldoCreditoFile(selectedFile);
       } else {
           // Abonos: si está activo updateMissing, hacemos llamada manual con query
           if (updateMissingAbonos) {
@@ -174,9 +176,10 @@ const ImportPanel = () => {
       downloadPlantillaClientes();
     } else if (importType === 'ventas') {
       downloadPlantillaVentas();
-    } else {
+    } else if (importType === 'abonos') {
       downloadPlantillaAbonos();
     }
+    // Saldo Crédito no tiene plantilla (se importa directamente desde archivo del sistema)
   };
 
   const handleDownloadInforme = () => {
@@ -242,22 +245,42 @@ const ImportPanel = () => {
                   Abonos
                 </Button>
               </Box>
+              <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                <Button
+                  variant={importType === 'saldo-credito' ? 'contained' : 'outlined'}
+                  onClick={() => setImportType('saldo-credito')}
+                  fullWidth
+                  color="warning"
+                >
+                  💳 Saldo Crédito
+                </Button>
+              </Box>
 
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 3 }}>
                 2. Descarga la plantilla
               </Typography>
-              <Button
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                onClick={handleDownloadPlantilla}
-                fullWidth
-                sx={{ mb: 3 }}
-              >
-                Descargar Plantilla de {
-                  importType === 'clientes' ? 'Clientes' :
-                  importType === 'ventas' ? 'Ventas' : 'Abonos'
-                }
-              </Button>
+              {importType !== 'saldo-credito' ? (
+                <Button
+                  startIcon={<DownloadIcon />}
+                  variant="outlined"
+                  onClick={handleDownloadPlantilla}
+                  fullWidth
+                  sx={{ mb: 3 }}
+                >
+                  Descargar Plantilla de {
+                    importType === 'clientes' ? 'Clientes' :
+                    importType === 'ventas' ? 'Ventas' : 'Abonos'
+                  }
+                </Button>
+              ) : (
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  <Typography variant="body2">
+                    Saldo Crédito se importa directamente desde el archivo del sistema.
+                    <br />
+                    <strong>Nota:</strong> Esta acción <strong>eliminará todos los registros existentes</strong> y los reemplazará con los nuevos datos del archivo.
+                  </Typography>
+                </Alert>
+              )}
 
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 3. Sube tu archivo
@@ -409,7 +432,22 @@ const ImportPanel = () => {
                         )}
 
                       <Grid container spacing={2}>
-                        {importType === 'clientes' && result.inserted !== undefined ? (
+                        {importType === 'saldo-credito' && result.registrosInsertados !== undefined ? (
+                          <>
+                            <Grid item xs={4}>
+                              <Typography variant="caption" color="textSecondary">Eliminados</Typography>
+                              <Typography variant="h4" sx={{ color: '#ff9800', fontWeight: 700 }}>{result.registrosEliminados || 0}</Typography>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Typography variant="caption" color="textSecondary">Insertados</Typography>
+                              <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 700 }}>{result.registrosInsertados}</Typography>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Typography variant="caption" color="textSecondary">Errores</Typography>
+                              <Typography variant="h4" sx={{ color: '#f44336', fontWeight: 700 }}>{result.errores?.length || 0}</Typography>
+                            </Grid>
+                          </>
+                        ) : importType === 'clientes' && result.inserted !== undefined ? (
                           <>
                             <Grid item xs={4}>
                               <Typography variant="caption" color="textSecondary">Nuevos</Typography>

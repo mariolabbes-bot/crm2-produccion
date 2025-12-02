@@ -1049,6 +1049,139 @@ router.get('/plantilla/clientes', (req, res) => {
   res.send(buffer);
 });
 
+// POST /api/import/saldo-credito - Importar saldo de crédito desde Excel
+router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (req, res) => {
+  console.log('🟢 ====== ENDPOINT /saldo-credito LLAMADO ====== 🟢');
+  const client = await pool.connect();
+  
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
+    }
+
+    console.log('📁 Archivo recibido:', req.file.originalname);
+    
+    // Leer archivo Excel
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    console.log(`📊 Registros encontrados: ${data.length}`);
+
+    if (data.length === 0) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ success: false, msg: 'El archivo no contiene datos' });
+    }
+
+    // Validar estructura del archivo
+    const requiredCols = ['RUT', 'CLIENTE', 'folio', 'fecha_emision', 'TOTAL FACTURA', 'SALDO FACTURA', 'NOMBRE VENDEDOR'];
+    const firstRow = data[0];
+    const missingCols = requiredCols.filter(col => !(col in firstRow));
+    
+    if (missingCols.length > 0) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ 
+        success: false, 
+        msg: `Columnas faltantes: ${missingCols.join(', ')}` 
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Crear tabla si no existe
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS saldo_credito (
+        id SERIAL PRIMARY KEY,
+        rut VARCHAR(20),
+        tipo_documento VARCHAR(50),
+        cliente VARCHAR(255),
+        folio INTEGER,
+        fecha_emision DATE,
+        total_factura NUMERIC(15,2),
+        deuda_cancelada NUMERIC(15,2) DEFAULT 0,
+        saldo_factura NUMERIC(15,2),
+        saldo_favor_disponible NUMERIC(15,2) DEFAULT 0,
+        nombre_vendedor VARCHAR(255),
+        idvendedor INTEGER,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
+    console.log('📋 Tabla saldo_credito verificada/creada');
+
+    // BORRAR todos los registros existentes
+    const deleteResult = await client.query('DELETE FROM saldo_credito');
+    console.log(`🗑️  Registros eliminados: ${deleteResult.rowCount}`);
+
+    // Insertar nuevos registros
+    let insertados = 0;
+    let errores = 0;
+
+    for (const row of data) {
+      try {
+        const fechaEmision = parseExcelDate(row.fecha_emision);
+        
+        await client.query(`
+          INSERT INTO saldo_credito (
+            rut, tipo_documento, cliente, folio, fecha_emision,
+            total_factura, deuda_cancelada, saldo_factura, 
+            saldo_favor_disponible, nombre_vendedor, idvendedor
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        `, [
+          row.RUT || null,
+          row['TIPO DOCUMENTO'] || 'FACTURA',
+          row.CLIENTE || null,
+          row.folio || null,
+          fechaEmision,
+          parseNumeric(row['TOTAL FACTURA']) || 0,
+          parseNumeric(row['Deuda Cancelada']) || 0,
+          parseNumeric(row['SALDO FACTURA']) || 0,
+          parseNumeric(row['Saldo a Favor Disponible']) || 0,
+          row['NOMBRE VENDEDOR'] || null,
+          row.idvendedor || null
+        ]);
+        
+        insertados++;
+      } catch (err) {
+        console.error(`⚠️  Error en fila:`, row, err.message);
+        errores++;
+      }
+    }
+
+    await client.query('COMMIT');
+
+    // Limpiar archivo temporal
+    fs.unlinkSync(req.file.path);
+
+    console.log(`✅ Importación completada: ${insertados} registros insertados, ${errores} errores`);
+
+    res.json({
+      success: true,
+      msg: 'Importación completada exitosamente',
+      registrosEliminados: deleteResult.rowCount,
+      registrosInsertados: insertados,
+      errores
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('❌ Error en importación saldo_credito:', error);
+    
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    res.status(500).json({
+      success: false,
+      msg: 'Error al importar saldo de crédito',
+      error: error.message
+    });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
 
 // Manejador de errores específico para este router (multer y validaciones)

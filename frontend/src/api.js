@@ -366,6 +366,41 @@ export const uploadClientesFile = async (file) => {
   }
 };
 
+export const uploadSaldoCreditoFile = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const token = getToken();
+  console.log('📤 Iniciando upload de saldo crédito:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
+  
+  try {
+    const response = await fetch(`${API_URL}/import/saldo-credito`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ Error response:', response.status, errorData);
+      const err = new Error(errorData.msg || 'Error al subir archivo');
+      err.status = response.status;
+      err.data = errorData;
+      throw err;
+    }
+
+    const result = await response.json();
+    console.log('✅ Upload saldo crédito exitoso:', result);
+    return result;
+    
+  } catch (error) {
+    console.error('❌ Error en import saldo crédito:', error);
+    throw error;
+  }
+};
+
 export const downloadInformePendientes = (filename) => {
   const token = getToken();
   window.open(`${API_URL}/import/download-report/${filename}?token=${token}`, '_blank');
