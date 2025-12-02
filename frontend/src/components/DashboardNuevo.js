@@ -263,9 +263,9 @@ const DashboardNuevo = () => {
       if (isManager && filtroVendedor) {
         params.vendedor_id = filtroVendedor;
       }
-      // Si NO es manager, siempre filtra por su propio id
-      if (!isManager && user?.id) {
-        params.vendedor_id = user.id;
+      // Si NO es manager, filtra por su propio RUT (backend espera RUT en vendedor_id)
+      if (!isManager && user?.rut) {
+        params.vendedor_id = user.rut;
       }
       const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData, saldoCreditoData] = await Promise.all([
         getAbonosEstadisticas(params).catch(e => {

@@ -617,9 +617,14 @@ router.get('/saldo-credito-total', auth(), async (req, res) => {
       if (req.query.vendedor_id) {
         const rut = String(req.query.vendedor_id);
         const vRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [rut]);
-        if (vRes.rows.length > 0) {
+        const nombreVend = vRes.rows[0]?.nombre_vendedor || null;
+        if (nombreVend) {
           where = ' WHERE UPPER(TRIM(nombre_vendedor)) = UPPER(TRIM($1))';
-          params.push(vRes.rows[0].nombre_vendedor);
+          params.push(nombreVend);
+        } else {
+          // Fallback: si no hay nombre, comparar por rut textual si existiera en saldo_credito
+          where = ' WHERE EXISTS (SELECT 1 FROM usuario u WHERE u.rut = $1 AND UPPER(TRIM(saldo_credito.nombre_vendedor)) = UPPER(TRIM(u.nombre_vendedor)))';
+          params.push(rut);
         }
       }
     } else {
@@ -628,11 +633,12 @@ router.get('/saldo-credito-total', auth(), async (req, res) => {
         where = ' WHERE UPPER(TRIM(nombre_vendedor)) = UPPER(TRIM($1))';
         params.push(user.nombre_vendedor);
       } else if (user.rut) {
-        // Try to resolve nombre_vendedor from rut
         const vRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [user.rut]);
-        const nombreVend = vRes.rows[0]?.nombre_vendedor || user.rut;
-        where = ' WHERE UPPER(TRIM(nombre_vendedor)) = UPPER(TRIM($1))';
-        params.push(nombreVend);
+        const nombreVend = vRes.rows[0]?.nombre_vendedor || null;
+        if (nombreVend) {
+          where = ' WHERE UPPER(TRIM(nombre_vendedor)) = UPPER(TRIM($1))';
+          params.push(nombreVend);
+        }
       }
     }
 
