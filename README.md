@@ -8,9 +8,10 @@ Una aplicación web completa para gestión de equipos comerciales con funcionali
 - **Gestión de Usuarios**: Autenticación JWT, roles (vendedor/manager)
 - **CRM Completo**: Clientes, actividades, objetivos parametrizables
 - **Oportunidades y Amenazas**: Seguimiento comercial avanzado
-- **Importación Masiva**: CSV y JSON para datos de ventas
-- **KPIs y Dashboard**: Métricas y calendario interactivo
-- **Arquitectura Robusta**: Backend Node.js + Frontend React + PostgreSQL
+- **Importación Masiva**: Excel para datos de ventas, abonos, saldo de crédito
+- **Sistema de Saldo Crédito**: KPI de facturas pendientes con normalización de nombres
+- **KPIs y Dashboard**: Métricas en tiempo real con filtros por vendedor
+- **Arquitectura Robusta**: Backend Node.js + Frontend React + PostgreSQL Neon
 
 ## 🏗️ Arquitectura
 
@@ -48,15 +49,42 @@ CRM2/
 - **Moment.js** para fechas
 
 ### Base de Datos
-- **PostgreSQL** en Supabase (producción)
+- **PostgreSQL** en Neon (producción)
 - Esquema completo con relaciones
 - Datos parametrizables (tipos de actividades/objetivos)
+- Sistema de aliases para normalización de vendedores
 
-## Carga masiva de ventas
-- Sube un archivo CSV con las columnas: `RUT`, `FECHA FACTURA`, `NUMERO FACTURA`, `MONTO NETO FACTURA`.
-- El sistema valida y carga los registros correctos.
-- Si hay errores (cliente no encontrado, duplicados, formato incorrecto), se descarga automáticamente un archivo CSV con los registros no cargados y el motivo.
-- Puedes corregir y volver a cargar solo los faltantes.
+## 📥 Importación de Datos
+
+### Saldo Crédito (Nuevo ✨)
+Sistema completo para gestionar facturas pendientes con normalización automática de nombres de vendedores.
+
+**Características:**
+- ✅ Importación desde Excel con reemplazo completo
+- ✅ 18 aliases de vendedores configurados
+- ✅ Normalización automática de nombres (sin acentos, uppercase)
+- ✅ KPI en dashboard con filtro por vendedor
+- ✅ Visualización global (manager) o individual (vendedor)
+
+**Documentación completa:** Ver [`docs/SISTEMA_SALDO_CREDITO.md`](docs/SISTEMA_SALDO_CREDITO.md)
+
+**Columnas esperadas en Excel:**
+- `RUT`, `TIPO DOCUMENTO`, `CLIENTE`, `folio`, `fecha_emision`
+- `TOTAL FACTURA`, `SALDO FACTURA`, `NOMBRE VENDEDOR`
+- Opcionales: `Deuda Cancelada`, `Saldo a Favor Disponible`, `idvendedor`
+
+**Proceso:**
+1. Manager → "Importación de Datos" → "💳 Saldo Crédito"
+2. Subir archivo `SALDO CREDITO.xlsx`
+3. Sistema elimina registros anteriores e inserta nuevos
+4. Dashboard muestra total actualizado
+
+### Ventas y Abonos
+### Ventas y Abonos
+- Sube un archivo Excel con las columnas requeridas
+- El sistema valida y carga los registros correctos
+- Si hay errores (cliente no encontrado, duplicados, formato incorrecto), se muestran en tabla
+- Puedes corregir y volver a cargar solo los faltantes
 
 ## Roles de usuario
 - **Vendedor:** Solo ve y gestiona sus propios clientes, actividades y ventas.
@@ -121,25 +149,17 @@ La aplicación estará disponible en:
 
 ## 🚀 Despliegue en Producción
 
-### Opción Recomendada (Gratis)
-- **Base de datos**: Supabase PostgreSQL
-- **Backend**: Render.com 
-- **Frontend**: Vercel
+### URLs Actuales
+- **Frontend:** https://crm2-produccion.vercel.app
+- **Backend:** https://crm2-backend.onrender.com
+- **Base de datos:** Neon PostgreSQL
 
-Ver `PRODUCCION.md` para instrucciones detalladas paso a paso.
+### Stack de Producción
+- **Base de datos**: Neon PostgreSQL (gratis)
+- **Backend**: Render.com (gratis con auto-sleep)
+- **Frontend**: Vercel (gratis, auto-deploy desde `main`)
 
-### Frontend Deploy (Vercel)
-
-Para el despliegue del frontend en Vercel con estructura monorepo, consulta la guía:
-
-- `frontend/DEPLOY.md` (Root Directory = `frontend`, `dist` como output, auto-deploy en `main`)
-
-Recomendación: Mantener una sola configuración activa en `frontend/vercel.json` y usar "Deploy latest" para despliegues manuales.
-
-### Preparar para producción
-```bash
-./deploy-production.sh
-```
+Ver archivos de configuración obsoletos archivados en `docs/archive/` (DEPLOY*.md, PRODUCCION*.md)
 
 ## 📊 Funcionalidades
 
@@ -151,10 +171,11 @@ Recomendación: Mantener una sola configuración activa en `frontend/vercel.json
 - ✅ Exportación de registros fallidos
 
 ### Dashboard y Análisis
-- ✅ KPIs principales (ventas, clientes top)
+- ✅ KPIs principales (ventas, abonos, saldo crédito)
 - ✅ Calendario de actividades interactivo
 - ✅ Filtrado por rol (vendedor ve solo sus datos)
 - ✅ Métricas de rendimiento en tiempo real
+- ✅ Sistema de aliases para normalización de vendedores
 
 ### Seguridad y Calidad
 - ✅ Autenticación JWT robusta
@@ -166,18 +187,23 @@ Recomendación: Mantener una sola configuración activa en `frontend/vercel.json
 
 ## 📖 API Documentation
 
-Ver `backend/API.md` para documentación completa de endpoints.
-
 ### Endpoints Principales
 ```
-POST /api/users/register       # Registro
-POST /api/users/login          # Autenticación
-GET  /api/clients              # Listar clientes
-POST /api/sales/bulk           # Importar ventas CSV
-POST /api/sales/import-json    # Importar ventas JSON
-GET  /api/kpis/sales-summary   # Resumen de ventas
-GET  /api/health               # Health check
+POST /api/users/register           # Registro
+POST /api/users/login              # Autenticación
+GET  /api/clients                  # Listar clientes
+POST /api/import/saldo-credito     # Importar saldo crédito Excel
+POST /api/import/ventas            # Importar ventas Excel
+POST /api/import/abonos            # Importar abonos Excel
+GET  /api/kpis/saldo-credito-total # KPI saldo crédito con filtro
+GET  /api/vendor-aliases           # CRUD aliases vendedores
+POST /api/vendor-aliases/seed      # Cargar 18 aliases predefinidos
+GET  /api/health                   # Health check
 ```
+
+**Documentación detallada:**
+- Sistema Saldo Crédito: [`docs/SISTEMA_SALDO_CREDITO.md`](docs/SISTEMA_SALDO_CREDITO.md)
+- Documentación obsoleta archivada en: `docs/archive/`
 
 ## 🧪 Testing
 
@@ -202,6 +228,9 @@ cd backend && npm test -- --testNamePattern="health"
 
 ## 📝 Roadmap
 
+- [x] Sistema de Saldo Crédito con aliases
+- [x] Importación masiva desde Excel (Ventas, Abonos, Saldo Crédito)
+- [x] Dashboard con KPIs en tiempo real
 - [ ] Notificaciones push
 - [ ] Reportes avanzados en PDF
 - [ ] Integración con CRM externos
@@ -220,10 +249,9 @@ Desarrollado para optimizar la gestión de equipos comerciales con herramientas 
 
 **¿Preguntas?** Abre un issue o consulta la documentación en `/docs`.
 
-**¿Listo para producción?** Sigue `PRODUCCION.md` paso a paso.
+**Sistema Saldo Crédito:** Ver guía completa en [`docs/SISTEMA_SALDO_CREDITO.md`](docs/SISTEMA_SALDO_CREDITO.md)
 
-## Despliegue
-Ver instrucciones detalladas en `DEPLOY.md` para alojar gratis en la nube (Render, Vercel, Supabase).
+**Documentación obsoleta:** Archivada en `docs/archive/` para referencia histórica
 
 ## Contacto y soporte
 Para dudas, mejoras o soporte, contacta al equipo de desarrollo.
