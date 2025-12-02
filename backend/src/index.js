@@ -5,6 +5,7 @@ const HOST = '0.0.0.0'; // Escuchar en todas las interfaces para Render
 
 console.log('🚀🚀🚀 SERVIDOR CRM2 - VERSIÓN 2.0.1 - 2025-11-21 🚀🚀🚀');
 console.log('✅ FIX: COUNT(*) implementado - NO más error "column id"');
+const vendorAliasesRoutes = require('./routes/vendorAliases');
 
 app.listen(PORT, HOST, () => {
   console.log(`Servidor backend escuchando en puerto ${PORT}`);
@@ -13,3 +14,4 @@ app.listen(PORT, HOST, () => {
   // Iniciar keep-alive service para evitar que Render se duerma
   startKeepAlive();
 });
+app.use('/api/vendor-aliases', vendorAliasesRoutes);

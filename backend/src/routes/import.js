@@ -1088,17 +1088,7 @@ router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (r
     }
 
     await client.query('BEGIN');
-
-    // Cargar lista de vendedores conocidos para normalización
-    const vendedoresRes = await client.query(`
-      SELECT nombre_vendedor
-      FROM usuario
-      WHERE LOWER(rol_usuario) = 'vendedor' AND nombre_vendedor IS NOT NULL
-    `);
-    const vendedoresConocidos = vendedoresRes.rows.map(r => r.nombre_vendedor);
-    const norm = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
-    const mapaVendedores = new Map();
-    vendedoresConocidos.forEach(v => mapaVendedores.set(norm(v), v));
+    const { resolveVendorName } = require('../utils/vendorAlias');
 
     // Crear tabla si no existe
     await client.query(`
@@ -1132,21 +1122,8 @@ router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (r
     for (const row of data) {
       try {
         const fechaEmision = parseExcelDate(row.fecha_emision);
-        // Normalizar nombre vendedor desde el Excel al valor conocido en usuario
         const nombreVendExcel = row['NOMBRE VENDEDOR'] || null;
-        let nombreVendFinal = nombreVendExcel;
-        if (nombreVendExcel) {
-          const clave = norm(nombreVendExcel);
-          if (mapaVendedores.has(clave)) {
-            nombreVendFinal = mapaVendedores.get(clave);
-          } else {
-            // Intentar coincidencias suaves: quitar palabras comunes (SR., SRA., VENDEDOR)
-            const claveSuave = clave.replace(/\b(SR\.?|SRA\.?|VENDEDOR|JEFE|DE|DEL|LA|EL)\b/g, '').replace(/\s+/g, ' ').trim();
-            if (mapaVendedores.has(claveSuave)) {
-              nombreVendFinal = mapaVendedores.get(claveSuave);
-            }
-          }
-        }
+        const nombreVendFinal = await resolveVendorName(nombreVendExcel);
         
         await client.query(`
           INSERT INTO saldo_credito (
