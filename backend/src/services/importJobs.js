@@ -242,7 +242,7 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
       const estadoSistema = colEstadoSistema && row[colEstadoSistema] ? String(row[colEstadoSistema]).trim() : null;
       const estadoComercial = colEstadoComercial && row[colEstadoComercial] ? String(row[colEstadoComercial]).trim() : null;
       const estadoSII = colEstadoSII && row[colEstadoSII] ? String(row[colEstadoSII]).trim() : null;
-      const indice = colIndice && row[colIndice] ? String(row[colIndice]).trim() : null;
+      // indice ya fue declarado arriba (línea 226) - NO redeclarar
       const sku = colSKU && row[colSKU] ? String(row[colSKU]).trim() : null;
       const descripcion = colDescripcion && row[colDescripcion] ? String(row[colDescripcion]).trim() : null;
       const cantidad = colCantidad ? parseNumeric(row[colCantidad]) : null;
