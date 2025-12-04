@@ -7,6 +7,7 @@ import {
   Inventory as ProductosIcon,
 } from '@mui/icons-material';
 import KPICard from '../components/KPICard';
+import ImportStatsWidget from '../components/ImportStatsWidget'; // ← Nuevo
 import ChartContainer from '../components/ChartContainer';
 import { 
   LineChart, 
@@ -128,6 +129,9 @@ const DashboardPage = () => {
 
   return (
     <Box>
+      {/* Widget de última importación */}
+      <ImportStatsWidget />
+
       {/* Selector de vendedor (solo para managers) */}
       {isManager() && (
         <Box sx={{ mb: 3 }}>

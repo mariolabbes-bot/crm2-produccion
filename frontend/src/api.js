@@ -410,3 +410,8 @@ export const downloadInformePendientes = (filename) => {
   const token = getToken();
   window.open(`${API_URL}/import/download-report/${filename}?token=${token}`, '_blank');
 };
+
+// IMPORT STATS - Obtener fechas de última importación de cada tabla
+export const getImportStats = () => {
+  return apiFetch(`${API_URL}/import-stats/stats`);
+};
