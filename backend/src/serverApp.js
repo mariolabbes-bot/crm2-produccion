@@ -64,7 +64,7 @@ app.use('/api/vendor-aliases', require('./routes/vendorAliases'));
 app.get('/', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'CRM2 Backend API - Versión: 2024-11-12',
+    message: 'CRM2 Backend API - Versión: 2.0.2 - 2025-12-04 - Widget ImportStats',
     environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString()
   });

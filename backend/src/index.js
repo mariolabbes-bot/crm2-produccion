@@ -3,8 +3,8 @@ const { startKeepAlive } = require('./keepAlive');
 const PORT = process.env.PORT || 3001;
 const HOST = '0.0.0.0'; // Escuchar en todas las interfaces para Render
 
-console.log('🚀🚀🚀 SERVIDOR CRM2 - VERSIÓN 2.0.1 - 2025-11-21 🚀🚀🚀');
-console.log('✅ FIX: COUNT(*) implementado - NO más error "column id"');
+console.log('🚀🚀🚀 SERVIDOR CRM2 - VERSIÓN 2.0.2 - 2025-12-04 🚀🚀🚀');
+console.log('✅ NUEVO: Widget ImportStats + endpoint /api/import-stats/stats');
 
 app.listen(PORT, HOST, () => {
   console.log(`Servidor backend escuchando en puerto ${PORT}`);
