@@ -1185,6 +1185,111 @@ router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (r
   }
 });
 
+// DELETE /api/import/ventas/limpiar - Limpiar ventas por rango de fechas
+router.delete('/ventas/limpiar', auth(['manager']), async (req, res) => {
+  const client = await pool.connect();
+  
+  try {
+    const { desde, hasta } = req.query;
+    
+    // Validar fechas
+    if (!desde) {
+      return res.status(400).json({
+        success: false,
+        msg: 'Parámetro "desde" es requerido (formato: YYYY-MM-DD)'
+      });
+    }
+    
+    const fechaDesde = new Date(desde);
+    if (isNaN(fechaDesde)) {
+      return res.status(400).json({
+        success: false,
+        msg: 'Fecha "desde" inválida. Formato esperado: YYYY-MM-DD'
+      });
+    }
+    
+    let fechaHasta = null;
+    if (hasta) {
+      fechaHasta = new Date(hasta);
+      if (isNaN(fechaHasta)) {
+        return res.status(400).json({
+          success: false,
+          msg: 'Fecha "hasta" inválida. Formato esperado: YYYY-MM-DD'
+        });
+      }
+    }
+    
+    console.log(`🗑️  Solicitud de limpieza de ventas desde ${desde}${hasta ? ` hasta ${hasta}` : ' (sin límite superior)'}`);
+    
+    // Obtener estadísticas antes de eliminar
+    let countQuery = 'SELECT COUNT(*) as total FROM venta WHERE fecha_emision >= $1';
+    let countParams = [desde];
+    
+    if (fechaHasta) {
+      countQuery += ' AND fecha_emision <= $2';
+      countParams.push(hasta);
+    }
+    
+    const countBeforeRes = await client.query(countQuery, countParams);
+    const totalAEliminar = parseInt(countBeforeRes.rows[0].total);
+    
+    console.log(`   Registros a eliminar: ${totalAEliminar.toLocaleString()}`);
+    
+    if (totalAEliminar === 0) {
+      return res.json({
+        success: true,
+        msg: 'No hay registros para eliminar en el rango especificado',
+        registrosEliminados: 0
+      });
+    }
+    
+    // Ejecutar limpieza con transacción
+    await client.query('BEGIN');
+    
+    let deleteQuery = 'DELETE FROM venta WHERE fecha_emision >= $1';
+    let deleteParams = [desde];
+    
+    if (fechaHasta) {
+      deleteQuery += ' AND fecha_emision <= $2';
+      deleteParams.push(hasta);
+    }
+    
+    const deleteRes = await client.query(deleteQuery, deleteParams);
+    const eliminados = deleteRes.rowCount;
+    
+    await client.query('COMMIT');
+    
+    console.log(`✅ Eliminados: ${eliminados.toLocaleString()} registros de ventas`);
+    
+    // Estadísticas finales
+    const totalFinalRes = await client.query('SELECT COUNT(*) as total FROM venta');
+    const totalFinal = parseInt(totalFinalRes.rows[0].total);
+    
+    res.json({
+      success: true,
+      msg: `Limpieza completada. ${eliminados.toLocaleString()} registros eliminados`,
+      registrosEliminados: eliminados,
+      totalRestante: totalFinal,
+      rango: {
+        desde,
+        hasta: hasta || 'sin límite'
+      }
+    });
+    
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('❌ Error en limpieza de ventas:', error);
+    
+    res.status(500).json({
+      success: false,
+      msg: 'Error al limpiar ventas',
+      error: error.message
+    });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
 
 // Manejador de errores específico para este router (multer y validaciones)
