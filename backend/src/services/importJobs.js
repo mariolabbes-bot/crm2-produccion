@@ -201,11 +201,13 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
     const clientsByRut = new Map(clientsRes.rows.filter(c => c.rut).map(c => [norm(c.rut), c.rut]));
 
     // Verificar duplicados existentes
+    // IMPORTANTE: Un registro único está identificado por folio + tipo_documento + indice
+    // (porque un folio puede tener múltiples líneas con diferentes índices)
     const existingSales = await client.query(
-      "SELECT folio, tipo_documento FROM venta WHERE folio IS NOT NULL AND tipo_documento IS NOT NULL"
+      "SELECT folio, tipo_documento, indice FROM venta WHERE folio IS NOT NULL AND tipo_documento IS NOT NULL"
     );
     const existingKeys = new Set(
-      existingSales.rows.map(s => `${norm(s.tipo_documento)}|${norm(s.folio)}`)
+      existingSales.rows.map(s => `${norm(s.tipo_documento)}|${norm(s.folio)}|${norm(s.indice || '')}`)
     );
 
     // Procesar filas
@@ -221,12 +223,14 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
       const folio = row[colFolio] ? String(row[colFolio]).trim() : null;
       const tipoDoc = row[colTipoDoc] ? String(row[colTipoDoc]).trim() : null;
       const fecha = parseExcelDate(row[colFecha]);
+      const indice = colIndice && row[colIndice] ? String(row[colIndice]).trim() : '';
 
       if (!folio || !tipoDoc || !fecha) continue;
 
-      const key = `${norm(tipoDoc)}|${norm(folio)}`;
+      // Clave única: tipo_documento + folio + indice
+      const key = `${norm(tipoDoc)}|${norm(folio)}|${norm(indice)}`;
       if (existingKeys.has(key)) {
-        duplicates.push({ folio, tipoDoc, fecha });
+        duplicates.push({ folio, tipoDoc, indice, fecha });
         continue;
       }
 
