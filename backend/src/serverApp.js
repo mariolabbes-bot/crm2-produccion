@@ -31,6 +31,17 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
+// OPTIMIZACIÓN: Aumentar timeouts para importaciones grandes
+// Render free tier puede necesitar hasta 30 minutos para 80k+ registros
+app.use((req, res, next) => {
+  // Aumentar timeout para rutas de importación (30 minutos = 1800s)
+  if (req.path.includes('/import')) {
+    req.setTimeout(1800000); // 30 minutos
+    res.setTimeout(1800000);
+  }
+  next();
+});
+
 // Rutas principales
 app.use('/api/users', require('./routes/users'));
 app.use('/api/clients', require('./routes/clients'));

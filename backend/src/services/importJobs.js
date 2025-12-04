@@ -352,45 +352,72 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
         console.warn(`⚠️ [Job ${jobId}] No se pudieron cargar productos:`, prodError.message);
       }
       
-      // Insertar ventas
-      for (let j = 0; j < toImport.length; j++) {
-        const item = toImport[j];
-        const excelRow = j + 2;
+      // OPTIMIZACIÓN: Insertar en LOTES (batch inserts) en lugar de uno por uno
+      const BATCH_SIZE = 500; // 500 registros por query
+      
+      for (let batchStart = 0; batchStart < toImport.length; batchStart += BATCH_SIZE) {
+        const batchEnd = Math.min(batchStart + BATCH_SIZE, toImport.length);
+        const batch = toImport.slice(batchStart, batchEnd);
+        
         try {
-          let litrosVendidos = 0;
-          if (item.sku && item.cantidad) {
-            const skuKey = item.sku.toUpperCase().trim();
-            const litrosPorUnidad = productoMap.get(skuKey);
-            if (litrosPorUnidad && litrosPorUnidad > 0) {
-              litrosVendidos = item.cantidad * litrosPorUnidad;
+          // Construir VALUES clause para múltiples registros
+          let placeholders = [];
+          let params = [];
+          let paramIndex = 1;
+          
+          for (let j = 0; j < batch.length; j++) {
+            const item = batch[j];
+            let litrosVendidos = 0;
+            if (item.sku && item.cantidad) {
+              const skuKey = item.sku.toUpperCase().trim();
+              const litrosPorUnidad = productoMap.get(skuKey);
+              if (litrosPorUnidad && litrosPorUnidad > 0) {
+                litrosVendidos = item.cantidad * litrosPorUnidad;
+              }
             }
-          }
-
-          await client.query(
-            `INSERT INTO venta (
-              sucursal, tipo_documento, folio, fecha_emision, identificador,
-              cliente, vendedor_cliente, vendedor_documento,
-              estado_sistema, estado_comercial, estado_sii, indice,
-              sku, descripcion, cantidad, precio, valor_total, litros_vendidos
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
-            [
+            
+            // Agregar 18 placeholders para este registro
+            placeholders.push(
+              `($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, ` +
+              `$${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, ` +
+              `$${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, ` +
+              `$${paramIndex++}, $${paramIndex++}, $${paramIndex++})`
+            );
+            
+            // Agregar parámetros
+            params.push(
               item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador,
-              item.clienteNombre, item.vendedorClienteAlias, null, // vendedor_documento = NULL
+              item.clienteNombre, item.vendedorClienteAlias, null,
               item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice,
               item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, litrosVendidos
-            ]
-          );
-          importedCount++;
+            );
+          }
           
-          // Log de progreso cada 100 filas
-          if (importedCount % 100 === 0) {
+          // Ejecutar INSERT único con todos los registros del lote
+          if (placeholders.length > 0) {
+            const query = `
+              INSERT INTO venta (
+                sucursal, tipo_documento, folio, fecha_emision, identificador,
+                cliente, vendedor_cliente, vendedor_documento,
+                estado_sistema, estado_comercial, estado_sii, indice,
+                sku, descripcion, cantidad, precio, valor_total, litros_vendidos
+              ) VALUES ${placeholders.join(', ')}
+            `;
+            
+            const result = await client.query(query, params);
+            importedCount += result.rowCount;
+            
+            // Log de progreso cada lote
             console.log(`📊 [Job ${jobId}] Progreso: ${importedCount}/${toImport.length}`);
           }
+          
         } catch (err) {
-          console.error(`❌ [Job ${jobId}] Error en fila ${excelRow}:`, err.message);
-          observations.push({ fila: excelRow, folio: item.folio || null, campo: 'DB', detalle: err.detail || err.message });
+          console.error(`❌ [Job ${jobId}] Error en lote ${Math.floor(batchStart / BATCH_SIZE) + 1}:`, err.message);
+          // Registrar error pero continuar con el siguiente lote
+          observations.push({ fila: `Lote ${batchStart}-${batchEnd}`, folio: null, campo: 'DB', detalle: err.detail || err.message });
         }
       }
+      
       console.log(`✅ [Job ${jobId}] Importación finalizada: ${importedCount} ventas guardadas`);
     }
 

@@ -3,6 +3,9 @@
  * Uso: node backend/scripts/limpiar_ventas_desde_2024.js
  */
 
+// Cargar variables de entorno ANTES de importar db
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+
 const pool = require('../src/db');
 const readline = require('readline');
 
