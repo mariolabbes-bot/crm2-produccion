@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -17,6 +18,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { getTopClientesByVentas, getClientesFacturasImpagas, searchClientes } from '../api';
 
 const ClientesPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [topClientes, setTopClientes] = useState([]);
@@ -245,10 +247,17 @@ const ClientesPage = () => {
               pageSize={5}
               rowsPerPageOptions={[5, 10]}
               disableSelectionOnClick
+              onRowClick={(params) => navigate(`/cliente/${params.row.rut}`)}
               sx={{
                 '& .data-grid-header': {
                   backgroundColor: '#f5f5f5',
                   fontWeight: 600,
+                },
+                '& .MuiDataGrid-row': {
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: '#f5f5f5',
+                  },
                 },
               }}
             />
