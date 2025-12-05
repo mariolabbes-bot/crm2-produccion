@@ -289,7 +289,7 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
           COALESCE(v.sku, 'SIN_SKU') as sku,
           v.descripcion,
           SUM(v.cantidad) as cantidad_total,
-          AVG(v.valor_unitario) as precio_promedio,
+          AVG(v.precio) as precio_promedio,
           MAX(v.fecha_emision) as ultima_compra
         FROM venta v
         WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM((SELECT nombre FROM cliente WHERE rut = $1)))
