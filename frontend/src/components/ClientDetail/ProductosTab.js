@@ -186,7 +186,7 @@ function ProductosTab({ data, loading, error }) {
       {productos.some(p => p.variacion_porcentaje > 20) && (
         <Alert severity="info" sx={{ mt: 1 }}>
           <Typography variant="caption">
-            ✅ Este cliente aumentó la compra de {products.filter(p => p.variacion_porcentaje > 20).length} productos respecto al período anterior.
+            ✅ Este cliente aumentó la compra de {productos.filter(p => p.variacion_porcentaje > 20).length} productos respecto al período anterior.
           </Typography>
         </Alert>
       )}
