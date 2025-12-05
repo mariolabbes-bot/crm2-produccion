@@ -23,8 +23,10 @@ const auth = require('../middleware/auth');
 router.get('/:rut', auth(), async (req, res) => {
   try {
     const { rut } = req.params;
+    const user = req.user;
+    const isManager = user.rol?.toLowerCase() === 'manager';
     
-    // Validar que sea gerente o su propio cliente
+    // Query para obtener info básica del cliente
     let query = `
       SELECT 
         c.rut,
@@ -34,12 +36,9 @@ router.get('/:rut', auth(), async (req, res) => {
         c.vendedor_alias,
         c.ciudad,
         c.comuna,
-        u.nombre as vendedor_nombre,
-        u.id as vendedor_id,
         c.created_at,
         c.updated_at
       FROM cliente c
-      LEFT JOIN usuario u ON c.vendedor_alias = u.alias
       WHERE c.rut = $1
     `;
     
@@ -51,9 +50,16 @@ router.get('/:rut', auth(), async (req, res) => {
     
     const cliente = result.rows[0];
     
-    // Validar permisos: vendedor solo ve sus clientes
-    if (req.user.rol !== 'manager' && cliente.vendedor_id !== req.user.id) {
-      return res.status(403).json({ msg: 'No tienes permiso para ver este cliente' });
+    // Validar permisos: vendedor solo ve sus clientes (basado en vendedor_alias)
+    if (!isManager) {
+      const nombreVendedor = user.nombre_vendedor || user.alias || '';
+      if (nombreVendedor && cliente.vendedor_alias) {
+        if (nombreVendedor.toUpperCase().trim() !== cliente.vendedor_alias.toUpperCase().trim()) {
+          return res.status(403).json({ msg: 'No tienes permiso para ver este cliente' });
+        }
+      } else if (nombreVendedor !== cliente.vendedor_alias) {
+        return res.status(403).json({ msg: 'No tienes permiso para ver este cliente' });
+      }
     }
     
     res.json({
@@ -80,8 +86,18 @@ router.get('/:rut', auth(), async (req, res) => {
 router.get('/:rut/deuda', auth(), async (req, res) => {
   try {
     const { rut } = req.params;
+    console.log(`📊 [GET /client-detail/:rut/deuda] Obteniendo deuda para RUT: ${rut}`);
     
-    // 1. Obtener deuda de saldo_credito
+    // 1. Verificar que cliente existe
+    const clienteCheck = await pool.query('SELECT nombre FROM cliente WHERE rut = $1', [rut]);
+    if (clienteCheck.rows.length === 0) {
+      return res.status(404).json({ msg: 'Cliente no encontrado' });
+    }
+    
+    const nombreCliente = clienteCheck.rows[0].nombre;
+    console.log(`   Cliente encontrado: ${nombreCliente}`);
+    
+    // 2. Obtener deuda de saldo_credito
     const deudaResult = await pool.query(`
       SELECT 
         deuda,
@@ -94,25 +110,24 @@ router.get('/:rut/deuda', auth(), async (req, res) => {
         ) as porcentaje_utilizacion,
         COALESCE(limite_credito, 0) - COALESCE(deuda, 0) as disponible
       FROM saldo_credito
-      WHERE cliente = (SELECT nombre FROM cliente WHERE rut = $1)
+      WHERE UPPER(TRIM(cliente)) = UPPER(TRIM($1))
       LIMIT 1
-    `, [rut]);
+    `, [nombreCliente]);
     
-    // 2. Obtener documentos con deuda
+    // 3. Obtener documentos con deuda
     const documentosResult = await pool.query(`
       SELECT 
         v.folio,
         v.tipo_documento,
         v.fecha_emision,
         v.valor_total,
-        COALESCE(sc.deuda, 0) as deuda_documento
+        COALESCE(v.valor_total, 0) as deuda_documento
       FROM venta v
-      LEFT JOIN saldo_credito sc ON v.cliente = sc.cliente
-      WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM((SELECT nombre FROM cliente WHERE rut = $1)))
+      WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM($1))
       AND COALESCE(v.valor_total, 0) > 0
       ORDER BY v.fecha_emision DESC
       LIMIT 20
-    `, [rut]);
+    `, [nombreCliente]);
     
     const deuda = deudaResult.rows[0] || {
       deuda: 0,
@@ -124,7 +139,7 @@ router.get('/:rut/deuda', auth(), async (req, res) => {
     res.json({
       success: true,
       data: {
-        resumen: deuda,
+        deuda: deuda,
         documentos: documentosResult.rows
       }
     });
