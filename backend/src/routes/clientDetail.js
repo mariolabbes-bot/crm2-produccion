@@ -310,11 +310,11 @@ router.get('/:rut/actividades', auth(), async (req, res) => {
         ca.id,
         ca.comentario,
         ca.created_at,
-        u.nombre as usuario_nombre,
-        u.alias as usuario_alias,
-        u.rol as usuario_rol
+        ua.nombre as usuario_nombre,
+        ua.rol as usuario_rol,
+        ua.id as usuario_alias_id
       FROM cliente_actividad ca
-      JOIN usuario u ON ca.usuario_id = u.id
+      JOIN usuario_alias ua ON ca.usuario_alias_id = ua.id
       WHERE ca.cliente_rut = $1
       ORDER BY ca.created_at DESC
       LIMIT 3
@@ -359,19 +359,31 @@ router.post('/:rut/actividades', auth(), async (req, res) => {
       return res.status(404).json({ msg: 'Cliente no encontrado' });
     }
     
+    // Obtener usuario_alias_id del usuario actual
+    const usuarioAliasResult = await pool.query(
+      'SELECT id FROM usuario_alias WHERE id = $1',
+      [req.user.id]
+    );
+    
+    if (usuarioAliasResult.rows.length === 0) {
+      return res.status(400).json({ msg: 'Usuario no encontrado en usuario_alias' });
+    }
+    
+    const usuarioAliasId = usuarioAliasResult.rows[0].id;
+    
     // Insertar actividad
     const query = `
-      INSERT INTO cliente_actividad (cliente_rut, usuario_id, comentario, created_at)
+      INSERT INTO cliente_actividad (cliente_rut, usuario_alias_id, comentario, created_at)
       VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
       RETURNING 
         id,
         cliente_rut,
-        usuario_id,
+        usuario_alias_id,
         comentario,
         created_at
     `;
     
-    const result = await pool.query(query, [rut, req.user.id, comentario.trim()]);
+    const result = await pool.query(query, [rut, usuarioAliasId, comentario.trim()]);
     
     res.json({
       success: true,
