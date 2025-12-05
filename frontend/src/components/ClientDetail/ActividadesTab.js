@@ -152,7 +152,7 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
                     width: 40,
                     height: 40,
                     backgroundColor:
-                      actividad.usuario_rol === 'manager'
+                      actividad.nombre_vendedor_oficial?.toUpperCase().includes('MANAGER')
                         ? '#FF6B6B'
                         : '#4ECDC4',
                   }}
@@ -172,7 +172,7 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
                     <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
                       {actividad.usuario_nombre || 'Usuario'}
                     </Typography>
-                    {actividad.usuario_rol === 'manager' && (
+                    {actividad.nombre_vendedor_oficial?.toUpperCase().includes('MANAGER') && (
                       <Typography
                         variant="caption"
                         sx={{

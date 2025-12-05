@@ -339,8 +339,8 @@ router.get('/:rut/actividades', auth(), async (req, res) => {
         ca.id,
         ca.comentario,
         ca.created_at,
-        ua.nombre as usuario_nombre,
-        ua.rol as usuario_rol,
+        ua.alias as usuario_nombre,
+        ua.nombre_vendedor_oficial,
         ua.id as usuario_alias_id
       FROM cliente_actividad ca
       JOIN usuario_alias ua ON ca.usuario_alias_id = ua.id
@@ -388,10 +388,16 @@ router.post('/:rut/actividades', auth(), async (req, res) => {
       return res.status(404).json({ msg: 'Cliente no encontrado' });
     }
     
-    // Obtener usuario_alias_id del usuario actual
+    // Obtener usuario_alias_id del usuario actual (buscar por alias)
+    const usuarioAlias = req.user.alias || req.user.nombre_vendedor;
+    
+    if (!usuarioAlias) {
+      return res.status(400).json({ msg: 'Usuario sin alias asignado' });
+    }
+    
     const usuarioAliasResult = await pool.query(
-      'SELECT id FROM usuario_alias WHERE id = $1',
-      [req.user.id]
+      'SELECT id FROM usuario_alias WHERE alias = $1 OR nombre_vendedor_oficial = $1',
+      [usuarioAlias]
     );
     
     if (usuarioAliasResult.rows.length === 0) {
