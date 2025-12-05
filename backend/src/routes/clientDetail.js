@@ -330,10 +330,10 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
     // Convertir valores STRING a números
     const productosConvertidos = result.rows.map(producto => ({
       ...producto,
-      cantidad_total: parseFloat(producto.cantidad_total) || 0,
-      valor_total: parseFloat(producto.valor_total) || 0,
-      cantidad_promedio_anterior: parseFloat(producto.cantidad_promedio_anterior) || 0,
-      variacion_porcentaje: parseFloat(producto.variacion_porcentaje) || 0
+      venta_mes_actual: parseFloat(producto.venta_mes_actual) || 0,
+      venta_promedio_12m: parseFloat(producto.venta_promedio_12m) || 0,
+      relacion_venta: parseFloat(producto.relacion_venta) || 0,
+      precio_promedio: parseFloat(producto.precio_promedio) || 0
     }));
     
     res.json({
