@@ -129,7 +129,7 @@ const KPICard = ({
                   fontSize: '0.875rem'
                 }}
               >
-                {trend.toFixed(1)}%
+                {(trend || 0).toFixed(1)}%
               </Typography>
             ) : (
               // Modo tendencia: con flechas, color verde/rojo
@@ -149,7 +149,7 @@ const KPICard = ({
                   <TrendingDown sx={{ fontSize: 20 }} />
                 )}
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {isPositiveTrend ? '+' : ''}{trend.toFixed(1)}%
+                  {isPositiveTrend ? '+' : ''}{(trend || 0).toFixed(1)}%
                 </Typography>
               </Box>
             )
