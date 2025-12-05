@@ -131,22 +131,22 @@ function ProductosTab({ data, loading, error }) {
 
                 {/* Promedio anterior */}
                 <TableCell align="right">
-                  {producto.cantidad_promedio_anterior?.toFixed(0) || '0'} un.
+                  {(producto.cantidad_promedio_anterior || 0).toFixed(0)} un.
                 </TableCell>
 
                 {/* Variación */}
                 <TableCell
                   align="center"
                   sx={{
-                    color: getTrendingColor(producto.variacion_porcentaje),
+                    color: getTrendingColor(producto.variacion_porcentaje || 0),
                     fontWeight: 'bold',
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                    {getTrendingIcon(producto.variacion_porcentaje)}
+                    {getTrendingIcon(producto.variacion_porcentaje || 0)}
                     <Typography variant="body2">
-                      {producto.variacion_porcentaje > 0 ? '+' : ''}
-                      {producto.variacion_porcentaje.toFixed(1)}%
+                      {(producto.variacion_porcentaje || 0) > 0 ? '+' : ''}
+                      {(producto.variacion_porcentaje || 0).toFixed(1)}%
                     </Typography>
                   </Box>
                 </TableCell>
