@@ -244,11 +244,15 @@ const ClientesPage = () => {
               rows={searchResults}
               columns={searchColumns}
               getRowId={(row) => row.rut}
-              pageSize={5}
-              rowsPerPageOptions={[5, 10]}
-              disableSelectionOnClick
+              pageSizeOptions={[5, 10]}
+              initialState={{
+                pagination: {
+                  paginationModel: { pageSize: 5 },
+                },
+              }}
               onRowClick={(params) => navigate(`/cliente/${params.row.rut}`)}
               sx={{
+                cursor: 'pointer',
                 '& .data-grid-header': {
                   backgroundColor: '#f5f5f5',
                   fontWeight: 600,
@@ -289,13 +293,24 @@ const ClientesPage = () => {
                   rows={topClientes}
                   columns={topClientesColumns}
                   getRowId={(row) => row.rut}
-                  pageSize={20}
-                  rowsPerPageOptions={[20]}
-                  disableSelectionOnClick
+                  pageSizeOptions={[20]}
+                  initialState={{
+                    pagination: {
+                      paginationModel: { pageSize: 20 },
+                    },
+                  }}
+                  onRowClick={(params) => navigate(`/cliente/${params.row.rut}`)}
                   sx={{
+                    cursor: 'pointer',
                     '& .data-grid-header': {
                       backgroundColor: '#f5f5f5',
                       fontWeight: 600,
+                    },
+                    '& .MuiDataGrid-row': {
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: '#f5f5f5',
+                      },
                     },
                   }}
                 />
@@ -326,13 +341,24 @@ const ClientesPage = () => {
                   rows={facturasImpagas}
                   columns={facturasImpagasColumns}
                   getRowId={(row) => row.rut}
-                  pageSize={20}
-                  rowsPerPageOptions={[20]}
-                  disableSelectionOnClick
+                  pageSizeOptions={[20]}
+                  initialState={{
+                    pagination: {
+                      paginationModel: { pageSize: 20 },
+                    },
+                  }}
+                  onRowClick={(params) => navigate(`/cliente/${params.row.rut}`)}
                   sx={{
+                    cursor: 'pointer',
                     '& .data-grid-header': {
                       backgroundColor: '#f5f5f5',
                       fontWeight: 600,
+                    },
+                    '& .MuiDataGrid-row': {
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: '#f5f5f5',
+                      },
                     },
                   }}
                 />
