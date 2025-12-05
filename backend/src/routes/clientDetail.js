@@ -388,19 +388,23 @@ router.post('/:rut/actividades', auth(), async (req, res) => {
       return res.status(404).json({ msg: 'Cliente no encontrado' });
     }
     
-    // Obtener usuario_alias_id del usuario actual (buscar por alias)
-    const usuarioAlias = req.user.alias || req.user.nombre_vendedor;
+    // Obtener usuario_alias_id del usuario actual
+    // Buscar por: alias (si existe) -> nombre_vendedor -> nombre completo
+    const usuarioAlias = req.user.alias || req.user.nombre_vendedor || req.user.nombre;
     
     if (!usuarioAlias) {
-      return res.status(400).json({ msg: 'Usuario sin alias asignado' });
+      return res.status(400).json({ msg: 'Usuario sin información de identidad' });
     }
     
     const usuarioAliasResult = await pool.query(
-      'SELECT id FROM usuario_alias WHERE alias = $1 OR nombre_vendedor_oficial = $1',
+      `SELECT id FROM usuario_alias 
+       WHERE UPPER(TRIM(alias)) = UPPER(TRIM($1)) 
+       OR UPPER(TRIM(nombre_vendedor_oficial)) = UPPER(TRIM($1))`,
       [usuarioAlias]
     );
     
     if (usuarioAliasResult.rows.length === 0) {
+      console.error(`⚠️  Usuario no encontrado en usuario_alias. Buscando por: "${usuarioAlias}"`);
       return res.status(400).json({ msg: 'Usuario no encontrado en usuario_alias' });
     }
     
