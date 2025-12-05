@@ -12,12 +12,10 @@ import {
   Typography,
   Chip,
 } from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 /**
  * ProductosTab
- * Muestra productos comprados en últimos 6 meses
+ * Muestra productos comprados en últimos 12 meses
  */
 function ProductosTab({ data, loading, error }) {
   if (loading) {
@@ -33,7 +31,7 @@ function ProductosTab({ data, loading, error }) {
   }
 
   if (!data || !data.productos || data.productos.length === 0) {
-    return <Alert severity="info">Sin productos comprados en los últimos 6 meses</Alert>;
+    return <Alert severity="info">Sin productos comprados en los últimos 12 meses</Alert>;
   }
 
   const { productos } = data;
@@ -46,21 +44,6 @@ function ProductosTab({ data, loading, error }) {
     }).format(value || 0);
   };
 
-  const getTrendingIcon = (variacion) => {
-    if (variacion > 0) {
-      return <TrendingUpIcon sx={{ color: '#4caf50', fontSize: '1.2rem' }} />;
-    } else if (variacion < 0) {
-      return <TrendingDownIcon sx={{ color: '#f44336', fontSize: '1.2rem' }} />;
-    }
-    return null;
-  };
-
-  const getTrendingColor = (variacion) => {
-    if (variacion > 0) return '#4caf50';
-    if (variacion < 0) return '#f44336';
-    return '#ff9800';
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
@@ -70,12 +53,12 @@ function ProductosTab({ data, loading, error }) {
   return (
     <Box>
       <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-        🛍️ Productos (Últimos 6 Meses)
+        🛍️ Productos (Últimos 12 Meses)
       </Typography>
 
       <Alert severity="info" sx={{ mb: 2 }}>
         <Typography variant="body2">
-          Se muestran los productos comprados en los últimos 6 meses, comparados con el promedio del período anterior (6-12 meses atrás).
+          Se muestran los productos comprados en los últimos 12 meses. Las columnas indican: venta del mes en curso, promedio mensual últimos 12 meses, relación entre ambos, precio promedio de compra y fecha de última factura emitida.
         </Typography>
       </Alert>
 
@@ -87,19 +70,19 @@ function ProductosTab({ data, loading, error }) {
                 Producto
               </TableCell>
               <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                Cantidad (6m)
+                Venta Mes Actual
               </TableCell>
               <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                Promedio (anterior)
+                Promedio 12M
               </TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                Variación
+                Relación
               </TableCell>
               <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                Valor Total
+                Precio Promedio
               </TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                Última Compra
+                Última Factura
               </TableCell>
             </TableRow>
           </TableHead>
@@ -124,39 +107,29 @@ function ProductosTab({ data, loading, error }) {
                   </Box>
                 </TableCell>
 
-                {/* Cantidad (6m) */}
+                {/* Venta Mes Actual */}
                 <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                  {producto.cantidad_total} un.
+                  {(producto.venta_mes_actual || 0).toFixed(0)} un.
                 </TableCell>
 
-                {/* Promedio anterior */}
+                {/* Promedio 12M */}
                 <TableCell align="right">
-                  {(producto.cantidad_promedio_anterior || 0).toFixed(0)} un.
+                  {(producto.venta_promedio_12m || 0).toFixed(1)} un.
                 </TableCell>
 
-                {/* Variación */}
-                <TableCell
-                  align="center"
-                  sx={{
-                    color: getTrendingColor(producto.variacion_porcentaje || 0),
-                    fontWeight: 'bold',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                    {getTrendingIcon(producto.variacion_porcentaje || 0)}
-                    <Typography variant="body2">
-                      {(producto.variacion_porcentaje || 0) > 0 ? '+' : ''}
-                      {(producto.variacion_porcentaje || 0).toFixed(1)}%
-                    </Typography>
-                  </Box>
+                {/* Relación */}
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                  {producto.venta_promedio_12m > 0
+                    ? (producto.relacion_venta || 0).toFixed(2)
+                    : '-'}
                 </TableCell>
 
-                {/* Valor Total */}
+                {/* Precio Promedio */}
                 <TableCell align="right">
-                  {formatCurrency(producto.valor_total)}
+                  {formatCurrency(producto.precio_promedio)}
                 </TableCell>
 
-                {/* Última Compra */}
+                {/* Última Factura */}
                 <TableCell align="center">
                   <Chip
                     label={formatDate(producto.ultima_compra)}
@@ -175,21 +148,7 @@ function ProductosTab({ data, loading, error }) {
         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
           📌 Total de productos comprados: {productos.length}
         </Typography>
-        <Typography variant="caption">
-          Valor total de compras en 6 meses: {formatCurrency(
-            productos.reduce((sum, p) => sum + (p.valor_total || 0), 0)
-          )}
-        </Typography>
       </Alert>
-
-      {/* Insight de productos con crecimiento */}
-      {productos.some(p => p.variacion_porcentaje > 20) && (
-        <Alert severity="info" sx={{ mt: 1 }}>
-          <Typography variant="caption">
-            ✅ Este cliente aumentó la compra de {productos.filter(p => p.variacion_porcentaje > 20).length} productos respecto al período anterior.
-          </Typography>
-        </Alert>
-      )}
     </Box>
   );
 }
