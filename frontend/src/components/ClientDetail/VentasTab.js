@@ -106,7 +106,7 @@ function VentasTab({ data, loading, error }) {
                 }}
               >
                 {variacion_porcentaje > 0 ? '+' : ''}
-                {variacion_porcentaje.toFixed(1)}%
+                {(variacion_porcentaje || 0).toFixed(1)}%
               </Typography>
               {getTrendingIcon()}
             </Box>
@@ -172,7 +172,7 @@ function VentasTab({ data, loading, error }) {
                   const anterior = parseFloat(meses[idx - 1].monto || 0);
                   const actual = parseFloat(mes.monto || 0);
                   if (anterior > 0) {
-                    variacion = ((actual - anterior) / anterior * 100).toFixed(1);
+                    variacion = (((actual - anterior) / anterior) * 100).toFixed(1);
                     variacionColor = variacion > 0 ? '#4caf50' : '#f44336';
                   }
                 }
