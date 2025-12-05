@@ -29,7 +29,9 @@ function DeudaTab({ data, loading, error }) {
     return <Alert severity="info">Sin información de deuda</Alert>;
   }
 
-  const { deuda, documentos } = data;
+  // Destructurar data que viene del backend con estructura: { deuda: {...}, documentos: [...] }
+  const deudaData = data.deuda || data;
+  const documentos = data.documentos || [];
   
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-CL', {
@@ -48,22 +50,22 @@ function DeudaTab({ data, loading, error }) {
     <Box>
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={6}>
-          <Card sx={{ p: 2, textAlign: 'center', bgcolor: deuda.total_deuda > 0 ? '#ffebee' : '#e8f5e9' }}>
+          <Card sx={{ p: 2, textAlign: 'center', bgcolor: deudaData.total_deuda > 0 ? '#ffebee' : '#e8f5e9' }}>
             <Typography variant="caption" sx={{ color: '#666' }}>Deuda Total</Typography>
-            <Typography variant="h5" sx={{ fontWeight: 'bold', color: deuda.total_deuda > 0 ? '#f44336' : '#4caf50', mt: 1 }}>
-              {formatCurrency(deuda.total_deuda)}
+            <Typography variant="h5" sx={{ fontWeight: 'bold', color: deudaData.total_deuda > 0 ? '#f44336' : '#4caf50', mt: 1 }}>
+              {formatCurrency(deudaData.total_deuda)}
             </Typography>
             <Typography variant="caption" sx={{ color: '#999', display: 'block', mt: 1 }}>
-              {deuda.cantidad_facturas} documento(s)
+              {deudaData.cantidad_facturas} documento(s)
             </Typography>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} md={6}>
-          <Card sx={{ p: 2, textAlign: 'center', bgcolor: deuda.saldo_favor > 0 ? '#e8f5e9' : '#f5f5f5' }}>
+          <Card sx={{ p: 2, textAlign: 'center', bgcolor: deudaData.saldo_favor > 0 ? '#e8f5e9' : '#f5f5f5' }}>
             <Typography variant="caption" sx={{ color: '#666' }}>Saldo a Favor</Typography>
-            <Typography variant="h5" sx={{ fontWeight: 'bold', color: deuda.saldo_favor > 0 ? '#4caf50' : '#999', mt: 1 }}>
-              {formatCurrency(deuda.saldo_favor)}
+            <Typography variant="h5" sx={{ fontWeight: 'bold', color: deudaData.saldo_favor > 0 ? '#4caf50' : '#999', mt: 1 }}>
+              {formatCurrency(deudaData.saldo_favor)}
             </Typography>
             <Typography variant="caption" sx={{ color: '#999', display: 'block', mt: 1 }}>
               Disponible para usar
@@ -72,15 +74,15 @@ function DeudaTab({ data, loading, error }) {
         </Grid>
       </Grid>
 
-      {deuda.total_deuda === 0 && (
+      {deudaData.total_deuda === 0 && (
         <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mb: 2 }}>
           <Typography variant="body2" sx={{ fontWeight: 'bold' }}>✅ Cliente sin deuda pendiente</Typography>
         </Alert>
       )}
 
-      {deuda.total_deuda > 0 && (
+      {deudaData.total_deuda > 0 && (
         <Alert severity="warning" icon={<WarningIcon />} sx={{ mb: 2 }}>
-          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>⚠️ Cliente con deuda pendiente: {formatCurrency(deuda.total_deuda)}</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>⚠️ Cliente con deuda pendiente: {formatCurrency(deudaData.total_deuda)}</Typography>
         </Alert>
       )}
 
@@ -116,7 +118,7 @@ function DeudaTab({ data, loading, error }) {
         </Box>
       )}
 
-      {(!documentos || documentos.length === 0) && deuda.total_deuda === 0 && (
+      {(!documentos || documentos.length === 0) && deudaData.total_deuda === 0 && (
         <Box sx={{ mt: 3, p: 2, bgcolor: '#f9f9f9', borderRadius: 1, textAlign: 'center' }}>
           <Typography variant="body2" sx={{ color: '#999' }}>No hay documentos con deuda</Typography>
         </Box>
