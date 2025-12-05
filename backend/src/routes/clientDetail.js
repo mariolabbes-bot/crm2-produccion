@@ -219,14 +219,19 @@ router.get('/:rut/ventas-mensual', auth(), async (req, res) => {
     const result = await pool.query(query, [rut]);
     
     // Calcular promedio trimestre anterior
-    const meses = result.rows;
+    const meses = result.rows.map(m => ({
+      ...m,
+      monto: parseFloat(m.monto) || 0,
+      num_ventas: parseInt(m.num_ventas) || 0
+    }));
+    
     const mesActual = meses[0];
     const trimestralAnterior = meses.slice(1, 4);
-    const promedioTrimestral = trimestralAnterior.reduce((sum, m) => sum + parseFloat(m.monto || 0), 0) / 3;
+    const promedioTrimestral = trimestralAnterior.reduce((sum, m) => sum + (m.monto || 0), 0) / 3;
     
     // Calcular variación
     const variacion = mesActual.monto ? 
-      ((mesActual.monto - promedioTrimestral) / promedioTrimestral * 100).toFixed(2) : 
+      parseFloat(((mesActual.monto - promedioTrimestral) / promedioTrimestral * 100).toFixed(2)) : 
       0;
     
     res.json({
@@ -234,8 +239,8 @@ router.get('/:rut/ventas-mensual', auth(), async (req, res) => {
       data: {
         meses: meses,
         promedio_trimestre_anterior: parseFloat(promedioTrimestral.toFixed(2)),
-        mes_actual: parseFloat(mesActual.monto),
-        variacion_porcentaje: parseFloat(variacion),
+        mes_actual: mesActual.monto,
+        variacion_porcentaje: variacion,
         trending: variacion > 0 ? 'UP' : variacion < 0 ? 'DOWN' : 'STABLE'
       }
     });
@@ -306,11 +311,20 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
     
     const result = await pool.query(query, [rut]);
     
+    // Convertir valores STRING a números
+    const productosConvertidos = result.rows.map(producto => ({
+      ...producto,
+      cantidad_total: parseFloat(producto.cantidad_total) || 0,
+      valor_total: parseFloat(producto.valor_total) || 0,
+      cantidad_promedio_anterior: parseFloat(producto.cantidad_promedio_anterior) || 0,
+      variacion_porcentaje: parseFloat(producto.variacion_porcentaje) || 0
+    }));
+    
     res.json({
       success: true,
       data: {
-        productos: result.rows,
-        total_productos: result.rows.length
+        productos: productosConvertidos,
+        total_productos: productosConvertidos.length
       }
     });
     
