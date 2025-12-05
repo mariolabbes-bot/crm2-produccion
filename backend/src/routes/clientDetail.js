@@ -321,7 +321,7 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
       LEFT JOIN ventas_mes_actual vma ON pc.sku = vma.sku
       LEFT JOIN ventas_12m v12 ON pc.sku = v12.sku
       WHERE pc.cantidad_total > 0
-      ORDER BY pc.cantidad_total DESC
+      ORDER BY COALESCE(v12.cantidad_promedio_12m, 0) DESC
       LIMIT 15
     `;
     
