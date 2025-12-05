@@ -266,48 +266,55 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
     const { rut } = req.params;
     
     const query = `
-      WITH productos_cliente AS (
+      WITH ventas_mes_actual AS (
+        SELECT 
+          COALESCE(v.sku, 'SIN_SKU') as sku,
+          SUM(v.cantidad) as cantidad_mes_actual
+        FROM venta v
+        WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM((SELECT nombre FROM cliente WHERE rut = $1)))
+          AND date_trunc('month', v.fecha_emision) = date_trunc('month', CURRENT_DATE)
+        GROUP BY COALESCE(v.sku, 'SIN_SKU')
+      ),
+      ventas_12m AS (
+        SELECT 
+          COALESCE(v.sku, 'SIN_SKU') as sku,
+          AVG(v.cantidad) as cantidad_promedio_12m
+        FROM venta v
+        WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM((SELECT nombre FROM cliente WHERE rut = $1)))
+          AND v.fecha_emision >= CURRENT_DATE - INTERVAL '12 months'
+        GROUP BY COALESCE(v.sku, 'SIN_SKU')
+      ),
+      productos_cliente AS (
         SELECT 
           COALESCE(v.sku, 'SIN_SKU') as sku,
           v.descripcion,
           SUM(v.cantidad) as cantidad_total,
-          COUNT(DISTINCT v.folio) as num_compras,
-          SUM(v.valor_total) as valor_total,
+          AVG(v.valor_unitario) as precio_promedio,
           MAX(v.fecha_emision) as ultima_compra
         FROM venta v
         WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM((SELECT nombre FROM cliente WHERE rut = $1)))
-        AND v.fecha_emision >= CURRENT_DATE - INTERVAL '6 months'
+          AND v.fecha_emision >= CURRENT_DATE - INTERVAL '12 months'
         GROUP BY COALESCE(v.sku, 'SIN_SKU'), v.descripcion
-      ),
-      promedio_anterior AS (
-        SELECT 
-          COALESCE(v.sku, 'SIN_SKU') as sku,
-          AVG(v.cantidad) as cantidad_promedio
-        FROM venta v
-        WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM((SELECT nombre FROM cliente WHERE rut = $1)))
-        AND v.fecha_emision >= CURRENT_DATE - INTERVAL '12 months'
-        AND v.fecha_emision < CURRENT_DATE - INTERVAL '6 months'
-        GROUP BY COALESCE(v.sku, 'SIN_SKU')
       )
       SELECT 
         pc.sku,
         pc.descripcion,
-        pc.cantidad_total,
-        pc.num_compras,
-        pc.valor_total,
-        pc.ultima_compra,
-        ROUND(COALESCE(pa.cantidad_promedio, 0), 2) as cantidad_promedio_anterior,
+        COALESCE(vma.cantidad_mes_actual, 0) as venta_mes_actual,
+        ROUND(COALESCE(v12.cantidad_promedio_12m, 0), 2) as venta_promedio_12m,
         ROUND(
           CASE 
-            WHEN COALESCE(pa.cantidad_promedio, 0) = 0 THEN 0
-            ELSE ((pc.cantidad_total - pa.cantidad_promedio) / pa.cantidad_promedio * 100)
+            WHEN COALESCE(v12.cantidad_promedio_12m, 0) = 0 THEN 0
+            ELSE (COALESCE(vma.cantidad_mes_actual, 0) / v12.cantidad_promedio_12m)
           END, 2
-        ) as variacion_porcentaje
+        ) as relacion_venta,
+        ROUND(pc.precio_promedio, 2) as precio_promedio,
+        pc.ultima_compra
       FROM productos_cliente pc
-      LEFT JOIN promedio_anterior pa ON pc.sku = pa.sku
+      LEFT JOIN ventas_mes_actual vma ON pc.sku = vma.sku
+      LEFT JOIN ventas_12m v12 ON pc.sku = v12.sku
       WHERE pc.cantidad_total > 0
-      ORDER BY pc.cantidad_total DESC
-      LIMIT 20
+      ORDER BY COALESCE(vma.cantidad_mes_actual, 0) DESC
+      LIMIT 15
     `;
     
     const result = await pool.query(query, [rut]);
