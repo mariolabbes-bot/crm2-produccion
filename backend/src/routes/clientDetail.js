@@ -26,20 +26,23 @@ router.get('/:rut', auth(), async (req, res) => {
     const user = req.user;
     const isManager = user.rol?.toLowerCase() === 'manager';
     
+    console.log(`📋 [GET /client-detail/:rut] RUT: ${rut}, Usuario: ${user.nombre_vendedor || user.alias}`);
+    
     // Query para obtener info básica del cliente
     let query = `
       SELECT 
-        c.rut,
-        c.nombre,
-        c.email,
-        c.telefono,
-        c.vendedor_alias,
-        c.ciudad,
-        c.comuna,
-        c.created_at,
-        c.updated_at
-      FROM cliente c
-      WHERE c.rut = $1
+        rut,
+        nombre,
+        email,
+        telefono_principal as telefono,
+        nombre_vendedor,
+        ciudad,
+        comuna,
+        direccion,
+        categoria,
+        subcategoria
+      FROM cliente
+      WHERE rut = $1
     `;
     
     const result = await pool.query(query, [rut]);
@@ -49,15 +52,16 @@ router.get('/:rut', auth(), async (req, res) => {
     }
     
     const cliente = result.rows[0];
+    console.log(`   ✅ Cliente encontrado: ${cliente.nombre}`);
     
-    // Validar permisos: vendedor solo ve sus clientes (basado en vendedor_alias)
+    // Validar permisos: vendedor solo ve sus clientes (basado en nombre_vendedor)
     if (!isManager) {
       const nombreVendedor = user.nombre_vendedor || user.alias || '';
-      if (nombreVendedor && cliente.vendedor_alias) {
-        if (nombreVendedor.toUpperCase().trim() !== cliente.vendedor_alias.toUpperCase().trim()) {
-          return res.status(403).json({ msg: 'No tienes permiso para ver este cliente' });
-        }
-      } else if (nombreVendedor !== cliente.vendedor_alias) {
+      if (!nombreVendedor) {
+        return res.status(403).json({ msg: 'Usuario sin nombre_vendedor asignado' });
+      }
+      
+      if (cliente.nombre_vendedor && nombreVendedor.toUpperCase().trim() !== cliente.nombre_vendedor.toUpperCase().trim()) {
         return res.status(403).json({ msg: 'No tienes permiso para ver este cliente' });
       }
     }
@@ -68,7 +72,7 @@ router.get('/:rut', auth(), async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Error en GET /client-detail/:rut:', error);
+    console.error('❌ Error en GET /client-detail/:rut:', error.message);
     res.status(500).json({
       success: false,
       msg: 'Error al obtener información del cliente',
@@ -86,66 +90,76 @@ router.get('/:rut', auth(), async (req, res) => {
 router.get('/:rut/deuda', auth(), async (req, res) => {
   try {
     const { rut } = req.params;
-    console.log(`📊 [GET /client-detail/:rut/deuda] Obteniendo deuda para RUT: ${rut}`);
+    console.log(`� [GET /client-detail/:rut/deuda] RUT: ${rut}`);
     
-    // 1. Verificar que cliente existe
-    const clienteCheck = await pool.query('SELECT nombre FROM cliente WHERE rut = $1', [rut]);
-    if (clienteCheck.rows.length === 0) {
+    // 1. Obtener cliente
+    const clienteResult = await pool.query('SELECT nombre FROM cliente WHERE rut = $1', [rut]);
+    if (clienteResult.rows.length === 0) {
       return res.status(404).json({ msg: 'Cliente no encontrado' });
     }
     
-    const nombreCliente = clienteCheck.rows[0].nombre;
-    console.log(`   Cliente encontrado: ${nombreCliente}`);
+    const nombreCliente = clienteResult.rows[0].nombre;
+    console.log(`   Cliente: ${nombreCliente}`);
     
-    // 2. Obtener deuda de saldo_credito
+    // 2. Obtener deuda y crédito de saldo_credito
     const deudaResult = await pool.query(`
       SELECT 
-        deuda,
-        COALESCE(limite_credito, 0) as limite_credito,
-        ROUND(
-          CASE 
-            WHEN COALESCE(limite_credito, 0) = 0 THEN 0
-            ELSE (deuda / NULLIF(limite_credito, 0) * 100)
-          END, 2
-        ) as porcentaje_utilizacion,
-        COALESCE(limite_credito, 0) - COALESCE(deuda, 0) as disponible
+        rut,
+        cliente,
+        SUM(saldo_factura) as total_deuda,
+        SUM(saldo_favor_disponible) as total_favor,
+        COUNT(*) as cantidad_facturas,
+        MAX(fecha_emision) as fecha_ultima
       FROM saldo_credito
-      WHERE UPPER(TRIM(cliente)) = UPPER(TRIM($1))
-      LIMIT 1
-    `, [nombreCliente]);
+      WHERE rut = $1
+      GROUP BY rut, cliente
+    `, [rut]);
     
-    // 3. Obtener documentos con deuda
+    // 3. Obtener documentos detallados
     const documentosResult = await pool.query(`
       SELECT 
-        v.folio,
-        v.tipo_documento,
-        v.fecha_emision,
-        v.valor_total,
-        COALESCE(v.valor_total, 0) as deuda_documento
-      FROM venta v
-      WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM($1))
-      AND COALESCE(v.valor_total, 0) > 0
-      ORDER BY v.fecha_emision DESC
+        rut,
+        folio,
+        tipo_documento,
+        fecha_emision,
+        total_factura,
+        deuda_cancelada,
+        saldo_factura as deuda_documento
+      FROM saldo_credito
+      WHERE rut = $1
+      ORDER BY fecha_emision DESC
       LIMIT 20
-    `, [nombreCliente]);
+    `, [rut]);
     
     const deuda = deudaResult.rows[0] || {
-      deuda: 0,
-      limite_credito: 0,
-      porcentaje_utilizacion: 0,
-      disponible: 0
+      total_deuda: 0,
+      total_favor: 0,
+      cantidad_facturas: 0
     };
+    
+    console.log(`   Deuda total: $${deuda.total_deuda}, Documentos: ${deuda.cantidad_facturas}`);
     
     res.json({
       success: true,
       data: {
-        deuda: deuda,
-        documentos: documentosResult.rows
+        deuda: {
+          total_deuda: parseFloat(deuda.total_deuda) || 0,
+          saldo_favor: parseFloat(deuda.total_favor) || 0,
+          cantidad_facturas: deuda.cantidad_facturas || 0,
+          fecha_ultima: deuda.fecha_ultima
+        },
+        documentos: documentosResult.rows.map(doc => ({
+          folio: doc.folio,
+          tipo_documento: doc.tipo_documento,
+          fecha_emision: doc.fecha_emision,
+          total_factura: parseFloat(doc.total_factura) || 0,
+          deuda_documento: parseFloat(doc.deuda_documento) || 0
+        }))
       }
     });
     
   } catch (error) {
-    console.error('❌ Error en GET /client-detail/:rut/deuda:', error);
+    console.error('❌ Error en GET /client-detail/:rut/deuda:', error.message);
     res.status(500).json({
       success: false,
       msg: 'Error al obtener deuda del cliente',
