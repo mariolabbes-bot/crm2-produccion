@@ -305,6 +305,7 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
         ) as variacion_porcentaje
       FROM productos_cliente pc
       LEFT JOIN promedio_anterior pa ON pc.sku = pa.sku
+      WHERE pc.cantidad_total > 0
       ORDER BY pc.cantidad_total DESC
       LIMIT 20
     `;
