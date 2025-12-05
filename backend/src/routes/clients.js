@@ -370,61 +370,37 @@ router.get('/top-ventas-v2', (req, res, next) => {
   }
 });
 
-// GET /api/clients/facturas-impagas - Clientes con ventas recientes pero facturas impagas >30 días
+// GET /api/clients/facturas-impagas - Clientes con facturas impagas de SALDO_CREDITO
 router.get('/facturas-impagas', auth(), async (req, res) => {
-  console.log('🎯🎯🎯 ENDPOINT /facturas-impagas INICIADO 🎯🎯🎯');
+  console.log('🎯🎯🎯 ENDPOINT /facturas-impagas v3.0 (SALDO_CREDITO) INICIADO 🎯🎯🎯');
   try {
-    console.log('⚠️  [FACTURAS-IMPAGAS v2.0] Obteniendo clientes con facturas impagas...');
+    console.log('⚠️  [FACTURAS-IMPAGAS v3.0] Obteniendo clientes con facturas impagas de SALDO_CREDITO...');
     console.log('👤 Usuario:', JSON.stringify(req.user, null, 2));
     
     const user = req.user;
     const isManager = user.rol?.toLowerCase() === 'manager';
     
-    // Construir filtro de vendedor
+    // Obtener información de vendedores para filtro
     let vendedorFilter = '';
     let params = [];
     
     if (!isManager) {
       const nombreVendedor = user.nombre_vendedor || user.alias || '';
       if (nombreVendedor) {
-        vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
+        vendedorFilter = 'AND UPPER(TRIM(c.nombre_vendedor)) = UPPER(TRIM($1))';
         params.push(nombreVendedor);
       }
     } else if (req.query.vendedor_id) {
       const vendedorRut = req.query.vendedor_id;
       const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
       if (vendedorQuery.rows.length > 0) {
-        vendedorFilter = 'AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))';
+        vendedorFilter = 'AND UPPER(TRIM(c.nombre_vendedor)) = UPPER(TRIM($1))';
         params.push(vendedorQuery.rows[0].nombre_vendedor);
       }
     }
     
-    // Query simplificado: clientes con ventas recientes y facturas antiguas sin pago completo
+    // Query: Usar SALDO_CREDITO directamente (datos reales de deuda)
     const query = `
-      WITH ventas_recientes AS (
-        SELECT DISTINCT v.cliente
-        FROM venta v
-        WHERE v.fecha_emision >= NOW() - INTERVAL '3 months'
-        ${vendedorFilter}
-      ),
-      facturas_antiguas AS (
-        SELECT 
-          v.cliente,
-          COUNT(*) as cantidad_facturas_impagas,
-          SUM(v.valor_total) as monto_total_facturado,
-          MIN(v.fecha_emision) as factura_mas_antigua
-        FROM venta v
-        WHERE v.fecha_emision <= NOW() - INTERVAL '30 days'
-        ${vendedorFilter}
-        GROUP BY v.cliente
-      ),
-      abonos_por_cliente AS (
-        SELECT 
-          UPPER(TRIM(a.cliente)) as cliente_normalizado,
-          SUM(COALESCE(a.monto_neto, a.monto, a.monto_total, 0)) as total_abonado
-        FROM abono a
-        GROUP BY UPPER(TRIM(a.cliente))
-      )
       SELECT 
         c.rut,
         c.nombre,
@@ -432,17 +408,19 @@ router.get('/facturas-impagas', auth(), async (req, res) => {
         c.ciudad,
         c.telefono_principal as telefono,
         c.email,
-        fa.cantidad_facturas_impagas,
-        fa.monto_total_facturado,
-        COALESCE(ab.total_abonado, 0) as total_abonado,
-        (fa.monto_total_facturado - COALESCE(ab.total_abonado, 0)) as monto_total_impago,
-        fa.factura_mas_antigua,
-        EXTRACT(DAY FROM NOW() - fa.factura_mas_antigua)::INTEGER as dias_mora
+        c.nombre_vendedor,
+        COUNT(DISTINCT sc.folio) as cantidad_facturas_impagas,
+        SUM(sc.total_factura) as monto_total_facturado,
+        SUM(sc.saldo_factura) as monto_total_impago,
+        COALESCE(SUM(sc.saldo_favor_disponible), 0) as saldo_favor_disponible,
+        MIN(sc.fecha_emision) as factura_mas_antigua,
+        EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision))::INTEGER as dias_mora
       FROM cliente c
-      INNER JOIN ventas_recientes vr ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(vr.cliente))
-      INNER JOIN facturas_antiguas fa ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(fa.cliente))
-      LEFT JOIN abonos_por_cliente ab ON UPPER(TRIM(c.nombre)) = ab.cliente_normalizado
-      WHERE (fa.monto_total_facturado - COALESCE(ab.total_abonado, 0)) > 0
+      INNER JOIN saldo_credito sc ON c.rut = sc.rut
+      WHERE sc.saldo_factura > 0
+      ${vendedorFilter}
+      GROUP BY c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal, c.email, c.nombre_vendedor
+      HAVING COUNT(DISTINCT sc.folio) > 0
       ORDER BY monto_total_impago DESC
       LIMIT 20
     `;
