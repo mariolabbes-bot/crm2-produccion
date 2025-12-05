@@ -415,3 +415,16 @@ export const downloadInformePendientes = (filename) => {
 export const getImportStats = () => {
   return apiFetch(`${API_URL}/import-stats/stats`);
 };
+
+// CLIENT DETAIL - Ficha de cliente
+export const getClientDetail = (rut) => apiFetch(`${API_URL}/client-detail/${rut}`);
+export const getClientDeuda = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/deuda`);
+export const getClientVentasMensual = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/ventas-mensual`);
+export const getClientProductos6m = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/productos-6m`);
+export const getClientActividades = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/actividades`);
+export const createClientActividad = (rut, comentario) => 
+  apiFetch(`${API_URL}/client-detail/${rut}/actividades`, { 
+    method: 'POST', 
+    body: JSON.stringify({ comentario }) 
+  });
+

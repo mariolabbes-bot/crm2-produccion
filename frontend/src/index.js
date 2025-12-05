@@ -23,6 +23,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import MainLayout from './components/MainLayout';
 import DashboardPage from './pages/DashboardPage';
 import ClientesPage from './pages/ClientesPage';
+import ClientDetailPage from './pages/ClientDetailPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 const theme = lubricarTheme;
@@ -253,6 +254,7 @@ const App = () => {
             <Route path="/" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
               <Route index element={<DashboardPage />} />
               <Route path="clientes" element={<ClientesPage />} />
+              <Route path="cliente/:rut" element={<ClientDetailPage />} />
             </Route>
             
             {/* Rutas antiguas (mantener temporalmente) */}
