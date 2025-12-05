@@ -275,14 +275,22 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
           AND date_trunc('month', v.fecha_emision) = date_trunc('month', CURRENT_DATE)
         GROUP BY COALESCE(v.sku, 'SIN_SKU')
       ),
-      ventas_12m AS (
+      ventas_por_mes AS (
         SELECT 
           COALESCE(v.sku, 'SIN_SKU') as sku,
-          AVG(v.cantidad) as cantidad_promedio_12m
+          date_trunc('month', v.fecha_emision) as mes,
+          SUM(v.cantidad) as cantidad_mes
         FROM venta v
         WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM((SELECT nombre FROM cliente WHERE rut = $1)))
           AND v.fecha_emision >= CURRENT_DATE - INTERVAL '12 months'
-        GROUP BY COALESCE(v.sku, 'SIN_SKU')
+        GROUP BY COALESCE(v.sku, 'SIN_SKU'), date_trunc('month', v.fecha_emision)
+      ),
+      ventas_12m AS (
+        SELECT 
+          sku,
+          AVG(cantidad_mes) as cantidad_promedio_12m
+        FROM ventas_por_mes
+        GROUP BY sku
       ),
       productos_cliente AS (
         SELECT 
@@ -313,7 +321,7 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
       LEFT JOIN ventas_mes_actual vma ON pc.sku = vma.sku
       LEFT JOIN ventas_12m v12 ON pc.sku = v12.sku
       WHERE pc.cantidad_total > 0
-      ORDER BY COALESCE(vma.cantidad_mes_actual, 0) DESC
+      ORDER BY pc.cantidad_total DESC
       LIMIT 15
     `;
     
