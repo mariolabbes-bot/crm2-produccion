@@ -18,6 +18,7 @@ import ImportPanel from './components/ImportPanel';
 import Papa from 'papaparse';
 import { ThemeProvider } from '@mui/material/styles';
 import lubricarTheme from './theme/lubricarTheme';
+import './styles/layout.css';
 import { Container, Box, Typography, TextField, Button, List, ListItem, ListItemText, Alert, Link, AppBar, Toolbar, IconButton, CircularProgress } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MainLayout from './components/MainLayout';

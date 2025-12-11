@@ -284,6 +284,15 @@ const lubricarTheme = createTheme({
         },
       },
     },
+    // Utilidades para tarjetas/tablas consistentes
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          padding: 16,
+          marginBottom: 16,
+        },
+      },
+    },
     MuiChip: {
       styleOverrides: {
         root: {

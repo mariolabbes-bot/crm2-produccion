@@ -1,0 +1,19 @@
+/* Utilidades layout para móviles y consistencia */
+.card-unified {
+  padding: 12px !important;
+  box-sizing: border-box;
+}
+
+.table-unified {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .card-unified {
+    padding: 8px !important;
+  }
+  .table-unified {
+    font-size: 0.9rem;
+  }
+}

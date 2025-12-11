@@ -221,7 +221,7 @@ const ClientesPage = () => {
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       {/* Buscador */}
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper className="card-unified" sx={{ mb: 3 }}>
         <Autocomplete
           freeSolo
           fullWidth
@@ -253,8 +253,8 @@ const ClientesPage = () => {
         />
 
         {/* Resultados de búsqueda (tabla) */}
-        {searchResults.length > 0 && (
-          <Box sx={{ mt: 2, height: 400 }}>
+          {searchResults.length > 0 && (
+          <Box className="table-unified" sx={{ mt: 2, height: 400 }}>
             <Typography variant="subtitle2" gutterBottom>
               {searchResults.length} resultado(s) encontrado(s)
             </Typography>
@@ -291,7 +291,7 @@ const ClientesPage = () => {
       <Grid container spacing={3}>
         {/* Top 20 Clientes por Ventas */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column' }}>
+    <Paper className="card-unified" sx={{ display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TrendingUpIcon sx={{ color: '#1976d2', mr: 1 }} />
               <Typography variant="h6" component="h2">
@@ -301,12 +301,12 @@ const ClientesPage = () => {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Últimos 12 meses
             </Typography>
-            {loading ? (
+              {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <Box sx={{ height: 600, width: '100%' }}>
+              <Box className="table-unified" sx={{ height: 600, width: '100%' }}>
                 <DataGrid
                   rows={topClientes}
                   columns={topClientesColumns}
@@ -339,7 +339,7 @@ const ClientesPage = () => {
 
         {/* Clientes con Facturas Impagas */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column' }}>
+    <Paper className="card-unified" sx={{ display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <WarningIcon sx={{ color: '#d32f2f', mr: 1 }} />
               <Typography variant="h6" component="h2">
@@ -349,12 +349,12 @@ const ClientesPage = () => {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Con ventas en últimos 3 meses y facturas pendientes &gt;30 días
             </Typography>
-            {loading ? (
+              {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <Box sx={{ height: 600, width: '100%' }}>
+              <Box className="table-unified" sx={{ height: 600, width: '100%' }}>
                 <DataGrid
                   rows={facturasImpagas}
                   columns={facturasImpagasColumns}
