@@ -14,26 +14,36 @@ import {
   Settings as SettingsIcon,
   HelpOutline as HelpIcon,
 } from '@mui/icons-material';
-import { SIDEBAR_WIDTH } from './Sidebar';
+import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { useAuth } from '../contexts/AuthContext';
+import { useUI } from '../contexts/UIContext';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const TopBar = ({ title = 'Dashboard', subtitle = null }) => {
   const { user } = useAuth();
+
+  const { sidebarCollapsed, toggleSidebar } = useUI();
+  const currentSidebarWidth = sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
 
   return (
     <AppBar 
       position="fixed" 
       elevation={0}
       sx={{ 
-        width: `calc(100% - ${SIDEBAR_WIDTH}px)`,
-        ml: `${SIDEBAR_WIDTH}px`,
+        width: `calc(100% - ${currentSidebarWidth}px)`,
+        ml: `${currentSidebarWidth}px`,
         backgroundColor: '#FFFFFF',
         borderBottom: '3px solid #E57A2D', // Borde naranja Lubricar
         color: '#111827',
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between', minHeight: 70 }}>
-        {/* Título de la Página */}
+        {/* Título de la Página + toggle */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton onClick={toggleSidebar} size="small">
+            <MenuIcon />
+          </IconButton>
+        </Box>
         <Box>
           <Typography 
             variant="h5" 

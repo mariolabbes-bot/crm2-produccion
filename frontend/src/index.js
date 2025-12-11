@@ -25,6 +25,7 @@ import DashboardPage from './pages/DashboardPage';
 import ClientesPage from './pages/ClientesPage';
 import ClientDetailPage from './pages/ClientDetailPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { UIProvider } from './contexts/UIContext';
 
 const theme = lubricarTheme;
 
@@ -245,7 +246,8 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <AuthProvider>
-        <BrowserRouter>
+        <UIProvider>
+          <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<ManagerRoute><Register /></ManagerRoute>} />
@@ -270,7 +272,8 @@ const App = () => {
             <Route path="/dashboard-nuevo" element={<DashboardNuevo />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
-        </BrowserRouter>
+          </BrowserRouter>
+        </UIProvider>
       </AuthProvider>
     </ThemeProvider>
   );

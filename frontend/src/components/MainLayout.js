@@ -1,7 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box, Toolbar } from '@mui/material';
-import Sidebar, { SIDEBAR_WIDTH } from './Sidebar';
+import Sidebar, { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
+import { useUI } from '../contexts/UIContext';
 import TopBar from './TopBar';
 
 /**
@@ -9,6 +10,10 @@ import TopBar from './TopBar';
  * Incluye Sidebar fijo + TopBar + Área de contenido
  */
 const MainLayout = ({ pageTitle = 'Dashboard', pageSubtitle = null }) => {
+  const { sidebarCollapsed } = useUI();
+
+  const currentSidebarWidth = sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F9FAFB' }}>
       {/* Sidebar - Fijo a la izquierda */}
@@ -19,8 +24,8 @@ const MainLayout = ({ pageTitle = 'Dashboard', pageSubtitle = null }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          width: `calc(100% - ${SIDEBAR_WIDTH}px)`,
-          ml: `${SIDEBAR_WIDTH}px`,
+          width: `calc(100% - ${currentSidebarWidth}px)`,
+          ml: `${currentSidebarWidth}px`,
         }}
       >
         {/* TopBar - Fijo arriba */}
