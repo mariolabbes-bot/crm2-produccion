@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
+  Autocomplete,
   TextField,
   Grid,
   Paper,
@@ -20,6 +21,7 @@ import { getTopClientesByVentas, getClientesFacturasImpagas, searchClientes } fr
 const ClientesPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [topClientes, setTopClientes] = useState([]);
   const [facturasImpagas, setFacturasImpagas] = useState([]);
@@ -50,13 +52,14 @@ const ClientesPage = () => {
     }
   };
 
-  // Buscar clientes con debounce
+  // Buscar clientes con debounce (disparado por inputValue)
   useEffect(() => {
     const timer = setTimeout(async () => {
-      if (searchTerm.trim().length >= 2) {
+      const q = inputValue || '';
+      if (q.trim().length >= 2) {
         setSearchLoading(true);
         try {
-          const results = await searchClientes(searchTerm);
+          const results = await searchClientes(q);
           setSearchResults(results || []);
         } catch (error) {
           console.error('Error buscando clientes:', error);
@@ -67,10 +70,10 @@ const ClientesPage = () => {
       } else {
         setSearchResults([]);
       }
-    }, 500);
+    }, 350);
 
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [inputValue]);
 
   // Formatear moneda
   const formatCurrency = (value) => {
@@ -219,22 +222,37 @@ const ClientesPage = () => {
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       {/* Buscador */}
       <Paper sx={{ p: 3, mb: 3 }}>
-        <TextField
+        <Autocomplete
+          freeSolo
           fullWidth
-          placeholder="Buscar cliente por nombre o RUT..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                {searchLoading ? <CircularProgress size={20} /> : <SearchIcon />}
-              </InputAdornment>
-            ),
+          options={searchResults}
+          getOptionLabel={(option) => `${option.nombre} (${option.rut})`}
+          inputValue={inputValue}
+          onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
+          onChange={(event, value) => {
+            if (value && value.rut) {
+              navigate(`/cliente/${value.rut}`);
+            }
           }}
-          variant="outlined"
+          loading={searchLoading}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder="Buscar cliente por nombre o RUT..."
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    {searchLoading ? <CircularProgress size={20} /> : <SearchIcon />}
+                  </InputAdornment>
+                ),
+              }}
+              variant="outlined"
+            />
+          )}
         />
-        
-        {/* Resultados de búsqueda */}
+
+        {/* Resultados de búsqueda (tabla) */}
         {searchResults.length > 0 && (
           <Box sx={{ mt: 2, height: 400 }}>
             <Typography variant="subtitle2" gutterBottom>
