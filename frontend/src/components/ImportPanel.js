@@ -217,7 +217,7 @@ const ImportPanel = () => {
         <Grid container spacing={3}>
           {/* Panel izquierdo: Upload */}
           <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3 }}>
+            <Paper className="card-unified" sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 1. Selecciona el tipo de datos
               </Typography>
@@ -378,7 +378,7 @@ const ImportPanel = () => {
 
           {/* Panel derecho: Resultados */}
           <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3 }}>
+            <Paper className="card-unified" sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Resultado de la Importación
               </Typography>

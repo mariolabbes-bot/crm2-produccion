@@ -630,7 +630,7 @@ const DashboardNuevo = () => {
           {/* Gráficos principales */}
           <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
-              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
+              <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos (últimos 6 meses)</Typography>
                 <ResponsiveContainer width="100%" height={chartHeights.line}>
                   <LineChart data={comparativo?.detalle?.length ? comparativo.detalle.map(row => ({ periodo: row.periodo, ventas: row.total_ventas, abonos: row.total_abonos })) : dummyLine}>

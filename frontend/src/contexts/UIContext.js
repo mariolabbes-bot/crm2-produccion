@@ -3,7 +3,8 @@ import React, { createContext, useContext, useState } from 'react';
 const UIContext = createContext();
 
 export const UIProvider = ({ children }) => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Por defecto colapsado
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   const toggleSidebar = () => setSidebarCollapsed(prev => !prev);
 

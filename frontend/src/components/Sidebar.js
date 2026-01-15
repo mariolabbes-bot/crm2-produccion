@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
+  Chat as ChatIcon,
   ShoppingCart as VentasIcon,
   Payment as AbonosIcon,
   People as ClientesIcon,
@@ -22,6 +23,7 @@ import {
   Settings as SettingsIcon,
   ExitToApp as LogoutIcon,
   UploadFile as ImportIcon,
+  Security as AdminIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -37,53 +39,67 @@ const Sidebar = () => {
   const { sidebarCollapsed, toggleSidebar } = useUI();
 
   const menuItems = [
-    { 
-      title: 'Dashboard', 
-      icon: <DashboardIcon />, 
+    {
+      title: 'Asistente',
+      icon: <ChatIcon />,
+      path: '/assistant',
+      color: '#E57A2D',
+      highlighted: true
+    },
+    {
+      title: 'Dashboard',
+      icon: <DashboardIcon />,
       path: '/',
       color: '#2B4F6F' // Azul Lubricar
     },
-    { 
-      title: 'Ventas', 
-      icon: <VentasIcon />, 
+    {
+      title: 'Ventas',
+      icon: <VentasIcon />,
       path: '/ventas',
       color: '#10B981' // Verde
     },
-    { 
-      title: 'Abonos', 
-      icon: <AbonosIcon />, 
+    {
+      title: 'Abonos',
+      icon: <AbonosIcon />,
       path: '/abonos',
       color: '#3478C3' // Azul claro
     },
-    { 
-      title: 'Clientes', 
-      icon: <ClientesIcon />, 
+    {
+      title: 'Clientes',
+      icon: <ClientesIcon />,
       path: '/clientes',
       color: '#A855F7' // Púrpura
     },
-    { 
-      title: 'Productos', 
-      icon: <ProductosIcon />, 
+    {
+      title: 'Productos',
+      icon: <ProductosIcon />,
       path: '/productos',
       color: '#E57A2D' // Naranja Lubricar
     },
-    { 
-      title: 'Reportes', 
-      icon: <ReportesIcon />, 
+    {
+      title: 'Reportes',
+      icon: <ReportesIcon />,
       path: '/reportes',
       color: '#14B8A6', // Teal
       divider: true
     },
-    { 
-      title: 'Importar Datos', 
-      icon: <ImportIcon />, 
+    {
+      title: 'Importar Datos',
+      icon: <ImportIcon />,
       path: '/import-data',
       color: '#F59E0B', // Amber
       managerOnly: true
     },
-    { 
-      title: 'Configuración', 
-      icon: <SettingsIcon />, 
+    {
+      title: 'Administración',
+      icon: <AdminIcon />, // Reusing SettingsIcon or could import AdminPanelSettings if available, but Settings is fine for now or I can add another icon import
+      path: '/admin',
+      color: '#EF4444', // Red for danger/admin
+      managerOnly: true
+    },
+    {
+      title: 'Configuración',
+      icon: <SettingsIcon />,
       path: '/configuracion',
       color: '#6B7280' // Gris
     },
@@ -122,13 +138,13 @@ const Sidebar = () => {
       }}
     >
       {/* Logo y Título */}
-  <Box sx={{ p: sidebarCollapsed ? 1.5 : 3, textAlign: 'center' }}>
+      <Box sx={{ p: sidebarCollapsed ? 1.5 : 3, textAlign: 'center' }}>
         {/* Logo como texto estilizado */}
         {!sidebarCollapsed && (
           <>
-            <Typography 
-              variant="h5" 
-              sx={{ 
+            <Typography
+              variant="h5"
+              sx={{
                 color: '#FFFFFF',
                 fontWeight: 700,
                 letterSpacing: '2px',
@@ -139,9 +155,9 @@ const Sidebar = () => {
             >
               LUBRICAR
             </Typography>
-            <Typography 
-              variant="subtitle2" 
-              sx={{ 
+            <Typography
+              variant="subtitle2"
+              sx={{
                 color: '#E57A2D', // Naranja Lubricar
                 fontWeight: 600,
                 letterSpacing: '1.5px',
@@ -151,9 +167,9 @@ const Sidebar = () => {
             >
               INSA
             </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ 
+            <Typography
+              variant="caption"
+              sx={{
                 color: '#9CA3AF',
                 fontWeight: 500,
                 display: 'block',
@@ -182,10 +198,10 @@ const Sidebar = () => {
         </Avatar>
         {!sidebarCollapsed && (
           <Box sx={{ flex: 1, overflow: 'hidden' }}>
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                fontWeight: 600, 
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
                 color: '#FFFFFF',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -194,9 +210,9 @@ const Sidebar = () => {
             >
               {user?.nombre_completo || 'Usuario'}
             </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ 
+            <Typography
+              variant="caption"
+              sx={{
                 color: '#9CA3AF',
                 textTransform: 'capitalize'
               }}
@@ -210,13 +226,13 @@ const Sidebar = () => {
       <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', mb: 1 }} />
 
       {/* Menú Principal */}
-  <List sx={{ px: sidebarCollapsed ? 0.5 : 1, flex: 1 }}>
+      <List sx={{ px: sidebarCollapsed ? 0.5 : 1, flex: 1 }}>
         {menuItems.map((item) => {
           // Ocultar "Importar Datos" si no es manager
-          if (item.managerOnly && user?.rol !== 'MANAGER') {
+          if (item.managerOnly && user?.rol?.toUpperCase() !== 'MANAGER') {
             return null;
           }
-          
+
           return (
             <React.Fragment key={item.title}>
               {item.divider && (
@@ -228,11 +244,11 @@ const Sidebar = () => {
                   sx={{
                     borderRadius: 2,
                     color: '#FFFFFF', // TEXTO BLANCO SIEMPRE
-                    backgroundColor: isActive(item.path) 
-                      ? 'rgba(229, 122, 45, 0.15)' 
+                    backgroundColor: isActive(item.path)
+                      ? (item.highlighted ? 'rgba(229, 122, 45, 0.35)' : 'rgba(229, 122, 45, 0.15)')
                       : 'transparent',
-                    borderLeft: isActive(item.path) 
-                      ? `4px solid ${'#E57A2D'}` 
+                    borderLeft: isActive(item.path)
+                      ? `4px solid ${item.highlighted ? '#F59E0B' : '#E57A2D'}`
                       : '4px solid transparent',
                     '&:hover': {
                       backgroundColor: 'rgba(229, 122, 45, 0.1)',
@@ -252,7 +268,7 @@ const Sidebar = () => {
                     {item.icon}
                   </ListItemIcon>
                   {!sidebarCollapsed && (
-                    <ListItemText 
+                    <ListItemText
                       primary={item.title}
                       primaryTypographyProps={{
                         fontSize: '0.9375rem',
@@ -297,7 +313,7 @@ const Sidebar = () => {
             >
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText 
+            <ListItemText
               primary="Cerrar Sesión"
               primaryTypographyProps={{
                 fontSize: '0.9375rem',

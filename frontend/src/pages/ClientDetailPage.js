@@ -210,8 +210,8 @@ function ClientDetailPage() {
       {/* Header cliente */}
       <ClientHeader cliente={cliente} />
 
-      {/* Card con tabs */}
-      <Card sx={{ mt: 3, boxShadow: 2 }}>
+  {/* Card con tabs */}
+  <Card className="card-unified" sx={{ mt: 3, boxShadow: 2 }}>
         <Tabs
           value={tabValue}
           onChange={handleTabChange}

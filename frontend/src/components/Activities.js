@@ -128,7 +128,7 @@ const Activities = () => {
           Registrar Interacción con Cliente
         </Typography>
 
-        <Paper component="form" onSubmit={handleSubmit} sx={{ mb: 4, p: 3 }}>
+  <Paper className="card-unified" component="form" onSubmit={handleSubmit} sx={{ mb: 4, p: 3 }}>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
           
@@ -170,7 +170,7 @@ const Activities = () => {
         </Paper>
 
         <Typography variant="h5" component="h2" gutterBottom>Actividades Recientes</Typography>
-        <TableContainer component={Paper}>
+  <TableContainer component={Paper} className="table-unified">
           <Table>
             <TableHead>
               <TableRow>

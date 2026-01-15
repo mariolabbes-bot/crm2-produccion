@@ -22,10 +22,10 @@ const apiFetch = async (url, options = {}) => {
 
   if (!response.ok) {
     let errorData = {};
-    try { errorData = await response.json(); } catch (_) {}
+    try { errorData = await response.json(); } catch (_) { }
     if (response.status === 401 || response.status === 403) {
       // Token inválido o expirado: limpiar y redirigir
-      try { localStorage.removeItem('token'); } catch (_) {}
+      try { localStorage.removeItem('token'); } catch (_) { }
     }
     const error = new Error(errorData.msg || errorData.message || `API request failed (${response.status})`);
     error.status = response.status;
@@ -186,10 +186,10 @@ export const getComparativasMensuales = (params = {}) => {
 // Función auxiliar para polling del status de job
 const pollJobStatus = async (jobId, maxMinutes = 15) => {
   const maxAttempts = (maxMinutes * 60) / 3; // Poll cada 3 segundos
-  
+
   for (let i = 0; i < maxAttempts; i++) {
     await new Promise(resolve => setTimeout(resolve, 3000)); // 3s entre polls
-    
+
     const token = getToken();
     const response = await fetch(`${API_URL}/import/status/${jobId}`, {
       headers: {
@@ -208,7 +208,7 @@ const pollJobStatus = async (jobId, maxMinutes = 15) => {
       console.log('✅ Job completado:', job);
       return job.result || job;
     }
-    
+
     if (job.status === 'failed') {
       console.error('❌ Job falló:', job.errorMessage);
       throw new Error(job.errorMessage || 'La importación falló');
@@ -223,10 +223,10 @@ const pollJobStatus = async (jobId, maxMinutes = 15) => {
 export const uploadVentasFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const token = getToken();
   console.log('📤 Iniciando upload de ventas:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
-  
+
   try {
     // 1. Subir archivo y recibir jobId
     const response = await fetch(`${API_URL}/import/ventas`, {
@@ -247,13 +247,13 @@ export const uploadVentasFile = async (file) => {
     }
 
     const result = await response.json();
-    
+
     // 2. Si es respuesta asíncrona (202), hacer polling
     if (response.status === 202 && result.jobId) {
       console.log('⏳ Importación iniciada (job:', result.jobId, ') - Polling status...');
       return await pollJobStatus(result.jobId, 15); // 15 minutos máximo
     }
-    
+
     // 3. Si es respuesta síncrona (200), retornar directamente
     console.log('✅ Upload exitoso (síncrono):', result);
     // Exponer en ventana para inspección manual
@@ -262,7 +262,7 @@ export const uploadVentasFile = async (file) => {
       console.log('🪟 window.__ultimaRespuestaImportVentas disponible');
     }
     return result;
-    
+
   } catch (error) {
     console.error('❌ Error en import:', error);
     throw error;
@@ -272,10 +272,10 @@ export const uploadVentasFile = async (file) => {
 export const uploadAbonosFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const token = getToken();
   console.log('📤 Iniciando upload de abonos:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
-  
+
   try {
     // 1. Subir archivo y recibir jobId
     const response = await fetch(`${API_URL}/import/abonos`, {
@@ -296,13 +296,13 @@ export const uploadAbonosFile = async (file) => {
     }
 
     const result = await response.json();
-    
+
     // 2. Si es respuesta asíncrona (202), hacer polling (aunque abonos aún es síncrono)
     if (response.status === 202 && result.jobId) {
       console.log('⏳ Importación de abonos iniciada (job:', result.jobId, ') - Polling status...');
       return await pollJobStatus(result.jobId, 15);
     }
-    
+
     // 3. Si es respuesta síncrona (200), retornar directamente
     console.log('✅ Upload exitoso:', result);
     if (typeof window !== 'undefined') {
@@ -310,7 +310,7 @@ export const uploadAbonosFile = async (file) => {
       console.log('🪟 window.__ultimaRespuestaImportAbonos disponible');
     }
     return result;
-    
+
   } catch (error) {
     console.error('❌ Error en import:', error);
     throw error;
@@ -335,10 +335,10 @@ export const downloadPlantillaClientes = () => {
 export const uploadClientesFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const token = getToken();
   console.log('📤 Iniciando upload de clientes:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
-  
+
   try {
     const response = await fetch(`${API_URL}/import/clientes`, {
       method: 'POST',
@@ -358,13 +358,20 @@ export const uploadClientesFile = async (file) => {
     }
 
     const result = await response.json();
+
+    // 2. Si es respuesta asíncrona (202), hacer polling
+    if (response.status === 202 && result.jobId) {
+      console.log('⏳ Importación de clientes iniciada (job:', result.jobId, ') - Polling status...');
+      return await pollJobStatus(result.jobId, 15);
+    }
+
     console.log('✅ Upload exitoso:', result);
     if (typeof window !== 'undefined') {
       window.__ultimaRespuestaImportClientes = result;
       console.log('🪟 window.__ultimaRespuestaImportClientes disponible');
     }
     return result;
-    
+
   } catch (error) {
     console.error('❌ Error en import:', error);
     throw error;
@@ -374,10 +381,10 @@ export const uploadClientesFile = async (file) => {
 export const uploadSaldoCreditoFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const token = getToken();
   console.log('📤 Iniciando upload de saldo crédito:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
-  
+
   try {
     const response = await fetch(`${API_URL}/import/saldo-credito`, {
       method: 'POST',
@@ -399,7 +406,7 @@ export const uploadSaldoCreditoFile = async (file) => {
     const result = await response.json();
     console.log('✅ Upload saldo crédito exitoso:', result);
     return result;
-    
+
   } catch (error) {
     console.error('❌ Error en import saldo crédito:', error);
     throw error;
@@ -422,9 +429,15 @@ export const getClientDeuda = (rut) => apiFetch(`${API_URL}/client-detail/${rut}
 export const getClientVentasMensual = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/ventas-mensual`);
 export const getClientProductos6m = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/productos-6m`);
 export const getClientActividades = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/actividades`);
-export const createClientActividad = (rut, comentario) => 
-  apiFetch(`${API_URL}/client-detail/${rut}/actividades`, { 
-    method: 'POST', 
-    body: JSON.stringify({ comentario }) 
+export const createClientActividad = (rut, comentario) =>
+  apiFetch(`${API_URL}/client-detail/${rut}/actividades`, {
+    method: 'POST',
+    body: JSON.stringify({ comentario })
   });
+
+// ADMIN - Reset Database
+export const resetDatabase = (confirmString) => apiFetch(`${API_URL}/admin/reset-database`, {
+  method: 'POST',
+  body: JSON.stringify({ confirm: confirmString })
+});
 

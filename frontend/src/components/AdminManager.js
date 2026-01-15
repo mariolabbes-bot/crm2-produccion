@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   getActivityTypes, addActivityType, updateActivityType, deleteActivityType,
-  getGoalTypes, addGoalType, updateGoalType, deleteGoalType
+  getGoalTypes, addGoalType, updateGoalType, deleteGoalType,
+  resetDatabase
 } from '../api';
-import { 
+import {
   Container, Typography, Box, Button, TextField, List, ListItem, ListItemText, IconButton, Paper, Grid
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -64,13 +65,13 @@ const TypeManager = ({ title, getTypes, addType, updateType, deleteType }) => {
   };
 
   return (
-    <Paper sx={{ p: 2, mb: 3 }}>
+    <Paper className="card-unified" sx={{ p: 2, mb: 3 }}>
       <Typography variant="h6">{title}</Typography>
       {error && <Typography color="error">{error}</Typography>}
       <Box component="form" onSubmit={handleAdd} sx={{ display: 'flex', gap: 1, mb: 2 }}>
         <TextField
           size="small"
-          label={`Nuevo tipo de ${title.toLowerCase().slice(0, -1)}`}
+          label={`Nuevo tipo de ${title.toLowerCase().slice(0, -1)} `}
           value={newTypeName}
           onChange={(e) => setNewTypeName(e.target.value)}
           required
@@ -91,7 +92,7 @@ const TypeManager = ({ title, getTypes, addType, updateType, deleteType }) => {
             ) : (
               <ListItemText primary={type.nombre} />
             )}
-            
+
             {editState.id === type.id ? (
               <IconButton onClick={() => handleUpdate(type.id)} color="primary">
                 <SaveIcon />
@@ -139,14 +140,48 @@ const AdminManager = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <Paper sx={{ p: 2, mb: 3 }}>
+            <Paper className="card-unified" sx={{ p: 2, mb: 3 }}>
               <SalesUploader />
               <SalesJsonImporter />
             </Paper>
           </Grid>
+
+          {/* Zona de Peligro - Reset Base de Datos */}
+          <Grid item xs={12}>
+            <Paper className="card-unified" sx={{ p: 3, mb: 3, border: '2px solid #ef5350', bgcolor: '#ffebee' }}>
+              <Typography variant="h5" color="error" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                ⚠️ Zona de Peligro
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Esta acción eliminará permanentemente todos los datos de <strong>Clientes, Ventas, Abonos, Saldo Crédito y Productos</strong>.
+                Los usuarios (vendedores) y la configuración de tipos se mantendrán.
+              </Typography>
+              <Button
+                variant="contained"
+                color="error"
+                size="large"
+                onClick={async () => {
+                  const confirm = prompt("⚠️ ESTA ACCIÓN ES IRREVERSIBLE ⚠️\n\nPara confirmar el borrado TOTAL de la base de datos, escribe: CONFIRMO_BORRAR_TODO");
+                  if (confirm === 'CONFIRMO_BORRAR_TODO') {
+                    try {
+                      await resetDatabase(confirm);
+                      alert("✅ Base de datos reiniciada correctamente.");
+                      window.location.reload();
+                    } catch (err) {
+                      alert("❌ Error: " + err.message);
+                    }
+                  } else if (confirm) {
+                    alert("❌ Código de confirmación incorrecto.");
+                  }
+                }}
+              >
+                🗑️ BORRAR BASE DE DATOS (RESET COMPLETO)
+              </Button>
+            </Paper>
+          </Grid>
         </Grid>
       </Box>
-    </Container>
+    </Container >
   );
 };
 

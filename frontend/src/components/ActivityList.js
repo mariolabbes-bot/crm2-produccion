@@ -52,7 +52,7 @@ const ActivityList = () => {
       
       {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
 
-      <TableContainer component={Paper} sx={{ mt: 4 }}>
+  <TableContainer component={Paper} className="table-unified" sx={{ mt: 4 }}>
         <Table>
           <TableHead>
             <TableRow>

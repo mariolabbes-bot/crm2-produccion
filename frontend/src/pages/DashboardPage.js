@@ -130,7 +130,9 @@ const DashboardPage = () => {
   return (
     <Box>
       {/* Widget de última importación */}
-      <ImportStatsWidget />
+      <div className="card-unified">
+        <ImportStatsWidget />
+      </div>
 
       {/* Selector de vendedor (solo para managers) */}
       {isManager() && (

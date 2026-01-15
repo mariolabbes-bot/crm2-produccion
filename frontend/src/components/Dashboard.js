@@ -86,7 +86,7 @@ const Dashboard = () => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Paper sx={{ p: 2 }}>
+            <Paper className="card-unified" sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom>Top 5 Clientes</Typography>
               <List dense>
                 {topClients.map(client => (
@@ -102,7 +102,7 @@ const Dashboard = () => {
         <Grid container spacing={4}>
           {/* Calendar */}
           <Grid item xs={12} md={8}>
-            <Paper sx={{ p: 2, height: '70vh' }}>
+            <Paper className="card-unified" sx={{ p: 2, height: '70vh' }}>
               <Calendar
                 localizer={localizer}
                 events={events}
@@ -125,7 +125,7 @@ const Dashboard = () => {
 
           {/* Overdue Activities */}
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 2, height: '70vh', overflowY: 'auto' }}>
+            <Paper className="card-unified" sx={{ p: 2, height: '70vh', overflowY: 'auto' }}>
               <Typography variant="h6" gutterBottom>Actividades Vencidas</Typography>
               <List>
                 {overdueActivities.map(activity => (

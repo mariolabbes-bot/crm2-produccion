@@ -36,6 +36,12 @@ function ProductosTab({ data, loading, error }) {
 
   const { productos } = data;
 
+  // Helpers
+  const toNum = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
@@ -51,7 +57,7 @@ function ProductosTab({ data, loading, error }) {
   };
 
   return (
-    <Box>
+    <Box className="card-unified">
       <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
         🛍️ Productos (Últimos 12 Meses)
       </Typography>
@@ -62,7 +68,7 @@ function ProductosTab({ data, loading, error }) {
         </Typography>
       </Alert>
 
-      <TableContainer sx={{ boxShadow: 1, borderRadius: 1 }}>
+      <TableContainer className="table-unified" sx={{ boxShadow: 1, borderRadius: 1 }}>
         <Table>
           <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
             <TableRow>
@@ -109,18 +115,18 @@ function ProductosTab({ data, loading, error }) {
 
                 {/* Venta Mes Actual */}
                 <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                  {(producto.venta_mes_actual || 0).toFixed(0)} un.
+                  {toNum(producto.venta_mes_actual).toFixed(0)} un.
                 </TableCell>
 
                 {/* Promedio 12M */}
                 <TableCell align="right">
-                  {(producto.venta_promedio_12m || 0).toFixed(1)} un.
+                  {toNum(producto.venta_promedio_12m).toFixed(1)} un.
                 </TableCell>
 
                 {/* Relación */}
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                  {producto.venta_promedio_12m > 0
-                    ? (producto.relacion_venta || 0).toFixed(2)
+                  {toNum(producto.venta_promedio_12m) > 0
+                    ? toNum(producto.relacion_venta).toFixed(2)
                     : '-'}
                 </TableCell>
 
