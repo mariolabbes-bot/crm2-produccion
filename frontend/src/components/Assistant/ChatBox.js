@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Paper, TextField, IconButton, List, ListItem, ListItemText, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import axios from 'axios';
+import { API_URL } from '../../api';
 
 const ChatBox = ({ initialContext }) => {
   const [messages, setMessages] = useState([]);
@@ -11,18 +11,29 @@ const ChatBox = ({ initialContext }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editTo, setEditTo] = useState('');
   const [editText, setEditText] = useState('');
-  
+
   const append = (role, text) => setMessages(m => [...m, { role, text }]);
-  
+
   const handleSend = async () => {
     if (!input.trim()) return;
     append('user', input);
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const resp = await axios.post('/api/assistant/parse', { message: input, context: initialContext }, { headers: { Authorization: `Bearer ${token}` } });
-      const parsed = resp.data.parsed;
-      setLastParsed({ parsed, audit_id: resp.data.audit_id });
+      const response = await fetch(`${API_URL}/assistant/parse`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: input, context: initialContext })
+      });
+
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const data = await response.json();
+      const parsed = data.parsed;
+      setLastParsed({ parsed, audit_id: data.audit_id });
       append('assistant', parsed.suggestedAction.preview?.text || JSON.stringify(parsed));
       // prepare editable fields and open confirm dialog
       setEditTo(parsed.entities?.telefono || parsed.entities?.rut || '');
@@ -30,6 +41,7 @@ const ChatBox = ({ initialContext }) => {
       setConfirmOpen(true);
     } catch (err) {
       append('assistant', 'Error parsing message');
+      console.error(err);
     } finally {
       setLoading(false);
       setInput('');
@@ -47,12 +59,25 @@ const ChatBox = ({ initialContext }) => {
         to: editTo,
         text: editText
       };
-      const resp = await axios.post('/api/assistant/execute', { audit_id: lastParsed.audit_id, action }, { headers: { Authorization: `Bearer ${token}` } });
-      append('assistant', `Acción encolada: job_id=${resp.data.job_id}`);
+
+      const response = await fetch(`${API_URL}/assistant/execute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ audit_id: lastParsed.audit_id, action })
+      });
+
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const data = await response.json();
+      append('assistant', `Acción encolada: job_id=${data.job_id}`);
       setLastParsed(null);
       setConfirmOpen(false);
     } catch (err) {
       append('assistant', 'Error ejecutando acción');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -70,7 +95,7 @@ const ChatBox = ({ initialContext }) => {
         <TextField fullWidth value={input} onChange={(e) => setInput(e.target.value)} placeholder="Escribe una instrucción (ej: enviar cotización a cliente 77555444-3)" />
         <IconButton color="primary" onClick={handleSend} disabled={loading}><SendIcon /></IconButton>
       </Box>
-      
+
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>Confirmar acción del Asistente</DialogTitle>
         <DialogContent>
