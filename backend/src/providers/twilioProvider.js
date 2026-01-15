@@ -1,5 +1,4 @@
 const axios = require('axios');
-const qs = require('qs');
 
 /**
  * Twilio WhatsApp provider (sandbox-ready). Requires env vars:
@@ -31,7 +30,10 @@ const sendWhatsApp = async ({ to, body, mediaUrls = [] }) => {
     // If media provided, add MediaUrl[n]
     mediaUrls.forEach((m, idx) => data[`MediaUrl${idx}`] = m);
 
-    const resp = await axios.post(url, qs.stringify(data), {
+    // Use URLSearchParams for x-www-form-urlencoded
+    const params = new URLSearchParams(data);
+
+    const resp = await axios.post(url, params.toString(), {
       auth: { username: accountSid, password: authToken },
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
