@@ -37,17 +37,33 @@ const moveToPending = (req, jobId) => {
 
 // ==================== ENDPOINTS ASÍNCRONOS (WORKER) ====================
 
-// POST /ventas (Async)
+const {
+  processVentasFileAsync,
+  processAbonosFileAsync,
+  processClientesFileAsync,
+  processSaldoCreditoFileAsync
+} = require('../services/importJobs');
+
+// POST /ventas (Async/Sync)
 router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res) => {
-  console.log('🟢 [Async] /ventas recibido:', req.file?.originalname);
+  console.log('🟢 [Request] /ventas recibido:', req.file?.originalname);
   try {
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
+    const forceSync = req.query.forceSync === 'true';
+
     const jobId = await createJob('ventas', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
 
-    // Encolar job
+    if (forceSync) {
+      console.log(`⚡ [Sync] Ejecutando ventas job ${jobId} sincrónicamente`);
+      // Ejecutar directamente (bypass queue)
+      const result = await processVentasFileAsync(jobId, permanentPath, req.file.originalname);
+      return res.json({ success: true, jobId, status: 'completed', result });
+    }
+
+    // Async Queue
     await enqueueImport({
       jobId,
       type: 'ventas',
@@ -69,20 +85,25 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
   }
 });
 
-// POST /abonos (Async)
+// POST /abonos (Async/Sync)
 router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res) => {
-  console.log('🔵 [Async] /abonos recibido:', req.file?.originalname);
+  console.log('🔵 [Request] /abonos recibido:', req.file?.originalname);
   try {
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
     const updateMissing = (req.query.updateMissing === '1' || req.query.updateMissing === 'true');
+    const forceSync = req.query.forceSync === 'true';
 
-    // Crear Job y mover archivo
     const jobId = await createJob('abonos', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
 
-    // Encolar job con opciones
+    if (forceSync) {
+      console.log(`⚡ [Sync] Ejecutando abonos job ${jobId} sincrónicamente`);
+      const result = await processAbonosFileAsync(jobId, permanentPath, req.file.originalname, { updateMissing });
+      return res.json({ success: true, jobId, status: 'completed', result });
+    }
+
     await enqueueImport({
       jobId,
       type: 'abonos',
@@ -106,15 +127,23 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
   }
 });
 
-// POST /clientes (Async)
+// POST /clientes (Async/Sync)
 router.post('/clientes', auth(['manager']), upload.single('file'), async (req, res) => {
-  console.log('🟣 [Async] /clientes recibido:', req.file?.originalname);
+  console.log('🟣 [Request] /clientes recibido:', req.file?.originalname);
   try {
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
+    const forceSync = req.query.forceSync === 'true';
+
     const jobId = await createJob('clientes', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
+
+    if (forceSync) {
+      console.log(`⚡ [Sync] Ejecutando clientes job ${jobId} sincrónicamente`);
+      const result = await processClientesFileAsync(jobId, permanentPath, req.file.originalname);
+      return res.json({ success: true, jobId, status: 'completed', result });
+    }
 
     await enqueueImport({
       jobId,
@@ -138,51 +167,24 @@ router.post('/clientes', auth(['manager']), upload.single('file'), async (req, r
   }
 });
 
-// GET /status/:jobId
-router.get('/status/:jobId', auth(['manager']), async (req, res) => {
-  try {
-    const job = await getJobStatus(req.params.jobId);
-    if (!job) return res.status(404).json({ success: false, msg: 'Job no encontrado' });
-
-    const response = {
-      success: true,
-      jobId: job.job_id,
-      tipo: job.tipo,
-      filename: job.filename,
-      status: job.status,
-      createdAt: job.created_at,
-      startedAt: job.started_at,
-      finishedAt: job.finished_at,
-      totalRows: job.total_rows,
-      importedRows: job.imported_rows,
-      duplicateRows: job.duplicate_rows,
-      errorRows: job.error_rows,
-      errorMessage: job.error_message
-    };
-    if (job.status === 'completed' && job.result_data) {
-      response.result = job.result_data;
-    }
-    res.json(response);
-  } catch (error) {
-    res.status(500).json({ success: false, msg: 'Error al obtener estado', error: error.message });
-  }
-});
-
-// ==================== ENDPOINTS SÍNCRONOS/LEGACY O PENDIENTES ====================
-
-// POST /saldo-credito (SÍNCRONO - Destructivo)
-// POST /saldo-credito (Async - Snapshot)
+// POST /saldo-credito (Async/Sync)
 router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (req, res) => {
-  console.log('🟢 [Async] /saldo-credito recibido:', req.file?.originalname);
+  console.log('🟢 [Request] /saldo-credito recibido:', req.file?.originalname);
   try {
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
-    // Create Job
+    const forceSync = req.query.forceSync === 'true';
+
     const jobId = await createJob('saldo_credito', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
 
-    // Enqueue
+    if (forceSync) {
+      console.log(`⚡ [Sync] Ejecutando saldo-credito job ${jobId} sincrónicamente`);
+      const result = await processSaldoCreditoFileAsync(jobId, permanentPath, req.file.originalname);
+      return res.json({ success: true, jobId, status: 'completed', result });
+    }
+
     await enqueueImport({
       jobId,
       type: 'saldo_credito',
@@ -194,7 +196,7 @@ router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (r
     res.status(202).json({
       success: true,
       jobId,
-      msg: 'Archivo de Saldo Crédito recibido. Procesando en segundo plano (Snapshot Mode)...',
+      msg: 'Archivo de Saldo Crédito recibido. Procesando en segundo plano...',
       statusUrl: `/api/import/status/${jobId}`
     });
 

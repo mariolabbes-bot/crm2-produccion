@@ -82,11 +82,11 @@ const UniversalImporter = () => {
             // Determine endpoint based on type
             let endpoint = '';
             switch (importType) {
-                case 'ventas': endpoint = '/import/ventas'; break;
-                case 'abonos': endpoint = '/import/abonos?updateMissing=1'; break; // Default to update missing logic
-                case 'clientes': endpoint = '/import/clientes'; break;
-                case 'saldo_credito': endpoint = '/import/saldo-credito'; break;
-                default: endpoint = '/import/ventas';
+                case 'ventas': endpoint = '/import/ventas?forceSync=true'; break;
+                case 'abonos': endpoint = '/import/abonos?updateMissing=1&forceSync=true'; break;
+                case 'clientes': endpoint = '/import/clientes?forceSync=true'; break;
+                case 'saldo_credito': endpoint = '/import/saldo-credito?forceSync=true'; break;
+                default: endpoint = '/import/ventas?forceSync=true';
             }
 
             const res = await fetch(`${API_URL}${endpoint}`, {
