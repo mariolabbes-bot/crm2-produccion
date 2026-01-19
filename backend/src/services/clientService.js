@@ -143,6 +143,9 @@ class ClientService {
 
         return await ClientModel.search({ term: q.trim(), nombreVendedor });
     }
+    static async getIncompleteClients() {
+        return await ClientModel.findIncomplete();
+    }
 }
 
 module.exports = ClientService;

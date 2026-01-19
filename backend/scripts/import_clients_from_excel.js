@@ -1,5 +1,10 @@
+require('dotenv').config();
 const XLSX = require('xlsx');
 const pool = require('../src/db');
+const fs = require('fs');
+const path = require('path');
+
+const BULK_DIR = path.join(__dirname, '../bulk_data');
 
 // Función para limpiar RUT (quitar puntos y guiones)
 function cleanRut(rut) {
@@ -20,31 +25,37 @@ function normalizeVendedorName(nombre) {
   return nombre.toUpperCase().trim();
 }
 
-async function importClients(filePath) {
-  console.log('📂 Leyendo archivo:', filePath);
-  
-  const workbook = XLSX.readFile(filePath);
-  const sheetName = 'BASE CLIENTES ACTIVOS';
-  const worksheet = workbook.Sheets[sheetName];
-  const data = XLSX.utils.sheet_to_json(worksheet);
-  
-  console.log(`📊 Total de clientes en Excel: ${data.length}`);
-  
+async function importClients() {
+  console.log('=== IMPORT CLIENTIES (MULTI-FILE BULK) ===');
+
+  if (!fs.existsSync(BULK_DIR)) {
+    console.error('No existe directorio bulk_data:', BULK_DIR);
+    process.exit(1);
+  }
+  const allFiles = fs.readdirSync(BULK_DIR);
+  // Look for files with 'CLIENTE' or 'BASE' (common for Base Tablas)
+  const targetFiles = allFiles.filter(f => (f.toUpperCase().includes('CLIENTE') || f.toUpperCase().includes('BASE')) && !f.startsWith('PROCESSED_') && f.endsWith('.xlsx'));
+
+  if (targetFiles.length === 0) {
+    console.log('No se encontraron archivos de CLIENTES/BASE nuevos en:', BULK_DIR);
+    process.exit(0);
+  }
+  console.log(`Archivos a procesar: ${targetFiles.length}`, targetFiles);
+
   const client = await pool.connect();
-  
+
   try {
-    await client.query('BEGIN');
-    
+
     // 1. Cargar todos los vendedores en memoria
     console.log('🔍 Cargando vendedores...');
     const vendedoresResult = await client.query('SELECT id, nombre FROM users WHERE rol = \'vendedor\'');
     const vendedoresByNombre = new Map();
-    
+
     // Crear múltiples variantes de nombre para mejor matching
     vendedoresResult.rows.forEach(v => {
       const nombre = v.nombre.toUpperCase().trim();
       vendedoresByNombre.set(nombre, v.id);
-      
+
       // También agregar versión sin segundo nombre/apellido
       const parts = nombre.split(' ');
       if (parts.length >= 2) {
@@ -52,133 +63,105 @@ async function importClients(filePath) {
         vendedoresByNombre.set(shortName, v.id);
       }
     });
-    
+
     console.log(`✅ ${vendedoresResult.rows.length} vendedores cargados`);
-    console.log('Variantes de nombres:', Array.from(vendedoresByNombre.keys()).slice(0, 10));
-    
+
     // 2. Obtener el ID del manager para clientes sin vendedor asignado
     const managerResult = await client.query('SELECT id FROM users WHERE rol = \'manager\' LIMIT 1');
     const managerId = managerResult.rows[0]?.id || 1;
-    
-    // 3. Insertar clientes
-    console.log('💾 Insertando clientes...');
-    let insertedCount = 0;
-    let skippedCount = 0;
-    let vendedorNotFoundCount = 0;
-    const errors = [];
-    
-    for (const row of data) {
-      try {
-        const rut = cleanRut(row.Identificador);
-        if (!rut) {
-          errors.push({ nombre: row.Nombre, motivo: 'RUT inválido' });
-          skippedCount++;
-          continue;
-        }
-        
-        // Buscar vendedor
-        const vendedorNormalizado = normalizeVendedorName(row.NombreVendedor);
-        let vendedorId = vendedoresByNombre.get(vendedorNormalizado);
-        
-        if (!vendedorId) {
-          // Intentar match parcial
-          for (const [nombre, id] of vendedoresByNombre) {
-            if (nombre.includes(vendedorNormalizado?.split(' ')[0] || '')) {
-              vendedorId = id;
-              break;
-            }
+
+    let totalInserted = 0;
+
+    for (const filename of targetFiles) {
+      console.log(`\n📂 Leyendo archivo: ${filename}`);
+      const filePath = path.join(BULK_DIR, filename);
+      const workbook = XLSX.readFile(filePath);
+
+      let sheetName = workbook.SheetNames.find(n => /CLIENTE|BASE/i.test(n));
+      if (!sheetName) sheetName = workbook.SheetNames[0]; // Fallback
+
+      console.log(`   Usando hoja: ${sheetName}`);
+      const worksheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet);
+      console.log(`   Filas en hoja: ${data.length}`);
+
+      // Detect Columns
+      // Expected: Identificador (Rut), Nombre, NombreVendedor, TelefonoPrincipal, Direccion, Numero, Ciudad, Comuna
+      const headers = Object.keys(data[0] || {});
+      // Helper to find key in object insensitive
+      const findKey = (row, patterns) => {
+        const keys = Object.keys(row);
+        const k = keys.find(key => patterns.some(p => p.test(key)));
+        return k ? row[k] : undefined;
+      };
+
+      // 3. Insertar clientes
+      console.log('💾 Insertando clientes...');
+      let insertedCount = 0;
+      let skippedCount = 0;
+      const errors = [];
+
+      await client.query('BEGIN'); // Transaction per file
+
+      for (const row of data) {
+        try {
+          const rutVal = findKey(row, [/^Identificador$/i, /^Rut$/i]);
+          const rut = cleanRut(rutVal);
+          if (!rut) {
+            skippedCount++;
+            continue;
           }
-        }
-        
-        if (!vendedorId) {
-          vendedorId = managerId;
-          vendedorNotFoundCount++;
-        }
-        
-        const nombre = row.Nombre || 'Sin nombre';
-        const telefono = row.TelefonoPrincipal ? row.TelefonoPrincipal.toString() : null;
-        const direccion = row.Direccion || null;
-        const numero = row.Numero || null;
-        const direccionCompleta = numero ? `${direccion} ${numero}` : direccion;
-        const ciudad = row.Ciudad || row.Comuna || null;
-        const estado = row.Comuna || null;
-        
-        // Insertar cliente
-        const result = await client.query(`
-          INSERT INTO clients (
-            rut, nombre, telefono, direccion, ciudad, estado, vendedor_id
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-          ON CONFLICT (rut) DO UPDATE SET
-            nombre = EXCLUDED.nombre,
-            telefono = EXCLUDED.telefono,
-            direccion = EXCLUDED.direccion,
-            ciudad = EXCLUDED.ciudad,
-            estado = EXCLUDED.estado,
-            vendedor_id = EXCLUDED.vendedor_id
-          RETURNING id
-        `, [rut, nombre, telefono, direccionCompleta, ciudad, estado, vendedorId]);
-        
-        if (result.rows.length > 0) {
+
+          // Buscar vendedor (Nombre string)
+          const nombreVendVal = findKey(row, [/^Nombre.*Vendedor/i, /^Vendedor/i]);
+          const vendedorName = normalizeVendedorName(nombreVendVal) || 'SIN VENDEDOR';
+
+          const nombre = findKey(row, [/^Nombre$/i, /^Cliente$/i]) || 'Sin nombre';
+          const fono = findKey(row, [/^Telefono/i, /^Celular/i]);
+          const telefono = fono ? fono.toString() : null;
+          const dir = findKey(row, [/^Direccion/i]) || '';
+          const num = findKey(row, [/^Numero/i]) || '';
+          const direccionCompleta = num ? `${dir} ${num}` : dir;
+          const comuna = findKey(row, [/^Comuna/i, /^Ciudad/i]) || null;
+          const ciudad = findKey(row, [/^Ciudad/i]) || comuna;
+
+          // Insertar cliente
+          // Schema: rut, nombre, email, telefono_principal, sucursal, categoria, subcategoria, comuna, ciudad, direccion, numero, nombre_vendedor
+          await client.query(`
+                INSERT INTO cliente (
+                    rut, nombre, telefono_principal, direccion, ciudad, comuna, nombre_vendedor
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+                ON CONFLICT (rut) DO UPDATE SET
+                    nombre = EXCLUDED.nombre,
+                    telefono_principal = EXCLUDED.telefono_principal,
+                    direccion = EXCLUDED.direccion,
+                    ciudad = EXCLUDED.ciudad,
+                    comuna = EXCLUDED.comuna,
+                    nombre_vendedor = EXCLUDED.nombre_vendedor
+                `, [rut, nombre, telefono, direccionCompleta, ciudad, comuna, vendedorName]);
+
           insertedCount++;
-          
-          if (insertedCount % 500 === 0) {
-            console.log(`  ⏳ Procesados ${insertedCount} clientes...`);
-          }
+
+        } catch (err) {
+          errors.push({ rut: rutVal, motivo: err.message });
+          skippedCount++;
         }
-        
-      } catch (err) {
-        errors.push({ nombre: row.Nombre, rut: row.Identificador, motivo: err.message });
-        skippedCount++;
       }
+      await client.query('COMMIT');
+      console.log(`   ✅ Procesados este archivo: ${insertedCount}`);
+      totalInserted += insertedCount;
     }
-    
-    await client.query('COMMIT');
-    
-    console.log('\n✅ Importación de clientes completada:');
-    console.log(`   📥 Clientes procesados: ${insertedCount}`);
-    console.log(`   ⏭️  Clientes omitidos: ${skippedCount}`);
-    console.log(`   ⚠️  Vendedores no encontrados (asignados a manager): ${vendedorNotFoundCount}`);
-    
-    if (errors.length > 0) {
-      console.log(`\n⚠️  Errores (primeros 10):`);
-      errors.slice(0, 10).forEach(err => {
-        console.log(`   - ${err.nombre} (${err.rut}): ${err.motivo}`);
-      });
-    }
-    
-    // Mostrar estadísticas
-    const stats = await client.query(`
-      SELECT 
-        u.nombre as vendedor,
-        COUNT(c.id) as total_clientes
-      FROM users u
-      LEFT JOIN clients c ON c.vendedor_id = u.id
-      WHERE u.rol = 'vendedor'
-      GROUP BY u.id, u.nombre
-      ORDER BY total_clientes DESC
-    `);
-    
-    console.log('\n📊 Clientes por vendedor:');
-    console.table(stats.rows);
-    
+
+    console.log(`\n🎉 Proceso TOTAL completado: ${totalInserted} clientes insertados/actualizados.`);
+
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('❌ Error durante la importación:', err.message);
-    throw err;
+    process.exit(1);
   } finally {
     client.release();
+    pool.end();
   }
 }
 
-// Ejecutar importación
-const filePath = process.argv[2] || '/Users/mariolabbe/Library/Mobile Documents/com~apple~CloudDocs/Desktop/Ventas/BASE VENTAS CRM2/BASE TABLAS CRM2.xlsx';
-
-importClients(filePath)
-  .then(() => {
-    console.log('\n🎉 Proceso completado');
-    process.exit(0);
-  })
-  .catch(err => {
-    console.error('💥 Error fatal:', err);
-    process.exit(1);
-  });
+importClients();

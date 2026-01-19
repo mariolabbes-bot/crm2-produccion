@@ -28,8 +28,8 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
         const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
 
         const colFolio = findCol([/^Folio$/i]);
-        const colTipoDoc = findCol([/^Tipo.*documento$/i, /^Tipo$/i]);
-        const colFecha = findCol([/^Fecha$/i, /^Fecha.*emision$/i]);
+        const colTipoDoc = findCol([/^Tipo.*doc/i]);
+        const colFecha = findCol([/^Fecha/i]);
         const colSucursal = findCol([/^Sucursal$/i]);
         const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i]);
         const colCliente = findCol([/^Cliente$/i]);
@@ -38,9 +38,9 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
         const colEstadoSistema = findCol([/^Estado.*sistema$/i]);
         const colEstadoComercial = findCol([/^Estado.*comercial$/i]);
         const colEstadoSII = findCol([/^Estado.*SII$/i, /^Estado.*sii$/i]);
-        const colIndice = findCol([/^Indice$/i, /^Index$/i]);
+        const colIndice = findCol([/ndice$/i, /^Index$/i]);
         const colSKU = findCol([/^SKU$/i, /^Codigo$/i]);
-        const colDescripcion = findCol([/^Descripcion$/i, /^Descripción$/i]);
+        const colDescripcion = findCol([/^Descripc/i]);
         const colCantidad = findCol([/^Cantidad$/i]);
         const colPrecio = findCol([/^Precio$/i]);
         const colValorTotal = findCol([/^Valor.*total$/i, /^Total$/i]);
@@ -54,25 +54,56 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
             throw new Error(`Faltan columnas requeridas: ${faltantes.join(', ')}`);
         }
 
-        // Cargar usuarios existentes
-        const usersRes = await client.query("SELECT nombre_vendedor, nombre_completo FROM usuario WHERE nombre_vendedor IS NOT NULL");
-        const usersByNormFull = new Map();
-        const usersByFirstWord = new Map();
-        const usersByFirstTwo = new Map();
-
-        usersRes.rows.filter(u => u.nombre_vendedor).forEach(u => {
-            const nombreNorm = norm(u.nombre_vendedor);
-            const palabras = nombreNorm.split(/\s+/);
-            usersByNormFull.set(nombreNorm, u.nombre_vendedor);
-            if (palabras.length > 0) usersByFirstWord.set(palabras[0], u.nombre_vendedor);
-            if (palabras.length >= 2) usersByFirstTwo.set(`${palabras[0]} ${palabras[1]}`, u.nombre_vendedor);
+        // --- 1. Cargar Usuarios/Vendedores (ALIAS) ---
+        const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario WHERE alias IS NOT NULL");
+        const aliasMap = new Map(); // Lowercase -> RealAlias
+        usersRes.rows.forEach(u => {
+            const a = (u.alias || u.nombre_vendedor || '').trim();
+            if (a) aliasMap.set(a.toLowerCase(), a);
         });
 
-        // Cargar clientes existentes
+        // --- 2. Pre-scan for Missing Vendors (Stubs) ---
+        const newAliases = new Set();
+        const scanVendor = (val) => {
+            if (!val) return;
+            const s = String(val).trim();
+            if (s && !aliasMap.has(s.toLowerCase())) {
+                newAliases.add(s);
+            }
+        };
+
+        for (const row of data) {
+            if (colVendedorDoc) scanVendor(row[colVendedorDoc]);
+            if (colVendedorCliente) scanVendor(row[colVendedorCliente]);
+        }
+
+        if (newAliases.size > 0) {
+            console.log(`🛠️ [Job ${jobId}] Creando ${newAliases.size} stubs de vendedor...`);
+            for (const originalAlias of newAliases) {
+                try {
+                    const dummyRut = `STUB-${Math.floor(Math.random() * 100000000)}-${Date.now()}`;
+                    await client.query(`
+                        INSERT INTO usuario (rut, nombre_completo, nombre_vendedor, rol_usuario, password, alias)
+                        VALUES ($1, $2, $2, 'VENDEDOR', '123456', $2)
+                        ON CONFLICT (rut) DO NOTHING
+                    `, [dummyRut.slice(0, 12), originalAlias]);
+                    // Update Map
+                    aliasMap.set(originalAlias.toLowerCase(), originalAlias);
+                } catch (err) {
+                    console.warn(`Could not create stub for alias ${originalAlias}: ${err.message}`);
+                }
+            }
+        }
+
+        // --- 3. Cargar Clientes (RUT) ---
         const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
         const clientsByRut = new Map(clientsRes.rows.filter(c => c.rut).map(c => [norm(c.rut), c.rut]));
 
-        // Verificar duplicados existentes
+        // --- 4. Cargar Productos (SKU) ---
+        const productsRes = await client.query("SELECT sku, litros_por_unidad FROM producto");
+        const productsBySku = new Map(productsRes.rows.map(p => [norm(p.sku), { sku: p.sku, litros: parseFloat(p.litros_por_unidad) || 0 }]));
+
+        // Check Existing Sales to avoid duplicates
         const existingSales = await client.query(
             "SELECT folio, tipo_documento, indice FROM venta WHERE folio IS NOT NULL AND tipo_documento IS NOT NULL"
         );
@@ -82,7 +113,7 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
 
         const toImport = [];
         const duplicates = [];
-        const missingVendors = new Set();
+        const missingVendors = new Set(); // Should be empty now due to stubs
         const missingClients = new Set();
         const observations = [];
 
@@ -96,58 +127,83 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
 
             if (!folio || !tipoDoc || !fecha) continue;
 
-            const key = `${norm(tipoDoc)}|${norm(folio)}|${norm(indice)}`;
-            if (existingKeys.has(key)) {
+            const duplicateKey = `${norm(tipoDoc)}|${norm(folio)}|${norm(indice)}`;
+            if (existingKeys.has(duplicateKey)) {
                 duplicates.push({ folio, tipoDoc, indice, fecha });
                 continue;
             }
 
+            const cantidad = colCantidad ? parseNumeric(row[colCantidad]) : 0;
+            const precio = colPrecio ? parseNumeric(row[colPrecio]) : 0;
+            let valorTotal = (colValorTotal && row[colValorTotal]) ? parseNumeric(row[colValorTotal]) : (cantidad * precio);
+
             const sucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
-            const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null;
+            const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null; // RUT
             const clienteNombre = colCliente && row[colCliente] ? String(row[colCliente]).trim() : null;
-            const vendedorClienteAlias = colVendedorCliente && row[colVendedorCliente] ? String(row[colVendedorCliente]).trim() : null;
-            const vendedorDocNombre = colVendedorDoc && row[colVendedorDoc] ? String(row[colVendedorDoc]).trim() : null;
+
+            // Strict check: if no identifier/folio, just skip
+            if (!identificador && !clienteNombre) {
+                // observations.push(...) could be added here if we want to track skipped rows
+                continue;
+            }
+
+            // Vendors -> Resolve via AliasMap
+            let vendedorDoc = null;
+            if (colVendedorDoc && row[colVendedorDoc]) {
+                const raw = String(row[colVendedorDoc]).trim();
+                if (aliasMap.has(raw.toLowerCase())) vendedorDoc = aliasMap.get(raw.toLowerCase());
+                else missingVendors.add(raw);
+            }
+
+            let vendedorClienteAlias = null;
+            if (colVendedorCliente && row[colVendedorCliente]) {
+                const raw = String(row[colVendedorCliente]).trim();
+                if (aliasMap.has(raw.toLowerCase())) vendedorClienteAlias = aliasMap.get(raw.toLowerCase());
+            }
+
             const estadoSistema = colEstadoSistema && row[colEstadoSistema] ? String(row[colEstadoSistema]).trim() : null;
             const estadoComercial = colEstadoComercial && row[colEstadoComercial] ? String(row[colEstadoComercial]).trim() : null;
             const estadoSII = colEstadoSII && row[colEstadoSII] ? String(row[colEstadoSII]).trim() : null;
             const sku = colSKU && row[colSKU] ? String(row[colSKU]).trim() : null;
             const descripcion = colDescripcion && row[colDescripcion] ? String(row[colDescripcion]).trim() : null;
-            const cantidad = colCantidad ? parseNumeric(row[colCantidad]) : null;
-            const precio = colPrecio ? parseNumeric(row[colPrecio]) : null;
-            const valorTotal = colValorTotal ? parseNumeric(row[colValorTotal]) : null;
 
-            let vendedorAlias = null;
-            if (vendedorClienteAlias) {
-                const vendedorNorm = norm(vendedorClienteAlias);
-                const palabras = vendedorNorm.split(/\s+/);
-                let found = null;
-                if (usersByNormFull.has(vendedorNorm)) found = usersByNormFull.get(vendedorNorm);
-                else if (palabras.length >= 2) {
-                    const dosPalabras = `${palabras[0]} ${palabras[1]}`;
-                    if (usersByFirstTwo.has(dosPalabras)) found = usersByFirstTwo.get(dosPalabras);
-                }
-                if (!found && palabras.length > 0 && usersByFirstWord.has(palabras[0])) found = usersByFirstWord.get(palabras[0]);
-
-                if (found) {
-                    vendedorAlias = found;
-                } else {
-                    missingVendors.add(vendedorClienteAlias);
-                    observations.push({ fila: excelRow, folio, campo: 'vendedor_cliente', detalle: `Vendedor no encontrado: ${vendedorClienteAlias}` });
-                }
-            }
-
+            // STUB CLIENT
             let clienteRut = null;
-            if (identificador && /^\d{7,8}-[\dkK]$/.test(identificador)) {
-                if (clientsByRut.has(norm(identificador))) clienteRut = identificador;
+            if (identificador) {
+                const rutNorm = norm(identificador);
+                if (clientsByRut.has(rutNorm)) {
+                    clienteRut = clientsByRut.get(rutNorm);
+                } else {
+                    // Create Stub
+                    if (!missingClients.has(rutNorm)) {
+                        try {
+                            await client.query("INSERT INTO cliente (rut, nombre) VALUES ($1, $2) ON CONFLICT (rut) DO NOTHING", [identificador, clienteNombre || 'Unknown']);
+                            clientsByRut.set(rutNorm, identificador);
+                            missingClients.add(rutNorm);
+                            clienteRut = identificador;
+                            observations.push({ fila: excelRow, campo: 'cliente', detalle: `Cliente Stub Creado: ${identificador}` });
+                        } catch (e) { console.error(e); }
+                    } else {
+                        clienteRut = identificador; // Already created in this loop
+                    }
+                }
             }
-            if (!clienteRut && (clienteNombre || identificador)) {
-                missingClients.add(clienteNombre || identificador);
-                observations.push({ fila: excelRow, folio, campo: 'identificador', detalle: `Cliente no encontrado: ${clienteNombre || identificador}` });
+
+            // STUB PRODUCT
+            if (sku) {
+                const skuNorm = norm(sku);
+                if (!productsBySku.has(skuNorm)) {
+                    try {
+                        await client.query("INSERT INTO producto (sku, descripcion, familia, marca, subfamilia) VALUES ($1, $2, 'SIN CLASIFICAR', 'GENERICO', 'SIN CLASIFICAR') ON CONFLICT (sku) DO NOTHING", [sku, descripcion || 'Sin Descripcion']);
+                        productsBySku.set(skuNorm, { sku, litros: 0 });
+                        observations.push({ fila: excelRow, campo: 'sku', detalle: `Producto Stub Creado: ${sku}` });
+                    } catch (e) { console.error(e); }
+                }
             }
 
             toImport.push({
                 sucursal, tipoDoc, folio, fecha, identificador: clienteRut, clienteNombre,
-                vendedorClienteAlias: vendedorAlias, vendedorDocNombre,
+                vendedorClienteAlias, vendedorDocNombre: vendedorDoc,
                 estadoSistema, estadoComercial, estadoSII, indice,
                 sku, descripcion, cantidad, precio, valorTotal
             });
@@ -201,7 +257,7 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
                             if (lp > 0) litrosVendidos = item.cantidad * lp;
                         }
                         placeholders.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`);
-                        params.push(item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador, item.clienteNombre, item.vendedorClienteAlias, null, item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice, item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, litrosVendidos);
+                        params.push(item.sucursal, item.tipoDoc, item.folio, item.fecha, item.identificador, item.clienteNombre, item.vendedorClienteAlias, item.vendedorDocNombre, item.estadoSistema, item.estadoComercial, item.estadoSII, item.indice, item.sku, item.descripcion, item.cantidad, item.precio, item.valorTotal, litrosVendidos);
                     }
 
                     if (placeholders.length > 0) {
@@ -245,18 +301,15 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
             resultData: result, reportFilename: pendingReportPath ? path.basename(pendingReportPath) : null, observationsFilename: observationsReportPath ? path.basename(observationsReportPath) : null
         });
 
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         console.log(`✅ [Job ${jobId}] Terminado exitosamente`);
         return result;
 
     } catch (error) {
         console.error(`❌ [Job ${jobId}] Falló:`, error);
         await updateJobStatus(jobId, 'failed', { errorMessage: error.message });
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         throw error;
     } finally {
         client.release();
     }
 }
-
 module.exports = { processVentasFileAsync };

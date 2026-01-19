@@ -1,6 +1,6 @@
 const Queue = require('bull');
 const Redis = require('ioredis');
-const { processVentasFileAsync, processAbonosFileAsync, processClientesFileAsync, updateJobStatus } = require('../services/importJobs');
+const { processVentasFileAsync, processAbonosFileAsync, processClientesFileAsync, processSaldoCreditoFileAsync, updateJobStatus } = require('../services/importJobs');
 
 const REDIS_URL = process.env.REDIS_URL || process.env.REDIS || 'redis://localhost:6379';
 // if (!REDIS_URL) {
@@ -22,6 +22,8 @@ importQueue.process(async (job) => {
             await processAbonosFileAsync(jobId, filePath, originalName, options);
         } else if (type === 'clientes') {
             await processClientesFileAsync(jobId, filePath, originalName, options);
+        } else if (type === 'saldo_credito') {
+            await processSaldoCreditoFileAsync(jobId, filePath, originalName, options);
         } else {
             throw new Error(`Tipo de importación desconocido: ${type}`);
         }

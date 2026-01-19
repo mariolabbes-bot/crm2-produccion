@@ -5,16 +5,18 @@ import {
   resetDatabase
 } from '../api';
 import {
-  Container, Typography, Box, Button, TextField, List, ListItem, ListItemText, IconButton, Paper, Grid
+  Container, Typography, Box, Button, TextField, List, ListItem, ListItemText, IconButton, Paper, Grid, Tabs, Tab
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 
-import SalesUploader from './SalesUploader';
-import SalesJsonImporter from './SalesJsonImporter';
+import SalesJsonImporter from '../SalesJsonImporter';
+import DataManagement from './admin/DataManagement';
+import UniversalImporter from './admin/UniversalImporter';
 
-// A generic component for managing a type (either activity or goal)
+// ... (TypeManager component remains same)
+
 const TypeManager = ({ title, getTypes, addType, updateType, deleteType }) => {
   const [types, setTypes] = useState([]);
   const [error, setError] = useState('');
@@ -114,41 +116,83 @@ const TypeManager = ({ title, getTypes, addType, updateType, deleteType }) => {
 
 
 const AdminManager = () => {
-  return (
-    <Container maxWidth="md">
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Mantenedor de Parámetros
-        </Typography>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
-            <TypeManager
-              title="Tipos de Actividad"
-              getTypes={getActivityTypes}
-              addType={addActivityType}
-              updateType={updateActivityType}
-              deleteType={deleteActivityType}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TypeManager
-              title="Tipos de Objetivo"
-              getTypes={getGoalTypes}
-              addType={addGoalType}
-              updateType={updateGoalType}
-              deleteType={deleteGoalType}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Paper className="card-unified" sx={{ p: 2, mb: 3 }}>
-              <SalesUploader />
-              <SalesJsonImporter />
-            </Paper>
-          </Grid>
+  const [tabIndex, setTabIndex] = useState(0);
 
-          {/* Zona de Peligro - Reset Base de Datos */}
-          <Grid item xs={12}>
-            <Paper className="card-unified" sx={{ p: 3, mb: 3, border: '2px solid #ef5350', bgcolor: '#ffebee' }}>
+  const handleTabChange = (event, newValue) => {
+    setTabIndex(newValue);
+  };
+
+  return (
+    <Container maxWidth="lg">
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4 }}>
+          Panel de Administración
+        </Typography>
+
+        <Paper sx={{ mb: 3 }}>
+          <Tabs
+            value={tabIndex}
+            onChange={handleTabChange}
+            variant="fullWidth"
+            indicatorColor="primary"
+            textColor="primary"
+          >
+            <Tab label="Dashboard & Carga" />
+            <Tab label="Gestión de Datos (Limpieza)" />
+            <Tab label="Configuración" />
+            <Tab label="Zona de Peligro" sx={{ color: 'error.main' }} />
+          </Tabs>
+        </Paper>
+
+        {/* TAB 0: DASHBOARD & CARGA */}
+        <Box role="tabpanel" hidden={tabIndex !== 0}>
+          {tabIndex === 0 && (
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <UniversalImporter />
+              </Grid>
+              {/* Add more dashboard widgets here later if needed */}
+            </Grid>
+          )}
+        </Box>
+
+        {/* TAB 1: GESTIÓN DE DATOS */}
+        <Box role="tabpanel" hidden={tabIndex !== 1}>
+          {tabIndex === 1 && (
+            <DataManagement />
+          )}
+        </Box>
+
+        {/* TAB 2: CONFIGURACIÓN (Tipos) */}
+        <Box role="tabpanel" hidden={tabIndex !== 2}>
+          {tabIndex === 2 && (
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <TypeManager
+                  title="Tipos de Actividad"
+                  getTypes={getActivityTypes}
+                  addType={addActivityType}
+                  updateType={updateActivityType}
+                  deleteType={deleteActivityType}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TypeManager
+                  title="Tipos de Objetivo"
+                  getTypes={getGoalTypes}
+                  addType={addGoalType}
+                  updateType={updateGoalType}
+                  deleteType={deleteGoalType}
+                />
+              </Grid>
+            </Grid>
+          )}
+        </Box>
+
+        {/* TAB 3: ZONA DE PELIGRO */}
+        <Box role="tabpanel" hidden={tabIndex !== 3}>
+          {tabIndex === 3 && (
+            <Paper className="card-unified" sx={{ p: 3, border: '2px solid #ef5350', bgcolor: '#ffebee' }}>
               <Typography variant="h5" color="error" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                 ⚠️ Zona de Peligro
               </Typography>
@@ -178,8 +222,9 @@ const AdminManager = () => {
                 🗑️ BORRAR BASE DE DATOS (RESET COMPLETO)
               </Button>
             </Paper>
-          </Grid>
-        </Grid>
+          )}
+        </Box>
+
       </Box>
     </Container >
   );

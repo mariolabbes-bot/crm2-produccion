@@ -7,6 +7,7 @@ node_modules/
 # Builds
 frontend/dist/
 backend/uploads/
+backend/bulk_data/
 
 # Variables de entorno sensibles
 .env

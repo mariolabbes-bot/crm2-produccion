@@ -2,6 +2,44 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const ClientService = require('../services/clientService');
+const XLSX = require('xlsx');
+
+// GET /incomplete - List clients details that need attention
+router.get('/incomplete', auth(), async (req, res) => {
+  try {
+    const clients = await ClientService.getIncompleteClients();
+    res.json(clients);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// GET /incomplete/download - Download Excel of incomplete clients
+router.get('/incomplete/download', auth(), async (req, res) => {
+  try {
+    const clients = await ClientService.getIncompleteClients();
+    if (clients.length === 0) return res.status(404).send('No incomplete clients found');
+
+    const ws = XLSX.utils.json_to_sheet(clients.map(c => ({
+      RUT: c.rut,
+      Nombre: c.nombre,
+      Direccion: c.direccion || '',
+      Telefono: c.telefono || '',
+      Email: c.email || ''
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Incompletos');
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    res.setHeader('Content-Disposition', 'attachment; filename="Clientes_Incompletos.xlsx"');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
 
 // GET top 20 clientes inactivos mes actual
 router.get('/inactivos-mes-actual', auth(), async (req, res) => {

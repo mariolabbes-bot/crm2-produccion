@@ -28,57 +28,55 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         const colFolio = findCol([/^Folio$/i, /Folio/i]);
         const colFecha = findCol([/^Fecha$/i, /Fecha.*abono/i, /Fecha/i]);
-        const colMontoNeto = findCol([/^Monto.*neto$/i, /Monto.*neto/i]);
+        const colMonto = findCol([/^Monto$/i]); // This is the TOTAL amount column in Excel
 
-        if (!colFolio || !colFecha || !colMontoNeto) {
-            throw new Error(`Faltan columnas requeridas: Folio, Fecha, Monto Neto`);
-        }
+        // Headers specific handling for duplicates (Identificador)
+        // XLSX usually dedupes headers as 'Identificador', 'Identificador_1'
+        const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i]);
+        const colIdentificadorAbono = findCol([/^Identificador_1$/i, /^Identificador.*abono/i, /^Identificador.*2$/i]);
 
         const colSucursal = findCol([/^Sucursal$/i]);
-        const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i]);
         const colCliente = findCol([/^Cliente$/i]);
-        const colVendedorCliente = findCol([/^Alias.*vendedor$/i, /^Vendedor.*cliente$/i, /^Vendedor$/i]);
-        const colCajaOperacion = findCol([/^Caja.*operacion$/i]);
-        const colUsuarioIngreso = findCol([/^Usuario.*ingreso$/i]);
-        const colMonto = findCol([/^Monto$/i, /Monto.*abono/i]);
+        const colVendedorCliente = findCol([/^Vendedor.*clie/i, /^Vendedor/i]);
+        const colCajaOperacion = findCol([/^Caja.*operaci/i]);
+        const colUsuarioIngreso = findCol([/^Usuario.*in/i]);
         const colMontoTotal = findCol([/^Monto.*total$/i]);
-        const colSaldoFavor = findCol([/^Saldo.*favor$/i]);
-        const colSaldoFavorTotal = findCol([/^Saldo.*favor.*total$/i]);
+        const colSaldoFavor = findCol([/^Saldo.*favor.*u/i]);
+        const colSaldoFavorTotal = findCol([/^Saldo.*favor.*to/i]);
         const colTipoPago = findCol([/^Tipo.*pago$/i]);
         const colEstadoAbono = findCol([/^Estado.*abono$/i]);
-        const colIdentificadorAbono = findCol([/^Identificador.*abono$/i]);
-        const colFechaVencimiento = findCol([/^Fecha.*vencimiento$/i]);
+        const colFechaVencimiento = findCol([/^Fecha.*vencir/i, /^Fecha.*vencimiento$/i]);
 
-        // Usarios map
-        const usersRes = await client.query("SELECT nombre_vendedor FROM usuario WHERE nombre_vendedor IS NOT NULL");
-        const usersByNormFull = new Map();
-        const usersByFirstTwo = new Map();
-        const usersByFirstWord = new Map();
+        if (!colFolio || !colFecha || !colMonto) {
+            throw new Error(`Faltan columnas requeridas: Folio, Fecha, Monto`);
+        }
+
+        // --- 1. Usarios map (Alias) ---
+        const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario WHERE alias IS NOT NULL");
+        const aliasMap = new Map();
         usersRes.rows.forEach(u => {
-            const fullNorm = norm(u.nombre_vendedor);
-            const words = fullNorm.split(/\s+/).filter(w => w.length > 0);
-            usersByNormFull.set(fullNorm, u.nombre_vendedor);
-            if (words.length >= 2) usersByFirstTwo.set(words.slice(0, 2).join(' '), u.nombre_vendedor);
-            if (words.length >= 1) usersByFirstWord.set(words[0], u.nombre_vendedor);
+            const a = (u.alias || u.nombre_vendedor || '').trim();
+            if (a) aliasMap.set(a.toLowerCase(), a);
         });
 
-        // Client map
+        // --- 2. Client map ---
         const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
-        const clientsByRut = new Map(clientsRes.rows.map(c => [norm(c.rut), c.rut]));
+        const clientsByRut = new Map(clientsRes.rows.filter(c => c.rut).map(c => [norm(c.rut), c.rut]));
 
-        // Existing abonos logic
+        // --- 3. Existing abonos logic ---
         const existingAbonos = await client.query(`SELECT id, folio, fecha, identificador_abono, identificador, cliente, vendedor_cliente FROM abono WHERE folio IS NOT NULL`);
-        const existingKeys = new Set();
         const existingByFolio = new Map();
+        const existingKeys = new Set();
         existingAbonos.rows.forEach(a => {
             const f = norm(a.folio || '');
-            // existingKeys is roughly check, logic is redundant if we check existingByFolio
             existingByFolio.set(f, a);
-            existingKeys.add(`${f}|${a.fecha}|${norm(a.identificador_abono || '')}`);
+            const key = `${f}|${new Date(a.fecha).toISOString()}|${norm(a.identificador_abono || '')}`;
+            existingKeys.add(key);
         });
 
         const toImport = [];
         const duplicates = [];
+        // Missing sets
         const missingVendors = new Set();
         const missingClients = new Set();
         const observations = [];
@@ -86,23 +84,78 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         let updatedMissing = 0;
         const updatedDetails = [];
 
+        // Pre-scan for stubs (Vendors)
+        const newAliases = new Set();
+        const scanVendor = (val) => {
+            if (!val) return;
+            const s = String(val).trim();
+            if (s && !aliasMap.has(s.toLowerCase())) {
+                newAliases.add(s);
+            }
+        };
+        for (const r of data) {
+            if (colVendedorCliente && r[colVendedorCliente]) scanVendor(r[colVendedorCliente]);
+        }
+        if (newAliases.size > 0) {
+            console.log(`🛠️ [Job ${jobId}] Creando ${newAliases.size} stubs de vendedor (Abonos)...`);
+            for (const originalAlias of newAliases) {
+                try {
+                    const dummyRut = `STUB-${Math.floor(Math.random() * 100000000)}-${Date.now()}`;
+                    await client.query(`INSERT INTO usuario (rut, nombre_completo, nombre_vendedor, rol_usuario, password, alias) VALUES ($1, $2, $2, 'VENDEDOR', '123456', $2) ON CONFLICT (rut) DO NOTHING`, [dummyRut.slice(0, 12), originalAlias]);
+                    aliasMap.set(originalAlias.toLowerCase(), originalAlias);
+                } catch (e) {
+                    console.warn(`Could not create stub for alias ${originalAlias}: ${e.message}`);
+                }
+            }
+        }
+
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
             const excelRow = i + 2;
             const folio = row[colFolio] ? String(row[colFolio]).trim() : null;
             const fecha = parseExcelDate(row[colFecha]);
-            const montoNeto = parseNumeric(row[colMontoNeto]);
 
-            if (!folio || !fecha || !montoNeto || montoNeto <= 0) continue;
+            // Logic: Monto in Excel is Total. We need Net -> Monto / 1.19
+            const montoExcel = parseNumeric(row[colMonto]);
+            const montoNetoCalc = montoExcel ? Math.round(montoExcel / 1.19) : 0;
+
+            if (!folio || !fecha || !montoExcel) continue;
 
             const sucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
             const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null;
             const clienteNombre = colCliente && row[colCliente] ? String(row[colCliente]).trim() : null;
+
+            // STUB CLIENT
+            if (identificador) {
+                const rutNorm = norm(identificador);
+                if (!clientsByRut.has(rutNorm)) {
+                    if (!missingClients.has(rutNorm)) {
+                        try {
+                            await client.query("INSERT INTO cliente (rut, nombre) VALUES ($1, $2) ON CONFLICT (rut) DO NOTHING", [identificador, clienteNombre || 'Unknown']);
+                            clientsByRut.set(rutNorm, identificador);
+                            missingClients.add(rutNorm);
+                        } catch (e) { console.error(e); }
+                    }
+                }
+            }
+
             const vendedorClienteAlias = colVendedorCliente && row[colVendedorCliente] ? String(row[colVendedorCliente]).trim() : null;
+
+            // Resolve Vendor
+            let vendedorNombre = null;
+            if (vendedorClienteAlias) {
+                const lower = vendedorClienteAlias.toLowerCase();
+                if (aliasMap.has(lower)) vendedorNombre = aliasMap.get(lower);
+                else {
+                    // Should be covered by pre-scan but just in case
+                    missingVendors.add(vendedorClienteAlias);
+                }
+            }
+
+            // ... (rest of logic mostly same)
             const cajaOperacion = colCajaOperacion && row[colCajaOperacion] ? String(row[colCajaOperacion]).trim() : null;
             const usuarioIngreso = colUsuarioIngreso && row[colUsuarioIngreso] ? String(row[colUsuarioIngreso]).trim() : null;
-            const monto = colMonto ? parseNumeric(row[colMonto]) : null;
-            const montoTotal = colMontoTotal ? parseNumeric(row[colMontoTotal]) : null;
+            const montoTotalExcel = colMontoTotal ? parseNumeric(row[colMontoTotal]) : null;
             const saldoFavor = colSaldoFavor ? parseNumeric(row[colSaldoFavor]) : null;
             const saldoFavorTotal = colSaldoFavorTotal ? parseNumeric(row[colSaldoFavorTotal]) : null;
             const tipoPago = colTipoPago && row[colTipoPago] ? String(row[colTipoPago]).trim() : null;
@@ -110,26 +163,10 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             const identificadorAbono = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : null;
             const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
 
-            let vendedorNombre = null;
-            if (vendedorClienteAlias) {
-                const vendorNorm = norm(vendedorClienteAlias);
-                const vendorWords = vendorNorm.split(/\s+/).filter(w => w.length > 0);
-                if (usersByNormFull.has(vendorNorm)) vendedorNombre = usersByNormFull.get(vendorNorm);
-                else if (vendorWords.length >= 2 && usersByFirstTwo.has(vendorWords.slice(0, 2).join(' '))) vendedorNombre = usersByFirstTwo.get(vendorWords.slice(0, 2).join(' '));
-                else if (vendorWords.length >= 1 && usersByFirstWord.has(vendorWords[0])) vendedorNombre = usersByFirstWord.get(vendorWords[0]);
-
-                if (!vendedorNombre) {
-                    missingVendors.add(vendedorClienteAlias);
-                    observations.push({ fila: excelRow, folio, campo: 'vendedor_cliente', detalle: `Vendedor no encontrado: ${vendedorClienteAlias}` });
-                }
-            }
-
             let clienteRut = null;
             if (identificador && /^\d{7,8}-[\dkK]$/.test(identificador) && clientsByRut.has(norm(identificador))) clienteRut = identificador;
-            if (!clienteRut && clienteNombre) {
-                missingClients.add(clienteNombre);
-                observations.push({ fila: excelRow, folio, campo: 'identificador', detalle: `Cliente no encontrado (${clienteNombre})` });
-            }
+
+            // ... (check dup, push)
 
             const folioNorm = norm(folio);
             const dupKey = `${folioNorm}|${fecha}|${norm(identificadorAbono || '')}`;
@@ -145,14 +182,15 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
                         continue;
                     }
                 }
-                duplicates.push({ folio, fecha, identificadorAbono, monto: montoNeto });
+                duplicates.push({ folio, fecha, identificadorAbono, monto: montoNetoCalc });
                 continue;
             }
+            existingKeys.add(dupKey);
 
             toImport.push({
                 sucursal, folio, fecha, identificador: clienteRut, clienteNombre, vendedorClienteNombre: vendedorNombre,
-                cajaOperacion, usuarioIngreso, montoTotal, saldoFavor, saldoFavorTotal, tipoPago,
-                estadoAbono, identificadorAbono, fechaVencimiento, monto, montoNeto
+                cajaOperacion, usuarioIngreso, montoTotal: montoTotalExcel, saldoFavor, saldoFavorTotal, tipoPago,
+                estadoAbono, identificadorAbono, fechaVencimiento, monto: montoExcel, montoNeto: montoNetoCalc
             });
         }
 
@@ -170,15 +208,50 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         let importedCount = 0;
         if (toImport.length > 0) {
-            console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos...`);
-            for (const item of toImport) {
+            console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos en batches...`);
+            const batchSize = 500;
+            for (let i = 0; i < toImport.length; i += batchSize) {
+                const batch = toImport.slice(i, i + batchSize);
+                const values = [];
+                let placeholders = [];
+                let pIndex = 1;
+
+                batch.forEach(item => {
+                    values.push(
+                        item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
+                        item.vendedorClienteNombre, item.cajaOperacion, item.usuarioIngreso, item.montoTotal,
+                        item.saldoFavor, item.saldoFavorTotal, item.tipoPago, item.estadoAbono,
+                        item.identificadorAbono, item.fechaVencimiento, item.monto, item.montoNeto
+                    );
+                    // 17 params per row + NOW() hardcoded
+                    const rowPlaceholders = [];
+                    for (let j = 0; j < 17; j++) {
+                        rowPlaceholders.push(`$${pIndex++}`);
+                    }
+                    placeholders.push(`(${rowPlaceholders.join(',')}, NOW())`);
+                });
+
+                const query = `
+                    INSERT INTO abono (sucursal, folio, fecha, identificador, cliente, vendedor_cliente, caja_operacion, usuario_ingreso, monto_total, saldo_a_favor, saldo_a_favor_total, tipo_pago, estado_abono, identificador_abono, fecha_vencimiento, monto, monto_neto, created_at)
+                    VALUES ${placeholders.join(',')}
+                    ON CONFLICT (folio, identificador_abono, fecha) DO UPDATE SET
+                        identificador = COALESCE(EXCLUDED.identificador, abono.identificador),
+                        cliente = COALESCE(EXCLUDED.cliente, abono.cliente),
+                        vendedor_cliente = COALESCE(EXCLUDED.vendedor_cliente, abono.vendedor_cliente),
+                        estado_abono = EXCLUDED.estado_abono,
+                        monto = EXCLUDED.monto,
+                        monto_neto = EXCLUDED.monto_neto
+                    RETURNING (xmax = 0) AS inserted
+                `;
+
                 try {
-                    await client.query(`INSERT INTO abono (sucursal, folio, fecha, identificador, cliente, vendedor_cliente, caja_operacion, usuario_ingreso, monto_total, saldo_a_favor, saldo_a_favor_total, tipo_pago, estado_abono, identificador_abono, fecha_vencimiento, monto, monto_neto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
-                        [item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre, item.vendedorClienteNombre, item.cajaOperacion, item.usuarioIngreso, item.montoTotal, item.saldoFavor, item.saldoFavorTotal, item.tipoPago, item.estadoAbono, item.identificadorAbono, item.fechaVencimiento, item.monto, item.montoNeto]);
-                    importedCount++;
+                    const res = await client.query(query, values);
+                    const insertedBatch = res.rows.filter(r => r.inserted).length;
+                    importedCount += insertedBatch;
+                    console.log(`   [Batch ${i / batchSize + 1}] Insertados: ${insertedBatch}`);
                 } catch (err) {
-                    console.error(`❌ [Job ${jobId}] Insert error row:`, err.message);
-                    observations.push({ fila: 'N/A', folio: item.folio, campo: 'DB', detalle: err.detail || err.message });
+                    console.error(`❌ [Job ${jobId}] Batch insert error:`, err.message);
+                    observations.push({ fila: 'Batch', folio: 'Unknown', campo: 'DB', detalle: err.detail || err.message });
                 }
             }
         }
@@ -235,18 +308,15 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             resultData: result, reportFilename: pendingReportPath ? path.basename(pendingReportPath) : null, observationsFilename: observationsReportPath ? path.basename(observationsReportPath) : null
         });
 
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         console.log(`✅ [Job ${jobId}] Abonos finalizado`);
         return result;
 
     } catch (error) {
         console.error(`❌ [Job ${jobId}] Falló abonos:`, error);
         await updateJobStatus(jobId, 'failed', { errorMessage: error.message });
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         throw error;
     } finally {
         client.release();
     }
 }
-
 module.exports = { processAbonosFileAsync };

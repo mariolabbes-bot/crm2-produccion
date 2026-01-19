@@ -7,7 +7,7 @@ const { from: copyFrom } = require('pg-copy-streams');
 
 // Config
 const NEON_URL = 'postgresql://neondb_owner:npg_DYTSqK9GI8Ei@ep-rapid-sky-ace1kx9r-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require';
-const EXCEL_PATH = '/Users/mariolabbe/Library/Mobile Documents/com~apple~CloudDocs/Desktop/Ventas/BASE VENTAS CRM2/BASE TABLAS CRM2.xlsx';
+const BULK_DIR = path.join(__dirname, '../bulk_data');
 const MAPPING_FILE = process.env.MAPPING_FILE || '/Users/mariolabbe/Desktop/base vendedores.xlsx';
 const fixedMapPath = path.join(__dirname, '..', 'config', 'vendor_alias_map.json');
 let FIXED_ALIAS = {};
@@ -80,151 +80,115 @@ async function detectAbonosTable(client) {
 }
 
 async function main() {
-  console.log('=== IMPORT ABONOS (FAST) ===');
-  // Leer Excel
-  const wb = XLSX.readFile(EXCEL_PATH);
-  const abonosSheetName = wb.SheetNames.find(n => /abonos/i.test(n));
-  if (!abonosSheetName) {
-    console.log('No se encontró hoja de abonos en el Excel');
+  console.log('=== IMPORT ABONOS (MULTI-FILE BULK / SCHEMA CORREGIDO) ===');
+
+  if (!fs.existsSync(BULK_DIR)) {
+    console.error('No existe directorio bulk_data:', BULK_DIR);
     process.exit(1);
   }
-  const sh = wb.Sheets[abonosSheetName];
-  const rows = XLSX.utils.sheet_to_json(sh, { raw: true });
-  console.log(`Hoja: ${abonosSheetName} | Filas: ${rows.length}`);
+  const allFiles = fs.readdirSync(BULK_DIR);
+  const targetFiles = allFiles.filter(f => f.toUpperCase().includes('ABONO') && !f.startsWith('PROCESSED_') && f.endsWith('.xlsx'));
 
-  // Detectar columnas (flexible)
-  const headers = Object.keys(rows[0] || {});
-  const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
-  const colFecha = findCol([/^Fecha$/i]);
-  const colFolio = findCol([/^Folio$/i]);
-  const colCliente = findCol([/^Cliente$/i]);
-  const colVendedor = findCol([/^Vendedor\s*cliente$/i, /^Vendedor$/i]);
-  const colTipoPago = findCol([/^Tipo\s*pago$/i]);
-  const colEstado = findCol([/^Estado\s*abono$/i]);
-  const colMonto = findCol([/^Monto$/i]);
-  const colMontoTotal = findCol([/^Monto\s*total$/i]);
-
-  if (!colFecha || !colCliente || !(colMonto || colMontoTotal)) {
-    console.error('Columnas requeridas no detectadas:', { colFecha, colCliente, colMonto, colMontoTotal });
-    process.exit(1);
+  if (targetFiles.length === 0) {
+    console.log('No se encontraron archivos ABONO nuevos en:', BULK_DIR);
+    process.exit(0);
   }
-  console.log('Columnas:', { colFecha, colFolio, colCliente, colVendedor, colTipoPago, colEstado, colMonto, colMontoTotal });
+  console.log(`Archivos a procesar: ${targetFiles.length}`, targetFiles);
 
   const client = await pool.connect();
   try {
-    // Usuarios
-    const usersRes = await client.query("SELECT id, nombre, rol FROM users WHERE rol IN ('vendedor','manager')");
-    const usersByNorm = new Map(usersRes.rows.map(u => [norm(u.nombre), u.id]));
-    const userRecords = usersRes.rows.map(u => ({ id: u.id, nombre: u.nombre, tokens: norm(u.nombre).split(' ') }));
-    const managerId = usersRes.rows.find(u => u.rol === 'manager')?.id || null;
-
-    // Mapeo interno (hoja MAPEO VENDEDORES)
-    const aliasMap = new Map();
-    const internalMapSheetName = wb.SheetNames.find(n => norm(n) === norm('MAPEO VENDEDORES'));
-    if (internalMapSheetName && wb.Sheets[internalMapSheetName]) {
-      const mapRows = XLSX.utils.sheet_to_json(wb.Sheets[internalMapSheetName], { raw: true });
-      const hdrs = Object.keys(mapRows[0] || {});
-      const colAlias = hdrs.find(h => /alias/i.test(h));
-      const colUsuario = hdrs.find(h => /usuario|user/i.test(h));
-      if (colAlias && colUsuario) {
-        for (const r of mapRows) {
-          const alias = norm(r[colAlias]);
-          const usuario = norm(r[colUsuario]);
-          const uid = usersByNorm.get(usuario);
-          if (alias && uid) aliasMap.set(alias, uid);
-        }
-        console.log(`Mapeo interno: ${aliasMap.size} alias`);
-      }
-    }
-
-    // Mapeo externo por nombre completo
-    try {
-      if (fs.existsSync(MAPPING_FILE)) {
-        const wbMap = XLSX.readFile(MAPPING_FILE);
-        const mapSheet = wbMap.Sheets[wbMap.SheetNames[0]];
-        const mrows = XLSX.utils.sheet_to_json(mapSheet, { raw: true });
-        const hdrs = Object.keys(mrows[0] || {});
-        const colNombreVend = hdrs.find(h => /nombre\s*vendedor/i.test(h));
-        const colNombre = hdrs.find(h => /^\s*nombre\s*$/i.test(h));
-        const colApellido = hdrs.find(h => /apellido(?!.*\d)/i.test(h));
-        const colApellido2 = hdrs.find(h => /apellido\s*2/i.test(h));
-        let added = 0;
-        if (colNombreVend && colNombre && colApellido) {
-          for (const r of mrows) {
-            const alias = norm(r[colNombreVend]);
-            const full = [r[colNombre], r[colApellido], r[colApellido2] || ''].map(x => (x == null ? '' : String(x))).join(' ');
-            const usuario = norm(full);
-            const uid = usersByNorm.get(usuario);
-            if (alias && uid) { if (!aliasMap.has(alias)) added++; aliasMap.set(alias, uid); }
-          }
-          console.log(`Mapeo externo: +${added} alias (total ${aliasMap.size})`);
-        }
-      }
-    } catch (_) {}
-
-    // Mapeo fijo desde config JSON
-    Object.entries(FIXED_ALIAS).forEach(([alias, targetName]) => {
-      const u = usersRes.rows.find(u => norm(u.nombre) === norm(targetName));
-      if (u) aliasMap.set(norm(alias), u.id);
-    });
-
-    // Heurística tokens
-    const resolveVendedorId = (aliasRaw) => {
-      const alias = norm(aliasRaw);
-      if (!alias) return managerId;
-      if (aliasMap.has(alias)) return aliasMap.get(alias);
-      if (usersByNorm.has(alias)) return usersByNorm.get(alias);
-      const aliasTokens = alias.split(' ').filter(Boolean);
-      const candidates = userRecords.filter(u => aliasTokens.every(t => u.tokens.includes(t)));
-      if (candidates.length === 1) return candidates[0].id;
-      const cand2 = userRecords.filter(u => u.tokens[0] === aliasTokens[0]);
-      if (cand2.length === 1) return cand2[0].id;
-      return managerId;
-    };
-
-    const abonosTable = await detectAbonosTable(client);
-    console.log('Importando hacia tabla:', abonosTable);
-
-    // Limpiar tabla
+    const abonosTable = 'abono';
+    console.log(`Tabla destino: ${abonosTable}`);
+    console.log('Limpiando tabla...');
     await client.query(`DELETE FROM ${abonosTable}`);
 
-    // Generar CSV
+    // CSV Stream
     const csvPath = '/tmp/abonos_import.csv';
     const out = fs.createWriteStream(csvPath);
-    let count = 0;
-    for (const r of rows) {
-      const fecha = parseExcelDate(r[colFecha]);
-      const monto = (r[colMonto] != null ? Number(r[colMonto]) : Number(r[colMontoTotal])) || 0;
-      if (!fecha || !(monto > 0)) continue;
-      const vendedor_id = resolveVendedorId(r[colVendedor]);
-      const folio = r[colFolio] == null ? '' : String(r[colFolio]);
-      const cliente = (r[colCliente] == null ? '' : String(r[colCliente])).replace(/\t|\n/g, ' ').trim();
-      const tipo = (r[colTipoPago] == null ? '' : String(r[colTipoPago])).replace(/\t|\n/g, ' ').trim();
-      const estado = (r[colEstado] == null ? '' : String(r[colEstado])).replace(/\t|\n/g, ' ').trim();
-      const descripcion = estado ? `Estado: ${estado}` : '';
-      out.write(`${vendedor_id || ''}\t${fecha}\t${monto.toFixed(2)}\t${descripcion}\t${folio}\t${cliente}\t${tipo}\n`);
-      count++;
+    let totalCount = 0;
+
+    for (const filename of targetFiles) {
+      console.log(`\n📄 Leyendo: ${filename}`);
+      const filePath = path.join(BULK_DIR, filename);
+      const wb = XLSX.readFile(filePath);
+
+      let abonosSheetName = wb.SheetNames.find(n => /abonos/i.test(n));
+      if (!abonosSheetName) {
+        console.log(`   ℹ️ No se encontró hoja con nombre 'Abonos', usando la primera hoja: ${wb.SheetNames[0]}`);
+        abonosSheetName = wb.SheetNames[0];
+      }
+
+      const sh = wb.Sheets[abonosSheetName];
+      const rows = XLSX.utils.sheet_to_json(sh, { raw: true });
+      console.log(`   Filas en hoja: ${rows.length}`);
+
+      // Detectar columnas
+      const headers = Object.keys(rows[0] || {});
+      const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
+
+      const colFecha = findCol([/^Fecha$/i]);
+      const colFolio = findCol([/^Folio$/i]);
+      const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i]);
+      const colCliente = findCol([/^Cliente$/i]);
+      const colVendedor = findCol([/^Vendedor\s*cliente$/i, /^Vendedor$/i]);
+      const colTipoPago = findCol([/^Tipo\s*pago$/i]);
+      const colEstado = findCol([/^Estado\s*abono$/i]);
+      const colMonto = findCol([/^Monto$/i]);
+      const colMontoTotal = findCol([/^Monto\s*total$/i]);
+      const colSucursal = findCol([/^Sucursal$/i]);
+
+      if (!colFecha || !colCliente || !(colMonto || colMontoTotal)) {
+        console.error(`   ❌ Falta col requerida en ${filename}. Fecha:${colFecha}, Cli:${colCliente}`);
+        continue;
+      }
+
+      for (const r of rows) {
+        const fecha = parseExcelDate(r[colFecha]);
+        const monto = (r[colMonto] != null ? Number(r[colMonto]) : Number(r[colMontoTotal])) || 0;
+
+        if (!fecha || !(monto > 0)) continue;
+
+        const folio = r[colFolio] ? String(r[colFolio]).trim() : '';
+        const identificador = colIdentificador && r[colIdentificador] ? String(r[colIdentificador]).trim() : '';
+        const cliente = (r[colCliente] ? String(r[colCliente]) : '').replace(/\t|\n/g, ' ').trim();
+        const vendedor = (colVendedor && r[colVendedor] ? String(r[colVendedor]) : '').replace(/\t|\n/g, ' ').trim();
+        const tipo = (colTipoPago && r[colTipoPago] ? String(r[colTipoPago]) : '').replace(/\t|\n/g, ' ').trim();
+        const estado = (colEstado && r[colEstado] ? String(r[colEstado]) : '').replace(/\t|\n/g, ' ').trim();
+        const sucursal = (colSucursal && r[colSucursal] ? String(r[colSucursal]) : '').replace(/\t|\n/g, ' ').trim();
+
+        // Mapeo a columnas DB: 
+        // folio, fecha, identificador, cliente, vendedor_cliente, estado_abono, tipo_pago, monto, monto_total, sucursal
+        // NOTA: Usamos tabulador \t como delimitador. Asegurar limpiar \t en strings.
+        out.write(`${folio}\t${fecha}\t${identificador}\t${cliente}\t${vendedor}\t${estado}\t${tipo}\t${monto.toFixed(2)}\t${monto.toFixed(2)}\t${sucursal}\n`);
+        totalCount++;
+      }
     }
+
     out.end();
     await new Promise(res => out.on('finish', res));
-    console.log(`CSV generado: ${count} abonos`);
+    console.log(`\n✅ CSV acumulado generado: ${totalCount} registros.`);
 
-    // COPY into table
-    console.log('Iniciando COPY...');
-    const stream = client.query(copyFrom(`COPY ${abonosTable} (vendedor_id, fecha_abono, monto, descripcion, folio, cliente_nombre, tipo_pago) FROM STDIN WITH (FORMAT text, DELIMITER E'\\t')`));
-    const fileStream = fs.createReadStream(csvPath);
-    await new Promise((resolve, reject) => {
-      fileStream.on('error', reject);
-      stream.on('error', reject);
-      stream.on('finish', resolve);
-      fileStream.pipe(stream);
-    });
-    fs.unlinkSync(csvPath);
-    console.log('✅ Abonos importados');
+    // --- COPY ---
+    if (totalCount > 0) {
+      console.log('Ejecutando COPY a base de datos...');
+      const stream = client.query(copyFrom(`COPY ${abonosTable} (folio, fecha, identificador, cliente, vendedor_cliente, estado_abono, tipo_pago, monto, monto_total, sucursal) FROM STDIN WITH (FORMAT text, DELIMITER E'\\t')`));
+      const fileStream = fs.createReadStream(csvPath);
+      await new Promise((resolve, reject) => {
+        fileStream.on('error', reject);
+        stream.on('error', reject);
+        stream.on('finish', resolve);
+        fileStream.pipe(stream);
+      });
+      fs.unlinkSync(csvPath);
+      console.log('✅ Importación Finalizada.');
+    } else {
+      console.log('No hay datos válidos para importar.');
+    }
 
-    // Verificar conteo
-    const check = await client.query(`SELECT COUNT(*)::int AS c, MIN(fecha_abono) AS min, MAX(fecha_abono) AS max FROM ${abonosTable}`);
-    console.log('Resumen abonos =>', check.rows[0]);
+    // --- VERIFICACIÓN ---
+    const check = await client.query(`SELECT COUNT(*)::int AS c, MIN(fecha) AS min, MAX(fecha) AS max, SUM(monto) as total_monto FROM ${abonosTable}`);
+    console.log('📊 Estado Final DB:', check.rows[0]);
+
   } finally {
     client.release();
     await pool.end();

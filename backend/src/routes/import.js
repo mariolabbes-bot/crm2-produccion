@@ -171,51 +171,37 @@ router.get('/status/:jobId', auth(['manager']), async (req, res) => {
 // ==================== ENDPOINTS SÍNCRONOS/LEGACY O PENDIENTES ====================
 
 // POST /saldo-credito (SÍNCRONO - Destructivo)
+// POST /saldo-credito (Async - Snapshot)
 router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (req, res) => {
-  console.log('🟢 /saldo-credito LLAMADO');
-  const client = await pool.connect();
+  console.log('🟢 [Async] /saldo-credito recibido:', req.file?.originalname);
   try {
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
-    const workbook = XLSX.readFile(req.file.path);
-    const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
-    if (data.length === 0) {
-      fs.unlinkSync(req.file.path);
-      return res.status(400).json({ success: false, msg: 'Archivo sin datos' });
-    }
+    const userRut = req.user?.rut || 'unknown';
+    // Create Job
+    const jobId = await createJob('saldo_credito', req.file.originalname, userRut);
+    const permanentPath = moveToPending(req, jobId);
 
-    await client.query('BEGIN');
-    const { resolveVendorName } = require('../utils/vendorAlias');
+    // Enqueue
+    await enqueueImport({
+      jobId,
+      type: 'saldo_credito',
+      filePath: permanentPath,
+      originalName: req.file.originalname,
+      userRut
+    });
 
-    // Config DB
-    await client.query(`CREATE TABLE IF NOT EXISTS saldo_credito (
-      id SERIAL PRIMARY KEY, rut VARCHAR(20), tipo_documento VARCHAR(50), cliente VARCHAR(255),
-      folio INTEGER, fecha_emision DATE, total_factura NUMERIC(15,2), deuda_cancelada NUMERIC(15,2) DEFAULT 0,
-      saldo_factura NUMERIC(15,2), saldo_favor_disponible NUMERIC(15,2) DEFAULT 0,
-      nombre_vendedor VARCHAR(255), idvendedor INTEGER, created_at TIMESTAMP DEFAULT NOW()
-    )`);
-
-    await client.query('DELETE FROM saldo_credito');
-
-    let insertados = 0, errores = 0;
-    for (const row of data) {
-      try {
-        await client.query(`INSERT INTO saldo_credito (rut, tipo_documento, cliente, folio, fecha_emision, total_factura, deuda_cancelada, saldo_factura, saldo_favor_disponible, nombre_vendedor, idvendedor) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-          [row.RUT || null, row['TIPO DOCUMENTO'] || 'FACTURA', row.CLIENTE || null, row.folio || null, parseExcelDate(row.fecha_emision), parseNumeric(row['TOTAL FACTURA']) || 0, parseNumeric(row['Deuda Cancelada']) || 0, parseNumeric(row['SALDO FACTURA']) || 0, parseNumeric(row['Saldo a Favor Disponible']) || 0, await resolveVendorName(row['NOMBRE VENDEDOR'] || null), row.idvendedor || null]);
-        insertados++;
-      } catch (e) { errores++; }
-    }
-
-    await client.query('COMMIT');
-    fs.unlinkSync(req.file.path);
-    res.json({ success: true, msg: 'Importación completada', registrosEliminados: 'ALL', registrosInsertados: insertados, errores });
+    res.status(202).json({
+      success: true,
+      jobId,
+      msg: 'Archivo de Saldo Crédito recibido. Procesando en segundo plano (Snapshot Mode)...',
+      statusUrl: `/api/import/status/${jobId}`
+    });
 
   } catch (error) {
-    await client.query('ROLLBACK');
+    console.error('❌ Error /saldo-credito:', error);
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-    res.status(500).json({ success: false, msg: 'Error al importar saldo crédito', error: error.message });
-  } finally {
-    client.release();
+    res.status(500).json({ success: false, msg: 'Error al iniciar importación de saldo crédito', error: error.message });
   }
 });
 

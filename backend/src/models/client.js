@@ -35,9 +35,9 @@ class ClientModel {
   }
 
   static async create(clientData) {
-    const { 
-      rut, nombre, direccion, ciudad, estado, codigo_postal, 
-      pais, latitud, longitud, telefono, email, vendedor_id 
+    const {
+      rut, nombre, direccion, ciudad, estado, codigo_postal,
+      pais, latitud, longitud, telefono, email, vendedor_id
     } = clientData;
 
     const query = `
@@ -47,10 +47,10 @@ class ClientModel {
       RETURNING *
     `;
     const values = [
-      rut, nombre, direccion, ciudad, estado, codigo_postal, 
+      rut, nombre, direccion, ciudad, estado, codigo_postal,
       pais, latitud, longitud, telefono, email, vendedor_id
     ];
-    
+
     const result = await pool.query(query, values);
     return result.rows[0];
   }
@@ -60,18 +60,26 @@ class ClientModel {
     try {
       await client.query('BEGIN');
       const insertedClients = [];
-      
+
       for (const c of clientsData) {
         const { rut, nombre, direccion, telefono, email } = c;
         // Asume vendedor_id = userId (quien sube el archivo, o lógica similar)
-        // La ruta original usaba req.user.id
+
+        // UPSERT LOGIC
         const res = await client.query(
-          'INSERT INTO cliente (rut, nombre, direccion, telefono, email, vendedor_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+          `INSERT INTO cliente (rut, nombre, direccion, telefono, email, vendedor_id) 
+           VALUES ($1, $2, $3, $4, $5, $6) 
+           ON CONFLICT (rut) DO UPDATE SET
+             nombre = EXCLUDED.nombre,
+             direccion = COALESCE(EXCLUDED.direccion, cliente.direccion),
+             telefono = COALESCE(EXCLUDED.telefono, cliente.telefono),
+             email = COALESCE(EXCLUDED.email, cliente.email)
+           RETURNING *`,
           [rut, nombre, direccion, telefono, email, userId]
         );
         insertedClients.push(res.rows[0]);
       }
-      
+
       await client.query('COMMIT');
       return insertedClients;
     } catch (err) {
@@ -80,6 +88,19 @@ class ClientModel {
     } finally {
       client.release();
     }
+  }
+
+  static async findIncomplete() {
+    // Definimos incompleto como: nombre es 'Unknown' O nombre es igual al Rut (si usamos rut como fallback)
+    // O campos criticos nulos.
+    // Usaremos la convención de Stubs: nombre = 'Unknown' O 'Cliente Nuevo'
+    const query = `
+      SELECT * FROM cliente 
+      WHERE (nombre = 'Unknown' OR nombre IS NULL OR nombre = rut)
+      ORDER BY created_at DESC
+    `;
+    const result = await pool.query(query);
+    return result.rows;
   }
 
   static async update(id, clientData, { isManager, userId }) {
@@ -165,7 +186,7 @@ class ClientModel {
       INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
       WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
     `;
-    
+
     const params = [];
     if (nombreVendedor) {
       query += ` AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))`;
@@ -196,7 +217,7 @@ class ClientModel {
       INNER JOIN saldo_credito sc ON c.rut = sc.rut
       WHERE sc.saldo_factura > 0
     `;
-    
+
     const params = [];
     if (nombreVendedor) {
       query += ` AND UPPER(TRIM(c.nombre_vendedor)) = UPPER(TRIM($1))`;
@@ -217,7 +238,7 @@ class ClientModel {
   static async search({ term, nombreVendedor }) {
     // term tendrá %...% ya o se agrega aquí? Mejor que venga limpio y lo agregamos.
     // En la ruta actual viene de query q, y se le agregan %.
-    
+
     const searchTerm = `%${term}%`;
     const params = [searchTerm, searchTerm];
     let query = `
