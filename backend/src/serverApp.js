@@ -18,9 +18,10 @@ const corsOptions = {
     if (!origin) return callback(null, true);
 
     const normalize = o => (o || '').replace(/\/$/, '').toLowerCase();
-    if (allowedOrigins.some(o => normalize(o) === normalize(origin))) {
+    if (allowedOrigins.some(o => normalize(o) === normalize(origin)) || normalize(origin).endsWith('.vercel.app')) {
       callback(null, true);
     } else {
+      console.warn(`[CORS] Bloqueado: ${origin}`);
       callback(new Error('No permitido por CORS'));
     }
   },
