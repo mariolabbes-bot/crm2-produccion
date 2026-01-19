@@ -24,14 +24,21 @@ if (REDIS_URL) {
         host: url.hostname,
         password: url.password,
         username: url.username,
-        tls: REDIS_URL.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined
+        tls: REDIS_URL.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
+        maxRetriesPerRequest: null, // Importante: Requerido por Bull
+        enableReadyCheck: false
     };
     if (REDIS_URL.startsWith('rediss://')) {
         console.log('🔒 [ImportWorker] Usando conexión segura (TLS) para Redis');
     }
 }
 
-const importQueue = new Queue('import-jobs', REDIS_URL ? { redis: redisConfig.redis } : 'redis://127.0.0.1:6379');
+// Configuración fallback para local (si no hay REDIS_URL) se asegura de tener opciones básicas si es necesario
+const queueConfig = REDIS_URL
+    ? { redis: redisConfig.redis }
+    : { redis: { port: 6379, host: 'localhost', maxRetriesPerRequest: null } };
+
+const importQueue = new Queue('import-jobs', queueConfig);
 
 importQueue.process(async (job) => {
     const { jobId, type, filePath, originalName, userRut, options } = job.data;
