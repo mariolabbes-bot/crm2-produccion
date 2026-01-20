@@ -30,13 +30,13 @@ async function getDetectedTables() {
 // GET /api/abonos - Obtener abonos con filtros
 router.get('/', auth(), async (req, res) => {
   try {
-    const { 
-      vendedor_id, 
-      fecha_desde, 
-      fecha_hasta, 
+    const {
+      vendedor_id,
+      fecha_desde,
+      fecha_hasta,
       tipo_pago,
       limit = 50,
-      offset = 0 
+      offset = 0
     } = req.query;
 
     const { abonosTable } = await getDetectedTables();
@@ -116,7 +116,7 @@ router.get('/', auth(), async (req, res) => {
   FROM ${abonosTable} a
       WHERE 1=1
     `;
-    
+
     const countParams = [];
     let countParamCounter = 1;
 
@@ -162,10 +162,10 @@ router.get('/', auth(), async (req, res) => {
     });
   } catch (error) {
     console.error('Error obteniendo abonos:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error al obtener abonos',
-      error: error.message 
+      error: error.message
     });
   }
 });
@@ -272,10 +272,10 @@ router.get('/estadisticas', auth(), async (req, res) => {
     });
   } catch (error) {
     console.error('Error obteniendo estadísticas de abonos:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error al obtener estadísticas',
-      error: error.message 
+      error: error.message
     });
   }
 });
@@ -347,7 +347,7 @@ router.get('/comparativo', auth(), async (req, res) => {
     let whereClauseAbonos = whereClause;
     const abonosParams = [];
     let abonosParamCounter = 1;
-    
+
     if (req.user.rol === 'vendedor') {
       whereClauseAbonos += ` AND vendedor_id = $${abonosParamCounter}`;
       abonosParams.push(req.user.id);
@@ -478,7 +478,7 @@ router.get('/comparativo', auth(), async (req, res) => {
         ...row,
         vendedor_nombre: vendedorNombres.get(row.vendedor_id) || 'Desconocido',
         diferencia: row.total_ventas - row.total_abonos,
-        porcentaje_cobrado: row.total_ventas > 0 
+        porcentaje_cobrado: row.total_ventas > 0
           ? parseFloat(((row.total_abonos / row.total_ventas) * 100).toFixed(2))
           : 0
       })).sort((a, b) => {
@@ -514,7 +514,7 @@ router.get('/comparativo', auth(), async (req, res) => {
         total_abonos: abonosTotal,
         cantidad_abonos: parseInt(abonosTotalData.rows[0]?.cantidad_abonos) || 0,
         saldo_pendiente: ventasTotal - abonosTotal,
-        porcentaje_cobrado_total: ventasTotal > 0 
+        porcentaje_cobrado_total: ventasTotal > 0
           ? parseFloat(((abonosTotal / ventasTotal) * 100).toFixed(2))
           : 0
       }]
@@ -529,10 +529,10 @@ router.get('/comparativo', auth(), async (req, res) => {
     });
   } catch (error) {
     console.error('Error obteniendo comparativo:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error al obtener comparativo',
-      error: error.message 
+      error: error.message
     });
   }
 });
@@ -570,28 +570,43 @@ router.get('/por-vendedor', auth(), async (req, res) => {
     }
 
     // Solo managers pueden ver todos los vendedores
-    if (req.user.rol !== 'manager') {
+    if (!req.user.rol || req.user.rol.toLowerCase() !== 'manager') {
       return res.status(403).json({
         success: false,
         message: 'No tienes permisos para ver esta información'
       });
     }
 
-    let whereClause = 'WHERE 1=1';
     const params = [];
     let paramCounter = 1;
+    let joinConditions = '';
 
     if (fecha_desde) {
-      whereClause += ` AND a.${abonoFechaCol} >= $${paramCounter}`;
+      joinConditions += ` AND a.${abonoFechaCol} >= $${paramCounter}`;
       params.push(fecha_desde);
       paramCounter++;
     }
 
     if (fecha_hasta) {
-      whereClause += ` AND a.${abonoFechaCol} <= $${paramCounter}`;
+      joinConditions += ` AND a.${abonoFechaCol} <= $${paramCounter}`;
       params.push(fecha_hasta);
       paramCounter++;
     }
+
+    // Subqueries need independent parameter indexing or reuse?
+    // Using string interpolation with values directly in subquery is safer for independent params, 
+    // BUT we are using $1, $2 which refer to the main query params.
+    // Since we push fecha_desde/hasta to params, $1 and $2 are valid.
+
+    // WARNING: logic below re-uses $1 and $2 in subquery text.
+    // If fecha_desde is present (param $1), subquery uses $1. Correct.
+    // If fecha_desde is NOT present but fecha_hasta IS?
+    // Then params has [fecha_hasta]. paramCounter was 1. joinConditions uses $1.
+    // subquery logic:
+    // ${fecha_desde ? `AND s.${salesDateCol} >= $1` : ''} 
+    // ${fecha_hasta ? `AND s.${salesDateCol} <= $${fecha_desde ? 2 : 1}` : ''}
+    // This logic correctly calculates index! ($2 if from exists, else $1).
+    // So distinct params array matches strictly.
 
     const ventasCantidadSub = salesTable
       ? `SELECT COUNT(*) FROM ${salesTable} s WHERE s.vendedor_id = u.id ${fecha_desde ? `AND s.${salesDateCol} >= $1` : ''} ${fecha_hasta ? `AND s.${salesDateCol} <= $${fecha_desde ? 2 : 1}` : ''}`
@@ -612,9 +627,9 @@ router.get('/por-vendedor', auth(), async (req, res) => {
         -- Ventas del vendedor
         ( ${ventasCantidadSub} ) as cantidad_ventas,
         ( ${ventasTotalSub} ) as total_ventas
-  FROM usuario u
-  LEFT JOIN ${abonosTable} a ON u.id = a.vendedor_id ${whereClause.replace('WHERE 1=1 AND', 'AND')}
-      WHERE u.rol IN ('vendedor', 'manager')
+      FROM usuario u
+      LEFT JOIN ${abonosTable} a ON u.id = a.vendedor_id ${joinConditions}
+      WHERE u.rol IN ('vendedor', 'manager', 'VENDEDOR', 'MANAGER')
       GROUP BY u.id, u.nombre
       ORDER BY total_abonos DESC NULLS LAST
     `;
@@ -624,7 +639,7 @@ router.get('/por-vendedor', auth(), async (req, res) => {
     // Calcular porcentajes y agregar métricas
     const vendedoresConMetricas = result.rows.map(v => ({
       ...v,
-      porcentaje_cobrado: v.total_ventas > 0 
+      porcentaje_cobrado: v.total_ventas > 0
         ? ((v.total_abonos / v.total_ventas) * 100).toFixed(2)
         : '0.00',
       saldo_pendiente: (parseFloat(v.total_ventas || 0) - parseFloat(v.total_abonos || 0)).toFixed(2)
@@ -636,10 +651,10 @@ router.get('/por-vendedor', auth(), async (req, res) => {
     });
   } catch (error) {
     console.error('Error obteniendo abonos por vendedor:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error al obtener información',
-      error: error.message 
+      error: error.message
     });
   }
 });
@@ -664,10 +679,10 @@ router.get('/tipos-pago', auth(), async (req, res) => {
     });
   } catch (error) {
     console.error('Error obteniendo tipos de pago:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error al obtener tipos de pago',
-      error: error.message 
+      error: error.message
     });
   }
 });
