@@ -132,10 +132,7 @@ const DashboardPage = () => {
 
   return (
     <Box className="dashboard-page-container">
-      <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>Dashboard General (v2.7)</Typography>
-      <Typography variant="caption" sx={{ display: 'block', mb: 3, color: 'text.secondary', fontFamily: 'monospace', fontSize: '10px' }}>
-        Backend: {API_URL}
-      </Typography>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Dashboard General (v2.8)</Typography>
 
       {/* Widget de última importación */}
       <div className="card-unified">

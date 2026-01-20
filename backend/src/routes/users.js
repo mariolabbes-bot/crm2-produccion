@@ -98,7 +98,7 @@ router.get('/vendedores', async (req, res) => {
     console.log('📋 [GET /vendedores] Iniciando consulta de vendedores...');
 
     const query = `
-      SELECT DISTINCT ON (nombre_vendedor)
+      SELECT DISTINCT ON (LOWER(TRIM(nombre_vendedor)))
         rut as id,
         nombre_vendedor as nombre,
         correo,
@@ -109,15 +109,13 @@ router.get('/vendedores', async (req, res) => {
       FROM usuario
       WHERE LOWER(rol_usuario) = 'vendedor'
       AND nombre_vendedor IS NOT NULL
-      ORDER BY nombre_vendedor ASC, id DESC
+      ORDER BY LOWER(TRIM(nombre_vendedor)) ASC, id DESC
     `;
 
     const vendedores = await pool.query(query);
-    console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores`);
+    console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores (unicos)`);
 
-    // Inject Debug Vendor for Validation
-    const debugVendor = { id: 'DEBUG_V2_6', nombre: '✅ Backend v2.6 OK' };
-    res.json([debugVendor, ...vendedores.rows]);
+    res.json(vendedores.rows);
   } catch (err) {
     console.error('❌ Error al obtener vendedores:', err.message);
     console.error('❌ Stack:', err.stack);
