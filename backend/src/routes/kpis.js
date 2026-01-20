@@ -187,11 +187,11 @@ router.get('/mes-actual', auth(), async (req, res) => {
     // Filtro vendedor: Managers pueden filtrar por vendedor_id, vendedores solo ven sus datos
     let vendedorFilter = '';
     let params = [];
-    
+
     // Si es manager y se proporciona vendedor_id en query, filtrar por ese vendedor
     if (isManager && req.query.vendedor_id) {
       const vendedorRut = req.query.vendedor_id; // Ahora es RUT, no ID numérico
-      
+
       // Buscar el nombre del vendedor por su RUT
       const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
       if (vendedorQuery.rows.length > 0) {
@@ -258,24 +258,25 @@ router.get('/mes-actual', auth(), async (req, res) => {
         SELECT column_name FROM information_schema.columns WHERE table_name = 'abono'
       `);
       const abonoCols = new Set(abonoColsQ.rows.map(r => r.column_name));
-      
+
       let abonoAmountCol = null;
       let abonoDateCol = null;
       let abonoVendedorCol = null;
 
-      if (abonoCols.has('monto')) abonoAmountCol = 'monto';
+      if (abonoCols.has('monto_neto')) abonoAmountCol = 'monto_neto';
+      else if (abonoCols.has('monto')) abonoAmountCol = 'monto';
       else if (abonoCols.has('monto_abono')) abonoAmountCol = 'monto_abono';
-      
+
       if (abonoCols.has('fecha_abono')) abonoDateCol = 'fecha_abono';
       else if (abonoCols.has('fecha')) abonoDateCol = 'fecha';
-      
+
       if (abonoCols.has('vendedor_id')) abonoVendedorCol = 'vendedor_id';
       else if (abonoCols.has('vendedor_cliente')) abonoVendedorCol = 'vendedor_cliente';
 
       if (abonoAmountCol && abonoDateCol) {
         let abonoVendedorFilter = '';
         let abonoParams = [];
-        
+
         // Aplicar el mismo filtro de vendedor que en ventas
         // Si es manager con filtro vendedor_id, usar el nombre del vendedor ya obtenido
         if (params.length > 0 && abonoVendedorCol) {
@@ -351,7 +352,7 @@ router.get('/mes-actual', auth(), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-    
+
     res.json({
       success: true,
       data: {
@@ -422,10 +423,10 @@ router.get('/dashboard-current', auth(), async (req, res) => {
     // Filtro vendedor
     let vendedorFilter = '';
     let params = [];
-    
+
     if (isManager && req.query.vendedor_id) {
       const vendedorRut = req.query.vendedor_id; // Ahora es RUT, no ID numérico
-      
+
       // Buscar el nombre del vendedor por RUT
       const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
       if (vendedorQuery.rows.length > 0) {
@@ -484,15 +485,15 @@ router.get('/dashboard-current', auth(), async (req, res) => {
     if (abonoTableCheck.rows[0]?.has_abono) {
       const abonoColsQ = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = 'abono'`);
       const abonoCols = new Set(abonoColsQ.rows.map(r => r.column_name));
-      
-      let abonoAmountCol = abonoCols.has('monto') ? 'monto' : (abonoCols.has('monto_abono') ? 'monto_abono' : null);
+
+      let abonoAmountCol = abonoCols.has('monto_neto') ? 'monto_neto' : (abonoCols.has('monto') ? 'monto' : (abonoCols.has('monto_abono') ? 'monto_abono' : null));
       let abonoDateCol = abonoCols.has('fecha_abono') ? 'fecha_abono' : (abonoCols.has('fecha') ? 'fecha' : null);
       let abonoVendedorCol = abonoCols.has('vendedor_id') ? 'vendedor_id' : (abonoCols.has('vendedor_cliente') ? 'vendedor_cliente' : null);
 
       if (abonoAmountCol && abonoDateCol) {
         let abonoVendedorFilter = '';
         let abonoParams = [];
-        
+
         if (params.length > 0 && abonoVendedorCol) {
           const nombreVendedor = params[0];
           if (abonoVendedorCol === 'vendedor_cliente') {
@@ -565,7 +566,7 @@ router.get('/dashboard-current', auth(), async (req, res) => {
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    
+
     res.json({
       success: true,
       data: {
@@ -617,16 +618,16 @@ router.get('/saldo-credito-total', auth(), async (req, res) => {
       if (req.query.vendedor_id) {
         const rut = String(req.query.vendedor_id);
         console.log('[Saldo Crédito] RUT recibido:', rut);
-        
+
         const vRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [rut]);
         const nombreVend = vRes.rows[0]?.nombre_vendedor || null;
         console.log('[Saldo Crédito] Nombre vendedor desde usuario:', nombreVend);
-        
+
         if (nombreVend) {
           // Verificar qué nombres existen en saldo_credito
           const checkRes = await pool.query('SELECT DISTINCT nombre_vendedor FROM saldo_credito WHERE nombre_vendedor IS NOT NULL');
           console.log('[Saldo Crédito] Nombres en saldo_credito:', checkRes.rows.map(r => r.nombre_vendedor));
-          
+
           where = ' WHERE UPPER(TRIM(nombre_vendedor)) = UPPER(TRIM($1))';
           params.push(nombreVend);
           console.log('[Saldo Crédito] Filtro aplicado:', nombreVend);
@@ -652,10 +653,10 @@ router.get('/saldo-credito-total', auth(), async (req, res) => {
     const finalQuery = sql + where;
     console.log('[Saldo Crédito] Query final:', finalQuery);
     console.log('[Saldo Crédito] Params:', params);
-    
+
     const { rows } = await pool.query(finalQuery, params);
     const total = parseFloat(rows[0]?.total || 0);
-    
+
     console.log('[Saldo Crédito] Total calculado:', total);
 
     // Prevent caching
@@ -692,7 +693,7 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
     // Construir filtro de fechas
     let fechaFilter = '';
     let fechaParams = [];
-    
+
     if (fechaInicio && fechaFin) {
       // Rango específico
       fechaFilter = `WHERE ${dateCol} >= $1::date AND ${dateCol} < ($2::text || '-01')::date + INTERVAL '1 month'`;
@@ -706,7 +707,7 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
       const ultimoMesQuery = `SELECT TO_CHAR(MAX(${dateCol}), 'YYYY-MM') AS ultimo_mes FROM ${salesTable}`;
       const ultimoMesResult = await pool.query(ultimoMesQuery);
       const ultimoMes = ultimoMesResult.rows[0]?.ultimo_mes;
-      
+
       if (ultimoMes) {
         const [year, month] = ultimoMes.split('-').map(Number);
         const fechaLimite = new Date(year, month - mesesAtras, 1).toISOString().slice(0, 7);
@@ -756,17 +757,17 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
       GROUP BY TO_CHAR(${dateCol}, 'YYYY-MM')
       ORDER BY mes
     `;
-    
+
     // Combinar parámetros de fecha y vendedor
     const allParams = [...fechaParams, ...params];
-    
+
     // Ajustar vendedorFilter si hay parámetros de fecha
     let adjustedVendedorFilter = vendedorFilter;
     if (baseParamCount > 0 && vendedorFilter) {
       // Reemplazar $1 por $N donde N es baseParamCount + 1
       adjustedVendedorFilter = vendedorFilter.replace('$1', `$${baseParamCount + 1}`);
     }
-    
+
     const finalQueryVentas = `
       SELECT 
         TO_CHAR(${dateCol}, 'YYYY-MM') AS mes,
@@ -777,7 +778,7 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
       GROUP BY TO_CHAR(${dateCol}, 'YYYY-MM')
       ORDER BY mes
     `;
-    
+
     const ventasResult = await pool.query(finalQueryVentas, allParams);
 
     // Obtener abonos (si existe tabla abono)
@@ -791,21 +792,22 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
         SELECT column_name FROM information_schema.columns WHERE table_name = 'abono'
       `);
       const abonoCols = new Set(abonoColsQ.rows.map(r => r.column_name));
-      
+
       let abonoAmountCol = null;
       let abonoDateCol = null;
       let abonoVendedorCol = null;
 
-      if (abonoCols.has('monto')) abonoAmountCol = 'monto';
+      if (abonoCols.has('monto_neto')) abonoAmountCol = 'monto_neto';
+      else if (abonoCols.has('monto')) abonoAmountCol = 'monto';
       else if (abonoCols.has('monto_abono')) abonoAmountCol = 'monto_abono';
-      
+
       if (abonoCols.has('fecha_abono')) abonoDateCol = 'fecha_abono';
       else if (abonoCols.has('fecha')) abonoDateCol = 'fecha';
-      
+
       if (abonoCols.has('vendedor_id')) abonoVendedorCol = 'vendedor_id';
       else if (abonoCols.has('vendedor_cliente')) abonoVendedorCol = 'vendedor_cliente';
 
-        if (abonoAmountCol && abonoDateCol) {
+      if (abonoAmountCol && abonoDateCol) {
         let abonoVendedorFilter = '';
         let abonoParams = [];
         if (!isManager && abonoVendedorCol) {
@@ -822,7 +824,7 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
 
         // Construir filtro de fechas para abonos (igual que ventas)
         let abonoFechaFilter = fechaFilter.replace(new RegExp(dateCol, 'g'), abonoDateCol);
-        
+
         const queryAbonos = `
           SELECT 
             TO_CHAR(${abonoDateCol}, 'YYYY-MM') AS mes,
@@ -834,7 +836,7 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
           ORDER BY mes
         `;
         const allAbonoParams = [...fechaParams, ...abonoParams];
-        const abonosResult = await pool.query(queryAbonos, allAbonoParams);        abonosResult.rows.forEach(row => {
+        const abonosResult = await pool.query(queryAbonos, allAbonoParams); abonosResult.rows.forEach(row => {
           abonosMap[row.mes] = parseFloat(row.abonos);
         });
       }
@@ -944,7 +946,7 @@ router.get('/ventas-por-familia', auth(), async (req, res) => {
     // Construir filtro de fechas
     let fechaFilter = '';
     let fechaParams = [];
-    
+
     if (fechaInicio && fechaFin) {
       // Rango específico
       const paramOffset = params.length + 1;
@@ -960,7 +962,7 @@ router.get('/ventas-por-familia', auth(), async (req, res) => {
       const ultimoMesQuery = `SELECT TO_CHAR(MAX(${dateCol}), 'YYYY-MM') AS ultimo_mes FROM ${salesTable}`;
       const ultimoMesResult = await pool.query(ultimoMesQuery);
       const ultimoMes = ultimoMesResult.rows[0]?.ultimo_mes;
-      
+
       if (ultimoMes) {
         const [year, month] = ultimoMes.split('-').map(Number);
         const fechaLimite = new Date(year, month - mesesAtras, 1).toISOString().slice(0, 7);
@@ -974,7 +976,7 @@ router.get('/ventas-por-familia', auth(), async (req, res) => {
 
     // Query ventas por familia con filtros dinámicos
     const allParams = [...params, ...fechaParams];
-    
+
     const query = `
       SELECT 
         p.${familiaCol} AS familia,
@@ -988,9 +990,9 @@ router.get('/ventas-por-familia', auth(), async (req, res) => {
       ORDER BY total DESC
       LIMIT ${limite}
     `;
-    
+
     const result = await pool.query(query, allParams);
-    
+
     const ventasPorFamilia = result.rows.map(row => ({
       familia: row.familia || 'Sin familia',
       total: parseFloat(row.total)
