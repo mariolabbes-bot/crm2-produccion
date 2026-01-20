@@ -472,7 +472,7 @@ const DashboardNuevo = () => {
   return (
     <Box className="dashboard-nuevo-container">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>Dashboard General (v2.2)</Typography>
+        <Typography variant="h4" sx={{ fontWeight: 700 }}>Dashboard General (v2.3)</Typography>
         <Box>
           {isManager && (
             <Button
