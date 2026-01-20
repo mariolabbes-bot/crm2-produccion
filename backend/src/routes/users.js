@@ -50,7 +50,7 @@ router.post('/login', async (req, res) => {
     // Verificar password
     const isMatch = await bcrypt.compare(password, user.rows[0].password);
     console.log('Autenticación:', isMatch ? 'exitosa' : 'fallida');
-    
+
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
@@ -72,7 +72,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '24h' }, // 24 horas
       (err, token) => {
         if (err) throw err;
-        res.json({ 
+        res.json({
           token,
           user: {
             rut: user.rows[0].rut,
@@ -96,9 +96,9 @@ router.post('/login', async (req, res) => {
 router.get('/vendedores', async (req, res) => {
   try {
     console.log('📋 [GET /vendedores] Iniciando consulta de vendedores...');
-    
+
     const query = `
-      SELECT 
+      SELECT DISTINCT ON (nombre_vendedor)
         rut as id,
         nombre_vendedor as nombre,
         correo,
@@ -109,19 +109,19 @@ router.get('/vendedores', async (req, res) => {
       FROM usuario
       WHERE LOWER(rol_usuario) = 'vendedor'
       AND nombre_vendedor IS NOT NULL
-      ORDER BY nombre_vendedor ASC
+      ORDER BY nombre_vendedor ASC, id DESC
     `;
-    
+
     const vendedores = await pool.query(query);
     console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores`);
-    
+
     res.json(vendedores.rows);
   } catch (err) {
     console.error('❌ Error al obtener vendedores:', err.message);
     console.error('❌ Stack:', err.stack);
-    res.status(500).json({ 
-      msg: 'Error al obtener vendedores', 
-      error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
+    res.status(500).json({
+      msg: 'Error al obtener vendedores',
+      error: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message
     });
   }
 });
