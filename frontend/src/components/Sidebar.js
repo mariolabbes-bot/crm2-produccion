@@ -11,6 +11,7 @@ import {
   Typography,
   Divider,
   Avatar,
+  Tooltip
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -239,45 +240,49 @@ const Sidebar = () => {
                 <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 1 }} />
               )}
               <ListItem disablePadding sx={{ mb: 0.5 }}>
-                <ListItemButton
-                  onClick={() => handleNavigation(item.path)}
-                  sx={{
-                    borderRadius: 2,
-                    color: '#FFFFFF', // TEXTO BLANCO SIEMPRE
-                    backgroundColor: isActive(item.path)
-                      ? (item.highlighted ? 'rgba(229, 122, 45, 0.35)' : 'rgba(229, 122, 45, 0.15)')
-                      : 'transparent',
-                    borderLeft: isActive(item.path)
-                      ? `4px solid ${item.highlighted ? '#F59E0B' : '#E57A2D'}`
-                      : '4px solid transparent',
-                    '&:hover': {
-                      backgroundColor: 'rgba(229, 122, 45, 0.1)',
-                      color: '#FFFFFF',
-                    },
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <ListItemIcon
+                <Tooltip title={sidebarCollapsed ? item.title : ""} placement="right" arrow>
+                  <ListItemButton
+                    onClick={() => handleNavigation(item.path)}
                     sx={{
-                      color: '#FFFFFF', // ICONOS BLANCOS SIEMPRE para mejor contraste
-                      minWidth: sidebarCollapsed ? 0 : 40,
-                      transition: 'color 0.2s ease',
-                      opacity: isActive(item.path) ? 1 : 0.85,
+                      borderRadius: 2,
+                      color: '#FFFFFF', // TEXTO BLANCO SIEMPRE
+                      backgroundColor: isActive(item.path)
+                        ? (item.highlighted ? 'rgba(229, 122, 45, 0.35)' : 'rgba(229, 122, 45, 0.15)')
+                        : 'transparent',
+                      borderLeft: isActive(item.path)
+                        ? `4px solid ${item.highlighted ? '#F59E0B' : '#E57A2D'}`
+                        : '4px solid transparent',
+                      '&:hover': {
+                        backgroundColor: 'rgba(229, 122, 45, 0.1)',
+                        color: '#FFFFFF',
+                      },
+                      transition: 'all 0.2s ease',
                     }}
                   >
-                    {item.icon}
-                  </ListItemIcon>
-                  {!sidebarCollapsed && (
-                    <ListItemText
-                      primary={item.title}
-                      primaryTypographyProps={{
-                        fontSize: '0.9375rem',
-                        fontWeight: isActive(item.path) ? 600 : 500,
-                        color: '#FFFFFF', // TEXTO BLANCO
+                    <ListItemIcon
+                      sx={{
+                        color: '#FFFFFF', // ICONOS BLANCOS SIEMPRE para mejor contraste
+                        minWidth: sidebarCollapsed ? 0 : 40,
+                        transition: 'color 0.2s ease',
+                        opacity: isActive(item.path) ? 1 : 0.85,
+                        justifyContent: 'center', // Center icon when collapsed
+                        mx: sidebarCollapsed ? 'auto' : 0 // Force center
                       }}
-                    />
-                  )}
-                </ListItemButton>
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                    {!sidebarCollapsed && (
+                      <ListItemText
+                        primary={item.title}
+                        primaryTypographyProps={{
+                          fontSize: '0.9375rem',
+                          fontWeight: isActive(item.path) ? 600 : 500,
+                          color: '#FFFFFF', // TEXTO BLANCO
+                        }}
+                      />
+                    )}
+                  </ListItemButton>
+                </Tooltip>
               </ListItem>
             </React.Fragment>
           );

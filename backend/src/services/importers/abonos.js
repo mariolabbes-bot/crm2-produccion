@@ -23,7 +23,14 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         console.log(`📊 Total filas: ${data.length}`);
         if (!Array.isArray(data) || data.length === 0) throw new Error('Excel vacío');
 
-        const headers = Object.keys(data[0] || {});
+        // Robust header detection: scan first 50 rows to find all potential keys
+        // (XLSX fails to include keys for empty cells in the first row)
+        const scanLimit = Math.min(data.length, 50);
+        const headersSet = new Set();
+        for (let i = 0; i < scanLimit; i++) {
+            Object.keys(data[i] || {}).forEach(k => headersSet.add(k));
+        }
+        const headers = Array.from(headersSet);
         const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
 
         const colFolio = findCol([/^Folio$/i, /Folio/i]);
@@ -46,6 +53,12 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         const colTipoPago = findCol([/^Tipo.*pago$/i]);
         const colEstadoAbono = findCol([/^Estado.*abono$/i]);
         const colFechaVencimiento = findCol([/^Fecha.*vencir/i, /^Fecha.*vencimiento$/i]);
+
+        console.log('--- Debug Columns ---');
+        console.log('Headers:', headers);
+        console.log('colIdentificadorAbono detected:', colIdentificadorAbono);
+        console.log('colFolio:', colFolio);
+        console.log('---------------------');
 
         if (!colFolio || !colFecha || !colMonto) {
             throw new Error(`Faltan columnas requeridas: Folio, Fecha, Monto`);
@@ -70,7 +83,9 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         existingAbonos.rows.forEach(a => {
             const f = norm(a.folio || '');
             existingByFolio.set(f, a);
-            const key = `${f}|${new Date(a.fecha).toISOString()}|${norm(a.identificador_abono || '')}`;
+            const d = new Date(a.fecha);
+            const dateStr = !isNaN(d) ? d.toISOString().split('T')[0] : '';
+            const key = `${f}|${dateStr}|${norm(a.identificador_abono || '')}`;
             existingKeys.add(key);
         });
 
@@ -86,6 +101,7 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         // Pre-scan for stubs (Vendors)
         const newAliases = new Set();
+        const processedKeys = new Set(); // Track keys processed in this batch to handle split payments
         const scanVendor = (val) => {
             if (!val) return;
             const s = String(val).trim();
@@ -160,8 +176,12 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             const saldoFavorTotal = colSaldoFavorTotal ? parseNumeric(row[colSaldoFavorTotal]) : null;
             const tipoPago = colTipoPago && row[colTipoPago] ? String(row[colTipoPago]).trim() : null;
             const estadoAbono = colEstadoAbono && row[colEstadoAbono] ? String(row[colEstadoAbono]).trim() : null;
-            const identificadorAbono = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : null;
+            const identificadorAbono = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : '';
             const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
+
+            if (i < 5) {
+                console.log(`Row ${i} - Folio: ${folio} - ID Abono Raw: ${row[colIdentificadorAbono]} - ID Extracted: ${identificadorAbono}`);
+            }
 
             let clienteRut = null;
             if (identificador && /^\d{7,8}-[\dkK]$/.test(identificador) && clientsByRut.has(norm(identificador))) clienteRut = identificador;
@@ -169,28 +189,38 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             // ... (check dup, push)
 
             const folioNorm = norm(folio);
-            const dupKey = `${folioNorm}|${fecha}|${norm(identificadorAbono || '')}`;
-            const existingRow = existingByFolio.get(folioNorm);
+            const rawId = norm(identificadorAbono || '');
+            let finalKey = `${folioNorm}|${fecha}|${rawId}`;
+            let idAbonoFinal = identificadorAbono || '';
 
-            if (existingKeys.has(dupKey) || existingRow) {
-                if (updateMissing && existingRow) {
-                    const needsId = (!existingRow.identificador && clienteRut);
-                    const needsVend = (!existingRow.vendedor_cliente && vendedorNombre);
-                    if (needsId || needsVend) {
-                        updates.push({ id: existingRow.id, folio, identificador: needsId ? clienteRut : null, clienteNombre: needsId ? clienteNombre : null, vendedorClienteNombre: needsVend ? vendedorNombre : null });
-                        updatedMissing++;
-                        continue;
+            if (processedKeys.has(finalKey)) {
+                // Intra-batch duplicate
+                let dupIndex = 1;
+                while (true) {
+                    const suffix = `_${dupIndex}`;
+                    const candidateId = `${(identificadorAbono || '')}${suffix}`;
+                    const candidateIdNorm = `${rawId}${suffix}`;
+                    const candidateKey = `${folioNorm}|${fecha}|${candidateIdNorm}`;
+
+                    if (!existingKeys.has(candidateKey) && !processedKeys.has(candidateKey)) {
+                        idAbonoFinal = candidateId;
+                        finalKey = candidateKey;
+                        break;
                     }
+                    dupIndex++;
                 }
-                duplicates.push({ folio, fecha, identificadorAbono, monto: montoNetoCalc });
-                continue;
             }
-            existingKeys.add(dupKey);
+
+            processedKeys.add(finalKey);
+            existingKeys.add(finalKey);
+
+
+
 
             toImport.push({
                 sucursal, folio, fecha, identificador: clienteRut, clienteNombre, vendedorClienteNombre: vendedorNombre,
                 cajaOperacion, usuarioIngreso, montoTotal: montoTotalExcel, saldoFavor, saldoFavorTotal, tipoPago,
-                estadoAbono, identificadorAbono, fechaVencimiento, monto: montoExcel, montoNeto: montoNetoCalc
+                estadoAbono, identificadorAbono: idAbonoFinal, fechaVencimiento, monto: montoExcel, montoNeto: montoNetoCalc
             });
         }
 
@@ -208,32 +238,13 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         let importedCount = 0;
         if (toImport.length > 0) {
-            console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos en batches...`);
-            const batchSize = 500;
-            for (let i = 0; i < toImport.length; i += batchSize) {
-                const batch = toImport.slice(i, i + batchSize);
-                const values = [];
-                let placeholders = [];
-                let pIndex = 1;
+            console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos (Row-by-Row)...`);
 
-                batch.forEach(item => {
-                    values.push(
-                        item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
-                        item.vendedorClienteNombre, item.cajaOperacion, item.usuarioIngreso, item.montoTotal,
-                        item.saldoFavor, item.saldoFavorTotal, item.tipoPago, item.estadoAbono,
-                        item.identificadorAbono, item.fechaVencimiento, item.monto, item.montoNeto
-                    );
-                    // 17 params per row + NOW() hardcoded
-                    const rowPlaceholders = [];
-                    for (let j = 0; j < 17; j++) {
-                        rowPlaceholders.push(`$${pIndex++}`);
-                    }
-                    placeholders.push(`(${rowPlaceholders.join(',')}, NOW())`);
-                });
-
+            for (let i = 0; i < toImport.length; i++) {
+                const item = toImport[i];
                 const query = `
                     INSERT INTO abono (sucursal, folio, fecha, identificador, cliente, vendedor_cliente, caja_operacion, usuario_ingreso, monto_total, saldo_a_favor, saldo_a_favor_total, tipo_pago, estado_abono, identificador_abono, fecha_vencimiento, monto, monto_neto, created_at)
-                    VALUES ${placeholders.join(',')}
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW())
                     ON CONFLICT (folio, identificador_abono, fecha) DO UPDATE SET
                         identificador = COALESCE(EXCLUDED.identificador, abono.identificador),
                         cliente = COALESCE(EXCLUDED.cliente, abono.cliente),
@@ -243,16 +254,22 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
                         monto_neto = EXCLUDED.monto_neto
                     RETURNING (xmax = 0) AS inserted
                 `;
+                const values = [
+                    item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
+                    item.vendedorClienteNombre, item.cajaOperacion, item.usuarioIngreso, item.montoTotal,
+                    item.saldoFavor, item.saldoFavorTotal, item.tipoPago, item.estadoAbono,
+                    item.identificadorAbono, item.fechaVencimiento, item.monto, item.montoNeto
+                ];
 
                 try {
                     const res = await client.query(query, values);
-                    const insertedBatch = res.rows.filter(r => r.inserted).length;
-                    importedCount += insertedBatch;
-                    console.log(`   [Batch ${i / batchSize + 1}] Insertados: ${insertedBatch}`);
+                    if (res.rows[0].inserted) importedCount++;
                 } catch (err) {
-                    console.error(`❌ [Job ${jobId}] Batch insert error:`, err.message);
-                    observations.push({ fila: 'Batch', folio: 'Unknown', campo: 'DB', detalle: err.detail || err.message });
+                    console.error(`❌ [Job ${jobId}] Row insert error (Folio ${item.folio}):`, err.message);
+                    observations.push({ fila: i + 2, folio: item.folio, campo: 'DB', detalle: err.detail || err.message });
                 }
+
+                if (i % 100 === 0) console.log(`   [Progress] ${i} / ${toImport.length}`);
             }
         }
 

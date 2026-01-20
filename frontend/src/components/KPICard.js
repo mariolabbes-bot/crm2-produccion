@@ -16,9 +16,9 @@ import { TrendingUp, TrendingDown } from '@mui/icons-material';
  * @param {React.ReactNode} icon - Ícono del módulo
  * @param {boolean} loading - Estado de carga
  */
-const KPICard = ({ 
-  title, 
-  value, 
+const KPICard = ({
+  title,
+  value,
   subtitle = null,
   highlightedSubtitle = null,
   highlightedColor = null,
@@ -26,12 +26,12 @@ const KPICard = ({
   trendAsPercentage = false,
   color = '#2B4F6F',
   icon = null,
-  loading = false 
+  loading = false
 }) => {
   const isPositiveTrend = trend !== null && trend >= 0;
 
   return (
-    <Card 
+    <Card
       sx={{
         height: '100%',
         borderLeft: `4px solid ${color}`,
@@ -42,25 +42,25 @@ const KPICard = ({
         }
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
         {/* Header: Título + Ícono */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Typography 
-            variant="subtitle2" 
-            sx={{ 
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
               color: '#6B7280',
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
-              fontSize: '0.75rem'
+              fontSize: '0.7rem'
             }}
           >
             {title}
           </Typography>
-          
+
           {icon && (
-            <Box 
-              sx={{ 
+            <Box
+              sx={{
                 color: color,
                 backgroundColor: `${color}15`, // 15% opacity
                 borderRadius: 2,
@@ -79,13 +79,14 @@ const KPICard = ({
         {loading ? (
           <Skeleton variant="text" width="80%" height={48} />
         ) : (
-          <Typography 
-            variant="h3" 
-            sx={{ 
+          <Typography
+            variant="h4"
+            sx={{
               fontWeight: 700,
               color: '#111827',
-              mb: 1,
-              fontSize: '2rem'
+              mb: 0.5,
+              fontSize: '1.75rem',
+              lineHeight: 1.2
             }}
           >
             {value}
@@ -95,9 +96,9 @@ const KPICard = ({
         {/* Footer: Subtítulo + Tendencia o Highlighted Subtitle */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
           {subtitle && (
-            <Typography 
-              variant="body2" 
-              sx={{ 
+            <Typography
+              variant="body2"
+              sx={{
                 color: '#9CA3AF',
                 fontSize: '0.875rem'
               }}
@@ -108,9 +109,9 @@ const KPICard = ({
 
           {/* Si hay highlightedSubtitle, mostrarlo en lugar del trend */}
           {highlightedSubtitle ? (
-            <Typography 
-              variant="body2" 
-              sx={{ 
+            <Typography
+              variant="body2"
+              sx={{
                 color: highlightedColor || color,
                 fontWeight: 700,
                 fontSize: '0.875rem'
@@ -121,9 +122,9 @@ const KPICard = ({
           ) : trend !== null && (
             trendAsPercentage ? (
               // Modo porcentaje: sin flechas, color del módulo
-              <Typography 
-                variant="body2" 
-                sx={{ 
+              <Typography
+                variant="body2"
+                sx={{
                   color: color,
                   fontWeight: 700,
                   fontSize: '0.875rem'
@@ -133,10 +134,10 @@ const KPICard = ({
               </Typography>
             ) : (
               // Modo tendencia: con flechas, color verde/rojo
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 0.5,
                   color: isPositiveTrend ? '#10B981' : '#EF4444',
                   fontWeight: 600,

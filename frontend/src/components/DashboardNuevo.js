@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select, useTheme, useMediaQuery } from '@mui/material';
 import VisionCard from './ui/VisionCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual, getSaldoCreditoTotal } from '../api';
+import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual, getSaldoCreditoTotal, getAbonosPorVendedor } from '../api';
 import { removeToken, getUser } from '../utils/auth';
 import './DashboardNuevo.css';
 import Papa from 'papaparse';
@@ -61,13 +61,14 @@ const DashboardNuevo = () => {
   useEffect(() => {
     fetchInactivos();
   }, [fetchInactivos]);
-  
+
   const [stats, setStats] = useState(null);
   const [comparativo, setComparativo] = useState(null);
   const [vendedores, setVendedores] = useState([]);
   const [comparativasMensuales, setComparativasMensuales] = useState(null);
   const [kpisMesActual, setKpisMesActual] = useState(null); // KPIs personalizados del mes actual
   const [saldoCreditoTotal, setSaldoCreditoTotal] = useState(null);
+  const [ventasPorVendedor, setVentasPorVendedor] = useState([]); // Gráfico Admin
   // Datos pivoteados para la tabla inferior
   const [pivotMonths, setPivotMonths] = useState([]); // ['YYYY-MM', ...]
   const [pivotRows, setPivotRows] = useState([]);     // [{ vendedor_id, vendedor_nombre, 'YYYY-MM': {ventas, abonos}, totalVentas, totalAbonos }, ...]
@@ -152,7 +153,7 @@ const DashboardNuevo = () => {
     const link = document.createElement('a');
     link.href = url;
     const prefix = pivoteModo === 'ambos' ? 'ventas_abonos' : pivoteModo;
-    link.download = `pivote_${prefix}_${new Date().toISOString().slice(0,10)}.csv`;
+    link.download = `pivote_${prefix}_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -222,7 +223,7 @@ const DashboardNuevo = () => {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Pivote');
     const prefix = pivoteModo === 'ambos' ? 'ventas_abonos' : pivoteModo;
-    XLSX.writeFile(wb, `pivote_${prefix}_${new Date().toISOString().slice(0,10)}.xlsx`);
+    XLSX.writeFile(wb, `pivote_${prefix}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -267,7 +268,7 @@ const DashboardNuevo = () => {
       if (!isManager && user?.rut) {
         params.vendedor_id = user.rut;
       }
-      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData, saldoCreditoData] = await Promise.all([
+      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData, saldoCreditoData, ventasPorVendedorData] = await Promise.all([
         getAbonosEstadisticas(params).catch(e => {
           console.error('[loadData] Error en getAbonosEstadisticas:', e);
           return { success: false, error: e.message, status: e.status };
@@ -295,7 +296,11 @@ const DashboardNuevo = () => {
         getSaldoCreditoTotal(params).catch(e => {
           console.error('[loadData] Error en getSaldoCreditoTotal:', e);
           return { success: false, error: e.message, status: e.status };
-        })
+        }),
+        isManager ? getAbonosPorVendedor(params).catch(e => {
+          console.error('[loadData] Error en getAbonosPorVendedor:', e);
+          return { success: false, error: e.message };
+        }) : Promise.resolve({ success: true, data: [] })
       ]);
 
       // Validar estructura y mostrar errores específicos
@@ -352,6 +357,13 @@ const DashboardNuevo = () => {
         setSaldoCreditoTotal(parseFloat(saldoCreditoData.data.total_saldo_credito || 0));
       } else {
         setSaldoCreditoTotal(0);
+      }
+
+      // Cargar Ventas por Vendedor (Admin Graph)
+      if (ventasPorVendedorData && ventasPorVendedorData.success && ventasPorVendedorData.data) {
+        setVentasPorVendedor(ventasPorVendedorData.data);
+      } else {
+        setVentasPorVendedor([]);
       }
 
       // Construir pivote: filas = vendedores, columnas = meses en rango, celdas = total_ventas
@@ -463,17 +475,17 @@ const DashboardNuevo = () => {
         <Typography variant="h4" sx={{ fontWeight: 700 }}>Dashboard General</Typography>
         <Box>
           {isManager && (
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               onClick={() => navigate('/import-data')}
               sx={{ fontWeight: 600, mr: 2 }}
             >
               📊 Importar Datos
             </Button>
           )}
-          <Button 
-            variant="outlined" 
-            color="error" 
+          <Button
+            variant="outlined"
+            color="error"
             onClick={handleLogout}
             sx={{ fontWeight: 600 }}
           >
@@ -498,31 +510,31 @@ const DashboardNuevo = () => {
               </Select>
             </FormControl>
           </Grid>
-          
+
           {/* Fechas personalizadas */}
           <Grid item xs={12} sm={6} md={3}>
-            <TextField 
-              label="Desde" 
-              type="date" 
-              size="small" 
-              fullWidth 
+            <TextField
+              label="Desde"
+              type="date"
+              size="small"
+              fullWidth
               InputLabelProps={{ shrink: true }}
               value={filtroFechaDesde}
               onChange={(e) => setFiltroFechaDesde(e.target.value)}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <TextField 
-              label="Hasta" 
-              type="date" 
-              size="small" 
-              fullWidth 
+            <TextField
+              label="Hasta"
+              type="date"
+              size="small"
+              fullWidth
               InputLabelProps={{ shrink: true }}
               value={filtroFechaHasta}
               onChange={(e) => setFiltroFechaHasta(e.target.value)}
             />
           </Grid>
-          
+
           {/* Filtro vendedor (solo manager) */}
           {isManager && (
             <Grid item xs={12} sm={6} md={3}>
@@ -547,25 +559,25 @@ const DashboardNuevo = () => {
           <Typography sx={{ mt: 2 }}>Cargando dashboard...</Typography>
         </Box>
       ) : (
-  <>
+        <>
           {/* DEBUG: Mostrar estado de kpisMesActual */}
           {console.log('[RENDER VisionCards] kpisMesActual:', kpisMesActual)}
           {console.log('[RENDER VisionCards] kpisMesActual es null?:', kpisMesActual === null)}
           {console.log('[RENDER VisionCards] kpisMesActual es undefined?:', kpisMesActual === undefined)}
-          
+
           {/* Métricas principales - KPIs del mes actual */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             {/* VisionCard #1: Venta Actual con % vs Año Anterior */}
             <Grid item xs={12} sm={6} md={3}>
-              <VisionCard 
+              <VisionCard
                 title="Venta Mes Actual"
                 value={kpisMesActual ? formatMoney(kpisMesActual.monto_ventas_mes) : '—'}
                 subtitle={kpisMesActual ? (
-                  <span style={{ 
+                  <span style={{
                     color: kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? '#27ae60' : '#e74c3c',
-                    fontWeight: 600 
+                    fontWeight: 600
                   }}>
-                    {kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? '↑' : '↓'} 
+                    {kpisMesActual.variacion_vs_anio_anterior_pct >= 0 ? '↑' : '↓'}
                     {' '}
                     {Math.abs(kpisMesActual.variacion_vs_anio_anterior_pct).toFixed(1)}% vs año anterior
                   </span>
@@ -583,15 +595,15 @@ const DashboardNuevo = () => {
                 ventas: kpisMesActual?.monto_ventas_mes,
                 abonos: kpisMesActual?.monto_abonos_mes,
                 condicion: kpisMesActual && kpisMesActual.monto_ventas_mes > 0,
-                calculo: kpisMesActual && kpisMesActual.monto_ventas_mes > 0 
+                calculo: kpisMesActual && kpisMesActual.monto_ventas_mes > 0
                   ? ((kpisMesActual.monto_abonos_mes / kpisMesActual.monto_ventas_mes) * 100).toFixed(1)
                   : 'N/A'
               })}
-              <VisionCard 
+              <VisionCard
                 title="Abonos Mes Actual"
                 value={kpisMesActual ? formatMoney(kpisMesActual.monto_abonos_mes) : '—'}
                 subtitle={
-                  kpisMesActual && kpisMesActual.monto_ventas_mes > 0 
+                  kpisMesActual && kpisMesActual.monto_ventas_mes > 0
                     ? `${((kpisMesActual.monto_abonos_mes / kpisMesActual.monto_ventas_mes) * 100).toFixed(1)}% de las ventas`
                     : 'Sin datos de ventas'
                 }
@@ -604,7 +616,7 @@ const DashboardNuevo = () => {
 
             {/* VisionCard #3: Promedio Ventas Trimestre Anterior */}
             <Grid item xs={12} sm={6} md={3}>
-              <VisionCard 
+              <VisionCard
                 title="Promedio Ventas Trimestre"
                 value={kpisMesActual ? formatMoney(kpisMesActual.promedio_ventas_trimestre_anterior) : '—'}
                 subtitle="3 meses anteriores"
@@ -616,7 +628,7 @@ const DashboardNuevo = () => {
 
             {/* VisionCard #4: Saldos (Saldo Crédito Total) */}
             <Grid item xs={12} sm={6} md={3}>
-              <VisionCard 
+              <VisionCard
                 title="Saldo Crédito Total"
                 value={saldoCreditoTotal != null ? formatMoney(saldoCreditoTotal) : '—'}
                 subtitle={isManager && filtroVendedor ? 'Filtrado por vendedor' : (isManager ? 'Global' : 'Tu cartera')}
@@ -627,54 +639,108 @@ const DashboardNuevo = () => {
             </Grid>
           </Grid>
 
-          {/* Gráficos principales */}
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={8}>
-              <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos (últimos 6 meses)</Typography>
-                <ResponsiveContainer width="100%" height={chartHeights.line}>
-                  <LineChart data={comparativo?.detalle?.length ? comparativo.detalle.map(row => ({ periodo: row.periodo, ventas: row.total_ventas, abonos: row.total_abonos })) : dummyLine}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="periodo"
-                      tick={{ fontSize: isMdUp ? 12 : 10 }}
-                      interval={isMdUp ? 0 : 'preserveStartEnd'}
-                      angle={isMdUp ? 0 : -25}
-                      dy={isMdUp ? 0 : 10}
-                    />
-                    <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
-                    <Tooltip formatter={formatMoney} />
-                    {isMdUp && <Legend />}
-                    <Line type="monotone" dataKey="ventas" stroke="#667eea" strokeWidth={3} name="Ventas" />
-                    <Line type="monotone" dataKey="abonos" stroke="#43e97b" strokeWidth={3} name="Abonos" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Paper>
+          {/* Gráficos Admin (Row Principal) */}
+          {isManager ? (
+            <Grid container spacing={3} sx={{ mb: 3 }}>
+              {/* Gráfico 1: Ventas y Abonos por Vendedor (Mes Actual) */}
+              <Grid item xs={12} md={6}>
+                <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 } }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos por Vendedor</Typography>
+                  <ResponsiveContainer width="100%" height={chartHeights.bar}>
+                    <BarChart data={ventasPorVendedor}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="vendedor_nombre"
+                        tick={{ fontSize: 10 }}
+                        interval={0}
+                        angle={-25}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis tick={{ fontSize: 10 }} width={40} />
+                      <Tooltip formatter={formatMoney} />
+                      <Legend />
+                      <Bar dataKey="total_ventas" fill="#667eea" name="Ventas" />
+                      <Bar dataKey="total_abonos" fill="#43e97b" name="Abonos" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </Paper>
+              </Grid>
+
+              {/* Gráfico 2: Evolución Semestral */}
+              <Grid item xs={12} md={6}>
+                <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 } }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>Evolución Ventas vs Abonos (6 Meses)</Typography>
+                  <ResponsiveContainer width="100%" height={chartHeights.line}>
+                    <LineChart data={comparativo?.detalle?.length ? comparativo.detalle.map(row => ({ periodo: row.periodo, ventas: row.total_ventas, abonos: row.total_abonos })) : dummyLine}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="periodo"
+                        tick={{ fontSize: isMdUp ? 12 : 10 }}
+                        interval={isMdUp ? 0 : 'preserveStartEnd'}
+                        angle={isMdUp ? 0 : -25}
+                        dy={isMdUp ? 0 : 10}
+                      />
+                      <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
+                      <Tooltip formatter={formatMoney} />
+                      <Legend />
+                      <Line type="monotone" dataKey="ventas" stroke="#667eea" strokeWidth={3} name="Ventas" />
+                      <Line type="monotone" dataKey="abonos" stroke="#43e97b" strokeWidth={3} name="Abonos" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Paper>
+              </Grid>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Distribución por Tipo de Pago</Typography>
-                <ResponsiveContainer width="100%" height={chartHeights.pie}>
-                  <PieChart margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
-                    <Pie
-                      data={stats?.por_tipo_pago?.length ? stats.por_tipo_pago.map(tp => ({ name: tp.tipo_pago, value: tp.monto_total })) : dummyPie}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={isMdUp ? 80 : 68}
-                      label={isMdUp}
-                    >
-                      {(stats?.por_tipo_pago?.length ? stats.por_tipo_pago : dummyPie).map((entry, idx) => (
-                        <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    {isMdUp && <Legend />}
-                  </PieChart>
-                </ResponsiveContainer>
-              </Paper>
+          ) : (
+            // Layout Normal para Vendedores
+            <Grid container spacing={3} sx={{ mb: 3 }}>
+              <Grid item xs={12} md={8}>
+                <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos (últimos 6 meses)</Typography>
+                  <ResponsiveContainer width="100%" height={chartHeights.line}>
+                    <LineChart data={comparativo?.detalle?.length ? comparativo.detalle.map(row => ({ periodo: row.periodo, ventas: row.total_ventas, abonos: row.total_abonos })) : dummyLine}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="periodo"
+                        tick={{ fontSize: isMdUp ? 12 : 10 }}
+                        interval={isMdUp ? 0 : 'preserveStartEnd'}
+                        angle={isMdUp ? 0 : -25}
+                        dy={isMdUp ? 0 : 10}
+                      />
+                      <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
+                      <Tooltip formatter={formatMoney} />
+                      {isMdUp && <Legend />}
+                      <Line type="monotone" dataKey="ventas" stroke="#667eea" strokeWidth={3} name="Ventas" />
+                      <Line type="monotone" dataKey="abonos" stroke="#43e97b" strokeWidth={3} name="Abonos" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>Distribución por Tipo de Pago</Typography>
+                  <ResponsiveContainer width="100%" height={chartHeights.pie}>
+                    <PieChart margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
+                      <Pie
+                        data={stats?.por_tipo_pago?.length ? stats.por_tipo_pago.map(tp => ({ name: tp.tipo_pago, value: tp.monto_total })) : dummyPie}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={isMdUp ? 80 : 68}
+                        label={isMdUp}
+                      >
+                        {(stats?.por_tipo_pago?.length ? stats.por_tipo_pago : dummyPie).map((entry, idx) => (
+                          <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      {isMdUp && <Legend />}
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Paper>
+              </Grid>
             </Grid>
-          </Grid>
+          )}
 
           {/* Top Vendedores (dummy) */}
           <Grid container spacing={3} sx={{ mt: 1 }}>
@@ -874,16 +940,16 @@ const DashboardNuevo = () => {
                   {pivotRows.length} vendedores mostrados
                 </Typography>
               </Typography>
-                {/* Selector de métrica para la tabla pivote */}
-                <Box sx={{ mb: 2 }}>
-                  <FormControl size="small">
-                    <InputLabel>Métrica</InputLabel>
-                    <Select label="Métrica" value={pivoteModo} onChange={(e) => setPivoteModo(e.target.value)}>
-                      <MenuItem value="ventas">Ventas</MenuItem>
-                      <MenuItem value="abonos">Abonos</MenuItem>
-                      <MenuItem value="ambos">Ambos</MenuItem>
-                    </Select>
-                  </FormControl>
+              {/* Selector de métrica para la tabla pivote */}
+              <Box sx={{ mb: 2 }}>
+                <FormControl size="small">
+                  <InputLabel>Métrica</InputLabel>
+                  <Select label="Métrica" value={pivoteModo} onChange={(e) => setPivoteModo(e.target.value)}>
+                    <MenuItem value="ventas">Ventas</MenuItem>
+                    <MenuItem value="abonos">Abonos</MenuItem>
+                    <MenuItem value="ambos">Ambos</MenuItem>
+                  </Select>
+                </FormControl>
                 <Button onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')} size="small" sx={{ ml: 2 }} variant="outlined">
                   Orden Total: {sortDir === 'asc' ? 'Asc' : 'Desc'}
                 </Button>
@@ -893,7 +959,7 @@ const DashboardNuevo = () => {
                 <Button onClick={() => exportPivotXLSX()} size="small" sx={{ ml: 1 }} variant="outlined">
                   Exportar XLSX
                 </Button>
-                </Box>
+              </Box>
               <div style={{ overflowX: 'auto', maxHeight: `${isMdUp ? 500 : 360}px`, overflowY: 'auto' }}>
                 <table className="table-compact" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontSize: isMdUp ? '0.9rem' : '0.85rem' }}>
                   <thead style={{ position: 'sticky', top: 0, background: '#f3e5f5', zIndex: 1 }}>
@@ -908,7 +974,7 @@ const DashboardNuevo = () => {
                   <tbody>
                     {pivotRows.length === 0 ? (
                       <tr>
-                          <td colSpan={pivotMonths.length + 2} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
+                        <td colSpan={pivotMonths.length + 2} style={{ textAlign: 'center', padding: '32px', color: '#999' }}>
                           <Typography variant="body1">❌ Sin datos en el rango seleccionado</Typography>
                           <Typography variant="caption">Ajusta el rango de fechas o revisa filtros</Typography>
                         </td>
@@ -922,35 +988,36 @@ const DashboardNuevo = () => {
                             const valA = row[m]?.abonos || 0;
                             const { bgColor, color } = getHeatStyle(pivoteModo, m, valV, valA);
                             return (
-                            <td key={m} style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 500, backgroundColor: bgColor, color }}>
+                              <td key={m} style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 500, backgroundColor: bgColor, color }}>
                                 {pivoteModo === 'ventas' && (
-                                <span style={{ color: '#667eea', fontWeight: 600 }}>{formatMoney(valV)}</span>
+                                  <span style={{ color: '#667eea', fontWeight: 600 }}>{formatMoney(valV)}</span>
                                 )}
                                 {pivoteModo === 'abonos' && (
-                                <span style={{ color: '#43e97b', fontWeight: 600 }}>{formatMoney(valA)}</span>
+                                  <span style={{ color: '#43e97b', fontWeight: 600 }}>{formatMoney(valA)}</span>
                                 )}
                                 {pivoteModo === 'ambos' && (
                                   <span>
-                                  <span style={{ display: 'block', color: '#667eea', fontWeight: 600 }}>V: {formatMoney(valV)}</span>
-                                  <span style={{ display: 'block', color: '#43e97b', fontWeight: 600 }}>A: {formatMoney(valA)}</span>
+                                    <span style={{ display: 'block', color: '#667eea', fontWeight: 600 }}>V: {formatMoney(valV)}</span>
+                                    <span style={{ display: 'block', color: '#43e97b', fontWeight: 600 }}>A: {formatMoney(valA)}</span>
                                   </span>
                                 )}
-                            </td>
-                          );})}
-                            <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 700 }}>
-                              {pivoteModo === 'ventas' && (
-                                <span style={{ color: '#667eea' }}>{formatMoney(row.totalVentas || 0)}</span>
-                              )}
-                              {pivoteModo === 'abonos' && (
-                                <span style={{ color: '#43e97b' }}>{formatMoney(row.totalAbonos || 0)}</span>
-                              )}
-                              {pivoteModo === 'ambos' && (
-                                <span>
-                                  <span style={{ display: 'block', color: '#667eea' }}>V: {formatMoney(row.totalVentas || 0)}</span>
-                                  <span style={{ display: 'block', color: '#43e97b' }}>A: {formatMoney(row.totalAbonos || 0)}</span>
-                                </span>
-                              )}
-                            </td>
+                              </td>
+                            );
+                          })}
+                          <td style={{ padding: '12px', borderBottom: '1px solid #eee', textAlign: 'right', fontWeight: 700 }}>
+                            {pivoteModo === 'ventas' && (
+                              <span style={{ color: '#667eea' }}>{formatMoney(row.totalVentas || 0)}</span>
+                            )}
+                            {pivoteModo === 'abonos' && (
+                              <span style={{ color: '#43e97b' }}>{formatMoney(row.totalAbonos || 0)}</span>
+                            )}
+                            {pivoteModo === 'ambos' && (
+                              <span>
+                                <span style={{ display: 'block', color: '#667eea' }}>V: {formatMoney(row.totalVentas || 0)}</span>
+                                <span style={{ display: 'block', color: '#43e97b' }}>A: {formatMoney(row.totalAbonos || 0)}</span>
+                              </span>
+                            )}
+                          </td>
                         </tr>
                       ))
                     )}
