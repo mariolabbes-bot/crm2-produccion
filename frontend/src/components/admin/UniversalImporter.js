@@ -99,8 +99,16 @@ const UniversalImporter = () => {
 
             const data = await res.json();
             if (res.ok && data.success) {
-                setJobId(data.jobId);
-                setJobStatus('processing');
+                if (data.status === 'completed' && data.result) {
+                    console.log('⚡ Importación completada sincrónicamente');
+                    setJobId(data.jobId);
+                    setResult(data.result);
+                    setJobStatus('completed');
+                    setProgress(100);
+                } else {
+                    setJobId(data.jobId);
+                    setJobStatus('processing');
+                }
             } else {
                 setError(data.msg || "Error al iniciar la carga.");
                 setUploading(false);
