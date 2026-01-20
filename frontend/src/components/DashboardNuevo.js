@@ -616,14 +616,26 @@ const DashboardNuevo = () => {
 
             {/* VisionCard #3: Promedio Ventas Trimestre Anterior */}
             <Grid item xs={12} sm={6} md={3}>
-              <VisionCard
-                title="Promedio Ventas Trimestre"
-                value={kpisMesActual ? formatMoney(kpisMesActual.promedio_ventas_trimestre_anterior) : '—'}
-                subtitle="3 meses anteriores"
-                trend="neutral"
-                icon="📈"
-                gradient="warning"
-              />
+              title="Promedio Ventas Trimestre"
+              value={kpisMesActual ? formatMoney(kpisMesActual.promedio_ventas_trimestre_anterior) : '—'}
+              subtitle={kpisMesActual && kpisMesActual.promedio_ventas_trimestre_anterior > 0 ? (
+                (() => {
+                  const avg = kpisMesActual.promedio_ventas_trimestre_anterior;
+                  const current = kpisMesActual.monto_ventas_mes || 0;
+                  const diffPct = ((current - avg) / avg) * 100;
+                  return (
+                    <span style={{
+                      color: diffPct >= 0 ? '#27ae60' : '#e74c3c',
+                      fontWeight: 600
+                    }}>
+                      {diffPct >= 0 ? '↑' : '↓'} {Math.abs(diffPct).toFixed(1)}% vs mes actual
+                    </span>
+                  );
+                })()
+              ) : '3 meses anteriores'}
+              trend={kpisMesActual && (kpisMesActual.monto_ventas_mes || 0) >= kpisMesActual.promedio_ventas_trimestre_anterior ? 'up' : 'down'}
+              icon="📈"
+              gradient="warning"
             </Grid>
 
             {/* VisionCard #4: Saldos (Saldo Crédito Total) */}
