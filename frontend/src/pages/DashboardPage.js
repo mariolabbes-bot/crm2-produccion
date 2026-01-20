@@ -7,7 +7,7 @@ import {
   Inventory as ProductosIcon,
 } from '@mui/icons-material';
 import KPICard from '../components/KPICard';
-import ImportStatsWidget from '../components/ImportStatsWidget'; // ← Nuevo
+import ImportStatsWidget from '../components/ImportStatsWidget';
 import ChartContainer from '../components/ChartContainer';
 import {
   LineChart,
@@ -21,7 +21,7 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedores, getSaldoCreditoTotal } from '../api';
+import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedores, getSaldoCreditoTotal, API_URL } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
 const DashboardPage = () => {
@@ -73,6 +73,9 @@ const DashboardPage = () => {
         console.log('🔄 Vendedor seleccionado:', vendedorSeleccionado);
 
         // KPIs del mes actual
+        // Añadir timestamp para evitar caché
+        params._t = Date.now();
+
         const kpisResponse = await getKpisMesActual(params);
         const kpisData = kpisResponse.data || kpisResponse; // Manejar ambos formatos
 
@@ -129,7 +132,11 @@ const DashboardPage = () => {
 
   return (
     <Box className="dashboard-page-container">
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Dashboard General (v2.6)</Typography>
+      <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>Dashboard General (v2.7)</Typography>
+      <Typography variant="caption" sx={{ display: 'block', mb: 3, color: 'text.secondary', fontFamily: 'monospace', fontSize: '10px' }}>
+        Backend: {API_URL}
+      </Typography>
+
       {/* Widget de última importación */}
       <div className="card-unified">
         <ImportStatsWidget />
