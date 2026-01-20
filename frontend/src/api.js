@@ -103,6 +103,8 @@ export const getSaldoCreditoTotal = (params = {}) => {
   return apiFetch(url);
 };
 
+export const getRankingVendedores = () => apiFetch(`${API_URL}/kpis/ranking-vendedores`);
+
 // ACTIVITY TYPES
 export const getActivityTypes = () => apiFetch(`${API_URL}/activity-types`);
 export const addActivityType = (type) => apiFetch(`${API_URL}/activity-types`, { method: 'POST', body: JSON.stringify(type) });

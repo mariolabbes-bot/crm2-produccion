@@ -1,0 +1,150 @@
+--- DEFINITIVE VENDOR MAPPING INVESTIGATION ---
+
+--- 1. SCHEMA INSPECTION ---
+
+Table: usuario
+rut (character varying), nombre_completo (character varying), cargo (character varying), nombre_vendedor (character varying), local (character varying), direccion (character varying), comuna (character varying), telefono (character varying), correo (character varying), rol_usuario (character varying), alias (character varying), password (character varying)
+
+Table: venta
+id (integer), sucursal (character varying), tipo_documento (character varying), folio (character varying), fecha_emision (date), identificador (character varying), cliente (character varying), vendedor_cliente (character varying), vendedor_documento (character varying), estado_sistema (character varying), estado_comercial (character varying), estado_sii (character varying), indice (character varying), sku (character varying), descripcion (character varying), cantidad (numeric), precio (numeric), valor_total (numeric), litros_vendidos (numeric), created_at (timestamp without time zone)
+
+Table: abono
+id (integer), sucursal (character varying), folio (character varying), fecha (date), identificador (character varying), cliente (character varying), vendedor_cliente (character varying), caja_operacion (character varying), usuario_ingreso (character varying), tipo_pago (character varying), monto (numeric), monto_total (numeric), monto_neto (numeric), saldo_a_favor (numeric), saldo_a_favor_total (numeric), estado_abono (character varying), identificador_abono (character varying), fecha_vencimiento (date), created_at (timestamp without time zone)
+
+Table: saldo_credito
+id (integer), rut (character varying), tipo_documento (character varying), cliente (character varying), folio (integer), fecha_emision (date), total_factura (numeric), deuda_cancelada (numeric), saldo_factura (numeric), saldo_favor_disponible (numeric), nombre_vendedor (character varying), idvendedor (integer), created_at (timestamp without time zone)
+
+Table: cliente
+rut (character varying), nombre (character varying), email (character varying), telefono_principal (character varying), sucursal (character varying), categoria (character varying), subcategoria (character varying), comuna (character varying), ciudad (character varying), direccion (character varying), numero (character varying), nombre_vendedor (character varying)
+
+--- 2. USERS (USUARIO TABLE) ---
+┌─────────┬────────────────┬─────────────────────────────────────────┬─────────────────────┬─────────────┐
+│ (index) │ rut            │ nombre_vendedor                         │ alias               │ rol_usuario │
+├─────────┼────────────────┼─────────────────────────────────────────┼─────────────────────┼─────────────┤
+│ 0       │ 'STUB-2607601' │ 'Alejandra'                             │ 'Alejandra'         │ 'VENDEDOR'  │
+│ 1       │ 'STUB-3520547' │ 'Alejandro'                             │ 'Alejandro'         │ 'VENDEDOR'  │
+│ 2       │ 'STUB-1451383' │ 'Alex'                                  │ 'Alex_OLD'          │ 'VENDEDOR'  │
+│ 3       │ '11.599.857-9' │ 'Alex Mauricio Mondaca Cortes'          │ 'Alex'              │ 'VENDEDOR'  │
+│ 4       │ 'STUB-9771004' │ 'Eduardo'                               │ 'Eduardo_OLD'       │ 'VENDEDOR'  │
+│ 5       │ '09.262.987-2' │ 'Eduardo Enrique Ponce Castillo'        │ 'Eduardo'           │ 'VENDEDOR'  │
+│ 6       │ 'STUB-7968508' │ 'Eduardo Rojas'                         │ 'Eduardo Rojas_OLD' │ 'VENDEDOR'  │
+│ 7       │ '13.830.417-5' │ 'Eduardo Rojas Andres Rojas Del Campo'  │ 'Eduardo Rojas'     │ 'VENDEDOR'  │
+│ 8       │ 'STUB-8361540' │ 'Emilio'                                │ 'Emilio'            │ 'VENDEDOR'  │
+│ 9       │ '12.569.531-0' │ 'Emilio Alberto Santos Castillo'        │ null                │ 'MANAGER'   │
+│ 10      │ 'STUB-5893400' │ 'JOAQUIN'                               │ 'JOAQUIN_OLD'       │ 'VENDEDOR'  │
+│ 11      │ '7.775.897-6'  │ 'JOAQUIN ALEJANDRO MANRIQUEZ MUNIZAGA'  │ 'JOAQUIN'           │ 'VENDEDOR'  │
+│ 12      │ 'STUB-3409642' │ 'Jorge'                                 │ 'Jorge_OLD'         │ 'VENDEDOR'  │
+│ 13      │ '05.715.101-3' │ 'Jorge Heriberto Gutierrez Silva'       │ 'Jorge'             │ 'VENDEDOR'  │
+│ 14      │ 'STUB-8556258' │ 'Luis'                                  │ 'Luis_OLD'          │ 'VENDEDOR'  │
+│ 15      │ '11.823.790-0' │ 'Luis Ramon Esquivel Oyamadel'          │ 'Luis'              │ 'VENDEDOR'  │
+│ 16      │ 'STUB-9793360' │ 'Maiko'                                 │ 'Maiko_OLD'         │ 'VENDEDOR'  │
+│ 17      │ '13.018.313-1' │ 'Maiko Ricardo Flores Maldonado'        │ 'Maiko'             │ 'VENDEDOR'  │
+│ 18      │ 'STUB-8233618' │ 'Marcelo'                               │ 'Marcelo_OLD'       │ 'VENDEDOR'  │
+│ 19      │ '16.412.525-4' │ 'Marcelo Hernan Troncoso Molina'        │ 'Marcelo'           │ 'VENDEDOR'  │
+│ 20      │ 'STUB-6292493' │ 'Marisol'                               │ 'Marisol_OLD'       │ 'VENDEDOR'  │
+│ 21      │ '13.087.134-8' │ 'Marisol De Lourdes Sanchez Roitman'    │ 'Marisol'           │ 'VENDEDOR'  │
+│ 22      │ 'STUB-5900915' │ 'Matias Felipe'                         │ 'Matias Felipe_OLD' │ 'VENDEDOR'  │
+│ 23      │ '14.138.537-2' │ 'Matias Felipe Felipe Tapia Valenzuela' │ 'Matias Felipe'     │ 'VENDEDOR'  │
+│ 24      │ 'STUB-5086051' │ 'Matias Ignacio'                        │ 'Matias Ignacio'    │ 'VENDEDOR'  │
+│ 25      │ 'STUB-8888463' │ 'Milton'                                │ 'Milton'            │ 'VENDEDOR'  │
+│ 26      │ '12.570.853-6' │ 'Milton Marin Blanco'                   │ null                │ 'MANAGER'   │
+│ 27      │ 'STUB-9977935' │ 'Nataly'                                │ 'Nataly_OLD'        │ 'VENDEDOR'  │
+│ 28      │ '16.082.310-0' │ 'Nataly Andrea Carrasco Rojas'          │ 'Nataly'            │ 'VENDEDOR'  │
+│ 29      │ 'STUB-1995213' │ 'Nelson'                                │ 'Nelson_OLD'        │ 'VENDEDOR'  │
+│ 30      │ '09.338.644-2' │ 'Nelson Antonio Muñoz Cortes'           │ 'Nelson'            │ 'VENDEDOR'  │
+│ 31      │ 'STUB-1516593' │ 'Octavio'                               │ 'Octavio'           │ 'VENDEDOR'  │
+│ 32      │ 'STUB-6101129' │ 'Omar'                                  │ 'Omar_OLD'          │ 'VENDEDOR'  │
+│ 33      │ '10.913.019-2' │ 'Omar Antonio Maldonado Castillo'       │ 'Omar'              │ 'VENDEDOR'  │
+│ 34      │ 'STUB-2468993' │ 'Roberto'                               │ 'Roberto_OLD'       │ 'VENDEDOR'  │
+│ 35      │ '07.107.100-6' │ 'Roberto Otilio Oyarzun Alvarez'        │ 'Roberto'           │ 'VENDEDOR'  │
+│ 36      │ 'STUB-5956837' │ 'Victoria'                              │ 'Victoria_OLD'      │ 'VENDEDOR'  │
+│ 37      │ '12.051.321-4' │ 'Victoria Andrea Hurtado Olivares'      │ 'Victoria'          │ 'VENDEDOR'  │
+│ 38      │ 'STUB-6295512' │ 'vendedor'                              │ 'vendedor'          │ 'VENDEDOR'  │
+│ 39      │ '12.425.152-4' │ null                                    │ null                │ 'MANAGER'   │
+│ 40      │ '12.168.148-K' │ null                                    │ null                │ 'MANAGER'   │
+└─────────┴────────────────┴─────────────────────────────────────────┴─────────────────────┴─────────────┘
+
+--- 3. VENDOR IN SALES (VENTA.vendedor_cliente) ---
+┌─────────┬─────────────────┬─────────┬───────────────┐
+│ (index) │ vendor_name     │ count   │ status        │
+├─────────┼─────────────────┼─────────┼───────────────┤
+│ 0       │ 'Omar'          │ '20511' │ 'MATCH_ALIAS' │
+│ 1       │ 'Eduardo'       │ '14396' │ 'MATCH_ALIAS' │
+│ 2       │ 'Nelson'        │ '8400'  │ 'MATCH_ALIAS' │
+│ 3       │ 'Maiko'         │ '7627'  │ 'MATCH_ALIAS' │
+│ 4       │ 'Alex'          │ '7207'  │ 'MATCH_ALIAS' │
+│ 5       │ 'Marisol'       │ '5251'  │ 'MATCH_ALIAS' │
+│ 6       │ 'Emilio'        │ '4953'  │ 'MATCH_ALIAS' │
+│ 7       │ 'Matias Felipe' │ '3533'  │ 'MATCH_ALIAS' │
+│ 8       │ 'Victoria'      │ '3001'  │ 'MATCH_ALIAS' │
+│ 9       │ 'Jorge'         │ '2804'  │ 'MATCH_ALIAS' │
+│ 10      │ 'Nataly'        │ '2576'  │ 'MATCH_ALIAS' │
+│ 11      │ 'JOAQUIN'       │ '2262'  │ 'MATCH_ALIAS' │
+│ 12      │ 'Roberto'       │ '1965'  │ 'MATCH_ALIAS' │
+│ 13      │ 'Luis'          │ '1667'  │ 'MATCH_ALIAS' │
+│ 14      │ 'Eduardo Rojas' │ '890'   │ 'MATCH_ALIAS' │
+│ 15      │ 'Marcelo'       │ '779'   │ 'MATCH_ALIAS' │
+│ 16      │ 'Milton'        │ '304'   │ 'MATCH_ALIAS' │
+│ 17      │ 'Alejandro'     │ '1'     │ 'MATCH_ALIAS' │
+└─────────┴─────────────────┴─────────┴───────────────┘
+
+--- 4. VENDOR IN ABONOS (ABONO.vendedor_cliente) ---
+┌─────────┬─────────────────┬────────┬───────────────┐
+│ (index) │ vendor_name     │ count  │ status        │
+├─────────┼─────────────────┼────────┼───────────────┤
+│ 0       │ 'Eduardo'       │ '7152' │ 'MATCH_ALIAS' │
+│ 1       │ 'Omar'          │ '5283' │ 'MATCH_ALIAS' │
+│ 2       │ 'Maiko'         │ '4586' │ 'MATCH_ALIAS' │
+│ 3       │ 'Emilio'        │ '3387' │ 'MATCH_ALIAS' │
+│ 4       │ 'Marisol'       │ '3070' │ 'MATCH_ALIAS' │
+│ 5       │ 'Nelson'        │ '2498' │ 'MATCH_ALIAS' │
+│ 6       │ 'Alex'          │ '2214' │ 'MATCH_ALIAS' │
+│ 7       │ 'Matias Felipe' │ '1543' │ 'MATCH_ALIAS' │
+│ 8       │ 'Victoria'      │ '1293' │ 'MATCH_ALIAS' │
+│ 9       │ 'Jorge'         │ '1075' │ 'MATCH_ALIAS' │
+│ 10      │ 'Luis'          │ '1060' │ 'MATCH_ALIAS' │
+│ 11      │ 'Roberto'       │ '646'  │ 'MATCH_ALIAS' │
+│ 12      │ 'Nataly'        │ '456'  │ 'MATCH_ALIAS' │
+│ 13      │ 'JOAQUIN'       │ '446'  │ 'MATCH_ALIAS' │
+│ 14      │ 'Eduardo Rojas' │ '374'  │ 'MATCH_ALIAS' │
+│ 15      │ 'Marcelo'       │ '254'  │ 'MATCH_ALIAS' │
+│ 16      │ 'Milton'        │ '120'  │ 'MATCH_ALIAS' │
+│ 17      │ 'Alejandro'     │ '1'    │ 'MATCH_ALIAS' │
+└─────────┴─────────────────┴────────┴───────────────┘
+
+--- 5. VENDOR IN SALDO_CREDITO (SALDO_CREDITO.nombre_vendedor) ---
+┌─────────┬─────────────┬────────┬───────────┐
+│ (index) │ vendor_name │ count  │ status    │
+├─────────┼─────────────┼────────┼───────────┤
+│ 0       │ 'NULL'      │ '4171' │ 'UNKNOWN' │
+└─────────┴─────────────┴────────┴───────────┘
+
+--- 6. VENDOR IN CLIENTE (CLIENTE.nombre_vendedor vs CLIENTE.vendedor_id) ---
+┌─────────┬─────────────────────────────────────────┬────────┐
+│ (index) │ nombre_vendedor                         │ count  │
+├─────────┼─────────────────────────────────────────┼────────┤
+│ 0       │ 'Eduardo Enrique Ponce Castillo'        │ '3696' │
+│ 1       │ 'Maiko Ricardo Flores Maldonado'        │ '3425' │
+│ 2       │ 'Emilio Alberto Santos Castillo'        │ '2951' │
+│ 3       │ 'Nelson Antonio Mu√±oz Cortes'          │ '804'  │
+│ 4       │ 'Alex Mauricio Mondaca Cortes'          │ '747'  │
+│ 5       │ 'Nataly Andrea Carrasco Rojas'          │ '698'  │
+│ 6       │ 'Omar Antonio Maldonado Castillo'       │ '626'  │
+│ 7       │ 'Matias Felipe Felipe Tapia Valenzuela' │ '522'  │
+│ 8       │ 'Jorge Heriberto Gutierrez Silva'       │ '507'  │
+│ 9       │ 'Marisol De Lourdes Sanchez Roitman'    │ '441'  │
+│ 10      │ 'Milton   Marin Blanco'                 │ '423'  │
+│ 11      │ 'Victoria Andrea Hurtado Olivares'      │ '323'  │
+│ 12      │ 'Roberto Otilio Oyarzun Alvarez'        │ '318'  │
+│ 13      │ 'Marcelo Hernan Troncoso Molina'        │ '218'  │
+│ 14      │ 'Luis Ramon Esquivel Oyamadel'          │ '199'  │
+│ 15      │ 'Alejandro Mauricio Valdivia Valdivia'  │ '155'  │
+│ 16      │ 'Octavio Enrique Contreras Acevedo'     │ '143'  │
+│ 17      │ 'JOAQUIN ALEJANDRO MANRIQUEZ MUNIZAGA'  │ '135'  │
+│ 18      │ 'Eduardo Rojas Andres Rojas Del Campo'  │ '118'  │
+│ 19      │ null                                    │ '39'   │
+│ 20      │ 'Francisco   Fredes'                    │ '6'    │
+│ 21      │ 'Alejandra Del Carmen Mery Hern√°ndez'  │ '6'    │
+│ 22      │ 'Matias Ignacio Ignacio Tapia Duran'    │ '2'    │
+│ 23      │ 'Tamara Isabel Lillo Avalos'            │ '1'    │
+└─────────┴─────────────────────────────────────────┴────────┘

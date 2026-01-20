@@ -64,12 +64,13 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             throw new Error(`Faltan columnas requeridas: Folio, Fecha, Monto`);
         }
 
-        // --- 1. Usarios map (Alias) ---
-        const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario WHERE alias IS NOT NULL");
+        // --- 1. Usarios map (Alias -> Full Name) ---
+        const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario");
         const aliasMap = new Map();
         usersRes.rows.forEach(u => {
-            const a = (u.alias || u.nombre_vendedor || '').trim();
-            if (a) aliasMap.set(a.toLowerCase(), a);
+            const fullName = u.nombre_vendedor;
+            if (u.alias) aliasMap.set(u.alias.toLowerCase().trim(), fullName);
+            if (u.nombre_vendedor) aliasMap.set(u.nombre_vendedor.toLowerCase().trim(), fullName);
         });
 
         // --- 2. Client map ---

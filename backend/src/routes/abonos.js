@@ -386,47 +386,48 @@ router.get('/comparativo', auth(), async (req, res) => {
         dateFormat = 'YYYY-MM';
     }
 
-    const ventasCte = salesTable
-      ? `SELECT 
-          TO_CHAR(${salesDateCol}, '${dateFormat}') as periodo,
-          vendedor_id,
-          SUM(${salesAmountCol}) as total_ventas,
-          COUNT(*) as cantidad_ventas
-        FROM ${salesTable}
-        ${whereClauseVentas}
-        GROUP BY TO_CHAR(${salesDateCol}, '${dateFormat}'), vendedor_id`
-      : `SELECT NULL::text as periodo, NULL::int as vendedor_id, 0::numeric as total_ventas, 0::bigint as cantidad_ventas WHERE 1=0`;
+    // Determinar col vendedor en Ventas
+    let salesVendorCol = 'vendedor_id';
+    let salesGroupBy = 'vendedor_id';
+    if (salesTable) {
+      const { rows: scols } = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [salesTable]);
+      const sColSet = new Set(scols.map(c => c.column_name));
+      if (sColSet.has('vendedor_cliente')) {
+        salesVendorCol = 'vendedor_cliente';
+        salesGroupBy = 'vendedor_cliente';
+      }
+    }
 
-    const abonosCte = `SELECT 
-          TO_CHAR(${abonoFechaCol}, '${dateFormat}') as periodo,
-          vendedor_id,
-          SUM(${abonoMontoCol}) as total_abonos,
-          COUNT(*) as cantidad_abonos
-        FROM ${abonosTable}
-        ${whereClauseAbonos}
-        GROUP BY TO_CHAR(${abonoFechaCol}, '${dateFormat}'), vendedor_id`;
+    // Determinar col vendedor en Abonos
+    let abonoVendorCol = 'vendedor_id';
+    let abonoGroupBy = 'vendedor_id';
+    const abonoVendorColName = abonoCols.includes('vendedor_cliente') ? 'vendedor_cliente' : (abonoCols.includes('vendedor_id') ? 'vendedor_id' : null);
+    if (abonoVendorColName) {
+      abonoVendorCol = abonoVendorColName;
+      abonoGroupBy = abonoVendorColName;
+    }
 
-    // Ejecutar consultas por separado ya que tienen diferentes parámetros
+    // Ejecutar consultas por separado
     const ventasData = salesTable ? await pool.query(`
       SELECT 
         TO_CHAR(${salesDateCol}, '${dateFormat}') as periodo,
-        vendedor_id,
+        ${salesVendorCol} as vendedor_key,
         SUM(${salesAmountCol}) as total_ventas,
         COUNT(*) as cantidad_ventas
       FROM ${salesTable}
       ${whereClauseVentas}
-      GROUP BY TO_CHAR(${salesDateCol}, '${dateFormat}'), vendedor_id
+      GROUP BY TO_CHAR(${salesDateCol}, '${dateFormat}'), ${salesGroupBy}
     `, params) : { rows: [] };
 
     const abonosData = await pool.query(`
       SELECT 
         TO_CHAR(${abonoFechaCol}, '${dateFormat}') as periodo,
-        vendedor_id,
+        ${abonoVendorCol} as vendedor_key,
         SUM(${abonoMontoCol}) as total_abonos,
         COUNT(*) as cantidad_abonos
       FROM ${abonosTable}
       ${whereClauseAbonos}
-      GROUP BY TO_CHAR(${abonoFechaCol}, '${dateFormat}'), vendedor_id
+      GROUP BY TO_CHAR(${abonoFechaCol}, '${dateFormat}'), ${abonoGroupBy}
     `, abonosParams);
 
     // Combinar resultados en memoria
@@ -434,10 +435,12 @@ router.get('/comparativo', auth(), async (req, res) => {
 
     // Procesar ventas
     ventasData.rows.forEach(row => {
-      const key = `${row.periodo}-${row.vendedor_id}`;
+      const keyRaw = row.vendedor_key ? String(row.vendedor_key).trim().toUpperCase() : 'UNKNOWN';
+      const key = `${row.periodo}-${keyRaw}`;
       periodoVendedorMap.set(key, {
         periodo: row.periodo,
-        vendedor_id: row.vendedor_id,
+        vendedor_key: keyRaw, // Used for matching
+        original_vendedor: row.vendedor_key,
         total_ventas: parseFloat(row.total_ventas) || 0,
         cantidad_ventas: parseInt(row.cantidad_ventas) || 0,
         total_abonos: 0,
@@ -447,7 +450,8 @@ router.get('/comparativo', auth(), async (req, res) => {
 
     // Procesar abonos
     abonosData.rows.forEach(row => {
-      const key = `${row.periodo}-${row.vendedor_id}`;
+      const keyRaw = row.vendedor_key ? String(row.vendedor_key).trim().toUpperCase() : 'UNKNOWN';
+      const key = `${row.periodo}-${keyRaw}`;
       if (periodoVendedorMap.has(key)) {
         const existing = periodoVendedorMap.get(key);
         existing.total_abonos = parseFloat(row.total_abonos) || 0;
@@ -455,7 +459,8 @@ router.get('/comparativo', auth(), async (req, res) => {
       } else {
         periodoVendedorMap.set(key, {
           periodo: row.periodo,
-          vendedor_id: row.vendedor_id,
+          vendedor_key: keyRaw,
+          original_vendedor: row.vendedor_key,
           total_ventas: 0,
           cantidad_ventas: 0,
           total_abonos: parseFloat(row.total_abonos) || 0,
@@ -464,26 +469,57 @@ router.get('/comparativo', auth(), async (req, res) => {
       }
     });
 
-    // Obtener nombres de vendedores
-    const vendedorIds = [...new Set([...periodoVendedorMap.values()].map(v => v.vendedor_id))];
-    const usuariosData = vendedorIds.length > 0 ? await pool.query(`
-      SELECT id, nombre FROM usuario WHERE id = ANY($1)
-    `, [vendedorIds]) : { rows: [] };
+    // Obtener nombres de vendedores (y mapear a RUT si es posible)
+    // Si la key es el Nombre (vendedor_cliente), buscamos el RUT en usuario
+    // Si la key es ya el ID (o RUT), buscamos el Nombre.
+    // Dado que estandarizamos a Full Name, la key es likely Full Name.
 
-    const vendedorNombres = new Map(usuariosData.rows.map(u => [u.id, u.nombre]));
+    const vendorKeys = [...new Set([...periodoVendedorMap.values()].map(v => v.original_vendedor))].filter(Boolean);
+
+    // Fetch user map: Name -> Rut, Rut -> Name
+    // Relaxed matching: verify Upper(Nombre) or Rut
+    let mapNameToRut = {};
+    let mapRutToName = {};
+
+    if (vendorKeys.length > 0) {
+      const userQ = await pool.query(`SELECT rut, nombre_vendedor FROM usuario`);
+      userQ.rows.forEach(u => {
+        if (u.nombre_vendedor) {
+          mapNameToRut[u.nombre_vendedor.toUpperCase().trim()] = u.rut;
+          mapRutToName[u.rut] = u.nombre_vendedor;
+        }
+      });
+    }
 
     // Construir resultado final
     const result = {
-      rows: [...periodoVendedorMap.values()].map(row => ({
-        ...row,
-        vendedor_nombre: vendedorNombres.get(row.vendedor_id) || 'Desconocido',
-        diferencia: row.total_ventas - row.total_abonos,
-        porcentaje_cobrado: row.total_ventas > 0
-          ? parseFloat(((row.total_abonos / row.total_ventas) * 100).toFixed(2))
-          : 0
-      })).sort((a, b) => {
+      rows: [...periodoVendedorMap.values()].map(row => {
+        const normKey = row.vendedor_key; // Upper Trimmed
+        // Try to find Name and Rut
+        // If key is Name (likely), we find Rut in mapNameToRut
+        // If key is Rut (less likely with new logic), we find Name in mapRutToName
+
+        let finalRut = mapNameToRut[normKey] || row.original_vendedor; // Fallback to key if not found
+        let finalName = mapRutToName[row.original_vendedor] || row.original_vendedor; // Fallback
+
+        // Check reverse
+        if (!mapRutToName[row.original_vendedor] && mapNameToRut[normKey]) {
+          // Key was Name
+          finalName = row.original_vendedor;
+        }
+
+        return {
+          ...row,
+          vendedor_id: finalRut,
+          vendedor_nombre: finalName,
+          diferencia: row.total_ventas - row.total_abonos,
+          porcentaje_cobrado: row.total_ventas > 0
+            ? parseFloat(((row.total_abonos / row.total_ventas) * 100).toFixed(2))
+            : 0
+        };
+      }).sort((a, b) => {
         if (b.periodo !== a.periodo) return b.periodo.localeCompare(a.periodo);
-        return a.vendedor_nombre.localeCompare(b.vendedor_nombre);
+        return String(a.vendedor_nombre).localeCompare(String(b.vendedor_nombre));
       })
     };
 
@@ -608,29 +644,63 @@ router.get('/por-vendedor', auth(), async (req, res) => {
     // This logic correctly calculates index! ($2 if from exists, else $1).
     // So distinct params array matches strictly.
 
+    // 4. Construir subqueries para Ventas (Corregido para usar MATCH POR NOMBRE si no hay ID)
+    //    Si tabla ventas tiene columna vendedor_cliente, usaremos eso para comparar con u.nombre_vendedor
+    let ventasMatchCondition = 's.vendedor_id = u.id'; // Default (que fallaria si no existen)
+
+    // Detectar columna de vendedor en ventas
+    let salesVendorCol = null;
+    if (salesTable) {
+      const { rows: scols } = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [salesTable]);
+      const sColSet = new Set(scols.map(c => c.column_name));
+      if (sColSet.has('vendedor_cliente')) salesVendorCol = 'vendedor_cliente';
+      else if (sColSet.has('vendedor_id')) salesVendorCol = 'vendedor_id';
+    }
+
+    // Definir condicion de join para ventas
+    if (salesVendorCol === 'vendedor_cliente') {
+      ventasMatchCondition = 'UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor))';
+    } else if (salesVendorCol === 'vendedor_id') {
+      // Fallback: usuario no tiene id, tiene rut. Asumimos que si hay vendedor_id en ventas, es el RUT? 
+      // Ojo: usuario no tiene columna ID. 
+      ventasMatchCondition = 's.vendedor_id = u.rut';
+    }
+
     const ventasCantidadSub = salesTable
-      ? `SELECT COUNT(*) FROM ${salesTable} s WHERE s.vendedor_id = u.id ${fecha_desde ? `AND s.${salesDateCol} >= $1` : ''} ${fecha_hasta ? `AND s.${salesDateCol} <= $${fecha_desde ? 2 : 1}` : ''}`
+      ? `SELECT COUNT(*) FROM ${salesTable} s WHERE ${ventasMatchCondition} ${fecha_desde ? `AND s.${salesDateCol} >= $1` : ''} ${fecha_hasta ? `AND s.${salesDateCol} <= $${fecha_desde ? 2 : 1}` : ''}`
       : `SELECT 0`;
+
     const ventasTotalSub = salesTable
-      ? `SELECT COALESCE(SUM(${salesAmountCol}), 0) FROM ${salesTable} s WHERE s.vendedor_id = u.id ${fecha_desde ? `AND s.${salesDateCol} >= $1` : ''} ${fecha_hasta ? `AND s.${salesDateCol} <= $${fecha_desde ? 2 : 1}` : ''}`
+      ? `SELECT COALESCE(SUM(${salesAmountCol}), 0) FROM ${salesTable} s WHERE ${ventasMatchCondition} ${fecha_desde ? `AND s.${salesDateCol} >= $1` : ''} ${fecha_hasta ? `AND s.${salesDateCol} <= $${fecha_desde ? 2 : 1}` : ''}`
       : `SELECT 0`;
+
+    // 5. Construir Join Condition para Abonos (Corregido para MATCH POR NOMBRE)
+    //    usuario no tiene id, tiene rut. Abono no tiene vendedor_id, tiene vendedor_cliente.
+    const abonoVendorCol = abonoCols.includes('vendedor_cliente') ? 'vendedor_cliente' : (abonoCols.includes('vendedor_id') ? 'vendedor_id' : null);
+
+    let abonoJoinCondition = 'FALSE'; // Safe default
+    if (abonoVendorCol === 'vendedor_cliente') {
+      abonoJoinCondition = 'UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(a.vendedor_cliente))';
+    } else if (abonoVendorCol === 'vendedor_id') {
+      abonoJoinCondition = 'u.rut = a.vendedor_id';
+    }
 
     const query = `
       SELECT 
-        u.id as vendedor_id,
-        u.nombre as vendedor_nombre,
+        u.rut as vendedor_id,         -- Return RUT as ID for frontend compatibility
+        u.nombre_vendedor as vendedor_nombre,
         COUNT(a.id) as cantidad_abonos,
-        SUM(a.${abonoMontoCol}) as total_abonos,
-        AVG(a.${abonoMontoCol})::numeric(15,2) as promedio_abono,
+        COALESCE(SUM(a.${abonoMontoCol}), 0) as total_abonos,
+        COALESCE(AVG(a.${abonoMontoCol}), 0)::numeric(15,2) as promedio_abono,
         MIN(a.${abonoFechaCol}) as primer_abono,
         MAX(a.${abonoFechaCol}) as ultimo_abono,
         -- Ventas del vendedor
         ( ${ventasCantidadSub} ) as cantidad_ventas,
         ( ${ventasTotalSub} ) as total_ventas
       FROM usuario u
-      LEFT JOIN ${abonosTable} a ON u.id = a.vendedor_id ${joinConditions}
-      WHERE u.rol IN ('vendedor', 'manager', 'VENDEDOR', 'MANAGER')
-      GROUP BY u.id, u.nombre
+      LEFT JOIN ${abonosTable} a ON ${abonoJoinCondition} ${joinConditions}
+      WHERE u.rol_usuario IN ('vendedor', 'manager', 'VENDEDOR', 'MANAGER')
+      GROUP BY u.rut, u.nombre_vendedor
       ORDER BY total_abonos DESC NULLS LAST
     `;
 
@@ -639,8 +709,11 @@ router.get('/por-vendedor', auth(), async (req, res) => {
     // Calcular porcentajes y agregar métricas
     const vendedoresConMetricas = result.rows.map(v => ({
       ...v,
-      porcentaje_cobrado: v.total_ventas > 0
-        ? ((v.total_abonos / v.total_ventas) * 100).toFixed(2)
+      // Ensure numeric types for safety
+      total_ventas: parseFloat(v.total_ventas || 0),
+      total_abonos: parseFloat(v.total_abonos || 0),
+      porcentaje_cobrado: parseFloat(v.total_ventas) > 0
+        ? ((parseFloat(v.total_abonos) / parseFloat(v.total_ventas)) * 100).toFixed(2)
         : '0.00',
       saldo_pendiente: (parseFloat(v.total_ventas || 0) - parseFloat(v.total_abonos || 0)).toFixed(2)
     }));

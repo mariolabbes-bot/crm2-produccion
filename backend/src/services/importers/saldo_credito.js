@@ -19,9 +19,13 @@ async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
         console.log(`📊 Total filas: ${data.length}`);
         if (!Array.isArray(data) || data.length === 0) throw new Error('Excel vacío');
 
-        const headers = Object.keys(data[0] || {});
+        // Fix: Read headers correctly from the first row of the sheet, not from the first data object.
+        const headerRow = XLSX.utils.sheet_to_json(sheet, { header: 1, range: 0, limit: 1 })[0];
+        const headers = headerRow || [];
+        console.log('Detected Headers:', headers);
+
         // Helper to find column by regex
-        const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
+        const findCol = (patterns) => headers.find(h => h && patterns.some(p => p.test(String(h).trim()))) || null;
 
         // Mappings based on Verified Schema and Implementation Plan
         const colRut = findCol([/^Rut$/i, /^Rut.*cliente$/i]);
@@ -51,6 +55,20 @@ async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
         // CRITICAL: Clear table for snapshot
         await client.query('TRUNCATE TABLE saldo_credito RESTART IDENTITY');
 
+        // Pre-fetch Vendors to build a map: Name/Alias/CreditName -> Standard Full Name
+        const usersRes = await client.query("SELECT nombre_vendedor, alias, nombre_credito FROM usuario");
+        const vendorMap = new Map();
+
+        usersRes.rows.forEach(u => {
+            const standardName = u.nombre_vendedor; // The Source of Truth Full Name
+            if (u.nombre_vendedor) vendorMap.set(u.nombre_vendedor.toLowerCase(), standardName);
+            if (u.alias) vendorMap.set(u.alias.toLowerCase(), standardName);
+            if (u.nombre_credito) vendorMap.set(u.nombre_credito.toLowerCase(), standardName);
+        });
+
+        const BATCH_SIZE = 500;
+        let batchRows = [];
+
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
 
@@ -62,24 +80,81 @@ async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
             const folio = row[colFolio] ? parseInt(row[colFolio]) : null;
             if (!folio || !rut) continue;
 
-            const tipo = colTipo ? String(row[colTipo]).trim() : 'FACTURA'; // Default to Factura if missing
+            const tipo = colTipo ? String(row[colTipo]).trim() : 'FACTURA';
             const fechaEmision = parseExcelDate(row[colFechaEmision]);
             const totalFactura = colTotal ? parseNumeric(row[colTotal]) : 0;
             const deudaCancelada = colDeudaCancelada ? parseNumeric(row[colDeudaCancelada]) : 0;
             const saldoFactura = colSaldoFactura ? parseNumeric(row[colSaldoFactura]) : 0;
             const saldoFavorDisponible = colSaldoFavor ? parseNumeric(row[colSaldoFavor]) : 0;
-            const nombreVendedor = colVendedor ? String(row[colVendedor]).trim() : null;
+            // Name from Excel (e.g. "Alex Mondaca")
+            const rawVendorName = colVendedor ? String(row[colVendedor]).trim() : null;
 
-            // Insert
+            // Resolve Standard Name
+            let finalVendorName = null;
+            if (rawVendorName) {
+                const key = rawVendorName.toLowerCase();
+                if (vendorMap.has(key)) {
+                    finalVendorName = vendorMap.get(key);
+                } else {
+                    finalVendorName = rawVendorName;
+                }
+            }
+
+            // Add to batch
+            batchRows.push([
+                rut,
+                tipo,
+                folio,
+                fechaEmision,
+                totalFactura,
+                deudaCancelada,
+                saldoFactura,
+                saldoFavorDisponible,
+                finalVendorName,
+                new Date() // created_at
+            ]);
+
+            // Execute Batch if full
+            if (batchRows.length >= BATCH_SIZE) {
+                const valuesClause = batchRows.map((_, idx) => {
+                    const offset = idx * 10;
+                    return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9}, $${offset + 10})`;
+                }).join(', ');
+
+                const flatParams = batchRows.flat();
+
+                await client.query(
+                    `INSERT INTO saldo_credito (
+                        rut, tipo_documento, folio, fecha_emision, 
+                        total_factura, deuda_cancelada, saldo_factura, 
+                        saldo_favor_disponible, nombre_vendedor, created_at
+                    ) VALUES ${valuesClause}`,
+                    flatParams
+                );
+
+                inserted += batchRows.length;
+                batchRows = []; // Clear batch
+            }
+        }
+
+        // Insert remaining rows
+        if (batchRows.length > 0) {
+            const valuesClause = batchRows.map((_, idx) => {
+                const offset = idx * 10;
+                return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9}, $${offset + 10})`;
+            }).join(', ');
+
+            const flatParams = batchRows.flat();
+
             await client.query(
                 `INSERT INTO saldo_credito (
                     rut, tipo_documento, folio, fecha_emision, 
                     total_factura, deuda_cancelada, saldo_factura, 
                     saldo_favor_disponible, nombre_vendedor, created_at
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
-                [rut, tipo, folio, fechaEmision, totalFactura, deudaCancelada, saldoFactura, saldoFavorDisponible, nombreVendedor]
+                ) VALUES ${valuesClause}`,
+                flatParams
             );
-            inserted++;
+            inserted += batchRows.length;
         }
 
         await client.query('COMMIT');

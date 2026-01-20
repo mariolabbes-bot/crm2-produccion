@@ -1,0 +1,58 @@
+RUT_USUARIO;NOMBRE_USUARIO_LOGIN;CORREO;ASIGNAR_NOMBRE_VENTAS_EXACTO
+11.823.790-0;Alejandra;soporteventas.norte@lubricar-insa.cl;Luis
+14.138.537-2;Alejandro;matias.tapia@lubricar-insa.cl;Matias Felipe
+11.599.857-9;Alex;alex.mondaca@lubricar-insa.cl;Alex
+11.599.857-9;Alex Mauricio Mondaca Cortes;alex.mondaca@lubricar-insa.cl;Alex
+09.262.987-2;Eduardo;lubricar.tb@lubricar-insa.cl;Eduardo
+09.262.987-2;Eduardo Enrique Ponce Castillo;lubricar.tb@lubricar-insa.cl;Eduardo
+13.830.417-5;Eduardo Rojas;eduardo.rojas@lubricar-insa.cl;Eduardo Rojas
+13.830.417-5;Eduardo Rojas Andres Rojas Del Campo;eduardo.rojas@lubricar-insa.cl;Eduardo Rojas
+STUB-8361540;Emilio;emilio.santos@lubricar-insa.cl;Emilio
+7.775.897-6;JOAQUIN;joaquin.mariquez@lubricar-insa.cl;JOAQUIN
+7.775.897-6;JOAQUIN ALEJANDRO MANRIQUEZ MUNIZAGA;joaquin.mariquez@lubricar-insa.cl;JOAQUIN
+05.715.101-3;Jorge;jorge.gutierrez@lubricar-insa.cl;Jorge
+05.715.101-3;Jorge Heriberto Gutierrez Silva;jorge.gutierrez@lubricar-insa.cl;Jorge
+11.823.790-0;Luis;soporteventas.norte@lubricar-insa.cl;Luis
+11.823.790-0;Luis Ramon Esquivel Oyamadel;soporteventas.norte@lubricar-insa.cl;Luis
+13.018.313-1;Maiko;lubricar.matriz@lubricar-insa.cl;Maiko
+13.018.313-1;Maiko Ricardo Flores Maldonado;lubricar.matriz@lubricar-insa.cl;Maiko
+16.412.525-4;Marcelo;marcelo.troncoso@lubricar-insa.cl;Marcelo
+16.412.525-4;Marcelo Hernan Troncoso Molina;marcelo.troncoso@lubricar-insa.cl;Marcelo
+13.087.134-8;Marisol;ventas.laflorida@lubricar-insa.cl;Marisol
+13.087.134-8;Marisol De Lourdes Sanchez Roitman;ventas.laflorida@lubricar-insa.cl;Marisol
+14.138.537-2;Matias Felipe;matias.tapia@lubricar-insa.cl;Matias Felipe
+14.138.537-2;Matias Felipe Felipe Tapia Valenzuela;matias.tapia@lubricar-insa.cl;Matias Felipe
+13.830.417-5;Matias Ignacio;eduardo.rojas@lubricar-insa.cl;Eduardo Rojas
+STUB-8888463;Milton;milton.marin@lubricar-insa.cl;Milton
+16.082.310-0;Nataly;ventas.pudahuel@lubricar-insa.cl;Nataly
+16.082.310-0;Nataly Andrea Carrasco Rojas;ventas.pudahuel@lubricar-insa.cl;Nataly
+09.338.644-2;Nelson;nelson.munoz@lubricar-insa.cl;Nelson
+09.338.644-2;Nelson Antonio Muñoz Cortes;nelson.munoz@lubricar-insa.cl;Nelson
+7.775.897-6;Octavio;joaquin.mariquez@lubricar-insa.cl;JOAQUIN
+10.913.019-2;Omar;omar.maldonado@lubricar-insa.cl;Omar
+10.913.019-2;Omar Antonio Maldonado Castillo;omar.maldonado@lubricar-insa.cl;Omar
+07.107.100-6;Roberto;roberto.oyarzun@lubricar-insa.cl;Roberto
+07.107.100-6;Roberto Otilio Oyarzun Alvarez;roberto.oyarzun@lubricar-insa.cl;Roberto
+12.051.321-4;Victoria;victoria.hurtado@lubricar-insa.cl;Victoria
+12.051.321-4;Victoria Andrea Hurtado Olivares;victoria.hurtado@lubricar-insa.cl;Victoria
+STUB-6295512;vendedor;;
+;;;
+;;;
+--- NOMBRES EN VENTAS (REFERENCIA) ---;;;
+;;;Alex
+;;;Eduardo
+;;;Eduardo Rojas
+;;;Emilio
+;;;JOAQUIN
+;;;Jorge
+;;;Luis
+;;;Maiko
+;;;Marcelo
+;;;Marisol
+;;;Matias Felipe
+;;;Milton
+;;;Nataly
+;;;Nelson
+;;;Omar
+;;;Roberto
+;;;Victoria

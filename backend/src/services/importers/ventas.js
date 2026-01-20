@@ -54,16 +54,17 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
             throw new Error(`Faltan columnas requeridas: ${faltantes.join(', ')}`);
         }
 
-        // --- 1. Cargar Usuarios/Vendedores (ALIAS) ---
-        const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario WHERE alias IS NOT NULL");
-        const aliasMap = new Map(); // Lowercase -> RealAlias
+        // --- 1. Cargar Usuarios/Vendedores (ALIAS -> NOMBRE COMPLETO) ---
+        // We now map everything to the Full Name (nombre_vendedor) to ensure standardisation
+        const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario");
+        const aliasMap = new Map(); // Lowercase -> Full Name (Standard)
         usersRes.rows.forEach(u => {
-            const realName = u.alias || u.nombre_vendedor;
+            const fullName = u.nombre_vendedor; // Use Full Name as the truth
             if (u.alias) {
-                aliasMap.set(u.alias.toLowerCase().trim(), realName);
+                aliasMap.set(u.alias.toLowerCase().trim(), fullName);
             }
             if (u.nombre_vendedor) {
-                aliasMap.set(u.nombre_vendedor.toLowerCase().trim(), realName);
+                aliasMap.set(u.nombre_vendedor.toLowerCase().trim(), fullName);
             }
         });
 

@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select, useTheme, useMediaQuery, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import VisionCard from './ui/VisionCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual, getSaldoCreditoTotal, getAbonosPorVendedor } from '../api';
+import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual, getSaldoCreditoTotal, getAbonosPorVendedor, getRankingVendedores } from '../api';
 import { removeToken, getUser } from '../utils/auth';
 import './DashboardNuevo.css';
 import Papa from 'papaparse';
@@ -69,6 +69,8 @@ const DashboardNuevo = () => {
   const [kpisMesActual, setKpisMesActual] = useState(null); // KPIs personalizados del mes actual
   const [saldoCreditoTotal, setSaldoCreditoTotal] = useState(null);
   const [ventasPorVendedor, setVentasPorVendedor] = useState([]); // Gráfico Admin
+  const [rankingVendedores, setRankingVendedores] = useState([]); // Tabla Ranking
+  const [loadingRanking, setLoadingRanking] = useState(false);
   // Datos pivoteados para la tabla inferior
   const [pivotMonths, setPivotMonths] = useState([]); // ['YYYY-MM', ...]
   const [pivotRows, setPivotRows] = useState([]);     // [{ vendedor_id, vendedor_nombre, 'YYYY-MM': {ventas, abonos}, totalVentas, totalAbonos }, ...]
@@ -268,7 +270,7 @@ const DashboardNuevo = () => {
       if (!isManager && user?.rut) {
         params.vendedor_id = user.rut;
       }
-      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData, saldoCreditoData, ventasPorVendedorData] = await Promise.all([
+      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData, saldoCreditoData, ventasPorVendedorData, rankingData] = await Promise.all([
         getAbonosEstadisticas(params).catch(e => {
           console.error('[loadData] Error en getAbonosEstadisticas:', e);
           return { success: false, error: e.message, status: e.status };
@@ -300,6 +302,10 @@ const DashboardNuevo = () => {
         isManager ? getAbonosPorVendedor(params).catch(e => {
           console.error('[loadData] Error en getAbonosPorVendedor:', e);
           return { success: false, error: e.message };
+        }) : Promise.resolve({ success: true, data: [] }),
+        isManager ? getRankingVendedores().catch(e => {
+          console.error('[loadData] Error en getRankingVendedores:', e);
+          return { success: false, data: [] };
         }) : Promise.resolve({ success: true, data: [] })
       ]);
 
@@ -364,6 +370,13 @@ const DashboardNuevo = () => {
         setVentasPorVendedor(ventasPorVendedorData.data);
       } else {
         setVentasPorVendedor([]);
+      }
+
+      // Cargar Ranking
+      if (rankingData && rankingData.success && rankingData.data) {
+        setRankingVendedores(rankingData.data);
+      } else {
+        setRankingVendedores([]);
       }
 
       // Construir pivote: filas = vendedores, columnas = meses en rango, celdas = total_ventas
@@ -757,17 +770,47 @@ const DashboardNuevo = () => {
           {/* Top Vendedores (dummy) */}
           <Grid container spacing={3} sx={{ mt: 1 }}>
             <Grid item xs={12} md={6}>
-              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 } }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Top Vendedores</Typography>
-                <ResponsiveContainer width="100%" height={chartHeights.bar}>
-                  <BarChart data={vendedores?.length ? vendedores.map(v => ({ name: v.nombre, abonos: v.total_abonos || Math.random() * 10000000 })) : []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" tick={{ fontSize: isMdUp ? 12 : 10 }} interval={isMdUp ? 0 : 'preserveStartEnd'} angle={isMdUp ? 0 : -25} dy={isMdUp ? 0 : 10} />
-                    <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 40 : 30} />
-                    <Tooltip formatter={formatMoney} />
-                    <Bar dataKey="abonos" fill="#764ba2" name="Abonos" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 }, overflow: 'hidden' }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>Ranking Vendedores (Mes Actual)</Typography>
+                <TableContainer sx={{ maxHeight: 300 }}>
+                  <Table size="small" stickyHeader>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Vendedor</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Mes Actual)</span></TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Abonos <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Mes Actual)</span></TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Prom. Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Trim. Ant.)</span></TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Año Ant.)</span></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {rankingVendedores.map((row) => (
+                        <TableRow key={row.rut} hover>
+                          <TableCell component="th" scope="row" sx={{ fontSize: '0.85rem' }}>
+                            {row.nombre_vendedor}
+                          </TableCell>
+                          <TableCell align="right" sx={{ color: '#667eea', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                            {formatMoney(row.ventas_mes_actual)}
+                          </TableCell>
+                          <TableCell align="right" sx={{ color: '#43e97b', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                            {formatMoney(row.abonos_mes_actual)}
+                          </TableCell>
+                          <TableCell align="right" sx={{ color: '#f6ad55', fontSize: '0.85rem' }}>
+                            {formatMoney(row.prom_ventas_trimestre_ant)}
+                          </TableCell>
+                          <TableCell align="right" sx={{ color: '#a0aec0', fontSize: '0.85rem' }}>
+                            {formatMoney(row.ventas_anio_anterior)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {rankingVendedores.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} align="center">No hay datos disponibles</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>

@@ -210,8 +210,9 @@ router.get('/mes-actual', auth(), async (req, res) => {
       if (vendedorCol === 'vendedor_cliente') {
         // Usar nombre_vendedor del token JWT
         if (user.nombre_vendedor) {
-          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-          params = [user.nombre_vendedor];
+          const firstName = user.nombre_vendedor.split(' ')[0];
+          vendedorFilter = `AND (UPPER(${vendedorCol}) = UPPER($1) OR UPPER(${vendedorCol}) = UPPER($2))`;
+          params = [user.nombre_vendedor, firstName];
         }
       } else {
         vendedorFilter = `AND ${vendedorCol} = $1`;
@@ -1012,6 +1013,157 @@ router.get('/ventas-por-familia', auth(), async (req, res) => {
   } catch (err) {
     console.error('Error en /api/kpis/ventas-por-familia:', err.message);
     res.status(500).json({ error: 'Server Error', message: err.message });
+  }
+});
+
+// @route   GET /api/kpis/ranking-vendedores
+// @desc    Get detailed vendor ranking with multi-period metrics
+//          Columns: Ventas Mes Actual, Abonos Mes Actual, Prom. Trimestre Ant, Ventas Mismo Mes Año Ant.
+// @access  Private (Manager only)
+router.get('/ranking-vendedores', auth(), async (req, res) => {
+  try {
+    const user = req.user;
+    if (user.rol !== 'MANAGER') {
+      return res.status(403).json({ success: false, message: 'Acceso denegado' });
+    }
+
+    const { salesTable, amountCol, dateCol } = await getDetectedSales();
+    // Check abonos table
+    const abonoInfo = await pool.query(`
+      SELECT table_name FROM information_schema.tables 
+      WHERE table_name IN ('abono', 'abonos') LIMIT 1
+    `);
+    const abonosTable = abonoInfo.rows[0]?.table_name;
+
+    // Detect abono cols
+    let abonoMontoCol = 'monto';
+    let abonoFechaCol = 'fecha';
+    let abonoVendorCol = 'vendedor_cliente';
+
+    if (abonosTable) {
+      const acols = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [abonosTable]);
+      const cols = new Set(acols.rows.map(c => c.column_name));
+      if (cols.has('monto_neto')) abonoMontoCol = 'monto_neto';
+      else if (cols.has('monto_abono')) abonoMontoCol = 'monto_abono';
+
+      if (cols.has('fecha_abono')) abonoFechaCol = 'fecha_abono';
+
+      if (cols.has('vendedor_cliente')) abonoVendorCol = 'vendedor_cliente';
+      else if (cols.has('vendedor_id')) abonoVendorCol = 'vendedor_id';
+    }
+
+    // Determine Periods
+    // Current Month (default to latest sales month or system date)
+    let currentMonthStr;
+    if (salesTable && dateCol) {
+      const lastDateQ = await pool.query(`SELECT TO_CHAR(MAX(${dateCol}), 'YYYY-MM') as last_month FROM ${salesTable}`);
+      currentMonthStr = lastDateQ.rows[0]?.last_month || new Date().toISOString().slice(0, 7);
+    } else {
+      currentMonthStr = new Date().toISOString().slice(0, 7);
+    }
+
+    const [currY, currM] = currentMonthStr.split('-').map(Number);
+
+    // Calculate periods
+    const dateCurrent = new Date(currY, currM - 1, 1);
+    const datePrevYear = new Date(currY - 1, currM - 1, 1); // Same month last year
+
+    // Previous Quarter (3 months before current)
+    const dateQStart = new Date(currY, currM - 4, 1); // e.g. if Curr is 01, prev quarter is Oct-Nov-Dec (Month -1, -2, -3) -> Start is Month -4? No.
+    // If Jan (0), Prev Q is Oct, Nov, Dec. 
+    // Jan is index 0. 
+    // Oct is index 9. (0 - 3 = -3 -> 12 - 3 = 9).
+    // Let's use simple string logic or date math.
+
+    // Helper to get 'YYYY-MM'
+    const toYM = (d) => d.toISOString().slice(0, 7);
+
+    const periodCurrent = currentMonthStr;
+    const periodPrevYear = toYM(datePrevYear);
+
+    const periodQ1 = toYM(new Date(currY, currM - 2, 0)); // Last day of prev month -> slice YM -> Prev Month
+    const periodQ2 = toYM(new Date(currY, currM - 3, 0));
+    const periodQ3 = toYM(new Date(currY, currM - 4, 0));
+
+    const prevQuarterMonths = [periodQ3, periodQ2, periodQ1]; // e.g. ['2025-10', '2025-11', '2025-12'] for '2026-01'
+
+    console.log('[Ranking] Periods:', { periodCurrent, periodPrevYear, prevQuarterMonths });
+
+    // Conditional Aggregation Queries (CTE or Subselects)
+    // Since we need to join by Name (vendedor_cliente = nombre_vendedor), it's cleaner to select from users and subselect sums
+    // or aggregate sales/abonos first by name then join.
+    // Aggregating first is safer for preventing fan-out issues.
+
+    // 1. Sales Stats by Vendor Name (Standardized)
+    // We group by UPPER(TRIM(vendedor_cliente))
+
+    let salesVendorField = 'vendedor_id'; // Default
+    if (salesTable) {
+      const scols = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [salesTable]);
+      if (scols.rows.some(c => c.column_name === 'vendedor_cliente')) salesVendorField = 'vendedor_cliente';
+    }
+
+    const salesQuery = salesTable ? `
+      SELECT 
+        UPPER(TRIM(${salesVendorField})) as vendor_key,
+        SUM(CASE WHEN TO_CHAR(${dateCol}, 'YYYY-MM') = '${periodCurrent}' THEN ${amountCol} ELSE 0 END) as ventas_mes_actual,
+        SUM(CASE WHEN TO_CHAR(${dateCol}, 'YYYY-MM') = '${periodPrevYear}' THEN ${amountCol} ELSE 0 END) as ventas_anio_anterior,
+        SUM(CASE WHEN TO_CHAR(${dateCol}, 'YYYY-MM') IN ('${prevQuarterMonths.join("','")}') THEN ${amountCol} ELSE 0 END) as ventas_trimestre_ant
+      FROM ${salesTable}
+      GROUP BY UPPER(TRIM(${salesVendorField}))
+    ` : `SELECT 'NONE' as vendor_key`;
+
+    const abonosQuery = abonosTable ? `
+      SELECT 
+        UPPER(TRIM(${abonoVendorCol})) as vendor_key,
+        SUM(CASE WHEN TO_CHAR(${abonoFechaCol}, 'YYYY-MM') = '${periodCurrent}' THEN ${abonoMontoCol} ELSE 0 END) as abonos_mes_actual
+      FROM ${abonosTable}
+      GROUP BY UPPER(TRIM(${abonoVendorCol}))
+    ` : `SELECT 'NONE' as vendor_key`;
+
+    // Final Query: Users left join these aggregates
+    // We assume usuario.nombre_vendedor IS the canonical name
+    const query = `
+      WITH sales_stats AS (
+        ${salesQuery}
+      ),
+      abono_stats AS (
+        ${abonosQuery}
+      )
+      SELECT 
+        u.rut,
+        u.nombre_vendedor,
+        COALESCE(s.ventas_mes_actual, 0) as ventas_mes_actual,
+        COALESCE(a.abonos_mes_actual, 0) as abonos_mes_actual,
+        COALESCE(s.ventas_trimestre_ant, 0) / 3 as prom_ventas_trimestre_ant,
+        COALESCE(s.ventas_anio_anterior, 0) as ventas_anio_anterior
+      FROM usuario u
+      LEFT JOIN sales_stats s ON UPPER(TRIM(u.nombre_vendedor)) = s.vendor_key
+      LEFT JOIN abono_stats a ON UPPER(TRIM(u.nombre_vendedor)) = a.vendor_key
+      WHERE u.rol_usuario IN ('vendedor', 'manager', 'VENDEDOR', 'MANAGER')
+      ORDER BY ventas_mes_actual DESC NULLS LAST
+    `;
+
+    const result = await pool.query(query);
+
+    // Format numbers
+    const data = result.rows.map(row => ({
+      ...row,
+      ventas_mes_actual: parseFloat(row.ventas_mes_actual || 0),
+      abonos_mes_actual: parseFloat(row.abonos_mes_actual || 0),
+      prom_ventas_trimestre_ant: parseFloat(row.prom_ventas_trimestre_ant || 0),
+      ventas_anio_anterior: parseFloat(row.ventas_anio_anterior || 0)
+    }));
+
+    res.json({
+      success: true,
+      period: periodCurrent,
+      data
+    });
+
+  } catch (err) {
+    console.error('Error in ranking-vendedores:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
