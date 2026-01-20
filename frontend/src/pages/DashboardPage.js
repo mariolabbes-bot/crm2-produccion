@@ -9,17 +9,17 @@ import {
 import KPICard from '../components/KPICard';
 import ImportStatsWidget from '../components/ImportStatsWidget'; // ← Nuevo
 import ChartContainer from '../components/ChartContainer';
-import { 
-  LineChart, 
-  Line, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
 } from 'recharts';
 import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedores, getSaldoCreditoTotal } from '../api';
 import { useAuth } from '../contexts/AuthContext';
@@ -68,21 +68,21 @@ const DashboardPage = () => {
         if (isManager() && vendedorSeleccionado !== 'todos') {
           params.vendedor_id = vendedorSeleccionado;
         }
-        
+
         console.log('🔄 Cargando dashboard con params:', params);
         console.log('🔄 Vendedor seleccionado:', vendedorSeleccionado);
 
         // KPIs del mes actual
         const kpisResponse = await getKpisMesActual(params);
         const kpisData = kpisResponse.data || kpisResponse; // Manejar ambos formatos
-        
+
         // Saldo Crédito Total
         const saldoCreditoResponse = await getSaldoCreditoTotal(params);
         const saldoCreditoData = saldoCreditoResponse.data || saldoCreditoResponse;
-        
+
         console.log('📊 KPIs recibidos:', kpisData);
         console.log('💳 Saldo Crédito recibido:', saldoCreditoData);
-        
+
         setKpis({
           ventasMes: kpisData.monto_ventas_mes || 0,
           abonosMes: kpisData.monto_abonos_mes || 0,
@@ -91,8 +91,8 @@ const DashboardPage = () => {
           saldoCreditoTotal: saldoCreditoData.total_saldo_credito || 0,
           trendVentas: kpisData.variacion_vs_anio_anterior_pct || 0,
           // Calcular % de abonos respecto a ventas del mes
-          trendAbonos: kpisData.monto_ventas_mes > 0 
-            ? (kpisData.monto_abonos_mes / kpisData.monto_ventas_mes) * 100 
+          trendAbonos: kpisData.monto_ventas_mes > 0
+            ? (kpisData.monto_abonos_mes / kpisData.monto_ventas_mes) * 100
             : 0,
           // Calcular % de ventas mes actual vs promedio trimestre anterior
           trendPromedioTrimestre: kpisData.promedio_ventas_trimestre_anterior > 0
@@ -128,7 +128,8 @@ const DashboardPage = () => {
   };
 
   return (
-    <Box>
+    <Box className="dashboard-page-container">
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Dashboard General (v2.4)</Typography>
       {/* Widget de última importación */}
       <div className="card-unified">
         <ImportStatsWidget />
@@ -218,17 +219,17 @@ const DashboardPage = () => {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={evolucionMensual}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis 
-                  dataKey="mes" 
+                <XAxis
+                  dataKey="mes"
                   stroke="#6B7280"
                   style={{ fontSize: '0.875rem' }}
                 />
-                <YAxis 
+                <YAxis
                   stroke="#6B7280"
                   style={{ fontSize: '0.875rem' }}
                   tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
                 />
-                <Tooltip 
+                <Tooltip
                   formatter={(value) => formatCurrency(value)}
                   contentStyle={{
                     backgroundColor: '#FFFFFF',
@@ -236,22 +237,22 @@ const DashboardPage = () => {
                     borderRadius: 8,
                   }}
                 />
-                <Legend 
+                <Legend
                   wrapperStyle={{ fontSize: '0.875rem' }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="ventas" 
-                  stroke="#10B981" 
+                <Line
+                  type="monotone"
+                  dataKey="ventas"
+                  stroke="#10B981"
                   strokeWidth={3}
                   name="Ventas"
                   dot={{ fill: '#10B981', r: 4 }}
                   activeDot={{ r: 6 }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="abonos" 
-                  stroke="#3478C3" 
+                <Line
+                  type="monotone"
+                  dataKey="abonos"
+                  stroke="#3478C3"
                   strokeWidth={3}
                   name="Abonos"
                   dot={{ fill: '#3478C3', r: 4 }}
@@ -273,20 +274,20 @@ const DashboardPage = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ventasPorFamilia.slice(0, 5)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis 
-                  type="number" 
+                <XAxis
+                  type="number"
                   stroke="#6B7280"
                   style={{ fontSize: '0.75rem' }}
                   tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
                 />
-                <YAxis 
-                  type="category" 
-                  dataKey="familia" 
+                <YAxis
+                  type="category"
+                  dataKey="familia"
                   stroke="#6B7280"
                   style={{ fontSize: '0.75rem' }}
                   width={100}
                 />
-                <Tooltip 
+                <Tooltip
                   formatter={(value) => formatCurrency(value)}
                   contentStyle={{
                     backgroundColor: '#FFFFFF',
@@ -294,9 +295,9 @@ const DashboardPage = () => {
                     borderRadius: 8,
                   }}
                 />
-                <Bar 
-                  dataKey="total" 
-                  fill="#E57A2D" 
+                <Bar
+                  dataKey="total"
+                  fill="#E57A2D"
                   radius={[0, 8, 8, 0]}
                   name="Total Ventas"
                 />
