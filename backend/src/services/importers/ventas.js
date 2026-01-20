@@ -58,8 +58,13 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
         const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario WHERE alias IS NOT NULL");
         const aliasMap = new Map(); // Lowercase -> RealAlias
         usersRes.rows.forEach(u => {
-            const a = (u.alias || u.nombre_vendedor || '').trim();
-            if (a) aliasMap.set(a.toLowerCase(), a);
+            const realName = u.alias || u.nombre_vendedor;
+            if (u.alias) {
+                aliasMap.set(u.alias.toLowerCase().trim(), realName);
+            }
+            if (u.nombre_vendedor) {
+                aliasMap.set(u.nombre_vendedor.toLowerCase().trim(), realName);
+            }
         });
 
         // --- 2. Pre-scan for Missing Vendors (Stubs) ---

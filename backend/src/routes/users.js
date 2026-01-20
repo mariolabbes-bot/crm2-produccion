@@ -114,6 +114,7 @@ router.get('/vendedores', async (req, res) => {
       FROM usuario
       WHERE LOWER(rol_usuario) = 'vendedor'
       AND nombre_vendedor IS NOT NULL
+      AND (alias IS NULL OR alias NOT LIKE '%_OLD')
       ORDER BY LOWER(TRIM(nombre_vendedor)) ASC, id DESC
     `;
 
