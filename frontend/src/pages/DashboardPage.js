@@ -129,7 +129,7 @@ const DashboardPage = () => {
 
   return (
     <Box className="dashboard-page-container">
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Dashboard General (v2.4)</Typography>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Dashboard General (v2.5)</Typography>
       {/* Widget de última importación */}
       <div className="card-unified">
         <ImportStatsWidget />
@@ -187,7 +187,10 @@ const DashboardPage = () => {
           <KPICard
             title="Promedio Trimestre"
             value={formatCurrency(kpis.promedioTrimestre)}
-            subtitle="vs mes actual"
+            subtitle={kpis.promedioTrimestre > 0 ? (
+              ((kpis.ventasMes - kpis.promedioTrimestre) / kpis.promedioTrimestre * 100).toFixed(1) + '% vs mes actual'
+            ) : 'vs mes actual'
+            }
             trend={kpis.trendPromedioTrimestre}
             color="#A855F7"
             icon={<ClientesIcon />}
