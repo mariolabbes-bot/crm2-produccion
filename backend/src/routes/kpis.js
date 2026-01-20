@@ -192,16 +192,17 @@ router.get('/mes-actual', auth(), async (req, res) => {
     if (isManager && req.query.vendedor_id) {
       const vendedorRut = req.query.vendedor_id; // Ahora es RUT, no ID numérico
 
-      // Buscar el nombre del vendedor por su RUT
-      const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
+      // Buscar el nombre y alias del vendedor por su RUT
+      const vendedorQuery = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE rut = $1', [vendedorRut]);
       if (vendedorQuery.rows.length > 0) {
-        const nombreVendedor = vendedorQuery.rows[0].nombre_vendedor;
+        const { nombre_vendedor, alias } = vendedorQuery.rows[0];
         if (vendedorCol === 'vendedor_cliente') {
+          // Para ventas, usar el alias si existe (ej. "Alex"), o fallback al nombre
           vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-          params = [nombreVendedor];
+          params = [alias || nombre_vendedor];
         } else {
           vendedorFilter = `AND ${vendedorCol} = $1`;
-          params = [nombreVendedor];
+          params = [nombre_vendedor];
         }
       }
     }
@@ -428,16 +429,17 @@ router.get('/dashboard-current', auth(), async (req, res) => {
     if (isManager && req.query.vendedor_id) {
       const vendedorRut = req.query.vendedor_id; // Ahora es RUT, no ID numérico
 
-      // Buscar el nombre del vendedor por RUT
-      const vendedorQuery = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [vendedorRut]);
+      // Buscar el nombre y alias del vendedor por RUT
+      const vendedorQuery = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE rut = $1', [vendedorRut]);
       if (vendedorQuery.rows.length > 0) {
-        const nombreVendedor = vendedorQuery.rows[0].nombre_vendedor;
+        const { nombre_vendedor, alias } = vendedorQuery.rows[0];
         if (vendedorCol === 'vendedor_cliente') {
+          // Usar alias para ventas (ej: "Alex")
           vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-          params = [nombreVendedor];
+          params = [alias || nombre_vendedor];
         } else {
           vendedorFilter = `AND ${vendedorCol} = $1`;
-          params = [nombreVendedor];
+          params = [nombre_vendedor];
         }
       }
     } else if (!isManager) {
@@ -1138,8 +1140,8 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
         COALESCE(s.ventas_trimestre_ant, 0) / 3 as prom_ventas_trimestre_ant,
         COALESCE(s.ventas_anio_anterior, 0) as ventas_anio_anterior
       FROM usuario u
-      LEFT JOIN sales_stats s ON UPPER(TRIM(u.nombre_vendedor)) = s.vendor_key
-      LEFT JOIN abono_stats a ON UPPER(TRIM(u.nombre_vendedor)) = a.vendor_key
+      LEFT JOIN sales_stats s ON UPPER(TRIM(u.alias)) = s.vendor_key
+      LEFT JOIN abono_stats a ON UPPER(TRIM(u.alias)) = a.vendor_key
       WHERE LOWER(u.rol_usuario) IN ('vendedor', 'manager')
       AND (u.alias IS NULL OR u.alias NOT LIKE '%_OLD')
       ORDER BY ventas_mes_actual DESC NULLS LAST
