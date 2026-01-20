@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Box, FormControl, InputLabel, Select, MenuItem, Typography, Paper } from '@mui/material';
+import { Grid, Box, FormControl, InputLabel, Select, MenuItem, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import {
   ShoppingCart as VentasIcon,
   Payment as AbonosIcon,
@@ -21,7 +21,7 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedores, getSaldoCreditoTotal, API_URL } from '../api';
+import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedores, getSaldoCreditoTotal, getRankingVendedores, API_URL } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
 const DashboardPage = () => {
@@ -40,6 +40,7 @@ const DashboardPage = () => {
   });
   const [evolucionMensual, setEvolucionMensual] = useState([]);
   const [ventasPorFamilia, setVentasPorFamilia] = useState([]);
+  const [rankingVendedores, setRankingVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Cargar lista de vendedores si es manager
@@ -110,6 +111,16 @@ const DashboardPage = () => {
         // Ventas por familia de productos
         const familias = await getVentasPorFamilia();
         setVentasPorFamilia(familias || []);
+
+        // Ranking de Vendedores
+        if (isManager()) {
+          const rankingData = await getRankingVendedores();
+          if (rankingData && rankingData.success && rankingData.data) {
+            setRankingVendedores(rankingData.data);
+          } else {
+            setRankingVendedores([]);
+          }
+        }
       } catch (error) {
         console.error('Error cargando datos del dashboard:', error);
       } finally {
@@ -319,6 +330,54 @@ const DashboardPage = () => {
           </ChartContainer>
         </Grid>
       </Grid>
+
+      {/* Fila 3: Ranking de Vendedores (Solo Manager) */}
+      {isManager() && (
+        <Box sx={{ mt: 3 }}>
+          <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, overflow: 'hidden' }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>Ranking Vendedores (Mes Actual)</Typography>
+            <TableContainer sx={{ maxHeight: 400 }}>
+              <Table size="small" stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Vendedor</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Mes Actual)</span></TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Abonos <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Mes Actual)</span></TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Prom. Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Trim. Ant.)</span></TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Año Ant.)</span></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rankingVendedores.map((row) => (
+                    <TableRow key={row.rut} hover>
+                      <TableCell component="th" scope="row" sx={{ fontSize: '0.85rem' }}>
+                        {row.nombre_vendedor}
+                      </TableCell>
+                      <TableCell align="right" sx={{ color: '#10B981', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                        {formatCurrency(row.ventas_mes_actual)}
+                      </TableCell>
+                      <TableCell align="right" sx={{ color: '#3478C3', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                        {formatCurrency(row.abonos_mes_actual)}
+                      </TableCell>
+                      <TableCell align="right" sx={{ color: '#A855F7', fontSize: '0.85rem' }}>
+                        {formatCurrency(row.prom_ventas_trimestre_ant)}
+                      </TableCell>
+                      <TableCell align="right" sx={{ color: '#6B7280', fontSize: '0.85rem' }}>
+                        {formatCurrency(row.ventas_anio_anterior)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {rankingVendedores.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">No hay datos disponibles</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </Box>
+      )}
     </Box>
   );
 };
