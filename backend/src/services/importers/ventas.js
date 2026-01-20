@@ -175,16 +175,18 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
                     clienteRut = clientsByRut.get(rutNorm);
                 } else {
                     // Create Stub
-                    if (!missingClients.has(rutNorm)) {
+                    if (!missingClients.has(rutNorm)) { // Check if we already tried and failed
                         try {
                             await client.query("INSERT INTO cliente (rut, nombre) VALUES ($1, $2) ON CONFLICT (rut) DO NOTHING", [identificador, clienteNombre || 'Unknown']);
                             clientsByRut.set(rutNorm, identificador);
-                            missingClients.add(rutNorm);
+                            // Log as observation/info but NOT as missing blocking
+                            observations.push({ fila: excelRow, campo: 'cliente', detalle: `Cliente Nuevo Creado (Stub): ${identificador}` });
                             clienteRut = identificador;
-                            observations.push({ fila: excelRow, campo: 'cliente', detalle: `Cliente Stub Creado: ${identificador}` });
-                        } catch (e) { console.error(e); }
-                    } else {
-                        clienteRut = identificador; // Already created in this loop
+                        } catch (e) {
+                            console.error(e);
+                            missingClients.add(rutNorm); // Only add to missing if failed
+                            observations.push({ fila: excelRow, campo: 'cliente', detalle: `Error creando cliente: ${e.message}` });
+                        }
                     }
                 }
             }
@@ -196,7 +198,7 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
                     try {
                         await client.query("INSERT INTO producto (sku, descripcion, familia, marca, subfamilia) VALUES ($1, $2, 'SIN CLASIFICAR', 'GENERICO', 'SIN CLASIFICAR') ON CONFLICT (sku) DO NOTHING", [sku, descripcion || 'Sin Descripcion']);
                         productsBySku.set(skuNorm, { sku, litros: 0 });
-                        observations.push({ fila: excelRow, campo: 'sku', detalle: `Producto Stub Creado: ${sku}` });
+                        observations.push({ fila: excelRow, campo: 'sku', detalle: `Producto Nuevo Creado (Stub): ${sku}` });
                     } catch (e) { console.error(e); }
                 }
             }
@@ -222,11 +224,11 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
                     const rutRegex = /^\d{7,8}-[\dkK]$/;
                     return rutRegex.test(c) ? { 'RUT': c, 'Nombre': '', 'Email': '', 'Teléfono': '' } : { 'RUT': '', 'Nombre': c, 'Email': '', 'Teléfono': '' };
                 });
-                XLSX.utils.book_append_sheet(reportWB, XLSX.utils.json_to_sheet(clientData), 'Clientes Faltantes');
+                XLSX.utils.book_append_sheet(reportWB, XLSX.utils.json_to_sheet(clientData), 'Clientes Fallidos');
             }
             const reportDir = 'uploads/reports';
             if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
-            pendingReportPath = path.join(reportDir, `faltantes_${jobId}.xlsx`);
+            pendingReportPath = path.join(reportDir, `faltantes_criticos_${jobId}.xlsx`);
             XLSX.writeFile(reportWB, pendingReportPath);
         }
 
