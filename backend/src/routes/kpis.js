@@ -849,6 +849,11 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
       abonos: abonosMap[row.mes] || 0
     }));
 
+    // Prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     res.json(evolucion);
   } catch (err) {
     console.error('Error en /api/kpis/evolucion-mensual:', err.message);
@@ -997,6 +1002,11 @@ router.get('/ventas-por-familia', auth(), async (req, res) => {
       familia: row.familia || 'Sin familia',
       total: parseFloat(row.total)
     }));
+
+    // Prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
 
     res.json(ventasPorFamilia);
   } catch (err) {

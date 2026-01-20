@@ -97,6 +97,11 @@ router.get('/vendedores', async (req, res) => {
   try {
     console.log('📋 [GET /vendedores] Iniciando consulta de vendedores...');
 
+    // Prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     const query = `
       SELECT DISTINCT ON (LOWER(TRIM(nombre_vendedor)))
         rut as id,
