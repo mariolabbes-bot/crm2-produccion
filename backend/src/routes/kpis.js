@@ -1140,7 +1140,8 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
       FROM usuario u
       LEFT JOIN sales_stats s ON UPPER(TRIM(u.nombre_vendedor)) = s.vendor_key
       LEFT JOIN abono_stats a ON UPPER(TRIM(u.nombre_vendedor)) = a.vendor_key
-      WHERE u.rol_usuario IN ('vendedor', 'manager', 'VENDEDOR', 'MANAGER')
+      WHERE LOWER(u.rol_usuario) IN ('vendedor', 'manager')
+      AND (u.alias IS NULL OR u.alias NOT LIKE '%_OLD')
       ORDER BY ventas_mes_actual DESC NULLS LAST
     `;
 
