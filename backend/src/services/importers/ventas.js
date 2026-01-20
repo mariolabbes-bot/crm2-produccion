@@ -143,7 +143,7 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
 
             // Strict check: if no identifier/folio, just skip
             if (!identificador && !clienteNombre) {
-                // observations.push(...) could be added here if we want to track skipped rows
+                observations.push({ fila: excelRow, folio: folio || 'N/A', campo: 'Identificador/Cliente', detalle: 'Fila saltada: No tiene RUT ni Nombre de Cliente' });
                 continue;
             }
 
