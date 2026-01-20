@@ -115,7 +115,9 @@ router.get('/vendedores', async (req, res) => {
     const vendedores = await pool.query(query);
     console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores`);
 
-    res.json(vendedores.rows);
+    // Inject Debug Vendor for Validation
+    const debugVendor = { id: 'DEBUG_V2_6', nombre: '✅ Backend v2.6 OK' };
+    res.json([debugVendor, ...vendedores.rows]);
   } catch (err) {
     console.error('❌ Error al obtener vendedores:', err.message);
     console.error('❌ Stack:', err.stack);
