@@ -347,6 +347,24 @@ const DashboardPage = () => {
                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Año Ant.)</span></TableCell>
                   </TableRow>
                 </TableHead>
+                {/* Totales Fijos */}
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>TOTALES</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5', color: '#10B981' }}>
+                      {formatCurrency(rankingVendedores.reduce((sum, row) => sum + (parseFloat(row.ventas_mes_actual) || 0), 0))}
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5', color: '#3478C3' }}>
+                      {formatCurrency(rankingVendedores.reduce((sum, row) => sum + (parseFloat(row.abonos_mes_actual) || 0), 0))}
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5', color: '#A855F7' }}>
+                      {formatCurrency(rankingVendedores.reduce((sum, row) => sum + (parseFloat(row.prom_ventas_trimestre_ant) || 0), 0))}
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5', color: '#6B7280' }}>
+                      {formatCurrency(rankingVendedores.reduce((sum, row) => sum + (parseFloat(row.ventas_anio_anterior) || 0), 0))}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
                 <TableBody>
                   {rankingVendedores.map((row) => (
                     <TableRow key={row.rut} hover>

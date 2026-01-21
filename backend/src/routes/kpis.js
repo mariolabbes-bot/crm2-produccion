@@ -1160,6 +1160,9 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
       LEFT JOIN abono_stats a ON (UPPER(TRIM(u.alias)) = a.vendor_key OR UPPER(TRIM(u.nombre_vendedor)) = a.vendor_key)
       WHERE LOWER(u.rol_usuario) IN ('vendedor', 'manager')
       AND (u.alias IS NULL OR u.alias NOT LIKE '%_OLD')
+      AND u.rut NOT LIKE 'STUB-%'
+      AND UPPER(TRIM(u.nombre_vendedor)) NOT IN ('ALEJANDRA', 'ALEJANDRO', 'OCTAVIO', 'MATIAS IGNACIO')
+      AND TRIM(u.nombre_vendedor) != ''
       ORDER BY ventas_mes_actual DESC NULLS LAST
     `;
 
