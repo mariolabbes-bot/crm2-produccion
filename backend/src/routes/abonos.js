@@ -50,7 +50,7 @@ router.get('/', auth(), async (req, res) => {
     `, [abonosTable]);
     const cols = colRows.map(r => r.column_name);
     const fechaCol = cols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
-    const montoCol = cols.includes('monto_neto') ? 'monto_neto' : (cols.includes('monto') ? 'monto' : 'monto_total');
+    const montoCol = cols.includes('monto') ? 'monto' : (cols.includes('monto_neto') ? 'monto_neto' : 'monto_total');
     const clienteCol = cols.includes('cliente_nombre') ? 'cliente_nombre' : 'cliente';
 
     let query = `
@@ -62,10 +62,10 @@ router.get('/', auth(), async (req, res) => {
         a.tipo_pago,
         a.${clienteCol} as cliente_nombre,
         a.identificador as descripcion,
-        u.nombre as vendedor_nombre,
-        u.id as vendedor_id
+        u.nombre_vendedor as vendedor_nombre,
+        u.rut as vendedor_id
   FROM ${abonosTable} a
-      LEFT JOIN usuario u ON a.vendedor_id = u.id
+      LEFT JOIN usuario u ON (UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(a.vendedor_cliente)) OR UPPER(TRIM(u.alias)) = UPPER(TRIM(a.vendedor_cliente)))
       WHERE 1=1
     `;
 
@@ -184,7 +184,7 @@ router.get('/estadisticas', auth(), async (req, res) => {
     `, [abonosTable]);
     const cols = colRows.map(r => r.column_name);
     const fechaCol = cols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
-    const montoCol = cols.includes('monto_neto') ? 'monto_neto' : (cols.includes('monto') ? 'monto' : 'monto_total');
+    const montoCol = cols.includes('monto') ? 'monto' : (cols.includes('monto_neto') ? 'monto_neto' : 'monto_total');
 
     const { vendedor_id, fecha_desde, fecha_hasta } = req.query;
 
@@ -284,10 +284,16 @@ router.get('/estadisticas', auth(), async (req, res) => {
 router.get('/comparativo', auth(), async (req, res) => {
   try {
     const { vendedor_id, fecha_desde, fecha_hasta, agrupar = 'mes' } = req.query;
+    console.log('--- DEBUG COMPARATIVO REQUEST ---');
+    console.log('Query:', req.query);
+    console.log('User:', req.user ? req.user.rut : 'No User');
+
     const { abonosTable, salesTable } = await getDetectedTables();
     if (!abonosTable) {
       return res.status(500).json({ success: false, message: 'Tabla de abonos no encontrada (abonos/abono)' });
     }
+    console.log('[DEBUG Comparativo] Start. User:', req.user.rut, req.user.rol);
+    console.log('[DEBUG Comparativo] Tables:', { abonosTable, salesTable });
 
     // Detectar columnas en tabla abonos
     const { rows: abonoColRows } = await pool.query(`
@@ -295,7 +301,7 @@ router.get('/comparativo', auth(), async (req, res) => {
     `, [abonosTable]);
     const abonoCols = abonoColRows.map(r => r.column_name);
     const abonoFechaCol = abonoCols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
-    const abonoMontoCol = abonoCols.includes('monto_neto') ? 'monto_neto' : (abonoCols.includes('monto') ? 'monto' : 'monto_total');
+    const abonoMontoCol = abonoCols.includes('monto') ? 'monto' : (abonoCols.includes('monto_neto') ? 'monto_neto' : 'monto_total');
 
     // Detect date column and amount column in sales table
     let salesDateCol = 'fecha_emision';
@@ -314,48 +320,114 @@ router.get('/comparativo', auth(), async (req, res) => {
       else if (cols.includes('net_amount')) salesAmountCol = 'net_amount';
     }
 
+    // Detectar col vendedor en Abonos (Moved up)
+    let abonoVendorCol = 'vendedor_id';
+    let abonoGroupBy = 'vendedor_id';
+    const abonoVendorColName = abonoCols.includes('vendedor_cliente') ? 'vendedor_cliente' : (abonoCols.includes('vendedor_id') ? 'vendedor_id' : null);
+    if (abonoVendorColName) {
+      abonoVendorCol = abonoVendorColName;
+      abonoGroupBy = abonoVendorColName;
+    }
+
     let whereClause = 'WHERE 1=1';
     const params = [];
     let paramCounter = 1;
 
-    // Control de acceso
-    if (req.user.rol === 'vendedor') {
-      whereClause += ` AND vendedor_id = $${paramCounter}`;
-      params.push(req.user.id);
-      paramCounter++;
-    } else if (vendedor_id) {
-      whereClause += ` AND vendedor_id = $${paramCounter}`;
-      params.push(vendedor_id);
-      paramCounter++;
+    // Params extraction
+    // logic for sales filter (uses vendedor_id usually? OR vendedor_cliente?)
+    // Sales typically has vendedor_id or vendedor_cliente.
+    // NOTE: Sales logic was: s.vendedor_id = u.rut. So Sales probably has `vendedor_id`.
+    // Let's assume Sales works for now (salesTable usually has id/rut).
+
+    // Control de acceso - Common Params
+    const filterVendedorId = (req.user.rol === 'vendedor') ? req.user.rut : (vendedor_id || null);
+
+    // Determinar col vendedor en Ventas (Moved Up for filtering)
+    let salesVendorCol = 'vendedor_id';
+    let salesGroupBy = 'vendedor_id';
+    if (salesTable) {
+      const { rows: scols } = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [salesTable]);
+      const sColSet = new Set(scols.map(c => c.column_name));
+      if (sColSet.has('vendedor_cliente')) {
+        salesVendorCol = 'vendedor_cliente';
+        salesGroupBy = 'vendedor_cliente';
+      }
     }
 
-    // Construir whereClause para ventas
-    let whereClauseVentas = whereClause;
+    // --- SALES WHERE CLAUSE ---
+    let whereClauseVentas = 'WHERE 1=1';
+    if (filterVendedorId) {
+      if (salesVendorCol === 'vendedor_cliente') {
+        // Resolve ID -> Name
+        const userRes = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE rut = $1', [filterVendedorId]);
+        console.log('[DEBUG] Looking up user for RUT:', filterVendedorId, 'Found:', userRes.rows.length);
+        if (userRes.rows.length > 0) {
+          const uName = userRes.rows[0].nombre_vendedor;
+          const uAlias = userRes.rows[0].alias;
+          console.log('[DEBUG] Resolved Name:', uName, 'Alias:', uAlias);
+          whereClauseVentas += ` AND (UPPER(TRIM(vendedor_cliente)) = UPPER(TRIM($${paramCounter}))`;
+          params.push(uName);
+          paramCounter++;
+          if (uAlias) {
+            whereClauseVentas += ` OR UPPER(TRIM(vendedor_cliente)) = UPPER(TRIM($${paramCounter}))`;
+            params.push(uAlias);
+            paramCounter++;
+          }
+          whereClauseVentas += `)`;
+        } else {
+          console.log('[DEBUG] User NOT FOUND for RUT:', filterVendedorId);
+          whereClauseVentas += ` AND 1=0`;
+        }
+      } else {
+        whereClauseVentas += ` AND ${salesVendorCol} = $${paramCounter}`;
+        params.push(filterVendedorId);
+        paramCounter++;
+      }
+    }
     if (fecha_desde) {
       whereClauseVentas += ` AND ${salesDateCol} >= $${paramCounter}`;
       params.push(fecha_desde);
       paramCounter++;
     }
-
     if (fecha_hasta) {
       whereClauseVentas += ` AND ${salesDateCol} <= $${paramCounter}`;
       params.push(fecha_hasta);
       paramCounter++;
     }
 
-    // Construir whereClause para abonos (mismos parámetros pero con fecha_abono)
-    let whereClauseAbonos = whereClause;
+    // --- ABONOS WHERE CLAUSE ---
+    let whereClauseAbonos = 'WHERE 1=1';
     const abonosParams = [];
     let abonosParamCounter = 1;
 
-    if (req.user.rol === 'vendedor') {
-      whereClauseAbonos += ` AND vendedor_id = $${abonosParamCounter}`;
-      abonosParams.push(req.user.id);
-      abonosParamCounter++;
-    } else if (vendedor_id) {
-      whereClauseAbonos += ` AND vendedor_id = $${abonosParamCounter}`;
-      abonosParams.push(vendedor_id);
-      abonosParamCounter++;
+    if (filterVendedorId) {
+      if (abonoVendorCol === 'vendedor_cliente') {
+        // Need to resolve ID -> Name
+        const userRes = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE rut = $1', [filterVendedorId]);
+        if (userRes.rows.length > 0) {
+          const uName = userRes.rows[0].nombre_vendedor;
+          const uAlias = userRes.rows[0].alias;
+          // Filter by Name OR Alias
+          whereClauseAbonos += ` AND (UPPER(TRIM(vendedor_cliente)) = UPPER(TRIM($${abonosParamCounter}))`;
+          abonosParams.push(uName);
+          abonosParamCounter++;
+
+          if (uAlias) {
+            whereClauseAbonos += ` OR UPPER(TRIM(vendedor_cliente)) = UPPER(TRIM($${abonosParamCounter}))`;
+            abonosParams.push(uAlias);
+            abonosParamCounter++;
+          }
+          whereClauseAbonos += `)`;
+        } else {
+          // User not found? Filter unlikely to match
+          whereClauseAbonos += ` AND 1=0`;
+        }
+      } else {
+        // Has ID column
+        whereClauseAbonos += ` AND ${abonoVendorCol} = $${abonosParamCounter}`;
+        abonosParams.push(filterVendedorId);
+        abonosParamCounter++;
+      }
     }
 
     if (fecha_desde) {
@@ -363,7 +435,6 @@ router.get('/comparativo', auth(), async (req, res) => {
       abonosParams.push(fecha_desde);
       abonosParamCounter++;
     }
-
     if (fecha_hasta) {
       whereClauseAbonos += ` AND ${abonoFechaCol} <= $${abonosParamCounter}`;
       abonosParams.push(fecha_hasta);
@@ -386,26 +457,9 @@ router.get('/comparativo', auth(), async (req, res) => {
         dateFormat = 'YYYY-MM';
     }
 
-    // Determinar col vendedor en Ventas
-    let salesVendorCol = 'vendedor_id';
-    let salesGroupBy = 'vendedor_id';
-    if (salesTable) {
-      const { rows: scols } = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [salesTable]);
-      const sColSet = new Set(scols.map(c => c.column_name));
-      if (sColSet.has('vendedor_cliente')) {
-        salesVendorCol = 'vendedor_cliente';
-        salesGroupBy = 'vendedor_cliente';
-      }
-    }
 
-    // Determinar col vendedor en Abonos
-    let abonoVendorCol = 'vendedor_id';
-    let abonoGroupBy = 'vendedor_id';
-    const abonoVendorColName = abonoCols.includes('vendedor_cliente') ? 'vendedor_cliente' : (abonoCols.includes('vendedor_id') ? 'vendedor_id' : null);
-    if (abonoVendorColName) {
-      abonoVendorCol = abonoVendorColName;
-      abonoGroupBy = abonoVendorColName;
-    }
+
+
 
     // Ejecutar consultas por separado
     const ventasData = salesTable ? await pool.query(`
@@ -429,6 +483,11 @@ router.get('/comparativo', auth(), async (req, res) => {
       ${whereClauseAbonos}
       GROUP BY TO_CHAR(${abonoFechaCol}, '${dateFormat}'), ${abonoGroupBy}
     `, abonosParams);
+
+    console.log('[DEBUG Comparativo] Abonos Query params:', abonosParams);
+    console.log('[DEBUG Comparativo] Abonos SQL (Approx):', `SELECT ... FROM ${abonosTable} ${whereClauseAbonos} ...`);
+    console.log('[DEBUG Comparativo] Abonos Data Rows:', abonosData.rows.length);
+    if (abonosData.rows.length > 0) console.log('[DEBUG Comparativo] Sample Abono:', abonosData.rows[0]);
 
     // Combinar resultados en memoria
     const periodoVendedorMap = new Map();
@@ -512,13 +571,19 @@ router.get('/comparativo', auth(), async (req, res) => {
           finalName = row.original_vendedor;
         }
 
+        const tVentas = parseFloat(row.total_ventas) || 0;
+        const tAbonos = parseFloat(row.total_abonos) || 0;
+
         return {
           ...row,
-          vendedor_id: finalRut,
+          vendedor_id: String(finalRut),
+          vendedor_cliente: finalName,
           vendedor_nombre: finalName,
-          diferencia: row.total_ventas - row.total_abonos,
-          porcentaje_cobrado: row.total_ventas > 0
-            ? parseFloat(((row.total_abonos / row.total_ventas) * 100).toFixed(2))
+          total_ventas: tVentas,
+          total_abonos: tAbonos,
+          diferencia: tVentas - tAbonos,
+          porcentaje_cobrado: tVentas > 0
+            ? parseFloat(((tAbonos / tVentas) * 100).toFixed(2))
             : 0
         };
       }).sort((a, b) => {
@@ -592,7 +657,7 @@ router.get('/por-vendedor', auth(), async (req, res) => {
     `, [abonosTable]);
     const abonoCols = abonoColRows.map(r => r.column_name);
     const abonoFechaCol = abonoCols.includes('fecha_abono') ? 'fecha_abono' : 'fecha';
-    const abonoMontoCol = abonoCols.includes('monto_neto') ? 'monto_neto' : (abonoCols.includes('monto') ? 'monto' : 'monto_total');
+    const abonoMontoCol = abonoCols.includes('monto') ? 'monto' : (abonoCols.includes('monto_neto') ? 'monto_neto' : 'monto_total');
 
     // Detectar columnas en tabla ventas
     let salesDateCol = 'fecha_emision';
@@ -650,7 +715,7 @@ router.get('/por-vendedor', auth(), async (req, res) => {
 
     // 4. Construir subqueries para Ventas (Corregido para usar MATCH POR NOMBRE si no hay ID)
     //    Si tabla ventas tiene columna vendedor_cliente, usaremos eso para comparar con u.nombre_vendedor
-    let ventasMatchCondition = 's.vendedor_id = u.id'; // Default (que fallaria si no existen)
+    let ventasMatchCondition = 's.vendedor_id = u.rut'; // Default (fallback to RUT)
 
     // Detectar columna de vendedor en ventas
     let salesVendorCol = null;
@@ -666,8 +731,7 @@ router.get('/por-vendedor', auth(), async (req, res) => {
       // Hybrid Match: Full Name OR Alias
       ventasMatchCondition = '(UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor)) OR UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.alias)))';
     } else if (salesVendorCol === 'vendedor_id') {
-      // Fallback: usuario no tiene id, tiene rut. Asumimos que si hay vendedor_id en ventas, es el RUT? 
-      // Ojo: usuario no tiene columna ID. 
+      // Fallback: usuario no tiene id, tiene rut. Asumimos que si hay vendedor_id en ventas, es el RUT
       ventasMatchCondition = 's.vendedor_id = u.rut';
     }
 
@@ -763,6 +827,47 @@ router.get('/tipos-pago', auth(), async (req, res) => {
       message: 'Error al obtener tipos de pago',
       error: error.message
     });
+  }
+});
+
+// Endpoint de diagnóstico rápido
+router.get('/diagnostico', auth(), async (req, res) => {
+  try {
+    const { abonosTable, salesTable } = await getDetectedTables();
+
+    // Check tables columns
+    const abonoCols = (await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [abonosTable])).rows.map(c => c.column_name);
+    const abonoMontoCol = abonoCols.includes('monto') ? 'monto' : (abonoCols.includes('monto_neto') ? 'monto_neto' : 'monto_total');
+
+    // Check User
+    const user = req.user;
+
+    // Simple Count
+    const countRes = await pool.query(`SELECT COUNT(*) as cnt, SUM(${abonoMontoCol}) as sum FROM ${abonosTable}`);
+
+    // Check specific user if Rut present
+    let specificRes = null;
+    if (user.rut) {
+      // Resolve Name
+      const uRes = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE rut = $1', [user.rut]);
+      if (uRes.rows.length > 0) {
+        const name = uRes.rows[0].nombre_vendedor;
+        specificRes = await pool.query(`SELECT COUNT(*) as cnt, SUM(${abonoMontoCol}) as sum FROM ${abonosTable} WHERE UPPER(TRIM(vendedor_cliente)) = UPPER(TRIM($1))`, [name]);
+      }
+    }
+
+    res.json({
+      success: true,
+      env: process.env.NODE_ENV,
+      user,
+      tables: { abonosTable, salesTable, abonoMontoCol },
+      globalStats: countRes.rows[0],
+      userSpecificStats: specificRes ? specificRes.rows[0] : 'No specific user stats',
+      dbConnection: 'OK'
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message, stack: error.stack });
   }
 });
 
