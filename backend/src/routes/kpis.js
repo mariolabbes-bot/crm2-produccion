@@ -197,23 +197,27 @@ router.get('/mes-actual', auth(), async (req, res) => {
       if (vendedorQuery.rows.length > 0) {
         const { nombre_vendedor, alias } = vendedorQuery.rows[0];
         if (vendedorCol === 'vendedor_cliente') {
-          // Para ventas, usar el alias si existe (ej. "Alex"), o fallback al nombre
-          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-          params = [alias || nombre_vendedor];
+          // HYBRID LOGIC: Match Alias OR Full Name
+          const safeAlias = alias || nombre_vendedor;
+          vendedorFilter = `AND (UPPER(${vendedorCol}) = UPPER($1) OR UPPER(${vendedorCol}) = UPPER($2))`;
+          params = [safeAlias, nombre_vendedor];
         } else {
           vendedorFilter = `AND ${vendedorCol} = $1`;
-          params = [nombre_vendedor];
+          params = [nombreVendedor];
         }
       }
     }
     // Si NO es manager, filtrar por sus propios datos
     else if (!isManager) {
       if (vendedorCol === 'vendedor_cliente') {
-        // Usar nombre_vendedor del token JWT
+        // Usar nombre_vendedor del token JWT y buscar Alias real en BD
         if (user.nombre_vendedor) {
-          const firstName = user.nombre_vendedor.split(' ')[0];
+          const userRes = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
+          const dbAlias = userRes.rows[0]?.alias;
+          const safeAlias = dbAlias || user.nombre_vendedor;
+
           vendedorFilter = `AND (UPPER(${vendedorCol}) = UPPER($1) OR UPPER(${vendedorCol}) = UPPER($2))`;
-          params = [user.nombre_vendedor, firstName];
+          params = [safeAlias, user.nombre_vendedor];
         }
       } else {
         vendedorFilter = `AND ${vendedorCol} = $1`;
@@ -435,8 +439,10 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         const { nombre_vendedor, alias } = vendedorQuery.rows[0];
         if (vendedorCol === 'vendedor_cliente') {
           // Usar alias para ventas (ej: "Alex")
-          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-          params = [alias || nombre_vendedor];
+          // HYBRID LOGIC: Match Alias OR Full Name
+          const safeAlias = alias || nombre_vendedor;
+          vendedorFilter = `AND (UPPER(${vendedorCol}) = UPPER($1) OR UPPER(${vendedorCol}) = UPPER($2))`;
+          params = [safeAlias, nombre_vendedor];
         } else {
           vendedorFilter = `AND ${vendedorCol} = $1`;
           params = [nombre_vendedor];
@@ -445,8 +451,13 @@ router.get('/dashboard-current', auth(), async (req, res) => {
     } else if (!isManager) {
       if (vendedorCol === 'vendedor_cliente') {
         if (user.nombre_vendedor) {
-          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-          params = [user.nombre_vendedor];
+          // Fetch alias from DB to support hybrid filter
+          const userRes = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
+          const dbAlias = userRes.rows[0]?.alias;
+          const safeAlias = dbAlias || user.nombre_vendedor;
+
+          vendedorFilter = `AND (UPPER(${vendedorCol}) = UPPER($1) OR UPPER(${vendedorCol}) = UPPER($2))`;
+          params = [safeAlias, user.nombre_vendedor];
         }
       } else {
         vendedorFilter = `AND ${vendedorCol} = $1`;
@@ -739,8 +750,13 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
     if (!isManager) {
       if (vendedorCol === 'vendedor_cliente') {
         if (user.nombre_vendedor) {
-          vendedorFilter = `AND UPPER(${vendedorCol}) = UPPER($1)`;
-          params = [user.nombre_vendedor];
+          // Fetch alias from DB to support hybrid filter
+          const userRes = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
+          const dbAlias = userRes.rows[0]?.alias;
+          const safeAlias = dbAlias || user.nombre_vendedor;
+
+          vendedorFilter = `AND (UPPER(${vendedorCol}) = UPPER($1) OR UPPER(${vendedorCol}) = UPPER($2))`;
+          params = [safeAlias, user.nombre_vendedor];
         }
       } else {
         vendedorFilter = `AND ${vendedorCol} = $1`;
@@ -1140,8 +1156,8 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
         COALESCE(s.ventas_trimestre_ant, 0) / 3 as prom_ventas_trimestre_ant,
         COALESCE(s.ventas_anio_anterior, 0) as ventas_anio_anterior
       FROM usuario u
-      LEFT JOIN sales_stats s ON UPPER(TRIM(u.alias)) = s.vendor_key
-      LEFT JOIN abono_stats a ON UPPER(TRIM(u.alias)) = a.vendor_key
+      LEFT JOIN sales_stats s ON (UPPER(TRIM(u.alias)) = s.vendor_key OR UPPER(TRIM(u.nombre_vendedor)) = s.vendor_key)
+      LEFT JOIN abono_stats a ON (UPPER(TRIM(u.alias)) = a.vendor_key OR UPPER(TRIM(u.nombre_vendedor)) = a.vendor_key)
       WHERE LOWER(u.rol_usuario) IN ('vendedor', 'manager')
       AND (u.alias IS NULL OR u.alias NOT LIKE '%_OLD')
       ORDER BY ventas_mes_actual DESC NULLS LAST

@@ -487,6 +487,10 @@ router.get('/comparativo', auth(), async (req, res) => {
         if (u.nombre_vendedor) {
           mapNameToRut[u.nombre_vendedor.toUpperCase().trim()] = u.rut;
           mapRutToName[u.rut] = u.nombre_vendedor;
+          // Add Alias to map for Hybrid Matching
+          if (u.alias) {
+            mapNameToRut[u.alias.toUpperCase().trim()] = u.rut;
+          }
         }
       });
     }
@@ -659,7 +663,8 @@ router.get('/por-vendedor', auth(), async (req, res) => {
 
     // Definir condicion de join para ventas
     if (salesVendorCol === 'vendedor_cliente') {
-      ventasMatchCondition = 'UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor))';
+      // Hybrid Match: Full Name OR Alias
+      ventasMatchCondition = '(UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor)) OR UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.alias)))';
     } else if (salesVendorCol === 'vendedor_id') {
       // Fallback: usuario no tiene id, tiene rut. Asumimos que si hay vendedor_id en ventas, es el RUT? 
       // Ojo: usuario no tiene columna ID. 
@@ -680,7 +685,8 @@ router.get('/por-vendedor', auth(), async (req, res) => {
 
     let abonoJoinCondition = 'FALSE'; // Safe default
     if (abonoVendorCol === 'vendedor_cliente') {
-      abonoJoinCondition = 'UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(a.vendedor_cliente))';
+      // Hybrid Match: Full Name OR Alias
+      abonoJoinCondition = '(UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(a.vendedor_cliente)) OR UPPER(TRIM(u.alias)) = UPPER(TRIM(a.vendedor_cliente)))';
     } else if (abonoVendorCol === 'vendedor_id') {
       abonoJoinCondition = 'u.rut = a.vendedor_id';
     }
