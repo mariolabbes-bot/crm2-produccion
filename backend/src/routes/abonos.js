@@ -58,7 +58,7 @@ router.get('/', auth(), async (req, res) => {
         a.id,
         a.folio,
         a.${fechaCol} as fecha_abono,
-        a.${montoCol} as monto,
+        (a.${montoCol} / 1.19)::numeric(15,0) as monto,
         a.tipo_pago,
         a.${clienteCol} as cliente_nombre,
         a.identificador as descripcion,
@@ -112,8 +112,7 @@ router.get('/', auth(), async (req, res) => {
 
     // Obtener el total de registros para paginación
     let countQuery = `
-      SELECT COUNT(*) as total
-  FROM ${abonosTable} a
+      SELECT COUNT(*) as total, SUM(${montoCol} / 1.19) as total_monto
       WHERE 1=1
     `;
 
@@ -219,10 +218,10 @@ router.get('/estadisticas', auth(), async (req, res) => {
     const statsQuery = `
       SELECT 
         COUNT(*) as total_abonos,
-        SUM(${montoCol}) as monto_total,
-        AVG(${montoCol}) as promedio_abono,
-        MIN(${montoCol}) as abono_minimo,
-        MAX(${montoCol}) as abono_maximo,
+        SUM(${montoCol} / 1.19) as monto_total,
+        AVG(${montoCol} / 1.19) as promedio_abono,
+        MIN(${montoCol} / 1.19) as abono_minimo,
+        MAX(${montoCol} / 1.19) as abono_maximo,
         MIN(${fechaCol}) as fecha_primera,
         MAX(${fechaCol}) as fecha_ultima
   FROM ${abonosTable} a
@@ -234,8 +233,8 @@ router.get('/estadisticas', auth(), async (req, res) => {
       SELECT 
         COALESCE(tipo_pago, 'Sin especificar') as tipo_pago,
         COUNT(*) as cantidad,
-        SUM(${montoCol}) as monto_total,
-        AVG(${montoCol})::numeric(15,2) as promedio
+        SUM(${montoCol} / 1.19) as monto_total,
+        AVG(${montoCol} / 1.19)::numeric(15,2) as promedio
   FROM ${abonosTable} a
       ${whereClause}
       GROUP BY tipo_pago
@@ -247,8 +246,8 @@ router.get('/estadisticas', auth(), async (req, res) => {
       SELECT 
         TO_CHAR(${fechaCol}, 'YYYY-MM') as mes,
         COUNT(*) as cantidad,
-        SUM(${montoCol}) as monto_total,
-        AVG(${montoCol})::numeric(15,2) as promedio
+        SUM(${montoCol} / 1.19) as monto_total,
+        AVG(${montoCol} / 1.19)::numeric(15,2) as promedio
   FROM ${abonosTable} a
       ${whereClause}
       GROUP BY TO_CHAR(${fechaCol}, 'YYYY-MM')
@@ -477,7 +476,7 @@ router.get('/comparativo', auth(), async (req, res) => {
       SELECT 
         TO_CHAR(${abonoFechaCol}, '${dateFormat}') as periodo,
         ${abonoVendorCol} as vendedor_key,
-        SUM(${abonoMontoCol}) as total_abonos,
+        SUM(${abonoMontoCol} / 1.19) as total_abonos,
         COUNT(*) as cantidad_abonos
       FROM ${abonosTable}
       ${whereClauseAbonos}
@@ -603,7 +602,7 @@ router.get('/comparativo', auth(), async (req, res) => {
 
     const abonosTotalData = await pool.query(`
       SELECT 
-        SUM(${abonoMontoCol}) as total_abonos,
+        SUM(${abonoMontoCol} / 1.19) as total_abonos,
         COUNT(*) as cantidad_abonos
       FROM ${abonosTable}
       ${whereClauseAbonos}
@@ -760,8 +759,8 @@ router.get('/por-vendedor', auth(), async (req, res) => {
         u.rut as vendedor_id,         -- Return RUT as ID for frontend compatibility
         u.nombre_vendedor as vendedor_nombre,
         COUNT(a.id) as cantidad_abonos,
-        COALESCE(SUM(a.${abonoMontoCol}), 0) as total_abonos,
-        COALESCE(AVG(a.${abonoMontoCol}), 0)::numeric(15,2) as promedio_abono,
+        COALESCE(SUM(a.${abonoMontoCol} / 1.19), 0) as total_abonos,
+        COALESCE(AVG(a.${abonoMontoCol} / 1.19), 0)::numeric(15,2) as promedio_abono,
         MIN(a.${abonoFechaCol}) as primer_abono,
         MAX(a.${abonoFechaCol}) as ultimo_abono,
         -- Ventas del vendedor

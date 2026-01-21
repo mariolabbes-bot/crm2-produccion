@@ -309,7 +309,7 @@ router.get('/mes-actual', auth(), async (req, res) => {
         }
 
         const queryAbonosMes = `
-          SELECT COALESCE(SUM(${abonoAmountCol}), 0) AS monto
+          SELECT COALESCE(SUM(${abonoAmountCol} / 1.19), 0) AS monto
           FROM abono
           WHERE TO_CHAR(${abonoDateCol}, 'YYYY-MM') = $${abonoParams.length + 1}
           ${abonoVendedorFilter}
@@ -528,7 +528,7 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         }
 
         const queryAbonosMes = `
-          SELECT COALESCE(SUM(${abonoAmountCol}), 0) AS monto
+          SELECT COALESCE(SUM(${abonoAmountCol} / 1.19), 0) AS monto
           FROM abono
           WHERE TO_CHAR(${abonoDateCol}, 'YYYY-MM') = $${abonoParams.length + 1}
           ${abonoVendedorFilter}
@@ -847,7 +847,7 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
         const queryAbonos = `
           SELECT 
             TO_CHAR(${abonoDateCol}, 'YYYY-MM') AS mes,
-            COALESCE(SUM(${abonoAmountCol}), 0) AS abonos
+            COALESCE(SUM(${abonoAmountCol} / 1.19), 0) AS abonos
           FROM abono
           ${abonoFechaFilter}
           ${abonoVendedorFilter}
@@ -1134,7 +1134,7 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
     const abonosQuery = abonosTable ? `
       SELECT 
         UPPER(TRIM(${abonoVendorCol})) as vendor_key,
-        SUM(CASE WHEN TO_CHAR(${abonoFechaCol}, 'YYYY-MM') = '${periodCurrent}' THEN ${abonoMontoCol} ELSE 0 END) as abonos_mes_actual
+        SUM(CASE WHEN TO_CHAR(${abonoFechaCol}, 'YYYY-MM') = '${periodCurrent}' THEN (${abonoMontoCol} / 1.19) ELSE 0 END) as abonos_mes_actual
       FROM ${abonosTable}
       GROUP BY UPPER(TRIM(${abonoVendorCol}))
     ` : `SELECT 'NONE' as vendor_key`;
