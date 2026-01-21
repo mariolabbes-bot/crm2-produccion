@@ -104,13 +104,27 @@ const DashboardPage = () => {
             : 0,
         });
 
-        // Evolución mensual (últimos 12 meses)
+        // Evolución mensual (Filtrar: Últimos 6 meses, SIN INCLUIR el actual)
         const evolucion = await getEvolucionMensual();
-        setEvolucionMensual(evolucion || []);
+        if (evolucion && Array.isArray(evolucion)) {
+          // Asignamos fecha actual para comparar
+          const now = new Date();
+          const currentMonthStr = now.toISOString().slice(0, 7); // YYYY-MM
 
-        // Ventas por familia de productos
-        const familias = await getVentasPorFamilia();
-        setVentasPorFamilia(familias || []);
+          // Filtramos todo lo que sea anterior al mes actual
+          const pastMonths = evolucion.filter(item => item.mes < currentMonthStr);
+
+          // Tomamos los últimos 6 de esa lista filtrada
+          const last6Months = pastMonths.slice(-6);
+
+          setEvolucionMensual(last6Months);
+        } else {
+          setEvolucionMensual([]);
+        }
+
+        // Ventas por familia de productos (DESHABILITADO POR REQUERIMIENTO)
+        // const familias = await getVentasPorFamilia();
+        setVentasPorFamilia([]);
 
         // Ranking de Vendedores
         if (isManager()) {
@@ -224,24 +238,25 @@ const DashboardPage = () => {
         </Grid>
       </Grid>
 
-      {/* Fila 2: Gráficos */}
+      {/* Fila 2: Gráfico Único de Evolución */}
       <Grid container spacing={3}>
-        {/* Evolución Mensual */}
-        <Grid item xs={12} md={8}>
+        {/* Evolución Mensual - Ancho Completo */}
+        <Grid item xs={12}>
           <ChartContainer
-            title="Evolución Mensual"
-            subtitle="Ventas y Abonos últimos 12 meses"
+            title="Evolución Mensual (Últimos 6 meses cerrados)"
+            subtitle="Comparativa Ventas vs Abonos"
             loading={loading}
-            height={350}
+            height={400}
           >
             <ResponsiveContainer width="100%" height="100%">
               {evolucionMensual.length > 0 ? (
-                <LineChart data={evolucionMensual}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <LineChart data={evolucionMensual} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
                   <XAxis
                     dataKey="mes"
                     stroke="#6B7280"
                     style={{ fontSize: '0.875rem' }}
+                    tick={{ dy: 10 }}
                   />
                   <YAxis
                     stroke="#6B7280"
@@ -249,15 +264,17 @@ const DashboardPage = () => {
                     tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
                   />
                   <Tooltip
-                    formatter={(value) => formatCurrency(value)}
+                    formatter={(value) => [formatCurrency(value), '']}
+                    labelStyle={{ color: '#111827', fontWeight: 'bold' }}
                     contentStyle={{
-                      backgroundColor: '#FFFFFF',
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
                       border: '1px solid #E5E7EB',
                       borderRadius: 8,
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                     }}
                   />
                   <Legend
-                    wrapperStyle={{ fontSize: '0.875rem' }}
+                    wrapperStyle={{ paddingTop: '20px' }}
                   />
                   <Line
                     type="monotone"
@@ -265,8 +282,9 @@ const DashboardPage = () => {
                     stroke="#10B981"
                     strokeWidth={3}
                     name="Ventas"
-                    dot={{ fill: '#10B981', r: 4 }}
-                    activeDot={{ r: 6 }}
+                    dot={{ fill: '#10B981', r: 5, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 8, strokeWidth: 0 }}
+                    animationDuration={1500}
                   />
                   <Line
                     type="monotone"
@@ -274,8 +292,9 @@ const DashboardPage = () => {
                     stroke="#3478C3"
                     strokeWidth={3}
                     name="Abonos"
-                    dot={{ fill: '#3478C3', r: 4 }}
-                    activeDot={{ r: 6 }}
+                    dot={{ fill: '#3478C3', r: 5, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 8, strokeWidth: 0 }}
+                    animationDuration={1500}
                   />
                 </LineChart>
               ) : (
@@ -283,49 +302,6 @@ const DashboardPage = () => {
                   No hay datos históricos disponibles
                 </Box>
               )}
-            </ResponsiveContainer>
-          </ChartContainer>
-        </Grid>
-
-        {/* Ventas por Familia */}
-        <Grid item xs={12} md={4}>
-          <ChartContainer
-            title="Ventas por Familia"
-            subtitle="Top 5 este mes"
-            loading={loading}
-            height={350}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ventasPorFamilia.slice(0, 5)} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis
-                  type="number"
-                  stroke="#6B7280"
-                  style={{ fontSize: '0.75rem' }}
-                  tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="familia"
-                  stroke="#6B7280"
-                  style={{ fontSize: '0.75rem' }}
-                  width={100}
-                />
-                <Tooltip
-                  formatter={(value) => formatCurrency(value)}
-                  contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: 8,
-                  }}
-                />
-                <Bar
-                  dataKey="total"
-                  fill="#E57A2D"
-                  radius={[0, 8, 8, 0]}
-                  name="Total Ventas"
-                />
-              </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
         </Grid>
