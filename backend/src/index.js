@@ -22,4 +22,12 @@ app.listen(PORT, HOST, () => {
 
   // Iniciar keep-alive service para evitar que Render se duerma
   startKeepAlive();
+
+  // Iniciar Cron Jobs de importación automática
+  try {
+    const { initCronJobs } = require('./services/cronService');
+    initCronJobs();
+  } catch (err) {
+    console.error('❌ Error iniciando Cron Service:', err);
+  }
 });
