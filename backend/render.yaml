@@ -16,5 +16,7 @@ services:
         sync: false  # Configurar manualmente con clave secreta fuerte
       - key: CORS_ORIGINS
         sync: false  # Configurar con tu URL de Vercel, ej: https://tu-app.vercel.app
+      - key: SMTP_URL
+        sync: false  # Configurar con URL SMTP (ej: smtps://user:pass@smtp.gmail.com)
     healthCheckPath: /api/health
     autoDeploy: true
