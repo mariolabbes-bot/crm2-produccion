@@ -24,6 +24,7 @@ import ClientManager from './components/ClientManager';
 // Pages
 import DashboardPage from './pages/DashboardPage';
 import ClientesPage from './pages/ClientesPage';
+import ProductsPage from './pages/ProductsPage'; // Nueva página
 import ClientDetailPage from './pages/ClientDetailPage';
 import AssistantPage from './pages/AssistantPage';
 
@@ -44,6 +45,7 @@ const App = () => {
                             <Route path="/" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
                                 <Route index element={<DashboardPage />} />
                                 <Route path="clientes" element={<ClientesPage />} />
+                                <Route path="productos" element={<ProductsPage />} /> {/* Nueva Ruta */}
                                 <Route path="cliente/:rut" element={<ClientDetailPage />} />
                                 <Route path="assistant" element={<AssistantPage />} />
                             </Route>

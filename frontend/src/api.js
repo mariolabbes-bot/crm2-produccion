@@ -100,8 +100,12 @@ export const getVentasPorFamilia = () => apiFetch(`${API_URL}/kpis/ventas-por-fa
 export const getSaldoCreditoTotal = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   const url = `${API_URL}/kpis/saldo-credito-total${qs ? `?${qs}` : ''}`;
+  const url = `${API_URL}/kpis/saldo-credito-total${qs ? `?${qs}` : ''}`;
   return apiFetch(url);
 };
+
+// PRODUCT ANALYTICS
+export const getProductKpis = () => apiFetch(`${API_URL}/product-analytics/kpis`);
 
 export const getRankingVendedores = () => apiFetch(`${API_URL}/kpis/ranking-vendedores`);
 
