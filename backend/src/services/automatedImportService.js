@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { processSalesFileAsync } = require('./importers/ventas');
 const { processAbonosFileAsync } = require('./importers/abonos');
-const { processClientsFileAsync } = require('./importers/clientes'); // Assuming this exists, will verify
+const { processClientsFileAsync } = require('./importers/clientes');
+const { processSaldoCreditoFileAsync } = require('./importers/saldo_credito');
 const { sendEmail } = require('../providers/emailProvider');
 
 const AUTO_IMPORT_DIR = path.join(__dirname, '../../uploads/auto_import');
@@ -32,9 +33,9 @@ const runAutoImport = async () => {
         errors: []
     };
 
-    // Sort files to process roughly in order ? Maybe Clients first, then Sales/Abonos
-    // Priority: Clientes -> Ventas -> Abonos
-    const sortOrder = { 'cliente': 1, 'venta': 2, 'abono': 3 };
+    // Sort files to process roughly in order
+    // Priority: Clientes -> Ventas -> Abonos -> Saldo Credito (Snapshot)
+    const sortOrder = { 'cliente': 1, 'venta': 2, 'abono': 3, 'credito': 4 };
     files.sort((a, b) => {
         const typeA = getType(a);
         const typeB = getType(b);
@@ -53,7 +54,7 @@ const runAutoImport = async () => {
             console.log(`🤖 [AutoImport] Procesando ${file} (Tipo: ${type || 'Unknown'})...`);
 
             if (!type) {
-                throw new Error('No se pudo determinar el tipo de archivo por el nombre (debe iniciar con ventas, abonos o clientes)');
+                throw new Error('No se pudo determinar el tipo de archivo por el nombre (debe incluir: ventas, abonos, clientes o saldo)');
             }
 
             let result = null;
@@ -62,12 +63,13 @@ const runAutoImport = async () => {
             } else if (type === 'abono') {
                 result = await processAbonosFileAsync(jobId, filePath, file, { updateMissing: true });
             } else if (type === 'cliente') {
-                // If clients importer doesn't exist yet, we might skip or use generic
                 if (processClientsFileAsync) {
                     result = await processClientsFileAsync(jobId, filePath, file);
                 } else {
                     throw new Error('Importador de clientes no configurado aún');
                 }
+            } else if (type === 'credito') {
+                result = await processSaldoCreditoFileAsync(jobId, filePath, file);
             }
 
             fileRes.status = 'success';
@@ -114,6 +116,8 @@ const getType = (filename) => {
     if (lower.includes('venta') || lower.includes('sales')) return 'venta';
     if (lower.includes('abono') || lower.includes('payment')) return 'abono';
     if (lower.includes('cliente') || lower.includes('client')) return 'cliente';
+    // 'saldo' usually sufficient for 'saldo_credito' or 'saldo credito'
+    if (lower.includes('saldo') || lower.includes('credito') || lower.includes('deuda')) return 'credito';
     return null;
 };
 
@@ -136,7 +140,7 @@ const sendSummaryEmail = async (report) => {
         html += `<strong>${icon} ${f.filename}</strong> (${f.type})`;
         if (f.status === 'success') {
             const d = f.details || {};
-            html += `<br/><small>Importados: ${d.imported || 0}, Duplicados: ${d.duplicates || 0}, Observaciones: ${(d.missingVendors || []).length + (d.missingClients || []).length}</small>`;
+            html += `<br/><small>Importados: ${d.imported || d.inserted || 0}, Duplicados: ${d.duplicates || 0}, Observaciones: ${(d.missingVendors || []).length + (d.missingClients || []).length}</small>`;
             if (d.pendingReportUrl || d.observationsReportUrl) {
                 html += `<br/><small><i>(Se generaron reportes Excel, revisar en sistema)</i></small>`;
             }
