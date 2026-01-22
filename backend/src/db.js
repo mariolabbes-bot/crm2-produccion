@@ -6,7 +6,7 @@ const isLocal = connStr && (connStr.includes('localhost') || connStr.includes('1
 
 const pool = new Pool({
   connectionString: connStr,
-  ssl: isLocal ? false : { rejectUnauthorized: false },
+  ssl: (isLocal || process.env.DB_SSL === 'false') ? false : { rejectUnauthorized: false },
   connectionTimeoutMillis: 5000,
   idleTimeoutMillis: 30000,
   max: 20

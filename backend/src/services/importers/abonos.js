@@ -39,7 +39,7 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         // Headers specific handling for duplicates (Identificador)
         // XLSX usually dedupes headers as 'Identificador', 'Identificador_1'
-        const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i]);
+        const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i, /^Identificador.*cliente$/i]);
         const colIdentificadorAbono = findCol([/^Identificador_1$/i, /^Identificador.*abono/i, /^Identificador.*2$/i]);
 
         const colSucursal = findCol([/^Sucursal$/i]);

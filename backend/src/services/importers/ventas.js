@@ -43,7 +43,7 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
         const colDescripcion = findCol([/^Descripc/i]);
         const colCantidad = findCol([/^Cantidad$/i]);
         const colPrecio = findCol([/^Precio$/i]);
-        const colValorTotal = findCol([/^Valor.*total$/i, /^Total$/i]);
+        const colValorTotal = findCol([/^Valor.*total$/i, /^Total$/i, /^vebtas$/i]);
 
         if (!colFolio || !colTipoDoc || !colFecha) {
             const faltantes = [
@@ -57,14 +57,14 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
         // --- 1. Cargar Usuarios/Vendedores (ALIAS -> NOMBRE COMPLETO) ---
         // We now map everything to the Full Name (nombre_vendedor) to ensure standardisation
         const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario");
-        const aliasMap = new Map(); // Lowercase -> Full Name (Standard)
+        const aliasMap = new Map(); // Lowercase -> Alias (Standard for FK)
         usersRes.rows.forEach(u => {
-            const fullName = u.nombre_vendedor; // Use Full Name as the truth
+            const alias = u.alias || u.nombre_vendedor; // Fallback to name if no alias
             if (u.alias) {
-                aliasMap.set(u.alias.toLowerCase().trim(), fullName);
+                aliasMap.set(u.alias.toLowerCase().trim(), alias);
             }
             if (u.nombre_vendedor) {
-                aliasMap.set(u.nombre_vendedor.toLowerCase().trim(), fullName);
+                aliasMap.set(u.nombre_vendedor.toLowerCase().trim(), alias);
             }
         });
 

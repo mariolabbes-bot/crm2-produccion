@@ -40,19 +40,98 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
             throw new Error('Faltan columnas requeridas: RUT, Nombre');
         }
 
+        // --- PRE-IMPORT: LOAD VENDOR ALIAS MAP ---
+        const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario");
+        const aliasMap = new Map();
+        usersRes.rows.forEach(u => {
+            const fullName = u.nombre_vendedor;
+            if (u.alias) aliasMap.set(u.alias.toLowerCase().trim(), fullName);
+            if (u.nombre_vendedor) aliasMap.set(u.nombre_vendedor.toLowerCase().trim(), fullName);
+        });
+
+        // --- LOAD VENDOR MAPPING CSV (NORMALIZATION) ---
+        const mapPath = path.join(__dirname, '../../../outputs/mapeo_vendedores.csv');
+        const normalizationMap = new Map();
+        if (fs.existsSync(mapPath)) {
+            try {
+                const csvData = fs.readFileSync(mapPath, 'utf8');
+                const lines = csvData.split(/\r?\n/);
+                // CSV Header: RUT_USUARIO;NOMBRE_USUARIO_LOGIN;CORREO;ASIGNAR_NOMBRE_VENTAS_EXACTO
+                // We map Index 1 (Original) -> Index 3 (Target)
+
+                lines.forEach((line, idx) => {
+                    if (!line.trim() || idx === 0) return;
+                    const cols = line.split(';');
+                    if (cols.length >= 4) {
+                        const original = cols[1];
+                        const target = cols[3];
+                        if (original && target) {
+                            normalizationMap.set(original.toLowerCase().trim(), target.trim());
+                            // Heuristic: If original has 'ñ', also add the '√±' version just in case
+                            if (original.includes('ñ')) {
+                                const bad = original.replace(/ñ/g, '√±');
+                                normalizationMap.set(bad.toLowerCase().trim(), target.trim());
+                            }
+                        }
+                    }
+                });
+                console.log(`🗺️ [Job ${jobId}] Cargado mapa de normalización: ${normalizationMap.size} entradas`);
+            } catch (err) {
+                console.warn(`⚠️ [Job ${jobId}] Error cargando mapa de vendedores: ${err.message}`);
+            }
+        }
+
+        // --- PRE-SCAN FOR MISSING VENDORS (STUBS) ---
+        const newAliases = new Set();
+        if (colVendedor) {
+            for (const row of data) {
+                const v = row[colVendedor];
+                if (v) {
+                    let s = String(v).trim();
+                    // Apply Normalization
+                    if (normalizationMap.has(s.toLowerCase())) {
+                        s = normalizationMap.get(s.toLowerCase());
+                    }
+                    if (!aliasMap.has(s.toLowerCase())) newAliases.add(s);
+                }
+            }
+        }
+        if (newAliases.size > 0) {
+            for (const originalAlias of newAliases) {
+                try {
+                    const dummyRut = `STUB-${Math.floor(Math.random() * 100000000)}-${Date.now()}`;
+                    await client.query(`
+                        INSERT INTO usuario (rut, nombre_completo, nombre_vendedor, rol_usuario, password, alias)
+                        VALUES ($1, $2, $2, 'VENDEDOR', '123456', $2)
+                        ON CONFLICT (rut) DO NOTHING
+                     `, [dummyRut.slice(0, 12), originalAlias]);
+                    aliasMap.set(originalAlias.toLowerCase(), originalAlias);
+                } catch (e) { console.warn(e.message); }
+            }
+        }
+
         const toImport = [];
         const observations = [];
         let skippedInvalid = 0;
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const excelRow = i + 2;
             const rut = row[colRUT] ? String(row[colRUT]).trim() : null;
             const nombre = row[colNombre] ? String(row[colNombre]).trim() : null;
 
             if (!rut || !nombre) {
                 skippedInvalid++;
                 continue;
+            }
+
+            let finalVendedor = null;
+            if (colVendedor && row[colVendedor]) {
+                let rawV = String(row[colVendedor]).trim();
+                // Apply Normalization
+                if (normalizationMap.has(rawV.toLowerCase())) {
+                    rawV = normalizationMap.get(rawV.toLowerCase());
+                }
+                finalVendedor = aliasMap.get(rawV.toLowerCase()) || rawV;
             }
 
             toImport.push({
@@ -66,7 +145,7 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                 ciudad: colCiudad && row[colCiudad] ? String(row[colCiudad]).trim() : null,
                 direccion: colDireccion && row[colDireccion] ? String(row[colDireccion]).trim() : null,
                 numero: colNumero && row[colNumero] ? String(row[colNumero]).trim() : null,
-                vendedor: colVendedor && row[colVendedor] ? String(row[colVendedor]).trim() : null
+                vendedor: finalVendedor
             });
         }
 

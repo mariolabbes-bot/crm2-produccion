@@ -269,9 +269,11 @@ router.get('/mes-actual', auth(), async (req, res) => {
       let abonoDateCol = null;
       let abonoVendedorCol = null;
 
-      if (abonoCols.has('monto_neto')) abonoAmountCol = 'monto_neto';
-      else if (abonoCols.has('monto')) abonoAmountCol = 'monto';
-      else if (abonoCols.has('monto_abono')) abonoAmountCol = 'monto_abono';
+      let abonoAmountExpr = null;
+      if (abonoCols.has('monto_neto')) abonoAmountExpr = 'COALESCE(monto_neto, monto / 1.19)';
+      else if (abonoCols.has('monto')) abonoAmountExpr = 'monto / 1.19';
+      else if (abonoCols.has('monto_abono')) abonoAmountExpr = 'monto_abono / 1.19';
+      else if (abonoCols.has('monto_total')) abonoAmountExpr = 'monto_total / 1.19';
 
       if (abonoCols.has('fecha_abono')) abonoDateCol = 'fecha_abono';
       else if (abonoCols.has('fecha')) abonoDateCol = 'fecha';
@@ -279,7 +281,7 @@ router.get('/mes-actual', auth(), async (req, res) => {
       if (abonoCols.has('vendedor_id')) abonoVendedorCol = 'vendedor_id';
       else if (abonoCols.has('vendedor_cliente')) abonoVendedorCol = 'vendedor_cliente';
 
-      if (abonoAmountCol && abonoDateCol) {
+      if (abonoAmountExpr && abonoDateCol) {
         let abonoVendedorFilter = '';
         let abonoParams = [];
 
@@ -309,7 +311,7 @@ router.get('/mes-actual', auth(), async (req, res) => {
         }
 
         const queryAbonosMes = `
-          SELECT COALESCE(SUM(${abonoAmountCol} / 1.19), 0) AS monto
+          SELECT COALESCE(SUM(${abonoAmountExpr}), 0) AS monto
           FROM abono
           WHERE TO_CHAR(${abonoDateCol}, 'YYYY-MM') = $${abonoParams.length + 1}
           ${abonoVendedorFilter}
@@ -500,11 +502,16 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       const abonoColsQ = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = 'abono'`);
       const abonoCols = new Set(abonoColsQ.rows.map(r => r.column_name));
 
-      let abonoAmountCol = abonoCols.has('monto_neto') ? 'monto_neto' : (abonoCols.has('monto') ? 'monto' : (abonoCols.has('monto_abono') ? 'monto_abono' : null));
+      let abonoAmountExpr = null;
+      if (abonoCols.has('monto_neto')) abonoAmountExpr = 'COALESCE(monto_neto, monto / 1.19)';
+      else if (abonoCols.has('monto')) abonoAmountExpr = 'monto / 1.19';
+      else if (abonoCols.has('monto_abono')) abonoAmountExpr = 'monto_abono / 1.19';
+      else if (abonoCols.has('monto_total')) abonoAmountExpr = 'monto_total / 1.19';
+
       let abonoDateCol = abonoCols.has('fecha_abono') ? 'fecha_abono' : (abonoCols.has('fecha') ? 'fecha' : null);
       let abonoVendedorCol = abonoCols.has('vendedor_id') ? 'vendedor_id' : (abonoCols.has('vendedor_cliente') ? 'vendedor_cliente' : null);
 
-      if (abonoAmountCol && abonoDateCol) {
+      if (abonoAmountExpr && abonoDateCol) {
         let abonoVendedorFilter = '';
         let abonoParams = [];
 
@@ -528,7 +535,7 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         }
 
         const queryAbonosMes = `
-          SELECT COALESCE(SUM(${abonoAmountCol} / 1.19), 0) AS monto
+          SELECT COALESCE(SUM(${abonoAmountExpr}), 0) AS monto
           FROM abono
           WHERE TO_CHAR(${abonoDateCol}, 'YYYY-MM') = $${abonoParams.length + 1}
           ${abonoVendedorFilter}
@@ -1061,8 +1068,10 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
     if (abonosTable) {
       const acols = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = $1`, [abonosTable]);
       const cols = new Set(acols.rows.map(c => c.column_name));
-      if (cols.has('monto_neto')) abonoMontoCol = 'monto_neto';
+      if (cols.has('monto')) abonoMontoCol = 'monto';
+      else if (cols.has('monto_neto')) abonoMontoCol = 'monto_neto';
       else if (cols.has('monto_abono')) abonoMontoCol = 'monto_abono';
+      else if (cols.has('monto_total')) abonoMontoCol = 'monto_total';
 
       if (cols.has('fecha_abono')) abonoFechaCol = 'fecha_abono';
 
