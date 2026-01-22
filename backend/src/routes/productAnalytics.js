@@ -66,26 +66,26 @@ router.get('/kpis', auth(), async (req, res) => {
             };
         };
 
-        // 1. LUBRICANTES (Litros)
-        // Match familia 'LUBRICANTES' (case insensitive just in case, though usually uppercase in DB)
+        // 1. LUBRICANTES (Fallback a Cantidad si litros es 0, o idealmente v.litros_vendidos si estuviara poblado)
+        // Como descubrimos que LITROS es nulo, reportaremos Unidades por ahora para que se muevan las agujas.
         const kpiLubricantes = await getKpiData(
-            'Litros Lubricantes',
-            'v.litros_vendidos',
+            'Lubricantes (Unid.)',
+            'v.cantidad',
             "UPPER(p.familia) = 'LUBRICANTES'"
         );
 
-        // 2. TBR APLUS (Unidades)
+        // 2. TBR APLUS (Unidades) - Fix: LIKE
         const kpiTbrAplus = await getKpiData(
             'Unidades TBR Aplus',
             'v.cantidad',
-            "UPPER(p.subfamilia) = 'TBR' AND UPPER(p.marca) = 'APLUS'"
+            "UPPER(p.subfamilia) LIKE '%TBR%' AND UPPER(p.marca) = 'APLUS'"
         );
 
-        // 3. PCR APLUS (Unidades)
+        // 3. PCR APLUS (Unidades) - Fix: LIKE
         const kpiPcrAplus = await getKpiData(
             'Unidades PCR Aplus',
             'v.cantidad',
-            "UPPER(p.subfamilia) = 'PCR' AND UPPER(p.marca) = 'APLUS'"
+            "UPPER(p.subfamilia) LIKE '%PCR%' AND UPPER(p.marca) = 'APLUS'"
         );
 
         // 4. REENCAUCHE (Unidades)
@@ -102,7 +102,7 @@ router.get('/kpis', auth(), async (req, res) => {
                 lastYear: lastYearMonth
             },
             kpis: [
-                { ...kpiLubricantes, id: 'lubricantes', unit: 'Lts' },
+                { ...kpiLubricantes, id: 'lubricantes', unit: 'Un' }, // Cambiado a Un
                 { ...kpiTbrAplus, id: 'tbr_aplus', unit: 'Un' },
                 { ...kpiPcrAplus, id: 'pcr_aplus', unit: 'Un' },
                 { ...kpiReencauche, id: 'reencauche', unit: 'Un' }
