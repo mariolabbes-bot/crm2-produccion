@@ -567,33 +567,7 @@ router.get('/por-vendedor', auth(), async (req, res) => {
 });
 
 module.exports = router;
-const result = await pool.query(query, params);
 
-// Calcular porcentajes y agregar métricas
-const vendedoresConMetricas = result.rows.map(v => ({
-  ...v,
-  // Ensure numeric types for safety
-  total_ventas: parseFloat(v.total_ventas || 0),
-  total_abonos: parseFloat(v.total_abonos || 0),
-  porcentaje_cobrado: parseFloat(v.total_ventas) > 0
-    ? ((parseFloat(v.total_abonos) / parseFloat(v.total_ventas)) * 100).toFixed(2)
-    : '0.00',
-  saldo_pendiente: (parseFloat(v.total_ventas || 0) - parseFloat(v.total_abonos || 0)).toFixed(2)
-}));
-
-res.json({
-  success: true,
-  data: vendedoresConMetricas
-});
-  } catch (error) {
-  console.error('Error obteniendo abonos por vendedor:', error);
-  res.status(500).json({
-    success: false,
-    message: 'Error al obtener información',
-    error: error.message
-  });
-}
-});
 
 // GET /api/abonos/tipos-pago - Lista de tipos de pago disponibles
 router.get('/tipos-pago', auth(), async (req, res) => {
