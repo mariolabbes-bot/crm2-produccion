@@ -1,15 +1,40 @@
 services:
+  # Servicio Web (Backend API)
   - type: web
     name: crm2-backend
     env: node
-    region: oregon
     plan: free
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    rootDirectory: backend
+    buildCommand: npm install && npm rebuild bcryptjs --build-from-source
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
         sync: false
-      - key: PORT
-        value: 10000
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SMTP_URL
+        sync: false
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+  # Servicio Worker (Background Jobs)
+  - type: worker
+    name: crm2-worker
+    env: node
+    plan: free
+    rootDirectory: backend
+    buildCommand: npm install && npm rebuild bcryptjs --build-from-source
+    startCommand: npm run worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false

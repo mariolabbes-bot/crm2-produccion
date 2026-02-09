@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { updateJobStatus } = require('../jobManager');
 const { norm, parseExcelDate, parseNumeric } = require('./utils');
+const { resolveVendorName } = require('../../utils/vendorAlias'); // Standard Vendor Resolution
 
 async function processAbonosFileAsync(jobId, filePath, originalname, options = {}) {
     const client = await pool.connect();
@@ -23,8 +24,7 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         console.log(`📊 Total filas: ${data.length}`);
         if (!Array.isArray(data) || data.length === 0) throw new Error('Excel vacío');
 
-        // Robust header detection: scan first 50 rows to find all potential keys
-        // (XLSX fails to include keys for empty cells in the first row)
+        // Robust header detection
         const scanLimit = Math.min(data.length, 50);
         const headersSet = new Set();
         for (let i = 0; i < scanLimit; i++) {
@@ -37,11 +37,9 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         const colFecha = findCol([/^Fecha$/i, /Fecha.*abono/i, /Fecha/i]);
         const colMonto = findCol([/^Monto$/i]); // This is the TOTAL amount column in Excel
 
-        // Headers specific handling for duplicates (Identificador)
-        // XLSX usually dedupes headers as 'Identificador', 'Identificador_1'
+        // Headers specific handling
         const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i, /^Identificador.*cliente$/i]);
         const colIdentificadorAbono = findCol([/^Identificador_1$/i, /^Identificador.*abono/i, /^Identificador.*2$/i]);
-
         const colSucursal = findCol([/^Sucursal$/i]);
         const colCliente = findCol([/^Cliente$/i]);
         const colVendedorCliente = findCol([/^Vendedor.*clie/i, /^Vendedor/i]);
@@ -54,36 +52,20 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         const colEstadoAbono = findCol([/^Estado.*abono$/i]);
         const colFechaVencimiento = findCol([/^Fecha.*vencir/i, /^Fecha.*vencimiento$/i]);
 
-        console.log('--- Debug Columns ---');
-        console.log('Headers:', headers);
-        console.log('colIdentificadorAbono detected:', colIdentificadorAbono);
-        console.log('colFolio:', colFolio);
-        console.log('---------------------');
-
         if (!colFolio || !colFecha || !colMonto) {
             throw new Error(`Faltan columnas requeridas: Folio, Fecha, Monto`);
         }
 
-        // --- 1. Usarios map (Alias -> Full Name) ---
-        const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario");
-        const aliasMap = new Map();
-        usersRes.rows.forEach(u => {
-            const fullName = u.nombre_vendedor;
-            if (u.alias) aliasMap.set(u.alias.toLowerCase().trim(), fullName);
-            if (u.nombre_vendedor) aliasMap.set(u.nombre_vendedor.toLowerCase().trim(), fullName);
-        });
+        // --- 1. Client Cache ---
+        const clientsRes = await client.query("SELECT rut FROM cliente");
+        const clientsByRut = new Set(clientsRes.rows.filter(c => c.rut).map(c => norm(c.rut)));
 
-        // --- 2. Client map ---
-        const clientsRes = await client.query("SELECT rut, nombre FROM cliente");
-        const clientsByRut = new Map(clientsRes.rows.filter(c => c.rut).map(c => [norm(c.rut), c.rut]));
-
-        // --- 3. Existing abonos logic ---
-        const existingAbonos = await client.query(`SELECT id, folio, fecha, identificador_abono, identificador, cliente, vendedor_cliente FROM abono WHERE folio IS NOT NULL`);
-        const existingByFolio = new Map();
+        // --- 2. Existing abonos logic (for split payments/duplicates) ---
+        // Fetch existing keys to avoid collisions
+        const existingAbonos = await client.query(`SELECT folio, fecha, identificador_abono FROM abono WHERE folio IS NOT NULL`);
         const existingKeys = new Set();
         existingAbonos.rows.forEach(a => {
             const f = norm(a.folio || '');
-            existingByFolio.set(f, a);
             const d = new Date(a.fecha);
             const dateStr = !isNaN(d) ? d.toISOString().split('T')[0] : '';
             const key = `${f}|${dateStr}|${norm(a.identificador_abono || '')}`;
@@ -91,49 +73,17 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         });
 
         const toImport = [];
-        const duplicates = [];
-        // Missing sets
-        const missingVendors = new Set();
-        const missingClients = new Set();
         const observations = [];
-        const updates = [];
-        let updatedMissing = 0;
-        const updatedDetails = [];
-
-        // Pre-scan for stubs (Vendors)
-        const newAliases = new Set();
-        const processedKeys = new Set(); // Track keys processed in this batch to handle split payments
-        const scanVendor = (val) => {
-            if (!val) return;
-            const s = String(val).trim();
-            if (s && !aliasMap.has(s.toLowerCase())) {
-                newAliases.add(s);
-            }
-        };
-        for (const r of data) {
-            if (colVendedorCliente && r[colVendedorCliente]) scanVendor(r[colVendedorCliente]);
-        }
-        if (newAliases.size > 0) {
-            console.log(`🛠️ [Job ${jobId}] Creando ${newAliases.size} stubs de vendedor (Abonos)...`);
-            for (const originalAlias of newAliases) {
-                try {
-                    const dummyRut = `STUB-${Math.floor(Math.random() * 100000000)}-${Date.now()}`;
-                    await client.query(`INSERT INTO usuario (rut, nombre_completo, nombre_vendedor, rol_usuario, password, alias) VALUES ($1, $2, $2, 'VENDEDOR', '123456', $2) ON CONFLICT (rut) DO NOTHING`, [dummyRut.slice(0, 12), originalAlias]);
-                    aliasMap.set(originalAlias.toLowerCase(), originalAlias);
-                } catch (e) {
-                    console.warn(`Could not create stub for alias ${originalAlias}: ${e.message}`);
-                }
-            }
-        }
+        const processedKeys = new Set();
+        const missingClients = new Set();
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const excelRow = i + 2;
             const folio = row[colFolio] ? String(row[colFolio]).trim() : null;
             const fecha = parseExcelDate(row[colFecha]);
+            const montoExcel = parseNumeric(row[colMonto]);
 
             // Logic: Monto in Excel is Total. We need Net -> Monto / 1.19
-            const montoExcel = parseNumeric(row[colMonto]);
             const montoNetoCalc = montoExcel ? Math.round(montoExcel / 1.19) : 0;
 
             if (!folio || !fecha || !montoExcel) continue;
@@ -149,27 +99,22 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
                     if (!missingClients.has(rutNorm)) {
                         try {
                             await client.query("INSERT INTO cliente (rut, nombre) VALUES ($1, $2) ON CONFLICT (rut) DO NOTHING", [identificador, clienteNombre || 'Unknown']);
-                            clientsByRut.set(rutNorm, identificador);
-                            missingClients.add(rutNorm);
-                        } catch (e) { console.error(e); }
+                            clientsByRut.add(rutNorm);
+                        } catch (e) {
+                            observations.push({ fila: i + 2, campo: 'Cliente', detalle: `Error creando stub cliente: ${e.message}` });
+                        }
                     }
                 }
             }
 
-            const vendedorClienteAlias = colVendedorCliente && row[colVendedorCliente] ? String(row[colVendedorCliente]).trim() : null;
-
-            // Resolve Vendor
+            // VENDOR RESOLUTION
+            const rawVendor = colVendedorCliente && row[colVendedorCliente] ? String(row[colVendedorCliente]).trim() : null;
             let vendedorNombre = null;
-            if (vendedorClienteAlias) {
-                const lower = vendedorClienteAlias.toLowerCase();
-                if (aliasMap.has(lower)) vendedorNombre = aliasMap.get(lower);
-                else {
-                    // Should be covered by pre-scan but just in case
-                    missingVendors.add(vendedorClienteAlias);
-                }
+            if (rawVendor) {
+                // Use Standard Resolution
+                vendedorNombre = await resolveVendorName(rawVendor);
             }
 
-            // ... (rest of logic mostly same)
             const cajaOperacion = colCajaOperacion && row[colCajaOperacion] ? String(row[colCajaOperacion]).trim() : null;
             const usuarioIngreso = colUsuarioIngreso && row[colUsuarioIngreso] ? String(row[colUsuarioIngreso]).trim() : null;
             const montoTotalExcel = colMontoTotal ? parseNumeric(row[colMontoTotal]) : null;
@@ -180,22 +125,14 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             const identificadorAbono = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : '';
             const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
 
-            if (i < 5) {
-                console.log(`Row ${i} - Folio: ${folio} - ID Abono Raw: ${row[colIdentificadorAbono]} - ID Extracted: ${identificadorAbono}`);
-            }
-
-            let clienteRut = null;
-            if (identificador && /^\d{7,8}-[\dkK]$/.test(identificador) && clientsByRut.has(norm(identificador))) clienteRut = identificador;
-
-            // ... (check dup, push)
-
+            // Deduplication / Key Generation
             const folioNorm = norm(folio);
             const rawId = norm(identificadorAbono || '');
             let finalKey = `${folioNorm}|${fecha}|${rawId}`;
             let idAbonoFinal = identificadorAbono || '';
 
             if (processedKeys.has(finalKey)) {
-                // Intra-batch duplicate
+                // Intra-batch duplicate logic
                 let dupIndex = 1;
                 while (true) {
                     const suffix = `_${dupIndex}`;
@@ -215,32 +152,18 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             processedKeys.add(finalKey);
             existingKeys.add(finalKey);
 
-
-
-
             toImport.push({
-                sucursal, folio, fecha, identificador: clienteRut, clienteNombre, vendedorClienteNombre: vendedorNombre,
+                sucursal, folio, fecha, identificador, clienteNombre, vendedorClienteNombre: vendedorNombre,
                 cajaOperacion, usuarioIngreso, montoTotal: montoTotalExcel, saldoFavor, saldoFavorTotal, tipoPago,
                 estadoAbono, identificadorAbono: idAbonoFinal, fechaVencimiento, monto: montoExcel, montoNeto: montoNetoCalc
             });
         }
 
-        // Reports
-        let pendingReportPath = null;
-        if (missingVendors.size > 0 || missingClients.size > 0) {
-            const reportWB = XLSX.utils.book_new();
-            if (missingVendors.size > 0) XLSX.utils.book_append_sheet(reportWB, XLSX.utils.json_to_sheet(Array.from(missingVendors).map(v => ({ 'Alias Vendedor': v }))), 'Vendedores Faltantes');
-            if (missingClients.size > 0) XLSX.utils.book_append_sheet(reportWB, XLSX.utils.json_to_sheet(Array.from(missingClients).map(c => ({ 'Cliente': c }))), 'Clientes Faltantes');
-            const reportDir = 'uploads/reports';
-            if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
-            pendingReportPath = path.join(reportDir, `faltantes_abonos_${jobId}.xlsx`);
-            XLSX.writeFile(reportWB, pendingReportPath);
-        }
-
         let importedCount = 0;
         if (toImport.length > 0) {
-            console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos (Row-by-Row)...`);
+            console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos (Standardized)...`);
 
+            // Using Row-by-Row to support detailed error reporting and ON CONFLICT handling
             for (let i = 0; i < toImport.length; i++) {
                 const item = toImport[i];
                 const query = `
@@ -270,33 +193,7 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
                     observations.push({ fila: i + 2, folio: item.folio, campo: 'DB', detalle: err.detail || err.message });
                 }
 
-                if (i % 100 === 0) console.log(`   [Progress] ${i} / ${toImport.length}`);
-            }
-        }
-
-        // Updates
-        let updatedReportPath = null;
-        if (updates.length > 0) {
-            console.log(`🛠️ [Job ${jobId}] Aplicando ${updates.length} updates...`);
-            for (const u of updates) {
-                try {
-                    const beforeRes = await client.query('SELECT identificador, cliente, vendedor_cliente FROM abono WHERE id=$1', [u.id]);
-                    const before = beforeRes.rows[0] || {};
-                    await client.query(`UPDATE abono SET identificador = COALESCE($2, identificador), cliente = COALESCE($3, cliente), vendedor_cliente = COALESCE($4, vendedor_cliente) WHERE id = $1`, [u.id, u.identificador, u.clienteNombre, u.vendedorClienteNombre]);
-                    const afterRes = await client.query('SELECT identificador, cliente, vendedor_cliente FROM abono WHERE id=$1', [u.id]);
-                    const after = afterRes.rows[0] || {};
-                    updatedDetails.push({ folio: u.folio, identificador_antes: before.identificador, identificador_despues: after.identificador, vendedor_antes: before.vendedor_cliente, vendedor_despues: after.vendedor_cliente });
-                } catch (e) {
-                    observations.push({ fila: null, folio: u.folio, campo: 'UPDATE', detalle: e.message });
-                }
-            }
-            if (updatedDetails.length > 0) {
-                const wbUpd = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wbUpd, XLSX.utils.json_to_sheet(updatedDetails), 'Actualizados');
-                const reportDir = 'uploads/reports';
-                if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
-                updatedReportPath = path.join(reportDir, `actualizados_abonos_${jobId}.xlsx`);
-                XLSX.writeFile(wbUpd, updatedReportPath);
+                if (i % 500 === 0 && i > 0) console.log(`   [Job ${jobId}] Progress: ${i} / ${toImport.length}`);
             }
         }
 
@@ -312,21 +209,19 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         const result = {
             success: true,
-            totalRows: data.length, toImport: toImport.length, imported: importedCount, duplicates: duplicates.length,
-            missingVendors: Array.from(missingVendors), missingClients: Array.from(missingClients),
-            pendingReportUrl: pendingReportPath ? `/api/import/download-report/${path.basename(pendingReportPath)}` : null,
+            totalRows: data.length,
+            toImport: toImport.length,
+            imported: importedCount,
             observationsReportUrl: observationsReportPath ? `/api/import/download-report/${path.basename(observationsReportPath)}` : null,
-            updatedReportUrl: updatedReportPath ? `/api/import/download-report/${path.basename(updatedReportPath)}` : null,
-            updatedMissing,
             dataImported: importedCount > 0
         };
 
         await updateJobStatus(jobId, 'completed', {
-            totalRows: data.length, importedRows: importedCount, duplicateRows: duplicates.length, errorRows: observations.length,
-            resultData: result, reportFilename: pendingReportPath ? path.basename(pendingReportPath) : null, observationsFilename: observationsReportPath ? path.basename(observationsReportPath) : null
+            totalRows: data.length, importedRows: importedCount, errorRows: observations.length,
+            resultData: result, observationsFilename: observationsReportPath ? path.basename(observationsReportPath) : null
         });
 
-        console.log(`✅ [Job ${jobId}] Abonos finalizado`);
+        console.log(`✅ [Job ${jobId}] Abonos finalizado (Standardized)`);
         return result;
 
     } catch (error) {

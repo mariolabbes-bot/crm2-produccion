@@ -62,31 +62,32 @@ router.get('/kpis', auth(), async (req, res) => {
         // 1. LUBRICANTES (Litros reales desde Maestro)
         const kpiLubricantes = await getKpiData(
             'Litros Lubricantes',
-            'v.cantidad * cp.litros', // Cálculo correcto
-            "UPPER(cp.familia) = 'LUBRICANTES'"
+            'v.cantidad * cp.litros',
+            "UPPER(cp.familia) LIKE '%LUBRICANTE%'"
         );
 
-        // 2. TBR APLUS (Unidades)
-        // Subfamilia: 'Neumaticos TBR' (vimos en inspections)
+        // 2. TBR (General, no solo Aplus, según verificador)
+        // Subfamilia incluye 'Neumaticos TBR'
         const kpiTbrAplus = await getKpiData(
-            'Unidades TBR Aplus',
+            'Unidades TBR',
             'v.cantidad',
-            "UPPER(cp.subfamilia) = 'NEUMATICOS TBR' AND UPPER(cp.marca) = 'APLUS'"
+            "UPPER(cp.subfamilia) LIKE '%TBR%'"
         );
 
-        // 3. PCR APLUS (Unidades)
-        // Subfamilia: 'Neumaticos PCR'
+        // 3. PCR (General, no solo Aplus)
+        // Subfamilia incluye 'Neumaticos PCR'
         const kpiPcrAplus = await getKpiData(
-            'Unidades PCR Aplus',
+            'Unidades PCR',
             'v.cantidad',
-            "UPPER(cp.subfamilia) = 'NEUMATICOS PCR' AND UPPER(cp.marca) = 'APLUS'"
+            "UPPER(cp.subfamilia) LIKE '%PCR%'"
         );
 
         // 4. REENCAUCHE (Unidades)
+        // Familia incluye 'REENCAUCHE'
         const kpiReencauche = await getKpiData(
             'Unidades Reencauche',
             'v.cantidad',
-            "UPPER(cp.familia) = 'REENCAUCHE'"
+            "UPPER(cp.familia) LIKE '%REENCAUCHE%'"
         );
 
         res.json({

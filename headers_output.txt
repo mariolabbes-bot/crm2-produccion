@@ -1,0 +1,12 @@
+
+📂 FILE: ABONO AL 08-02-2026.xlsx (Headers detected at row 1)
+["Sucursal","Folio","Fecha","Identificador cliente","Cliente","Vendedor cliente","Caja operacional","Usuario de ingreso","Monto total","Saldo favor utilizado","Saldo favor total","Tipo pago","Estado abono","Identificador abono","Fecha vencimiento","Monto","Monto devuelto"]
+
+📂 FILE: CLIENTES AL 08-02-2026.xlsx (Headers detected at row 1)
+["Identificador","Nombre","TipoCliente","TieneBloqueo","TieneCredito","FechaCreacion","Email","TelefonoPrincipal","Sucursal","Categoria","Subcategoria","Comuna","Ciudad","Direccion","Numero","NombreVendedor","Cupo","CupoUtilizado","SaldoFavor","CantidadPropiedades","CantidadVehiculos","F29Ventas","F29Compras","Cadencia","RecibeCheque","CantidadFacturas","MontoTotalFacturas","MontoDevueltoFacturas","DeudaTotalFacturas","DeudaCanceladaFacturas","CantidadBoletas","MontoTotalBoletas","MontoDevueltoBoletas","DeudaTotalBoletas","DeudaCanceladaBoletas","CantidadNotasCredito","MontoTotalNotasCredito","SaldoFavorTotalNotasCredito","SaldoFavorDisponibleNotasCredito"]
+
+📂 FILE: SALDO CREDITO .xlsx (Headers detected at row 1)
+["rut","dv","tipo","nombre","folio","fecha_emision","Total","Deuda Cancelada","Deuda de Cliente","Saldo a Favor Disponible","vendedor_nombre","idvendedor"]
+
+📂 FILE: VENTA AL 08-02-2026.xlsx (Headers detected at row 1)
+["Sucursal","Tipo de documento","Folio","Fecha emisi√≥n","Identificador","Cliente","Vendedor cliente","Vendedor documento","Estado sistema","Estado comercial","Estado SII","√çndice","SKU","Descripci√≥n","Cantidad","Precio","Descuento","Recargo","Tipo l√≠nea","L√≠nea","Sublinea","Marca","Tipo art√≠culo"]
