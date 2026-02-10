@@ -23,6 +23,28 @@ async function getUltimoMesConDatos() {
   }
 }
 
+// @route   GET /api/kpis/debug-dashboard
+// @desc    Diagnóstico público para dashboard
+router.get('/debug-dashboard', async (req, res) => {
+  try {
+    const mesActual = await getUltimoMesConDatos();
+    const salesTotal = await pool.query(`SELECT SUM(valor_total) as total FROM venta WHERE TO_CHAR(fecha_emision, 'YYYY-MM') = $1`, [mesActual]);
+    const abonosTotal = await pool.query(`SELECT SUM(COALESCE(monto_neto, monto/1.19)) as total FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = $1`, [mesActual]);
+    const counts = await pool.query(`SELECT (SELECT count(*) FROM venta) as v, (SELECT count(*) FROM abono) as a`);
+
+    res.json({
+      mesActual,
+      salesSum: salesTotal.rows[0].total,
+      abonosSum: abonosTotal.rows[0].total,
+      ventaCount: counts.rows[0].v,
+      abonoCount: counts.rows[0].a,
+      timestamp: new Date().toISOString()
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // @route   GET /api/kpis/dashboard-current
 // @desc    Get current dashboard KPIs (NUEVO - Corregido)
 router.get('/dashboard-current', auth(), async (req, res) => {
