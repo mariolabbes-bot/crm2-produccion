@@ -180,11 +180,12 @@ class ClientModel {
     let query = `
       SELECT 
         c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal AS telefono, c.email,
-        COALESCE(SUM(v.valor_total), 0) AS total_ventas,
-        COUNT(*) AS cantidad_ventas
+        COALESCE(SUM(CASE WHEN v.fecha_emision >= DATE_TRUNC('month', NOW()) THEN v.valor_total ELSE 0 END), 0) AS venta_mes_curso,
+        COALESCE(SUM(CASE WHEN v.fecha_emision >= DATE_TRUNC('month', NOW() - INTERVAL '6 months') AND v.fecha_emision < DATE_TRUNC('month', NOW()) THEN v.valor_total ELSE 0 END) / 6.0, 0) AS venta_promedio_6m,
+        COALESCE(SUM(v.valor_total), 0) AS total_ventas
       FROM cliente c
       INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
-      WHERE v.fecha_emision >= NOW() - INTERVAL '12 months'
+      WHERE v.fecha_emision >= DATE_TRUNC('month', NOW() - INTERVAL '6 months')
     `;
 
     const params = [];

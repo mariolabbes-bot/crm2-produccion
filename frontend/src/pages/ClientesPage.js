@@ -87,28 +87,28 @@ const ClientesPage = () => {
 
   // Columnas para Top Clientes
   const topClientesColumns = [
-    { 
-      field: 'rut', 
-      headerName: 'RUT', 
+    {
+      field: 'rut',
+      headerName: 'RUT',
       width: 120,
       headerClassName: 'data-grid-header',
     },
-    { 
-      field: 'nombre', 
-      headerName: 'Nombre', 
+    {
+      field: 'nombre',
+      headerName: 'Nombre',
       flex: 1,
       minWidth: 200,
       headerClassName: 'data-grid-header',
     },
-    { 
-      field: 'ciudad', 
-      headerName: 'Ciudad', 
+    {
+      field: 'ciudad',
+      headerName: 'Ciudad',
       width: 130,
       headerClassName: 'data-grid-header',
     },
-    { 
-      field: 'total_ventas', 
-      headerName: 'Ventas (12m)', 
+    {
+      field: 'total_ventas',
+      headerName: 'Ventas (12m)',
       width: 150,
       headerClassName: 'data-grid-header',
       renderCell: (params) => (
@@ -117,34 +117,48 @@ const ClientesPage = () => {
         </Typography>
       ),
     },
-    { 
-      field: 'cantidad_ventas', 
-      headerName: 'Transacciones', 
-      width: 120,
+    {
+      field: 'venta_mes_curso',
+      headerName: 'Venta Mes Actual',
+      width: 150,
       headerClassName: 'data-grid-header',
-      align: 'center',
-      headerAlign: 'center',
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ fontWeight: 600, color: '#2e7d32' }}>
+          {formatCurrency(params.value)}
+        </Typography>
+      ),
+    },
+    {
+      field: 'venta_promedio_6m',
+      headerName: 'Promedio (6m)',
+      width: 150,
+      headerClassName: 'data-grid-header',
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ color: '#666' }}>
+          {formatCurrency(params.value)}
+        </Typography>
+      ),
     },
   ];
 
   // Columnas para Facturas Impagas
   const facturasImpagasColumns = [
-    { 
-      field: 'rut', 
-      headerName: 'RUT', 
+    {
+      field: 'rut',
+      headerName: 'RUT',
       width: 120,
       headerClassName: 'data-grid-header',
     },
-    { 
-      field: 'nombre', 
-      headerName: 'Nombre', 
+    {
+      field: 'nombre',
+      headerName: 'Nombre',
       flex: 1,
       minWidth: 180,
       headerClassName: 'data-grid-header',
     },
-    { 
-      field: 'monto_total_impago', 
-      headerName: 'Monto Impago', 
+    {
+      field: 'monto_total_impago',
+      headerName: 'Monto Impago',
       width: 140,
       headerClassName: 'data-grid-header',
       renderCell: (params) => (
@@ -153,24 +167,24 @@ const ClientesPage = () => {
         </Typography>
       ),
     },
-    { 
-      field: 'dias_mora', 
-      headerName: 'Días Mora', 
+    {
+      field: 'dias_mora',
+      headerName: 'Días Mora',
       width: 110,
       headerClassName: 'data-grid-header',
       align: 'center',
       headerAlign: 'center',
       renderCell: (params) => (
-        <Chip 
+        <Chip
           label={`${Math.floor(params.value)} días`}
           color={params.value > 60 ? 'error' : 'warning'}
           size="small"
         />
       ),
     },
-    { 
-      field: 'cantidad_facturas_impagas', 
-      headerName: 'Facturas', 
+    {
+      field: 'cantidad_facturas_impagas',
+      headerName: 'Facturas',
       width: 90,
       headerClassName: 'data-grid-header',
       align: 'center',
@@ -180,34 +194,34 @@ const ClientesPage = () => {
 
   // Columnas para Búsqueda
   const searchColumns = [
-    { 
-      field: 'rut', 
-      headerName: 'RUT', 
+    {
+      field: 'rut',
+      headerName: 'RUT',
       width: 120,
       headerClassName: 'data-grid-header',
     },
-    { 
-      field: 'nombre', 
-      headerName: 'Nombre', 
+    {
+      field: 'nombre',
+      headerName: 'Nombre',
       flex: 1,
       minWidth: 200,
       headerClassName: 'data-grid-header',
     },
-    { 
-      field: 'ciudad', 
-      headerName: 'Ciudad', 
+    {
+      field: 'ciudad',
+      headerName: 'Ciudad',
       width: 130,
       headerClassName: 'data-grid-header',
     },
-    { 
-      field: 'telefono', 
-      headerName: 'Teléfono', 
+    {
+      field: 'telefono',
+      headerName: 'Teléfono',
       width: 120,
       headerClassName: 'data-grid-header',
     },
-    { 
-      field: 'ventas_12m', 
-      headerName: 'Ventas (12m)', 
+    {
+      field: 'ventas_12m',
+      headerName: 'Ventas (12m)',
       width: 150,
       headerClassName: 'data-grid-header',
       renderCell: (params) => (
@@ -253,7 +267,7 @@ const ClientesPage = () => {
         />
 
         {/* Resultados de búsqueda (tabla) */}
-          {searchResults.length > 0 && (
+        {searchResults.length > 0 && (
           <Box className="table-unified" sx={{ mt: 2, height: 400 }}>
             <Typography variant="subtitle2" gutterBottom>
               {searchResults.length} resultado(s) encontrado(s)
@@ -291,7 +305,7 @@ const ClientesPage = () => {
       <Grid container spacing={3}>
         {/* Top 20 Clientes por Ventas */}
         <Grid item xs={12} lg={6}>
-    <Paper className="card-unified" sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Paper className="card-unified" sx={{ display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TrendingUpIcon sx={{ color: '#1976d2', mr: 1 }} />
               <Typography variant="h6" component="h2">
@@ -301,7 +315,7 @@ const ClientesPage = () => {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Últimos 12 meses
             </Typography>
-              {loading ? (
+            {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
                 <CircularProgress />
               </Box>
@@ -339,7 +353,7 @@ const ClientesPage = () => {
 
         {/* Clientes con Facturas Impagas */}
         <Grid item xs={12} lg={6}>
-    <Paper className="card-unified" sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Paper className="card-unified" sx={{ display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <WarningIcon sx={{ color: '#d32f2f', mr: 1 }} />
               <Typography variant="h6" component="h2">
@@ -349,7 +363,7 @@ const ClientesPage = () => {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Con ventas en últimos 3 meses y facturas pendientes &gt;30 días
             </Typography>
-              {loading ? (
+            {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
                 <CircularProgress />
               </Box>

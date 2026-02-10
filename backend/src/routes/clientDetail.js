@@ -25,9 +25,9 @@ router.get('/:rut', auth(), async (req, res) => {
     const { rut } = req.params;
     const user = req.user;
     const isManager = user.rol?.toLowerCase() === 'manager';
-    
+
     console.log(`📋 [GET /client-detail/:rut] RUT: ${rut}, Usuario: ${user.nombre_vendedor || user.alias}`);
-    
+
     // Query para obtener info básica del cliente
     let query = `
       SELECT 
@@ -35,7 +35,7 @@ router.get('/:rut', auth(), async (req, res) => {
         nombre,
         email,
         telefono_principal as telefono,
-        nombre_vendedor,
+        nombre_vendedor AS vendedor_nombre,
         ciudad,
         comuna,
         direccion,
@@ -44,33 +44,33 @@ router.get('/:rut', auth(), async (req, res) => {
       FROM cliente
       WHERE rut = $1
     `;
-    
+
     const result = await pool.query(query, [rut]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ msg: 'Cliente no encontrado' });
     }
-    
+
     const cliente = result.rows[0];
     console.log(`   ✅ Cliente encontrado: ${cliente.nombre}`);
-    
+
     // Validar permisos: vendedor solo ve sus clientes (basado en nombre_vendedor)
     if (!isManager) {
       const nombreVendedor = user.nombre_vendedor || user.alias || '';
       if (!nombreVendedor) {
         return res.status(403).json({ msg: 'Usuario sin nombre_vendedor asignado' });
       }
-      
+
       if (cliente.nombre_vendedor && nombreVendedor.toUpperCase().trim() !== cliente.nombre_vendedor.toUpperCase().trim()) {
         return res.status(403).json({ msg: 'No tienes permiso para ver este cliente' });
       }
     }
-    
+
     res.json({
       success: true,
       data: cliente
     });
-    
+
   } catch (error) {
     console.error('❌ Error en GET /client-detail/:rut:', error.message);
     res.status(500).json({
@@ -91,16 +91,16 @@ router.get('/:rut/deuda', auth(), async (req, res) => {
   try {
     const { rut } = req.params;
     console.log(`� [GET /client-detail/:rut/deuda] RUT: ${rut}`);
-    
+
     // 1. Obtener cliente
     const clienteResult = await pool.query('SELECT nombre FROM cliente WHERE rut = $1', [rut]);
     if (clienteResult.rows.length === 0) {
       return res.status(404).json({ msg: 'Cliente no encontrado' });
     }
-    
+
     const nombreCliente = clienteResult.rows[0].nombre;
     console.log(`   Cliente: ${nombreCliente}`);
-    
+
     // 2. Obtener deuda y crédito de saldo_credito
     const deudaResult = await pool.query(`
       SELECT 
@@ -111,11 +111,11 @@ router.get('/:rut/deuda', auth(), async (req, res) => {
         COUNT(*) as cantidad_facturas,
         MAX(fecha_emision) as fecha_ultima
       FROM saldo_credito
-      WHERE rut = $1
+      WHERE rut = $1 AND saldo_factura > 0
       GROUP BY rut, cliente
     `, [rut]);
-    
-    // 3. Obtener documentos detallados
+
+    // 3. Obtener documentos detallados (ahora sin límite y filtrados)
     const documentosResult = await pool.query(`
       SELECT 
         rut,
@@ -126,19 +126,18 @@ router.get('/:rut/deuda', auth(), async (req, res) => {
         deuda_cancelada,
         saldo_factura as deuda_documento
       FROM saldo_credito
-      WHERE rut = $1
-      ORDER BY fecha_emision DESC
-      LIMIT 20
+      WHERE rut = $1 AND saldo_factura > 0
+      ORDER BY fecha_emision ASC
     `, [rut]);
-    
+
     const deuda = deudaResult.rows[0] || {
       total_deuda: 0,
       total_favor: 0,
       cantidad_facturas: 0
     };
-    
+
     console.log(`   Deuda total: $${deuda.total_deuda}, Documentos: ${deuda.cantidad_facturas}`);
-    
+
     res.json({
       success: true,
       data: {
@@ -157,7 +156,7 @@ router.get('/:rut/deuda', auth(), async (req, res) => {
         }))
       }
     });
-    
+
   } catch (error) {
     console.error('❌ Error en GET /client-detail/:rut/deuda:', error.message);
     res.status(500).json({
@@ -177,7 +176,7 @@ router.get('/:rut/deuda', auth(), async (req, res) => {
 router.get('/:rut/ventas-mensual', auth(), async (req, res) => {
   try {
     const { rut } = req.params;
-    
+
     const query = `
       WITH meses AS (
         SELECT 
@@ -215,25 +214,25 @@ router.get('/:rut/ventas-mensual', auth(), async (req, res) => {
       LEFT JOIN ventas_por_mes vpm ON m.mes = vpm.mes
       ORDER BY m.orden ASC
     `;
-    
+
     const result = await pool.query(query, [rut]);
-    
+
     // Calcular promedio trimestre anterior
     const meses = result.rows.map(m => ({
       ...m,
       monto: parseFloat(m.monto) || 0,
       num_ventas: parseInt(m.num_ventas) || 0
     }));
-    
+
     const mesActual = meses[0];
     const trimestralAnterior = meses.slice(1, 4);
     const promedioTrimestral = trimestralAnterior.reduce((sum, m) => sum + (m.monto || 0), 0) / 3;
-    
+
     // Calcular variación
-    const variacion = mesActual.monto ? 
-      parseFloat(((mesActual.monto - promedioTrimestral) / promedioTrimestral * 100).toFixed(2)) : 
+    const variacion = mesActual.monto ?
+      parseFloat(((mesActual.monto - promedioTrimestral) / promedioTrimestral * 100).toFixed(2)) :
       0;
-    
+
     res.json({
       success: true,
       data: {
@@ -244,7 +243,7 @@ router.get('/:rut/ventas-mensual', auth(), async (req, res) => {
         trending: variacion > 0 ? 'UP' : variacion < 0 ? 'DOWN' : 'STABLE'
       }
     });
-    
+
   } catch (error) {
     console.error('❌ Error en GET /client-detail/:rut/ventas-mensual:', error);
     res.status(500).json({
@@ -264,7 +263,7 @@ router.get('/:rut/ventas-mensual', auth(), async (req, res) => {
 router.get('/:rut/productos-6m', auth(), async (req, res) => {
   try {
     const { rut } = req.params;
-    
+
     const query = `
       WITH ventas_mes_actual AS (
         SELECT 
@@ -324,9 +323,9 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
       ORDER BY COALESCE(v12.cantidad_promedio_12m, 0) DESC
       LIMIT 15
     `;
-    
+
     const result = await pool.query(query, [rut]);
-    
+
     // Convertir valores STRING a números
     const productosConvertidos = result.rows.map(producto => ({
       ...producto,
@@ -335,7 +334,7 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
       relacion_venta: parseFloat(producto.relacion_venta) || 0,
       precio_promedio: parseFloat(producto.precio_promedio) || 0
     }));
-    
+
     res.json({
       success: true,
       data: {
@@ -343,7 +342,7 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
         total_productos: productosConvertidos.length
       }
     });
-    
+
   } catch (error) {
     console.error('❌ Error en GET /client-detail/:rut/productos-6m:', error);
     res.status(500).json({
@@ -363,7 +362,7 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
 router.get('/:rut/actividades', auth(), async (req, res) => {
   try {
     const { rut } = req.params;
-    
+
     const query = `
       SELECT 
         ca.id,
@@ -378,9 +377,9 @@ router.get('/:rut/actividades', auth(), async (req, res) => {
       ORDER BY ca.created_at DESC
       LIMIT 3
     `;
-    
+
     const result = await pool.query(query, [rut]);
-    
+
     res.json({
       success: true,
       data: {
@@ -388,7 +387,7 @@ router.get('/:rut/actividades', auth(), async (req, res) => {
         total: result.rows.length
       }
     });
-    
+
   } catch (error) {
     console.error('❌ Error en GET /client-detail/:rut/actividades:', error);
     res.status(500).json({
@@ -407,39 +406,39 @@ router.post('/:rut/actividades', auth(), async (req, res) => {
   try {
     const { rut } = req.params;
     const { comentario } = req.body;
-    
+
     if (!comentario || comentario.trim().length === 0) {
       return res.status(400).json({ msg: 'El comentario no puede estar vacío' });
     }
-    
+
     // Verificar que el cliente existe
     const clienteCheck = await pool.query('SELECT rut FROM cliente WHERE rut = $1', [rut]);
     if (clienteCheck.rows.length === 0) {
       return res.status(404).json({ msg: 'Cliente no encontrado' });
     }
-    
+
     // Obtener usuario_alias_id del usuario actual
     // Buscar por: alias (si existe) -> nombre_vendedor -> nombre completo
     const usuarioAlias = req.user.alias || req.user.nombre_vendedor || req.user.nombre;
-    
+
     if (!usuarioAlias) {
       return res.status(400).json({ msg: 'Usuario sin información de identidad' });
     }
-    
+
     const usuarioAliasResult = await pool.query(
       `SELECT id FROM usuario_alias 
        WHERE UPPER(TRIM(alias)) = UPPER(TRIM($1)) 
        OR UPPER(TRIM(nombre_vendedor_oficial)) = UPPER(TRIM($1))`,
       [usuarioAlias]
     );
-    
+
     if (usuarioAliasResult.rows.length === 0) {
       console.error(`⚠️  Usuario no encontrado en usuario_alias. Buscando por: "${usuarioAlias}"`);
       return res.status(400).json({ msg: 'Usuario no encontrado en usuario_alias' });
     }
-    
+
     const usuarioAliasId = usuarioAliasResult.rows[0].id;
-    
+
     // Insertar actividad
     const query = `
       INSERT INTO cliente_actividad (cliente_rut, usuario_alias_id, comentario, created_at)
@@ -451,15 +450,15 @@ router.post('/:rut/actividades', auth(), async (req, res) => {
         comentario,
         created_at
     `;
-    
+
     const result = await pool.query(query, [rut, usuarioAliasId, comentario.trim()]);
-    
+
     res.json({
       success: true,
       msg: 'Actividad registrada correctamente',
       data: result.rows[0]
     });
-    
+
   } catch (error) {
     console.error('❌ Error en POST /client-detail/:rut/actividades:', error);
     res.status(500).json({
