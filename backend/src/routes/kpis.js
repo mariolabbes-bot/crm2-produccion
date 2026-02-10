@@ -384,110 +384,94 @@ router.get('/mes-actual', auth(), async (req, res) => {
 // @access  Private
 router.get('/dashboard-current', auth(), async (req, res) => {
   try {
-    const { salesTable, amountCol, dateCol, clientIdCol } = await getDetectedSales();
-    if (!salesTable || !amountCol || !dateCol) {
-      return res.json({
-        success: true,
-        data: {
-          monto_ventas_mes: 0,
-          monto_abonos_mes: 0,
-          variacion_vs_anio_anterior_pct: 0,
-          numero_clientes_con_venta_mes: 0,
-          promedio_ventas_trimestre_anterior: 0,
-          monto_ventas_anio_anterior: 0,
-          mes_consultado: new Date().toISOString().slice(0, 7)
-        }
-      });
-    }
-
     const user = req.user;
-    const isManager = user.rol === 'MANAGER';
+    const isManager = (user.rol || '').toUpperCase() === 'MANAGER';
+
+    // Tablas HARDCODED para evitar error de detección
+    const SALES_TABLE = 'venta'; // Confirmado que es 'venta'
+    const ABONOS_TABLE = 'abono';
 
     // Determinar mes a consultar
     let mesActual;
     if (req.query.mes && /^\d{4}-\d{2}$/.test(req.query.mes)) {
       mesActual = req.query.mes;
     } else {
-      const ultimoMesQuery = `SELECT TO_CHAR(MAX(${dateCol}), 'YYYY-MM') AS ultimo_mes FROM ${salesTable}`;
-      const ultimoMesResult = await pool.query(ultimoMesQuery);
-      mesActual = ultimoMesResult.rows[0]?.ultimo_mes || new Date().toISOString().slice(0, 7);
+      // Default: Mes actual del sistema
+      mesActual = new Date().toISOString().slice(0, 7);
+
+      // Opcional: Buscar último mes con datos de VENTAS si se prefiere
+      // const ultimoMesQuery = `SELECT TO_CHAR(MAX(fecha_emision), 'YYYY-MM') AS ultimo_mes FROM ${SALES_TABLE}`;
+      // const ultimoMesResult = await pool.query(ultimoMesQuery);
+      // if (ultimoMesResult.rows[0]?.ultimo_mes) mesActual = ultimoMesResult.rows[0].ultimo_mes;
     }
 
     const [year, month] = mesActual.split('-').map(Number);
-    const mesAnioAnterior = new Date(year - 1, month - 1, 1).toISOString().slice(0, 7);
+    // Mes anterior (para variación)
+    const dateAnioAnt = new Date(year - 1, month - 1, 1);
+    const mesAnioAnterior = dateAnioAnt.toISOString().slice(0, 7);
 
-    // Detectar columna vendedor
-    let vendedorCol = 'vendedor_id';
-    const vendedorColCheck = await pool.query(`
-      SELECT column_name FROM information_schema.columns
-      WHERE table_schema = 'public' AND table_name = $1
-      AND column_name IN ('vendedor_id', 'vendedor_cliente')
-      LIMIT 1
-    `, [salesTable]);
-    if (vendedorColCheck.rows.length > 0) {
-      vendedorCol = vendedorColCheck.rows[0].column_name;
+    // Trimestre anterior (3 meses previos al actual: mes-1, mes-2, mes-3)
+    // Ejemplo: Si mesActual es 2026-02. Trimestre anterior: 2026-01, 2025-12, 2025-11.
+    const mesesTrimestre = [];
+    for (let i = 1; i <= 3; i++) {
+      const d = new Date(year, month - 1 - i, 1);
+      mesesTrimestre.push(d.toISOString().slice(0, 7));
     }
 
-    // Filtro vendedor
-    let vendedorFilter = '';
-    let params = [];
+    // Filtros de Vendedor
+    // Lógica: 
+    // - Si es Vendedor: filtrar por su RUT (que está en token o DB). 
+    // - Si es Manager y filtra: usar RUT del filtro.
+    // - Si es Manager sin filtro: ver todo.
 
+    let vendedorFilterVenta = '';
+    let vendedorFilterAbono = '';
+    const params = [];
+    let pIdx = 1;
+
+    // Recuperar RUT para filtro
+    let targetRut = null;
     if (isManager && req.query.vendedor_id) {
-      const vendedorRut = req.query.vendedor_id; // Ahora es RUT, no ID numérico
-
-      // Buscar el nombre y alias del vendedor por RUT
-      const vendedorQuery = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE rut = $1', [vendedorRut]);
-      if (vendedorQuery.rows.length > 0) {
-        const { nombre_vendedor, alias } = vendedorQuery.rows[0];
-        if (vendedorCol === 'vendedor_cliente') {
-          // Usar alias para ventas (ej: "Alex")
-          // HYBRID LOGIC: Match Alias OR Full Name
-          const safeAlias = alias || nombre_vendedor;
-          vendedorFilter = `AND (UPPER(${vendedorCol}) = UPPER($1) OR UPPER(${vendedorCol}) = UPPER($2))`;
-          params = [safeAlias, nombre_vendedor];
-        } else {
-          vendedorFilter = `AND ${vendedorCol} = $1`;
-          params = [nombre_vendedor];
-        }
-      }
+      targetRut = req.query.vendedor_id;
     } else if (!isManager) {
-      if (vendedorCol === 'vendedor_cliente') {
-        if (user.nombre_vendedor) {
-          // Fetch alias from DB to support hybrid filter
-          const userRes = await pool.query('SELECT alias FROM usuario WHERE rut = $1', [user.rut]);
-          const dbAlias = userRes.rows[0]?.alias;
-          const safeAlias = dbAlias || user.nombre_vendedor;
-
-          vendedorFilter = `AND (UPPER(${vendedorCol}) = UPPER($1) OR UPPER(${vendedorCol}) = UPPER($2))`;
-          params = [safeAlias, user.nombre_vendedor];
-        }
-      } else {
-        vendedorFilter = `AND ${vendedorCol} = $1`;
-        params = [user.nombre_vendedor || user.rut];
-      }
+      targetRut = user.rut;
     }
 
-    // Ventas mes actual
+    // Preparar WHERE clauses para VENDEDOR
+    if (targetRut) {
+      // Para Ventas: JOIN con usuario alias/nombre
+      vendedorFilterVenta = ` AND COALESCE(u.rut, u2.rut) = $${pIdx}`; // Asumiendo JOINs
+      // Para Abonos: JOIN con usuario alias/nombre
+      vendedorFilterAbono = ` AND COALESCE(u.rut, u2.rut) = $${pIdx}`;
+      params.push(targetRut);
+      pIdx++;
+    }
+
+    // 1. VENTAS MES ACTUAL
     const queryVentasMes = `
-      SELECT COALESCE(SUM(${amountCol}), 0) AS monto
-      FROM ${salesTable}
-      WHERE TO_CHAR(${dateCol}, 'YYYY-MM') = $${params.length + 1}
-      ${vendedorFilter}
+        SELECT COALESCE(SUM(s.valor_total), 0) as monto
+        FROM ${SALES_TABLE} s
+        LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
+        LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento)) -- Usar FK documento para alias
+        WHERE TO_CHAR(s.fecha_emision, 'YYYY-MM') = $${pIdx}
+        ${vendedorFilterVenta}
     `;
-    const ventasMesResult = await pool.query(queryVentasMes, [...params, mesActual]);
-    const montoVentasMes = parseFloat(ventasMesResult.rows[0]?.monto || 0);
+    const resVentasMes = await pool.query(queryVentasMes, [...params, mesActual]);
+    const montoVentasMes = parseFloat(resVentasMes.rows[0]?.monto || 0);
 
-    // Ventas año anterior
+    // 2. VENTAS AÑO ANTERIOR (Mismo mes)
     const queryVentasAnioAnt = `
-      SELECT COALESCE(SUM(${amountCol}), 0) AS monto
-      FROM ${salesTable}
-      WHERE TO_CHAR(${dateCol}, 'YYYY-MM') = $${params.length + 1}
-      ${vendedorFilter}
+        SELECT COALESCE(SUM(s.valor_total), 0) as monto
+        FROM ${SALES_TABLE} s
+        LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
+        LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento))
+        WHERE TO_CHAR(s.fecha_emision, 'YYYY-MM') = $${pIdx}
+        ${vendedorFilterVenta}
     `;
-    const ventasAnioAntResult = await pool.query(queryVentasAnioAnt, [...params, mesAnioAnterior]);
-    const montoVentasAnioAnt = parseFloat(ventasAnioAntResult.rows[0]?.monto || 0);
+    const resVentasAnioAnt = await pool.query(queryVentasAnioAnt, [...params, mesAnioAnterior]);
+    const montoVentasAnioAnt = parseFloat(resVentasAnioAnt.rows[0]?.monto || 0);
 
-    // Variación porcentual
+    // Variación
     let variacionPct = 0;
     if (montoVentasAnioAnt > 0) {
       variacionPct = ((montoVentasMes - montoVentasAnioAnt) / montoVentasAnioAnt) * 100;
@@ -495,98 +479,55 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       variacionPct = 100;
     }
 
-    // Abonos mes actual
-    let montoAbonosMes = 0;
-    const abonoTableCheck = await pool.query(`SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = 'abono') AS has_abono`);
-    if (abonoTableCheck.rows[0]?.has_abono) {
-      const abonoColsQ = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = 'abono'`);
-      const abonoCols = new Set(abonoColsQ.rows.map(r => r.column_name));
-
-      let abonoAmountExpr = null;
-      if (abonoCols.has('monto_neto')) abonoAmountExpr = 'COALESCE(monto_neto, monto / 1.19)';
-      else if (abonoCols.has('monto')) abonoAmountExpr = 'monto / 1.19';
-      else if (abonoCols.has('monto_abono')) abonoAmountExpr = 'monto_abono / 1.19';
-      else if (abonoCols.has('monto_total')) abonoAmountExpr = 'monto_total / 1.19';
-
-      let abonoDateCol = abonoCols.has('fecha_abono') ? 'fecha_abono' : (abonoCols.has('fecha') ? 'fecha' : null);
-      let abonoVendedorCol = abonoCols.has('vendedor_id') ? 'vendedor_id' : (abonoCols.has('vendedor_cliente') ? 'vendedor_cliente' : null);
-
-      if (abonoAmountExpr && abonoDateCol) {
-        let abonoVendedorFilter = '';
-        let abonoParams = [];
-
-        if (params.length > 0 && abonoVendedorCol) {
-          const nombreVendedor = params[0];
-          if (abonoVendedorCol === 'vendedor_cliente') {
-            abonoVendedorFilter = `AND UPPER(${abonoVendedorCol}) = UPPER($1)`;
-            abonoParams = [nombreVendedor];
-          } else {
-            abonoVendedorFilter = `AND ${abonoVendedorCol} = $1`;
-            abonoParams = [nombreVendedor];
-          }
-        } else if (!isManager && abonoVendedorCol) {
-          if (abonoVendedorCol === 'vendedor_cliente' && user.nombre_vendedor) {
-            abonoVendedorFilter = `AND UPPER(${abonoVendedorCol}) = UPPER($1)`;
-            abonoParams = [user.nombre_vendedor];
-          } else {
-            abonoVendedorFilter = `AND ${abonoVendedorCol} = $1`;
-            abonoParams = [user.nombre_vendedor || user.rut];
-          }
-        }
-
-        const queryAbonosMes = `
-          SELECT COALESCE(SUM(${abonoAmountExpr}), 0) AS monto
-          FROM abono
-          WHERE TO_CHAR(${abonoDateCol}, 'YYYY-MM') = $${abonoParams.length + 1}
-          ${abonoVendedorFilter}
-        `;
-        const abonosResult = await pool.query(queryAbonosMes, [...abonoParams, mesActual]);
-        montoAbonosMes = parseFloat(abonosResult.rows[0]?.monto || 0);
-      }
-    }
-
-    // Clientes con venta (solo si tenemos columna de cliente)
-    let numClientesConVenta = 0;
-    if (clientIdCol) {
-      const queryClientesConVenta = `
-        SELECT COUNT(DISTINCT ${clientIdCol}) AS num_clientes
-        FROM ${salesTable}
-        WHERE TO_CHAR(${dateCol}, 'YYYY-MM') = $${params.length + 1}
-        ${vendedorFilter}
-      `;
-      const clientesResult = await pool.query(queryClientesConVenta, [...params, mesActual]);
-      numClientesConVenta = parseInt(clientesResult.rows[0]?.num_clientes || 0);
-    }
-
-    // Promedio trimestre anterior
-    const fecha1MesAntes = new Date(year, month - 2, 1).toISOString().slice(0, 7);
-    const fecha2MesesAntes = new Date(year, month - 3, 1).toISOString().slice(0, 7);
-    const fecha3MesesAntes = new Date(year, month - 4, 1).toISOString().slice(0, 7);
-
-    const queryVentasTrimestreAnterior = `
-      SELECT COALESCE(SUM(${amountCol}), 0) AS monto_total
-      FROM ${salesTable}
-      WHERE TO_CHAR(${dateCol}, 'YYYY-MM') IN ($${params.length + 1}, $${params.length + 2}, $${params.length + 3})
-      ${vendedorFilter}
+    // 3. ABONOS MES ACTUAL (CORREGIDO)
+    const MONTO_EXPR_ABONO = `COALESCE(a.monto_neto, a.monto / 1.19)`;
+    const queryAbonosMes = `
+        SELECT COALESCE(SUM(${MONTO_EXPR_ABONO}), 0) as monto
+        FROM ${ABONOS_TABLE} a
+        LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(a.vendedor_cliente))
+        LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(a.vendedor_cliente))
+        WHERE TO_CHAR(a.fecha, 'YYYY-MM') = $${pIdx}
+        ${vendedorFilterAbono}
     `;
-    const ventasTrimestreResult = await pool.query(queryVentasTrimestreAnterior, [...params, fecha3MesesAntes, fecha2MesesAntes, fecha1MesAntes]);
-    const montoVentasTrimestre = parseFloat(ventasTrimestreResult.rows[0]?.monto_total || 0);
-    const promedioVentasTrimestre = montoVentasTrimestre / 3;
+    const resAbonosMes = await pool.query(queryAbonosMes, [...params, mesActual]);
+    const montoAbonosMes = parseFloat(resAbonosMes.rows[0]?.monto || 0);
 
-    console.log('[KPIs dashboard-current] Respuesta:', {
-      mes: mesActual,
-      ventas: montoVentasMes,
-      abonos: montoAbonosMes,
-      promedio_trimestre: promedioVentasTrimestre,
-      isManager,
-      vendedorFilter: vendedorFilter || 'SIN FILTRO'
-    });
+    // 4. CLIENTES CON VENTA
+    // Asumimos columna 'cliente' (nombre) o 'identificador' (rut). Venta tiene 'identificador' FK a cliente(rut) y 'cliente' (nombre).
+    // Usamos 'identificador' si es posible, sino 'cliente'. Venta table verified: 'identificador' exists.
+    const queryClientes = `
+        SELECT COUNT(DISTINCT s.identificador) as num_clientes
+        FROM ${SALES_TABLE} s
+        LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
+        LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento))
+        WHERE TO_CHAR(s.fecha_emision, 'YYYY-MM') = $${pIdx}
+        ${vendedorFilterVenta}
+    `;
+    const resClientes = await pool.query(queryClientes, [...params, mesActual]);
+    const numClientes = parseInt(resClientes.rows[0]?.num_clientes || 0);
 
+    // 5. PROMEDIO TRIMESTRE ANTERIOR
+    // Necesitamos pasar los 3 meses.
+    const placeholdersTrimestre = mesesTrimestre.map((_, i) => `$${pIdx + 1 + i}`).join(',');
+    // pIdx es para el parametro mesActual (que no usaremos aqui). Usamos params extra.
+
+    const queryTrimestre = `
+        SELECT COALESCE(SUM(s.valor_total), 0) as monto
+        FROM ${SALES_TABLE} s
+        LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
+        LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento))
+        WHERE TO_CHAR(s.fecha_emision, 'YYYY-MM') IN (${placeholdersTrimestre})
+        ${vendedorFilterVenta}
+    `;
+    const resTrimestre = await pool.query(queryTrimestre, [...params, ...mesesTrimestre]);
+    const montoTrimestre = parseFloat(resTrimestre.rows[0]?.monto || 0);
+    const promedioTrimestre = montoTrimestre / 3;
+
+    // Respuesta
     // Headers anti-caché
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private, max-age=0');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
 
     res.json({
       success: true,
@@ -595,11 +536,12 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         monto_ventas_anio_anterior: montoVentasAnioAnt,
         monto_abonos_mes: montoAbonosMes,
         variacion_vs_anio_anterior_pct: variacionPct,
-        promedio_ventas_trimestre_anterior: promedioVentasTrimestre,
-        numero_clientes_con_venta_mes: numClientesConVenta,
+        promedio_ventas_trimestre_anterior: promedioTrimestre,
+        numero_clientes_con_venta_mes: numClientes,
         mes_consultado: mesActual
       }
     });
+
   } catch (err) {
     console.error('Error en /api/kpis/dashboard-current:', err.message);
     res.status(500).json({ success: false, error: 'Server Error', message: err.message });
