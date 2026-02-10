@@ -112,17 +112,56 @@ async function main() {
       const filePath = path.join(BULK_DIR, filename);
       const wb = XLSX.readFile(filePath);
 
-      let abonosSheetName = wb.SheetNames.find(n => /abonos/i.test(n));
-      if (!abonosSheetName) {
-        console.log(`   ℹ️ No se encontró hoja con nombre 'Abonos', usando la primera hoja: ${wb.SheetNames[0]}`);
-        abonosSheetName = wb.SheetNames[0];
+      // ----------------------------------------------------
+      // Lógica de detección de hoja:
+      // Buscamos en TODAS las hojas aquella que tenga las columnas críticas.
+      // Priorizamos las que se llamen 'abonos' si ambas cumplen, pero
+      // lo más importante es el contenido.
+      // ----------------------------------------------------
+
+      let targetSheetName = null;
+      let targetHeaders = null;
+      let targetRowData = null; // Para guardar la referencia a las filas parseadas
+
+      // Definimos patrones para colos críticas
+      const PATTERN_FECHA = /^Fecha$/i;
+      const PATTERN_CLIENTE = /^Cliente$/i;
+      const PATTERN_MONTO = /^Monto$/i;
+      const PATTERN_TOTAL = /^Monto\s*total$/i;
+
+      for (const sheetName of wb.SheetNames) {
+        const shTest = wb.Sheets[sheetName];
+        // Parseamos con header:1 para obtener solo la primera fila y verificar encabezados rapido
+        const headerRows = XLSX.utils.sheet_to_json(shTest, { header: 1, range: 0, defval: '' });
+        if (!headerRows || headerRows.length === 0) continue;
+
+        const possibleHeaders = headerRows[0]; // Fila 0 como encabezados
+
+        // Verificamos si tiene las columas necesarias
+        const hasFecha = possibleHeaders.some(h => PATTERN_FECHA.test(h));
+        const hasCliente = possibleHeaders.some(h => PATTERN_CLIENTE.test(h));
+        const hasMonto = possibleHeaders.some(h => PATTERN_MONTO.test(h) || PATTERN_TOTAL.test(h));
+
+        if (hasFecha && hasCliente && hasMonto) {
+          console.log(`   ✅ Hoja candidata encontrada: '${sheetName}' (tiene Fecha, Cliente, Monto)`);
+          targetSheetName = sheetName;
+          targetHeaders = possibleHeaders;
+          // Si encontramos una hoja que se llame Abonos, es la ideal. Si no, nos quedamos con la primera válida que encontremos.
+          if (/abonos/i.test(sheetName)) break;
+        }
       }
 
-      const sh = wb.Sheets[abonosSheetName];
+      if (!targetSheetName) {
+        console.error(`   ❌ No se encontró ninguna hoja con columnas (Fecha, Cliente, Monto) en ${filename}. Hojas: ${wb.SheetNames.join(', ')}`);
+        continue;
+      }
+
+      console.log(`   --> Usando hoja: '${targetSheetName}'`);
+      const sh = wb.Sheets[targetSheetName];
       const rows = XLSX.utils.sheet_to_json(sh, { raw: true });
       console.log(`   Filas en hoja: ${rows.length}`);
 
-      // Detectar columnas
+      // Detectar columnas (Re-scan sobre headers confirmados)
       const headers = Object.keys(rows[0] || {});
       const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
 
@@ -138,7 +177,8 @@ async function main() {
       const colSucursal = findCol([/^Sucursal$/i]);
 
       if (!colFecha || !colCliente || !(colMonto || colMontoTotal)) {
-        console.error(`   ❌ Falta col requerida en ${filename}. Fecha:${colFecha}, Cli:${colCliente}`);
+        // Esto no debería pasar si la logica de arriba funcionó, pero doble check
+        console.error(`   ❌ (Unexpected) Faltan columnas tras selección. Fecha:${colFecha}, Cli:${colCliente}`);
         continue;
       }
 
