@@ -219,11 +219,11 @@ router.get('/comparativo', auth(), async (req, res) => {
                 TO_CHAR(s.fecha_emision, '${dateFormat}') as periodo,
                 COALESCE(u.nombre_vendedor, u2.nombre_vendedor, s.vendedor_cliente) as vendedor,
                 COALESCE(u.rut, u2.rut) as vendedor_rut,
-                SUM(s.total) as total_ventas, -- Asumiendo columna 'total' de venta. Si falla, probar 'monto' o 'valor_total'.
+                SUM(s.valor_total) as total_ventas,
                 COUNT(*) as cantidad_ventas
             FROM ${VENTAS_TABLE} s
             LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
-            LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_cliente))
+            LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento)) -- Usamos vendedor_documento para Alias en ventas? Espera, ventas tiene vendedor_cliente Y vendedor_documento. vendedor_documento es FK a alias. vendedor_cliente es nombre. Usar ambos.
             WHERE 1=1 ${dateWhereVenta} ${vendedorWhere}
             GROUP BY 1, 2, 3
         `;
