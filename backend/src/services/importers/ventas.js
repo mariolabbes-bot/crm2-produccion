@@ -134,10 +134,7 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
             if (!folio || !tipoDoc || !fecha) continue;
 
             const duplicateKey = `${norm(tipoDoc)}|${norm(folio)}|${norm(indice)}`;
-            if (existingKeys.has(duplicateKey)) {
-                duplicates.push({ folio, tipoDoc, indice, fecha });
-                continue;
-            }
+            // Removido chequeo manual para permitir que ON CONFLICT DO UPDATE maneje la actualización
 
             const cantidad = colCantidad ? parseNumeric(row[colCantidad]) : 0;
             const precio = colPrecio ? parseNumeric(row[colPrecio]) : 0;
@@ -269,7 +266,30 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
                     }
 
                     if (placeholders.length > 0) {
-                        const query = `INSERT INTO venta (sucursal, tipo_documento, folio, fecha_emision, identificador, cliente, vendedor_cliente, vendedor_documento, estado_sistema, estado_comercial, estado_sii, indice, sku, descripcion, cantidad, precio, valor_total, litros_vendidos) VALUES ${placeholders.join(', ')}`;
+                        const query = `
+                            INSERT INTO venta (
+                                sucursal, tipo_documento, folio, fecha_emision, identificador, cliente, 
+                                vendedor_cliente, vendedor_documento, estado_sistema, estado_comercial, 
+                                estado_sii, indice, sku, descripcion, cantidad, precio, valor_total, litros_vendidos
+                            ) VALUES ${placeholders.join(', ')}
+                            ON CONFLICT (tipo_documento, folio, indice) DO UPDATE SET
+                                sucursal = EXCLUDED.sucursal,
+                                fecha_emision = EXCLUDED.fecha_emision,
+                                identificador = EXCLUDED.identificador,
+                                cliente = EXCLUDED.cliente,
+                                vendedor_cliente = EXCLUDED.vendedor_cliente,
+                                vendedor_documento = EXCLUDED.vendedor_documento,
+                                estado_sistema = EXCLUDED.estado_sistema,
+                                estado_comercial = EXCLUDED.estado_comercial,
+                                estado_sii = EXCLUDED.estado_sii,
+                                sku = EXCLUDED.sku,
+                                descripcion = EXCLUDED.descripcion,
+                                cantidad = EXCLUDED.cantidad,
+                                precio = EXCLUDED.precio,
+                                valor_total = EXCLUDED.valor_total,
+                                litros_vendidos = EXCLUDED.litros_vendidos,
+                                created_at = NOW()
+                        `;
                         const result = await client.query(query, params);
                         importedCount += result.rowCount;
                         console.log(`📊 [Job ${jobId}] Progreso: ${importedCount}/${toImport.length}`);

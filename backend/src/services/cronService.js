@@ -4,8 +4,8 @@ const { runAutoImport } = require('./automatedImportService');
 const initCronJobs = () => {
     console.log('⏰ [Cron] Inicializando tareas programadas...');
 
-    // Programar importación diaria a las 23:00 (11 PM) Lunes a Viernes
-    cron.schedule('0 23 * * 1-5', async () => {
+    // Programar importación diaria a las 23:00 (11 PM) Lunes a Sábado
+    cron.schedule('0 23 * * 1-6', async () => {
         console.log('⏰ [Cron] Ejecutando Importación Automática diaria (23:00 L-V)...');
         try {
             await runAutoImport();

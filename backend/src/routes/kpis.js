@@ -23,28 +23,6 @@ async function getUltimoMesConDatos() {
   }
 }
 
-// @route   GET /api/kpis/debug-dashboard
-// @desc    Diagnóstico público para dashboard
-router.get('/debug-dashboard', async (req, res) => {
-  try {
-    const mesActual = await getUltimoMesConDatos();
-    const salesTotal = await pool.query(`SELECT SUM(valor_total) as total FROM venta WHERE TO_CHAR(fecha_emision, 'YYYY-MM') = $1`, [mesActual]);
-    const abonosTotal = await pool.query(`SELECT SUM(COALESCE(monto_neto, monto/1.19)) as total FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = $1`, [mesActual]);
-    const counts = await pool.query(`SELECT (SELECT count(*) FROM venta) as v, (SELECT count(*) FROM abono) as a`);
-
-    res.json({
-      mesActual,
-      salesSum: salesTotal.rows[0].total,
-      abonosSum: abonosTotal.rows[0].total,
-      ventaCount: counts.rows[0].v,
-      abonoCount: counts.rows[0].a,
-      timestamp: new Date().toISOString()
-    });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
 // @route   GET /api/kpis/dashboard-current
 // @desc    Get current dashboard KPIs (NUEVO - Corregido)
 router.get('/dashboard-current', auth(), async (req, res) => {
@@ -96,19 +74,22 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         where += ` AND TO_CHAR(t.${dateCol}, 'YYYY-MM') = $${qParams.length}`;
       }
 
-      // Filtro Vendedor (por RUT)
+      let sql;
       if (rut) {
+        // Si hay RUT, necesitamos el JOIN con usuario para filtrar por alias o nombre
         qParams.push(rut);
-        where += ` AND COALESCE(u.rut, u2.rut) = $${qParams.length}`;
+        const rutParam = `$${qParams.length}`;
+        sql = `
+                SELECT COALESCE(SUM(${amountExpr}), 0) as total
+                FROM ${table} t
+                LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(t.vendedor_cliente))
+                LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(t.${table === 'venta' ? 'vendedor_documento' : 'vendedor_cliente'}))
+                ${where} AND COALESCE(u.rut, u2.rut) = ${rutParam}
+            `;
+      } else {
+        // Vista Global: Consulta Directa (Mucho más rápida y segura)
+        sql = `SELECT COALESCE(SUM(${amountExpr}), 0) as total FROM ${table} t ${where}`;
       }
-
-      const sql = `
-            SELECT COALESCE(SUM(${amountExpr}), 0) as total
-            FROM ${table} t
-            LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(t.vendedor_cliente))
-            LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(t.${table === 'venta' ? 'vendedor_documento' : 'vendedor_cliente'}))
-            ${where}
-        `;
 
       const result = await pool.query(sql, qParams);
       return parseFloat(result.rows[0]?.total || 0);
@@ -123,17 +104,22 @@ router.get('/dashboard-current', auth(), async (req, res) => {
     const getClientCount = async (monthVal, rut) => {
       const qParams = [monthVal];
       let where = ` WHERE TO_CHAR(t.${SALES_DATE_COL}, 'YYYY-MM') = $1`;
+
+      let sql;
       if (rut) {
         qParams.push(rut);
-        where += ` AND COALESCE(u.rut, u2.rut) = $2`;
+        const rutParam = `$${qParams.length}`;
+        sql = `
+                SELECT COUNT(DISTINCT t.identificador) as count
+                FROM ${SALES_TABLE} t
+                LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(t.vendedor_cliente))
+                LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(t.vendedor_documento))
+                ${where} AND COALESCE(u.rut, u2.rut) = ${rutParam}
+            `;
+      } else {
+        sql = `SELECT COUNT(DISTINCT t.identificador) as count FROM ${SALES_TABLE} t ${where}`;
       }
-      const sql = `
-            SELECT COUNT(DISTINCT t.identificador) as count
-            FROM ${SALES_TABLE} t
-            LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(t.vendedor_cliente))
-            LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(t.vendedor_documento))
-            ${where}
-        `;
+
       const result = await pool.query(sql, qParams);
       return parseInt(result.rows[0]?.count || 0);
     };

@@ -82,17 +82,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.get('/api/test-db', async (req, res) => {
-  const pool = require('./db');
-  try {
-    const v = await pool.query('SELECT count(*) as c, MAX(fecha_emision) as m FROM venta');
-    const a = await pool.query('SELECT count(*) as c, MAX(fecha) as m FROM abono');
-    res.json({ venta: v.rows[0], abono: a.rows[0], timestamp: new Date().toISOString() });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
 // DB Debug endpoint (solo DB URL hash para verificar conexión, NO exponer credenciales)
 app.get('/api/debug/connection-check', (req, res) => {
   // Solo permitir en desarrollo o para admin si se implementara middleware

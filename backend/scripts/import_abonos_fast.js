@@ -99,8 +99,8 @@ async function main() {
   try {
     const abonosTable = 'abono';
     console.log(`Tabla destino: ${abonosTable}`);
-    console.log('Limpiando tabla...');
-    await client.query(`DELETE FROM ${abonosTable}`);
+    // console.log('Limpiando tabla...');
+    // await client.query(`DELETE FROM ${abonosTable}`);
 
     // CSV Stream
     const csvPath = '/tmp/abonos_import.csv';
