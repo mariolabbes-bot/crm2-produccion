@@ -7,6 +7,25 @@ const { resolveVendorName, normalizeVendorName } = require('../utils/vendorAlias
 // Use hardcoded table name 'abono' as standard
 const ABONOS_TABLE = 'abono';
 
+// DEBUG: Endpoint público para verificar conexión y datos en Render
+router.get('/debug-public', async (req, res) => {
+  try {
+    const count = await pool.query(`SELECT COUNT(*)::int as total FROM ${ABONOS_TABLE}`);
+    const sample = await pool.query(`SELECT * FROM ${ABONOS_TABLE} LIMIT 1`);
+    const sums = await pool.query(`SELECT SUM(monto) as total_bruto, SUM(monto_neto) as total_neto FROM ${ABONOS_TABLE}`);
+
+    res.json({
+      env: process.env.NODE_ENV,
+      db_url_masked: process.env.DATABASE_URL ? process.env.DATABASE_URL.split('@')[1] : 'undefined',
+      count: count.rows[0].total,
+      sums: sums.rows[0],
+      sample: sample.rows[0] ? { ...sample.rows[0], vendedor_cliente: sample.rows[0].vendedor_cliente } : 'No data'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, stack: err.stack });
+  }
+});
+
 // GET /api/abonos - Obtener abonos con filtros
 router.get('/', auth(), async (req, res) => {
   try {
