@@ -17,5 +17,12 @@ export const getEnv = (name, fallback = '') => {
         // process might be a restricted object in some environments
     }
 
+    // Smart Fallback for production if variables are missing
+    if (name === 'REACT_APP_API_URL' && fallback === 'http://localhost:3001/api') {
+        if (typeof window !== 'undefined' && window.location.hostname === 'crm2-produccion.vercel.app') {
+            return 'https://crm2-backend.onrender.com/api';
+        }
+    }
+
     return fallback;
 };
