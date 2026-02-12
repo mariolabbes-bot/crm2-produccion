@@ -45,6 +45,7 @@ app.use((req, res, next) => {
 // Rutas principales
 app.use('/api/users', require('./routes/users'));
 app.use('/api/clients', require('./routes/clients'));
+app.use('/api/visits', require('./routes/visits'));
 app.use('/api/client-detail', require('./routes/clientDetail'));
 app.use('/api/activities', require('./routes/activities'));
 app.use('/api/activity-types', require('./routes/activity_types'));
