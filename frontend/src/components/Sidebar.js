@@ -25,6 +25,7 @@ import {
   ExitToApp as LogoutIcon,
   UploadFile as ImportIcon,
   Security as AdminIcon,
+  Map as MapIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -90,6 +91,13 @@ const Sidebar = () => {
       path: '/import-data',
       color: '#F59E0B', // Amber
       managerOnly: true
+    },
+    {
+      title: 'Mapa (PoC)',
+      icon: <MapIcon />,
+      path: '/mapa-visitas',
+      color: '#3B82F6',
+      divider: true
     },
     {
       title: 'Administración',

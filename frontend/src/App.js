@@ -20,6 +20,7 @@ import ComparativoVentasAbonos from './components/ComparativoVentasAbonos';
 import ImportPanel from './components/ImportPanel';
 import MainLayout from './components/MainLayout';
 import ClientManager from './components/ClientManager';
+import VisitMapPoC from './components/VisitMapPoC';
 
 // Pages
 import DashboardPage from './pages/DashboardPage';
@@ -47,6 +48,7 @@ const App = () => {
                                 <Route path="clientes" element={<ClientesPage />} />
                                 <Route path="productos" element={<ProductsPage />} /> {/* Nueva Ruta */}
                                 <Route path="cliente/:rut" element={<ClientDetailPage />} />
+                                <Route path="mapa-visitas" element={<VisitMapPoC />} />
                                 <Route path="assistant" element={<AssistantPage />} />
                             </Route>
 
