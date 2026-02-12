@@ -46,7 +46,12 @@ const VisitMapPoC = () => {
             const res = await axios.get('/api/visits/heatmap?vendedor_id=11', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setClients(res.data);
+            if (Array.isArray(res.data)) {
+                setClients(res.data);
+            } else {
+                console.error('Heatmap data is not an array:', res.data);
+                setClients([]);
+            }
         } catch (err) {
             console.error('Error fetching heatmap data:', err);
         } finally {

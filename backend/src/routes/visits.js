@@ -46,7 +46,7 @@ router.post('/plans', auth(), async (req, res) => {
 // GET /api/visits/heatmap - Datos para el mapa de calor
 router.get('/heatmap', auth(), async (req, res) => {
     try {
-        const isManager = req.user.rol === 'manager';
+        const isManager = req.user.rol.toUpperCase() === 'MANAGER';
         const vendedorId = req.query.vendedor_id || req.user.id;
 
         // Si no es manager y quiere ver otro, denegar (a menos que haya otra lógica)
