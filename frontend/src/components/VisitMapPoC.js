@@ -24,9 +24,14 @@ const circuitColors = {
 };
 
 const VisitMapPoC = () => {
+    // Safely get API Key
+    const apiKey = (window._env_ && window._env_.REACT_APP_GOOGLE_MAPS_API_KEY) ||
+        (typeof process !== 'undefined' && process.env && process.env.REACT_APP_GOOGLE_MAPS_API_KEY) ||
+        '';
+
     const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''
+        googleMapsApiKey: apiKey
     });
 
     const [clients, setClients] = useState([]);
