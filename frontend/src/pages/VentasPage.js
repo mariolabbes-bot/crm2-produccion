@@ -30,6 +30,7 @@ const VentasPage = () => {
     const [vendedores, setVendedores] = useState([]);
     const [selectedVendedor, setSelectedVendedor] = useState('');
     const [categoria, setCategoria] = useState('TODOS LOS PRODUCTOS');
+    const [sortBy, setSortBy] = useState('monto');
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -37,7 +38,8 @@ const VentasPage = () => {
     useEffect(() => {
         if (isManager) {
             getVendedores().then(res => {
-                if (res.success) setVendedores(res.data);
+                if (Array.isArray(res)) setVendedores(res);
+                else if (res.success) setVendedores(res.data);
             });
         }
     }, [isManager]);
@@ -49,7 +51,8 @@ const VentasPage = () => {
             try {
                 const res = await getVentasReport({
                     vendedor_id: selectedVendedor,
-                    categoria: categoria
+                    categoria: categoria,
+                    sort_by: sortBy
                 });
                 if (res.success) {
                     setData(res.data);
@@ -64,7 +67,7 @@ const VentasPage = () => {
             }
         };
         loadReport();
-    }, [selectedVendedor, categoria]);
+    }, [selectedVendedor, categoria, sortBy]);
 
     const formatMoney = (val) => {
         return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val);
@@ -100,7 +103,7 @@ const VentasPage = () => {
                             >
                                 <MenuItem value="">Todos los Vendedores</MenuItem>
                                 {vendedores.map(v => (
-                                    <MenuItem key={v.id} value={v.id}>{v.nombre_completo}</MenuItem>
+                                    <MenuItem key={v.id} value={v.id}>{v.nombre || v.nombre_completo}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
@@ -120,6 +123,18 @@ const VentasPage = () => {
                             <MenuItem value="REENCAUCHE">Reencauche</MenuItem>
                         </Select>
                     </FormControl>
+
+                    <FormControl sx={{ minWidth: 150 }} size="small">
+                        <InputLabel>Orden por</InputLabel>
+                        <Select
+                            value={sortBy}
+                            label="Orden por"
+                            onChange={(e) => setSortBy(e.target.value)}
+                        >
+                            <MenuItem value="monto">Monto ($)</MenuItem>
+                            <MenuItem value="cantidad">Cantidad</MenuItem>
+                        </Select>
+                    </FormControl>
                 </Box>
             </Box>
 
@@ -130,7 +145,7 @@ const VentasPage = () => {
             <Paper sx={{ p: 0, overflow: 'hidden', borderRadius: 2, boxShadow: 3 }}>
                 <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2B4F6F' }}>
-                        Detalle de Rendimiento por Producto
+                        Top 20 Productos por {sortBy === 'monto' ? 'Volumen de Venta ($)' : 'Cantidad Vendida'}
                     </Typography>
                 </Box>
 

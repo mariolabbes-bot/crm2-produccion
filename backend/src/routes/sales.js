@@ -109,7 +109,7 @@ router.post('/bulk', auth(), upload.single('file'), async (req, res) => {
 // @access  Private
 router.get('/report', auth(), async (req, res) => {
   try {
-    const { vendedor_id, categoria } = req.query;
+    const { vendedor_id, categoria, sort_by = 'monto' } = req.query;
     const isManager = req.user.rol.toUpperCase() === 'MANAGER';
 
     // Determinar vendedor a filtrar
@@ -128,7 +128,6 @@ router.get('/report', auth(), async (req, res) => {
     const endLastYear = new Date(currentYear - 1, currentMonth, 0).toISOString().split('T')[0];
 
     // Rango 6 meses anteriores (sin contar el actual)
-    // Ejemplo: si es Feb, meses son: Ene, Dic, Nov, Oct, Sep, Ago
     const start6m = new Date(currentYear, currentMonth - 7, 1).toISOString().split('T')[0];
     const end6m = new Date(currentYear, currentMonth - 1, 0).toISOString().split('T')[0];
 
@@ -157,6 +156,7 @@ router.get('/report', auth(), async (req, res) => {
     }
 
     const whereSql = whereClauses.length > 0 ? 'AND ' + whereClauses.join(' AND ') : '';
+    const sortColumn = sort_by === 'cantidad' ? 'cantidad_mes_actual' : 'volumen_dinero_mes_actual';
 
     const query = `
             WITH ventas_agrupadas AS (
@@ -185,7 +185,8 @@ router.get('/report', auth(), async (req, res) => {
                 CASE WHEN qty_6m > 0 THEN ROUND(((qty_actual - (qty_6m / 6.0)) / (qty_6m / 6.0) * 100), 1) ELSE 0 END as perc_vs_prom_6m
             FROM ventas_agrupadas
             WHERE qty_actual > 0 OR qty_anio_ant > 0 OR qty_6m > 0
-            ORDER BY volumen_dinero_mes_actual DESC
+            ORDER BY ${sortColumn} DESC
+            LIMIT 20
         `;
 
     const result = await pool.query(query, params);

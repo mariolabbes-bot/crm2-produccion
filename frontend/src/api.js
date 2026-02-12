@@ -137,28 +137,8 @@ export const addGoalType = (type) => apiFetch(`${API_URL}/goal-types`, { method:
 export const updateGoalType = (id, type) => apiFetch(`${API_URL}/goal-types/${id}`, { method: 'PUT', body: JSON.stringify(type) });
 export const deleteGoalType = (id) => apiFetch(`${API_URL}/goal-types/${id}`, { method: 'DELETE' });
 
-// ABONOS
-export const getAbonos = () => apiFetch(`${API_URL}/abonos`);
-export const uploadAbonos = async (file) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  const response = await fetch(`${API_URL}/abonos/bulk`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${getToken()}` },
-    body: formData
-  });
-  return response.json();
-};
-
-export const downloadPlantillaAbonos = () => {
-  window.open(`${API_URL}/abonos/plantilla`, '_blank');
-};
-
 // COMPARATIVAS
-export const getComparativaVentasAbonos = (params) => {
-  const query = new URLSearchParams(params).toString();
-  return apiFetch(`${API_URL}/comparativas/ventas-abonos?${query}`);
-};
+// (Eliminado)
 export const uploadSales = async (file) => {
   const token = getToken();
   const formData = new FormData();
