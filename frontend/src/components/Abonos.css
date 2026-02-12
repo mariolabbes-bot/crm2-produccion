@@ -1,0 +1,433 @@
+.abonos-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.abonos-header {
+  margin-bottom: 30px;
+}
+
+.abonos-header h1 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+/* Estadísticas */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card:nth-child(2) {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-card:nth-child(3) {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-card:nth-child(4) {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Filtros */
+.filters-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.filters-section h3 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.btn-clear-filters {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.btn-clear-filters:hover {
+  background: #c0392b;
+}
+
+/* Lista de Abonos */
+.abonos-list-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.list-header h3 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+.pagination-info {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+/* Tabla */
+.table-container {
+  overflow-x: auto;
+}
+
+.abonos-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.abonos-table thead {
+  background: #f8f9fa;
+}
+
+.abonos-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.abonos-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.abonos-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.folio {
+  font-family: monospace;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.cliente-nombre {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vendedor {
+  font-weight: 500;
+  color: #555;
+}
+
+.monto {
+  font-weight: bold;
+  color: #27ae60;
+  text-align: right;
+}
+
+.tipo-pago {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.tipo-cheque {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.tipo-transferencia {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.tipo-dbito {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.tipo-efectivo {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.tipo-crdito {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+.tipo-depsito {
+  background: #e0f2f1;
+  color: #00796b;
+}
+
+.tipo-valevista {
+  background: #f1f8e9;
+  color: #689f38;
+}
+
+.estado {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #95a5a6;
+  font-style: italic;
+}
+
+/* Paginación */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  padding: 8px 15px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  padding: 8px 15px;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+/* Distribución por Tipo de Pago */
+.tipo-pago-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tipo-pago-section h3 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.tipo-pago-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.tipo-pago-card {
+  border: 2px solid #f1f1f1;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.tipo-pago-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+}
+
+.tipo-pago-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.tipo-pago-amount {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #27ae60;
+  margin-bottom: 5px;
+}
+
+.tipo-pago-count {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin-bottom: 5px;
+}
+
+.tipo-pago-avg {
+  font-size: 0.85rem;
+  color: #95a5a6;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error */
+.error-message {
+  background: #fee;
+  color: #c00;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c00;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .abonos-table {
+    font-size: 0.85rem;
+  }
+
+  .abonos-table th,
+  .abonos-table td {
+    padding: 8px;
+  }
+
+  .pagination {
+    font-size: 0.85rem;
+  }
+
+  .pagination button {
+    padding: 6px 10px;
+  }
+}

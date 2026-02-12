@@ -15,6 +15,8 @@ import ActivityEditor from './components/ActivityEditor';
 import Goals from './components/Goals';
 import AdminManager from './components/AdminManager';
 import DashboardNuevo from './components/DashboardNuevo';
+import Abonos from './components/Abonos';
+import ComparativoVentasAbonos from './components/ComparativoVentasAbonos';
 import ImportPanel from './components/ImportPanel';
 import MainLayout from './components/MainLayout';
 import ClientManager from './components/ClientManager';
@@ -60,6 +62,8 @@ const App = () => {
                             <Route path="/goals" element={<PrivateRoute><Goals /></PrivateRoute>} />
                             <Route path="/admin" element={<ManagerRoute><AdminManager /></ManagerRoute>} />
                             <Route path="/import-data" element={<ManagerRoute><ImportPanel /></ManagerRoute>} />
+                            <Route path="/abonos" element={<PrivateRoute><Abonos /></PrivateRoute>} />
+                            <Route path="/comparativo" element={<PrivateRoute><ComparativoVentasAbonos /></PrivateRoute>} />
                             <Route path="/dashboard-nuevo" element={<DashboardNuevo />} />
 
                             <Route path="*" element={<Navigate to="/" />} />
