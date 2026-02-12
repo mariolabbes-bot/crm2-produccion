@@ -1,7 +1,8 @@
 import { getToken } from './utils/auth';
+import { getEnv } from './utils/env';
 
 // API URL con fallback para desarrollo y producción
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_URL = getEnv('REACT_APP_API_URL', 'http://localhost:3001/api');
 
 // Exportar API_URL para uso en componentes
 export { API_URL };

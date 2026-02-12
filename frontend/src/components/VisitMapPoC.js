@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { Box, Typography, Paper, CircularProgress, Chip, Stack } from '@mui/material';
 import { getHeatmapData } from '../api';
+import { getEnv } from '../utils/env';
 
 const containerStyle = {
     width: '100%',
@@ -24,9 +25,7 @@ const circuitColors = {
 
 const VisitMapPoC = () => {
     // Safely get API Key
-    const apiKey = (window._env_ && window._env_.REACT_APP_GOOGLE_MAPS_API_KEY) ||
-        process.env.REACT_APP_GOOGLE_MAPS_API_KEY ||
-        '';
+    const apiKey = getEnv('REACT_APP_GOOGLE_MAPS_API_KEY');
 
     const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
