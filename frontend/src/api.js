@@ -440,6 +440,12 @@ export const createClientActividad = (rut, comentario) =>
     body: JSON.stringify({ comentario })
   });
 
+// VISITS & MAP
+export const getHeatmapData = (vendedorId) => {
+  const url = vendedorId ? `${API_URL}/visits/heatmap?vendedor_id=${vendedorId}` : `${API_URL}/visits/heatmap`;
+  return apiFetch(url);
+};
+
 // ADMIN - Reset Database
 export const resetDatabase = (confirmString) => apiFetch(`${API_URL}/admin/reset-database`, {
   method: 'POST',

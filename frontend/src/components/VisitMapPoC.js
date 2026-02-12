@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { Box, Typography, Paper, CircularProgress, Chip, Stack } from '@mui/material';
-import axios from 'axios';
+import { getHeatmapData } from '../api';
 
 const containerStyle = {
     width: '100%',
@@ -26,7 +25,7 @@ const circuitColors = {
 const VisitMapPoC = () => {
     // Safely get API Key
     const apiKey = (window._env_ && window._env_.REACT_APP_GOOGLE_MAPS_API_KEY) ||
-        (typeof process !== 'undefined' && process.env && process.env.REACT_APP_GOOGLE_MAPS_API_KEY) ||
+        process.env.REACT_APP_GOOGLE_MAPS_API_KEY ||
         '';
 
     const { isLoaded, loadError } = useJsApiLoader({
@@ -41,15 +40,11 @@ const VisitMapPoC = () => {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
-            // For PoC, we point to Eduardo Rojas (ID 11) or allow all if manager
-            const res = await axios.get('/api/visits/heatmap?vendedor_id=11', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (Array.isArray(res.data)) {
-                setClients(res.data);
+            const data = await getHeatmapData(11); // For PoC, Eduardo Rojas
+            if (Array.isArray(data)) {
+                setClients(data);
             } else {
-                console.error('Heatmap data is not an array:', res.data);
+                console.error('Heatmap data is not an array:', data);
                 setClients([]);
             }
         } catch (err) {
