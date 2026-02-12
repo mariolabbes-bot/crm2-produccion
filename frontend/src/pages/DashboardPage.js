@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Grid, Box, FormControl, InputLabel, Select, MenuItem, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import {
   ShoppingCart as VentasIcon,
-  Payment as AbonosIcon,
   People as ClientesIcon,
   Inventory as ProductosIcon,
 } from '@mui/icons-material';
@@ -30,12 +29,10 @@ const DashboardPage = () => {
   const [vendedorSeleccionado, setVendedorSeleccionado] = useState('todos');
   const [kpis, setKpis] = useState({
     ventasMes: 0,
-    abonosMes: 0,
     promedioTrimestre: 0,
     clientesActivos: 0,
     saldoCreditoTotal: 0,
     trendVentas: 0,
-    trendAbonos: 0,
     trendPromedioTrimestre: 0,
   });
   const [evolucionMensual, setEvolucionMensual] = useState([]);
@@ -89,15 +86,10 @@ const DashboardPage = () => {
 
         setKpis({
           ventasMes: kpisData.monto_ventas_mes || 0,
-          abonosMes: kpisData.monto_abonos_mes || 0,
           promedioTrimestre: kpisData.promedio_ventas_trimestre_anterior || 0,
           clientesActivos: kpisData.numero_clientes_con_venta_mes || 0,
           saldoCreditoTotal: saldoCreditoData.total_saldo_credito || 0,
           trendVentas: kpisData.variacion_vs_anio_anterior_pct || 0,
-          // Calcular % de abonos respecto a ventas del mes
-          trendAbonos: kpisData.monto_ventas_mes > 0
-            ? (kpisData.monto_abonos_mes / kpisData.monto_ventas_mes) * 100
-            : 0,
           // Calcular % de ventas mes actual vs promedio trimestre anterior
           trendPromedioTrimestre: kpisData.promedio_ventas_trimestre_anterior > 0
             ? ((kpisData.monto_ventas_mes - kpisData.promedio_ventas_trimestre_anterior) / kpisData.promedio_ventas_trimestre_anterior) * 100
@@ -202,18 +194,6 @@ const DashboardPage = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <KPICard
-            title="Abonos del Mes"
-            value={formatCurrency(kpis.abonosMes)}
-            subtitle="de las ventas"
-            trend={kpis.trendAbonos}
-            trendAsPercentage={true}
-            color="#3478C3"
-            icon={<AbonosIcon />}
-            loading={loading}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <KPICard
             title="Promedio Trimestre"
             value={formatCurrency(kpis.promedioTrimestre)}
             subtitle={kpis.promedioTrimestre > 0 ? (
@@ -244,7 +224,7 @@ const DashboardPage = () => {
         <Grid item xs={12}>
           <ChartContainer
             title="Evolución Mensual (Últimos 6 meses cerrados)"
-            subtitle="Comparativa Ventas vs Abonos"
+            subtitle="Análisis de Ventas"
             loading={loading}
             height={400}
           >
@@ -286,16 +266,6 @@ const DashboardPage = () => {
                     activeDot={{ r: 8, strokeWidth: 0 }}
                     animationDuration={1500}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="abonos"
-                    stroke="#3478C3"
-                    strokeWidth={3}
-                    name="Abonos"
-                    dot={{ fill: '#3478C3', r: 5, strokeWidth: 2, stroke: '#fff' }}
-                    activeDot={{ r: 8, strokeWidth: 0 }}
-                    animationDuration={1500}
-                  />
                 </LineChart>
               ) : (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'text.secondary' }}>
@@ -318,7 +288,6 @@ const DashboardPage = () => {
                   <TableRow>
                     <TableCell sx={{ fontWeight: 'bold' }}>Vendedor</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Mes Actual)</span></TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Abonos <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Mes Actual)</span></TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Prom. Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Trim. Ant.)</span></TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Ventas <br /><span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>(Año Ant.)</span></TableCell>
                   </TableRow>
@@ -329,9 +298,6 @@ const DashboardPage = () => {
                     <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>TOTALES</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5', color: '#10B981' }}>
                       {formatCurrency(rankingVendedores.reduce((sum, row) => sum + (parseFloat(row.ventas_mes_actual) || 0), 0))}
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5', color: '#3478C3' }}>
-                      {formatCurrency(rankingVendedores.reduce((sum, row) => sum + (parseFloat(row.abonos_mes_actual) || 0), 0))}
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5', color: '#A855F7' }}>
                       {formatCurrency(rankingVendedores.reduce((sum, row) => sum + (parseFloat(row.prom_ventas_trimestre_ant) || 0), 0))}
@@ -349,9 +315,6 @@ const DashboardPage = () => {
                       </TableCell>
                       <TableCell align="right" sx={{ color: '#10B981', fontWeight: 'bold', fontSize: '0.85rem' }}>
                         {formatCurrency(row.ventas_mes_actual)}
-                      </TableCell>
-                      <TableCell align="right" sx={{ color: '#3478C3', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                        {formatCurrency(row.abonos_mes_actual)}
                       </TableCell>
                       <TableCell align="right" sx={{ color: '#A855F7', fontSize: '0.85rem' }}>
                         {formatCurrency(row.prom_ventas_trimestre_ant)}

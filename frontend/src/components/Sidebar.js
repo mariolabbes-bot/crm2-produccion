@@ -17,7 +17,6 @@ import {
   Dashboard as DashboardIcon,
   Chat as ChatIcon,
   ShoppingCart as VentasIcon,
-  Payment as AbonosIcon,
   People as ClientesIcon,
   Inventory as ProductosIcon,
   Assessment as ReportesIcon,
@@ -59,12 +58,6 @@ const Sidebar = () => {
       icon: <VentasIcon />,
       path: '/ventas',
       color: '#10B981' // Verde
-    },
-    {
-      title: 'Abonos',
-      icon: <AbonosIcon />,
-      path: '/abonos',
-      color: '#3478C3' // Azul claro
     },
     {
       title: 'Clientes',

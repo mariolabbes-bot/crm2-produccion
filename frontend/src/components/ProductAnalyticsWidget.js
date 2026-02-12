@@ -7,15 +7,16 @@ import OpacityIcon from '@mui/icons-material/Opacity'; // Para litros
 import BlurOnIcon from '@mui/icons-material/BlurOn'; // Para neumáticos/unidades
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
-const ProductAnalyticsWidget = () => {
+const ProductAnalyticsWidget = ({ vendedorId }) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const loadData = async () => {
+            setLoading(true);
             try {
-                const result = await getProductKpis();
+                const result = await getProductKpis({ vendedor_id: vendedorId });
                 if (result.success) {
                     setData(result);
                 } else {
@@ -29,7 +30,7 @@ const ProductAnalyticsWidget = () => {
             }
         };
         loadData();
-    }, []);
+    }, [vendedorId]);
 
     if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress /></Box>;
     if (error) return <Alert severity="error">{error}</Alert>;

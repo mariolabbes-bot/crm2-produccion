@@ -1,0 +1,348 @@
+Sucursal;Folio;Fecha;Identificador cliente;Cliente;Vendedor cliente;Caja operacional;Usuario de ingreso;Monto total;Saldo favor utilizado;Saldo favor total;Tipo pago;Estado abono;Identificador abono;Fecha vencimiento;Monto;Monto devuelto
+Linares;223508;10-02-26;9262987-2;EDUARDO ENRIQUE PONCE;Eduardo;Linares;Eduardo;57281;0;0;Efectivo;En Caja Operacional;;;17281;0
+Linares;223508;10-02-26;9262987-2;EDUARDO ENRIQUE PONCE;Eduardo;Linares;Eduardo;57281;0;0;Débito;En Caja Operacional;550049;;40000;0
+Ovalle;223507;10-02-26;11507724-4;ALDO ARIEL CARVAJAL;Emilio;Ovalle;Emilio;129641;0;0;Débito;En Caja Operacional;214;;129641;0
+Geronimo Mendez;223506;10-02-26;77610582-1;CLAUDIO RODRIGUEZ E HIJOS SPA;Maiko;Ventas Local;Maiko;24990;0;0;Débito;En Caja Operacional;330679;;24990;0
+Ovalle;223505;10-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;69037;0;0;Débito;En Caja Operacional;224986;;69037;0
+Rojas Magallanes;223504;10-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;13426;0;0;Débito;En Caja Operacional;7183;;13426;0
+Rojas Magallanes;223503;10-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;57139;0;0;Débito;En Caja Operacional;335521;;57139;0
+Linares;223502;10-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;25715;0;0;Débito;En Caja Operacional;600337;;25715;0
+Linares;223501;10-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;38375;0;0;Débito;En Caja Operacional;536225;;38375;0
+Rojas Magallanes;223500;10-02-26;76495857-8;AUTO MOTO REPUESTOS LIMITADA;Marisol;Rojas Magallanes;Marisol;296705;0;0;Débito;En Caja Operacional;1698;;296705;0
+Geronimo Mendez;223499;10-02-26;16443372-2;HECTOR JAVIER  ROJAS;Maiko;Ventas Local;SoporteVenta;547400;0;0;Débito;En Caja Operacional;207955;;250000;0
+Geronimo Mendez;223499;10-02-26;16443372-2;HECTOR JAVIER  ROJAS;Maiko;Ventas Local;SoporteVenta;547400;0;0;Cheque;En Caja Operacional;4650818;10-03-26;297400;0
+Linares;223498;10-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;35000;0;303;Crédito;En Caja Operacional;804442;;35000;0
+Geronimo Mendez;223497;10-02-26;11505534-8;JOSE ARACENA;Nelson;Cobranzas;Maria;468330;0;0;Transferencia;En Caja Operacional;276631;;468330;0
+Geronimo Mendez;223496;10-02-26;78159556-K;VENTAS Y SERVICIOS MYC SPA;Nelson;Ventas Local;SoporteVenta;1245007;0;0;Transferencia;En Caja Operacional;278842;;1245007;0
+Linares;223495;10-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;36432;0;0;Débito;En Caja Operacional;484909;;36432;0
+Linares;223494;10-02-26;77528991-0;MOVIMIENTOS DE TIERRA M M Y COMPANIA LIMITADA;Luis;Linares;Eduardo;83816;0;0;Débito;En Caja Operacional;414970;;83816;0
+Geronimo Mendez;223493;10-02-26;10913019-2;OMAR MALDONADO;Omar;Ventas Local;SoporteVenta;118087;0;0;Débito;En Caja Operacional;910822;;118087;0
+Rojas Magallanes;223492;10-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;4731;0;0;Débito;En Caja Operacional;128125;;4731;0
+Geronimo Mendez;223491;10-02-26;66666666-6;Cliente GERONIMO MENDEZ Generico;Maiko;Ventas Local;Maiko;52426;0;0;Débito;En Caja Operacional;346246;;52426;0
+Rojas Magallanes;223490;10-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Cristian;12495;0;0;Crédito;En Caja Operacional;60993;;12495;0
+Geronimo Mendez;223489;10-02-26;17378532-1;KATHERINE SAN;Maiko;Ventas Local;Maiko;217770;0;0;Débito;En Caja Operacional;424667;;217770;0
+Rojas Magallanes;223488;10-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;29932;0;0;Crédito;En Caja Operacional;411870;;29932;0
+Linares;223487;10-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;45833;0;0;Débito;En Caja Operacional;23674;;45833;0
+Geronimo Mendez;223486;10-02-26;6948097-7;EDDIE PALEO;Maiko;Ventas Local;Maiko;210711;0;0;Débito;En Caja Operacional;450526;;210711;0
+Antillanca;223485;10-02-26;76432317-3;LUBRICENTRO LA FLORIDA;Victoria;Antillanca;Nataly;342107;0;0;Transferencia;En Caja Operacional;85;;342107;0
+Geronimo Mendez;223484;10-02-26;76683179-6;TRANSPORTE WILLIAM ALEXANDER DINAMARCA M;Maiko;Ventas Local;Maiko;2153050;0;0;Crédito;En Caja Operacional;490846;;3050;0
+Geronimo Mendez;223484;10-02-26;76683179-6;TRANSPORTE WILLIAM ALEXANDER DINAMARCA M;Maiko;Ventas Local;Maiko;2153050;0;0;Cheque;En Caja Operacional;171;10-02-26;430000;0
+Geronimo Mendez;223484;10-02-26;76683179-6;TRANSPORTE WILLIAM ALEXANDER DINAMARCA M;Maiko;Ventas Local;Maiko;2153050;0;0;Cheque;En Caja Operacional;172;10-03-26;430000;0
+Geronimo Mendez;223484;10-02-26;76683179-6;TRANSPORTE WILLIAM ALEXANDER DINAMARCA M;Maiko;Ventas Local;Maiko;2153050;0;0;Cheque;En Caja Operacional;173;10-04-26;430000;0
+Geronimo Mendez;223484;10-02-26;76683179-6;TRANSPORTE WILLIAM ALEXANDER DINAMARCA M;Maiko;Ventas Local;Maiko;2153050;0;0;Cheque;En Caja Operacional;174;10-05-26;430000;0
+Geronimo Mendez;223484;10-02-26;76683179-6;TRANSPORTE WILLIAM ALEXANDER DINAMARCA M;Maiko;Ventas Local;Maiko;2153050;0;0;Cheque;En Caja Operacional;175;10-06-26;430000;0
+Ovalle;223483;10-02-26;12217672-K;MARGARITA DEL CARMEN ASTUDILLO;Emilio;Ovalle;Emilio;60005;0;0;Efectivo;En Caja Operacional;;;60005;0
+Antillanca;223482;10-02-26;77138593-1;DyA INVERSIONES SPA;Roberto;Antillanca;Nataly;537221;0;0;Transferencia;En Caja Operacional;99;;537221;0
+Antillanca;223481;10-02-26;78008271-2;COMERCIO DE ACCESORIOS Y REPUESTOS AUTOMOTRICES GONZALO GUZMAN EIRL;Roberto;Antillanca;Nataly;326292;0;0;Transferencia;En Caja Operacional;67;;326292;0
+Geronimo Mendez;223480;10-02-26;6276438-4;IVAR TORRES;Maiko;Ventas Local;Maiko;97973;0;0;Débito;En Caja Operacional;574980;;97973;0
+Linares;223479;10-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;42758;0;0;Débito;En Caja Operacional;12931;;42758;0
+Geronimo Mendez;223478;10-02-26;77691322-7;LA SERENA LOGISTICA SPA;Maiko;Ventas Local;Maiko;14994;0;0;Débito;En Caja Operacional;827534;;14994;0
+Ovalle;223477;10-02-26;76970627-5;SERVICIOS HOTELEROS SAN LUIS SPA;Emilio;Ovalle;Emilio;332498;0;0;Débito;En Caja Operacional;6823;;332498;0
+Ovalle;223476;10-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;29932;0;0;Efectivo;En Caja Operacional;;;29932;0
+Geronimo Mendez;223475;10-02-26;11784668-7;LAURA ANTONIETA CASTRO;Omar;Contraloria;Maria;391069;0;0;Transferencia;En Caja Operacional;278700;;391069;0
+Geronimo Mendez;223474;10-02-26;12350511-5;CESAR GODOY;Omar;Contraloria;Maria;1171160;0;0;Cheque;En Caja Operacional;1267;31-03-26;390387;0
+Geronimo Mendez;223474;10-02-26;12350511-5;CESAR GODOY;Omar;Contraloria;Maria;1171160;0;0;Cheque;En Caja Operacional;1268;30-04-26;390387;0
+Geronimo Mendez;223474;10-02-26;12350511-5;CESAR GODOY;Omar;Contraloria;Maria;1171160;0;0;Cheque;En Caja Operacional;1269;31-05-26;390386;0
+Geronimo Mendez;223473;10-02-26;10447980-4;PATRICIO VIDAL;Omar;Contraloria;Maria;200000;0;0;Efectivo;En Caja Operacional;;;200000;0
+Geronimo Mendez;223472;10-02-26;12844515-3;YURI BARRAZA;Omar;Contraloria;Maria;200000;0;0;Transferencia;En Caja Operacional;278697;;200000;0
+Geronimo Mendez;223471;10-02-26;9341458-6;GUILLERMO ARAYA;Omar;Contraloria;Maria;60000;0;0;Efectivo;En Caja Operacional;;;60000;0
+Geronimo Mendez;223470;10-02-26;77715777-9;INVERSIONES SRG SPA;Omar;Contraloria;Maria;178441;0;0;Transferencia;En Caja Operacional;278695;;178441;0
+Geronimo Mendez;223469;10-02-26;77043814-4;SERVICIOS AUTOMOTRIZ TP SPA;Omar;Contraloria;Maria;1140399;0;0;Cheque;En Caja Operacional;4630140;09-03-26;380133;0
+Geronimo Mendez;223469;10-02-26;77043814-4;SERVICIOS AUTOMOTRIZ TP SPA;Omar;Contraloria;Maria;1140399;0;0;Cheque;En Caja Operacional;4630141;07-04-26;380133;0
+Geronimo Mendez;223469;10-02-26;77043814-4;SERVICIOS AUTOMOTRIZ TP SPA;Omar;Contraloria;Maria;1140399;0;0;Cheque;En Caja Operacional;4630142;15-05-26;380133;0
+Geronimo Mendez;223468;10-02-26;18969126-2;PAULO ANDRES HONORES;Omar;Contraloria;Maria;1190032;0;0;Transferencia;En Caja Operacional;278701;;1190032;0
+Antillanca;223467;10-02-26;77695488-8;LUBRICENTRO MUNOZ HERMANOS SPA;Victoria;Antillanca;Nataly;236175;0;0;Transferencia;En Caja Operacional;63;;236175;0
+Antillanca;223466;10-02-26;76444358-6;REPUESTOS AUTOMOTRICES PAULITA LTDA.;Jorge;Antillanca;Nataly;397577;0;0;Transferencia;En Caja Operacional;96;;397577;0
+Antillanca;223465;10-02-26;16743246-8;ALEXY ANDRES IBANEZ;Victoria;Antillanca;Nataly;532457;0;0;Transferencia;En Caja Operacional;98;;299099;0
+Antillanca;223465;10-02-26;16743246-8;ALEXY ANDRES IBANEZ;Victoria;Antillanca;Nataly;532457;0;0;Transferencia;En Caja Operacional;91;;66968;0
+Antillanca;223465;10-02-26;16743246-8;ALEXY ANDRES IBANEZ;Victoria;Antillanca;Nataly;532457;0;0;Transferencia;En Caja Operacional;92;;123886;0
+Antillanca;223465;10-02-26;16743246-8;ALEXY ANDRES IBANEZ;Victoria;Antillanca;Nataly;532457;0;0;Transferencia;En Caja Operacional;93;;42504;0
+Linares;223464;10-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;36267;0;0;Débito;En Caja Operacional;9372;;36267;0
+Antillanca;223463;10-02-26;15485019-8;JAIME GREGORIO  RAMOS;Victoria;Antillanca;Nataly;619733;0;0;Transferencia;En Caja Operacional;47;;619733;0
+Geronimo Mendez;223462;10-02-26;12267788-5;CARLOS EDUARDO  CORREA;Omar;Ventas Local;SoporteVenta;118978;0;0;Débito;En Caja Operacional;3497;;118978;0
+Antillanca;223461;10-02-26;13835232-3;JAIME MAURICIO  PONTIGO;Victoria;Antillanca;Nataly;77702;0;0;Transferencia;En Caja Operacional;49;;77702;0
+Antillanca;223460;10-02-26;16743246-8;ALEXY ANDRES IBANEZ;Victoria;Antillanca;Nataly;300418;0;0;Transferencia;En Caja Operacional;94;;300418;0
+Antillanca;223459;10-02-26;77124812-8;TRANSPORTES C R SPA;Matias Felipe;Antillanca;Nataly;100000;0;0;Transferencia;En Caja Operacional;77;;100000;0
+Linares;223458;09-02-26;76547222-9;EL REGALON SPA;Eduardo;Linares;Eduardo;98369;0;0;Crédito;En Caja Operacional;837156;;98369;0
+Linares;223457;09-02-26;77329341-4;TRANSPORTES CARLOS CONTRERAS E I R L;Eduardo;Linares;Eduardo;91707;0;0;Débito;En Caja Operacional;150370;;91707;0
+Rojas Magallanes;223456;09-02-26;12748552-6;erica sepulveda;Marisol;Rojas Magallanes;Marisol;183889;0;0;Débito;En Caja Operacional;41010;;183889;0
+Linares;223455;09-02-26;9262987-2;EDUARDO ENRIQUE PONCE;Eduardo;Linares;Eduardo;63395;0;0;Efectivo;En Caja Operacional;;;7516;0
+Linares;223455;09-02-26;9262987-2;EDUARDO ENRIQUE PONCE;Eduardo;Linares;Eduardo;63395;0;0;Débito;En Caja Operacional;23929;;55879;0
+Ovalle;223454;09-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;7001;0;0;Efectivo;En Caja Operacional;;;7001;0
+Ovalle;223453;09-02-26;11327860-9;ROBERT CAROZZI;Emilio;Ovalle;Emilio;600000;0;0;Débito;En Caja Operacional;17278;;600000;0
+Geronimo Mendez;223452;09-02-26;77331017-3;SERVICIOS INTEGRALES DE MECANICA AUTOMOTRIZ SPA;Luis;Ventas Local;SoporteVenta;130843;0;0;Crédito;En Caja Operacional;559101;;130843;0
+Geronimo Mendez;223451;09-02-26;26985013-2;MARIA FERNANDA PARRA;Nelson;Contraloria;Maria;794681;0;0;Transferencia;En Caja Operacional;278395;;200000;0
+Geronimo Mendez;223451;09-02-26;26985013-2;MARIA FERNANDA PARRA;Nelson;Contraloria;Maria;794681;0;0;Transferencia;En Caja Operacional;278395;;300000;0
+Geronimo Mendez;223451;09-02-26;26985013-2;MARIA FERNANDA PARRA;Nelson;Contraloria;Maria;794681;0;0;Transferencia;En Caja Operacional;278395;;294681;0
+Geronimo Mendez;223450;09-02-26;76721044-2;MECANICA AUT. RUBEN DOMINGO RODRIGUEZ TI;Nelson;Contraloria;Maria;73316;0;0;Transferencia;En Caja Operacional;278400;;73316;0
+Geronimo Mendez;223449;09-02-26;11823742-0;OSVALDO CARMONA;Nelson;Contraloria;Maria;200000;0;0;Transferencia;En Caja Operacional;278399;;200000;0
+Geronimo Mendez;223448;09-02-26;6985240-8;JOEL SAAVEDRA;Nelson;Contraloria;Maria;618800;0;0;Transferencia;En Caja Operacional;278398;;618800;0
+Geronimo Mendez;223447;09-02-26;76225790-4;SOC. COMERCIAL AUTOLINE LTDA;Nelson;Contraloria;Maria;254810;0;0;Transferencia;En Caja Operacional;278397;;254810;0
+Geronimo Mendez;223446;09-02-26;77964055-8;J G TRANSPORTES SPA;Nelson;Contraloria;Maria;336123;0;0;Transferencia;En Caja Operacional;278396;;250000;0
+Geronimo Mendez;223446;09-02-26;77964055-8;J G TRANSPORTES SPA;Nelson;Contraloria;Maria;336123;0;0;Transferencia;En Caja Operacional;278396;;86123;0
+Geronimo Mendez;223445;09-02-26;78244373-9;INVERSIONES RIVECORT SPA;Nelson;Contraloria;Maria;1500000;0;0;Transferencia;En Caja Operacional;278394;;1500000;0
+Geronimo Mendez;223444;09-02-26;8808596-5;JOSE OSCIEL GONZALEZ;Nelson;Contraloria;Maria;537404;0;0;Transferencia;En Caja Operacional;278393;;537404;0
+Rojas Magallanes;223443;09-02-26;76495857-8;AUTO MOTO REPUESTOS LIMITADA;Marisol;Rojas Magallanes;Marisol;90742;0;0;Efectivo;En Caja Operacional;;;90742;0
+Geronimo Mendez;223442;09-02-26;77870701-2;TRANSPORTES JIMENEZ LAGOS SPA;Nelson;Contraloria;Maria;422245;0;0;Transferencia;En Caja Operacional;278392;;422245;0
+Geronimo Mendez;223441;09-02-26;76362119-7;RAPID CARGO SA;Nelson;Contraloria;Maria;995740;0;0;Transferencia;En Caja Operacional;278391;;995740;0
+Geronimo Mendez;223440;09-02-26;3822222-8;MANUEL VEGA;Nelson;Contraloria;Maria;590000;0;522;Transferencia;En Caja Operacional;278390;;590000;0
+Geronimo Mendez;223439;09-02-26;76743011-6;TRANSPORTES JORGE HUMBERTO MORENO MORENO EMPRESA INDIVIDUAL DE RESPONSABILIDA;Nelson;Contraloria;Maria;1502827;0;0;Transferencia;En Caja Operacional;278389;;1502827;0
+Geronimo Mendez;223438;09-02-26;76711140-1;AGROCOMERCIAL MARDANELY Y CIA LTDA;Nelson;Contraloria;Maria;1134982;0;0;Cheque;En Caja Operacional;5172470;05-05-26;377000;0
+Geronimo Mendez;223438;09-02-26;76711140-1;AGROCOMERCIAL MARDANELY Y CIA LTDA;Nelson;Contraloria;Maria;1134982;0;0;Cheque;En Caja Operacional;5172471;05-06-26;377000;0
+Geronimo Mendez;223438;09-02-26;76711140-1;AGROCOMERCIAL MARDANELY Y CIA LTDA;Nelson;Contraloria;Maria;1134982;0;0;Cheque;En Caja Operacional;5172473;25-05-26;380982;0
+Geronimo Mendez;223437;09-02-26;76711140-1;AGROCOMERCIAL MARDANELY Y CIA LTDA;Nelson;Contraloria;Maria;1131000;0;0;Cheque;En Caja Operacional;5172467;05-02-26;377000;0
+Geronimo Mendez;223437;09-02-26;76711140-1;AGROCOMERCIAL MARDANELY Y CIA LTDA;Nelson;Contraloria;Maria;1131000;0;0;Cheque;En Caja Operacional;5172468;05-03-26;377000;0
+Geronimo Mendez;223437;09-02-26;76711140-1;AGROCOMERCIAL MARDANELY Y CIA LTDA;Nelson;Contraloria;Maria;1131000;0;0;Cheque;En Caja Operacional;5172469;05-04-26;377000;0
+Geronimo Mendez;223436;09-02-26;76323736-2;RENTA DE EQUIPOS Y SERVICIOS W M E.I.R.L;Nelson;Contraloria;Maria;248890;0;0;Cheque;En Caja Operacional;4147307;15-03-26;248890;0
+Rojas Magallanes;223435;09-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;68974;0;0;Crédito;En Caja Operacional;724345;;68974;0
+Geronimo Mendez;223434;09-02-26;9536850-6;WENCESLAO CASTILLO;Nelson;Contraloria;Maria;805781;0;0;Cheque;En Caja Operacional;2428532;16-02-26;205781;0
+Geronimo Mendez;223434;09-02-26;9536850-6;WENCESLAO CASTILLO;Nelson;Contraloria;Maria;805781;0;0;Cheque;En Caja Operacional;2428533;16-03-26;200000;0
+Geronimo Mendez;223434;09-02-26;9536850-6;WENCESLAO CASTILLO;Nelson;Contraloria;Maria;805781;0;0;Cheque;En Caja Operacional;2428534;16-04-26;200000;0
+Geronimo Mendez;223434;09-02-26;9536850-6;WENCESLAO CASTILLO;Nelson;Contraloria;Maria;805781;0;0;Cheque;En Caja Operacional;2428535;16-05-26;200000;0
+Geronimo Mendez;223433;09-02-26;77948539-0;COMERCIAL M V SPA;Nelson;Contraloria;Maria;3214478;0;0;Cheque;En Caja Operacional;277;28-02-26;530000;0
+Geronimo Mendez;223433;09-02-26;77948539-0;COMERCIAL M V SPA;Nelson;Contraloria;Maria;3214478;0;0;Cheque;En Caja Operacional;278;11-03-26;530000;0
+Geronimo Mendez;223433;09-02-26;77948539-0;COMERCIAL M V SPA;Nelson;Contraloria;Maria;3214478;0;0;Cheque;En Caja Operacional;279;23-03-26;530000;0
+Geronimo Mendez;223433;09-02-26;77948539-0;COMERCIAL M V SPA;Nelson;Contraloria;Maria;3214478;0;0;Cheque;En Caja Operacional;280;01-04-26;530000;0
+Geronimo Mendez;223433;09-02-26;77948539-0;COMERCIAL M V SPA;Nelson;Contraloria;Maria;3214478;0;0;Cheque;En Caja Operacional;281;15-04-26;530000;0
+Geronimo Mendez;223433;09-02-26;77948539-0;COMERCIAL M V SPA;Nelson;Contraloria;Maria;3214478;0;0;Cheque;En Caja Operacional;282;29-04-26;564478;0
+Geronimo Mendez;223432;09-02-26;76047955-1;SOCIEDAD DE INVERSIONES EXPLO-ATACAMA SPA;Nelson;Contraloria;Maria;3071430;0;0;Cheque;En Caja Operacional;8162;04-02-26;767859;0
+Geronimo Mendez;223432;09-02-26;76047955-1;SOCIEDAD DE INVERSIONES EXPLO-ATACAMA SPA;Nelson;Contraloria;Maria;3071430;0;0;Cheque;En Caja Operacional;8163;04-03-26;767857;0
+Geronimo Mendez;223432;09-02-26;76047955-1;SOCIEDAD DE INVERSIONES EXPLO-ATACAMA SPA;Nelson;Contraloria;Maria;3071430;0;0;Cheque;En Caja Operacional;8164;04-04-26;767857;0
+Geronimo Mendez;223432;09-02-26;76047955-1;SOCIEDAD DE INVERSIONES EXPLO-ATACAMA SPA;Nelson;Contraloria;Maria;3071430;0;0;Cheque;En Caja Operacional;8166;04-05-26;767857;0
+Rojas Magallanes;223431;09-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Cristian;39393;0;0;Débito;En Caja Operacional;349683;;39393;0
+Geronimo Mendez;223430;09-02-26;7486131-8;HUGO TORREALBA;Nelson;Contraloria;Maria;806000;0;219;Efectivo;En Caja Operacional;;;806000;0
+Geronimo Mendez;223429;09-02-26;77049288-2;CHOAPA MIX SPA;Nelson;Contraloria;Maria;1329992;0;0;Cheque;En Caja Operacional;1882391;04-03-26;443330;0
+Geronimo Mendez;223429;09-02-26;77049288-2;CHOAPA MIX SPA;Nelson;Contraloria;Maria;1329992;0;0;Cheque;En Caja Operacional;1882392;04-04-26;443330;0
+Geronimo Mendez;223429;09-02-26;77049288-2;CHOAPA MIX SPA;Nelson;Contraloria;Maria;1329992;0;0;Cheque;En Caja Operacional;1882393;04-05-26;443332;0
+Geronimo Mendez;223428;09-02-26;76859755-3;LABORATORIO CENTRO ESTUDIO DE MATERIALES SPA;Nelson;Contraloria;Maria;714243;0;0;Cheque;En Caja Operacional;1882389;04-02-26;358000;0
+Geronimo Mendez;223428;09-02-26;76859755-3;LABORATORIO CENTRO ESTUDIO DE MATERIALES SPA;Nelson;Contraloria;Maria;714243;0;0;Cheque;En Caja Operacional;1882390;27-02-26;356243;0
+Geronimo Mendez;223427;09-02-26;66666666-6;Cliente retail generico;Alejandra;Ventas Local;SoporteVenta;104474;0;0;Débito;En Caja Operacional;566402;;104474;0
+Ovalle;223426;09-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;36467;0;10;Débito;En Caja Operacional;236021;;36467;0
+Linares;223425;09-02-26;77831850-4;SOC.DE TRANSPORTES CHARP LTDA.;Maiko;Linares;Eduardo;58393;0;0;Débito;En Caja Operacional;3531;;58393;0
+Linares;223424;09-02-26;77774919-6;TRANSPORTES SEBASTIAN VELIZ SPA;Eduardo;Linares;Eduardo;45612;0;0;Débito;En Caja Operacional;218941;;45612;0
+Rojas Magallanes;223423;09-02-26;7048981-3;luis ponzano;Marisol;Rojas Magallanes;Cristian;31475;0;0;Débito;En Caja Operacional;755323;;31475;0
+Geronimo Mendez;223422;09-02-26;77946105-K;SR SERVICES SPA;Nelson;Contraloria;Maria;1952093;0;0;Transferencia;En Caja Operacional;278379;;1214170;0
+Geronimo Mendez;223422;09-02-26;77946105-K;SR SERVICES SPA;Nelson;Contraloria;Maria;1952093;0;0;Transferencia;En Caja Operacional;278379;;620863;0
+Geronimo Mendez;223422;09-02-26;77946105-K;SR SERVICES SPA;Nelson;Contraloria;Maria;1952093;0;0;Transferencia;En Caja Operacional;278379;;117060;0
+Geronimo Mendez;223421;09-02-26;17866399-2;DANIEL ANDRES TAPIA;Nelson;Contraloria;Maria;1680306;0;0;Transferencia;En Caja Operacional;278378;;1680306;0
+Geronimo Mendez;223420;09-02-26;76047955-1;SOCIEDAD DE INVERSIONES EXPLO-ATACAMA SPA;Nelson;Contraloria;Maria;792459;0;0;Cheque;En Caja Operacional;8132;14-02-26;396229;0
+Geronimo Mendez;223420;09-02-26;76047955-1;SOCIEDAD DE INVERSIONES EXPLO-ATACAMA SPA;Nelson;Contraloria;Maria;792459;0;0;Cheque;En Caja Operacional;8131;14-01-26;396230;0
+Rojas Magallanes;223419;09-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;29932;0;0;Débito;En Caja Operacional;31010;;29932;0
+Linares;223418;09-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;30636;0;0;Débito;En Caja Operacional;627149;;30636;0
+Linares;223417;09-02-26;77227298-7;TRANSPORTES LAPANNI SPA;Eduardo;Linares;Eduardo;39012;0;0;Crédito;En Caja Operacional;711616;;39012;0
+Linares;223416;09-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;77614;0;0;Crédito;En Caja Operacional;142751;;77614;0
+Ovalle;223415;09-02-26;12569531-0;EMILIO SANTOS;Emilio;Ovalle;Emilio;35912;0;0;Débito;En Caja Operacional;2404;;35912;0
+Ovalle;223414;09-02-26;12569531-0;EMILIO SANTOS;Emilio;Ovalle;Emilio;84968;0;0;Débito;En Caja Operacional;489034;;84968;0
+Rojas Magallanes;223413;09-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Cristian;44843;0;0;Crédito;En Caja Operacional;141140;;44843;0
+Linares;223412;09-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;47521;0;0;Efectivo;En Caja Operacional;;;47521;0
+Geronimo Mendez;223411;09-02-26;76892484-8;ELQUI PROJECT Y SERVICIOS SPA;Maiko;Ventas Local;Maiko;1143052;0;0;Crédito;En Caja Operacional;487085;;1143052;0
+Linares;223410;09-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;32716;0;0;Débito;En Caja Operacional;902;;32716;0
+Geronimo Mendez;223409;09-02-26;76040751-8;OSORIO E HIJO LTDA;Nelson;Cobranzas;Maria;437256;0;0;Transferencia;En Caja Operacional;276630;;437256;0
+Rojas Magallanes;223408;09-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;46041;0;0;Crédito;En Caja Operacional;291380;;46041;0
+Linares;223407;09-02-26;9262987-2;EDUARDO ENRIQUE PONCE;Eduardo;Linares;Eduardo;29593;0;0;Efectivo;En Caja Operacional;;;29593;0
+Geronimo Mendez;223406;09-02-26;78338269-5;CONSTRU-ARTE SPA;Eduardo;Ventas Local;Maiko;76735;0;0;Débito;En Caja Operacional;7537;;76735;0
+Geronimo Mendez;223405;09-02-26;77331017-3;SERVICIOS INTEGRALES DE MECANICA AUTOMOTRIZ SPA;Luis;Ventas Local;SoporteVenta;189177;0;0;Débito;En Caja Operacional;271406;;189177;0
+Rojas Magallanes;223404;09-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;31475;0;0;Débito;En Caja Operacional;684807;;31475;0
+Antillanca;223403;09-02-26;77756681-4;IMPORTADORA Y COMERCIALIZADORA GARAJE INFINITO SPA;Eduardo Rojas;Antillanca;Nataly;136843;0;0;Transferencia;En Caja Operacional;87;;136843;0
+Ovalle;223402;09-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;48677;0;0;Débito;En Caja Operacional;522680;;48677;0
+Linares;223401;09-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;77614;0;0;Crédito;En Caja Operacional;70624;;77614;0
+Linares;223400;09-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;29811;0;0;Débito;En Caja Operacional;902;;29811;0
+Rojas Magallanes;223399;09-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;10400;0;0;Débito;En Caja Operacional;1893;;10400;0
+Geronimo Mendez;223398;09-02-26;66666666-6;Cliente GERONIMO MENDEZ Generico;Maiko;Ventas Local;Maiko;51519;0;0;Débito;En Caja Operacional;535058;;51519;0
+Linares;223397;09-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;41804;0;0;Efectivo;En Caja Operacional;;;41804;0
+Geronimo Mendez;223396;09-02-26;77348594-1;GESTION AUTOMORIZ GS SPA;Maiko;Ventas Local;SoporteVenta;122995;0;0;Crédito;En Caja Operacional;555231;;122995;0
+Antillanca;223395;09-02-26;76445709-9;COM ACAM SPA;Eduardo Rojas;Antillanca;Nataly;107440;0;0;Transferencia;En Caja Operacional;80;;107440;0
+Linares;223394;09-02-26;7320509-3;JUAN ALFREDO  SOLER;Eduardo;Linares;Eduardo;113700;0;0;Cheque;En Caja Operacional;5280668;10-03-26;113700;0
+Geronimo Mendez;223393;09-02-26;78337734-9;TRANSPORTE DE CARGA JOSE TOLEDO E.I.R.L.;Maiko;Ventas Local;Maiko;250209;0;0;Débito;En Caja Operacional;931100;;250209;0
+Geronimo Mendez;223392;09-02-26;12267788-5;CARLOS EDUARDO  CORREA;Omar;Ventas Local;SoporteVenta;132487;0;0;Efectivo;En Caja Operacional;;;120000;0
+Geronimo Mendez;223392;09-02-26;12267788-5;CARLOS EDUARDO  CORREA;Omar;Ventas Local;SoporteVenta;132487;0;0;Débito;En Caja Operacional;3497;;12487;0
+Antillanca;223391;09-02-26;76241619-0;GUSTAVO GONZALEZ CUGAT T DE CARGA EIRL;Matias Felipe;Antillanca;Nataly;4124227;0;71400;Transferencia;En Caja Operacional;68;;4124227;0
+Antillanca;223390;09-02-26;76349975-8;MEGA FRIO CHILE SPA;Matias Felipe;Antillanca;Nataly;401904;0;0;Transferencia;En Caja Operacional;84;;401904;0
+Linares;223389;09-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;53741;0;0;Débito;En Caja Operacional;8299;;53741;0
+Antillanca;223388;09-02-26;79906540-1;CARGO TRADER SPA;Matias Felipe;Antillanca;Nataly;1908215;0;0;Transferencia;En Caja Operacional;81;;948728;0
+Antillanca;223388;09-02-26;79906540-1;CARGO TRADER SPA;Matias Felipe;Antillanca;Nataly;1908215;0;0;Transferencia;En Caja Operacional;82;;569584;0
+Antillanca;223388;09-02-26;79906540-1;CARGO TRADER SPA;Matias Felipe;Antillanca;Nataly;1908215;0;0;Transferencia;En Caja Operacional;83;;389903;0
+Geronimo Mendez;223387;09-02-26;66666666-6;Cliente GERONIMO MENDEZ Generico;Maiko;Ventas Local;Maiko;24990;0;0;Débito;En Caja Operacional;556001;;24990;0
+Geronimo Mendez;223386;09-02-26;10708596-3;JUAN FLORES;Nelson;Ventas Local;SoporteVenta;442237;0;0;Crédito;En Caja Operacional;279089;;442237;0
+Geronimo Mendez;223385;09-02-26;77316540-8;PILLADO Y CIA. LTDA.;Luis;Ventas Local;SoporteVenta;1819420;0;0;Transferencia;En Caja Operacional;69;;1819420;0
+Geronimo Mendez;223384;09-02-26;79518000-1;TRANSPORTES MONEDA LIMITADA;Maiko;Ventas Local;Maiko;49980;0;0;Transferencia;En Caja Operacional;278820;;49980;0
+Antillanca;223383;09-02-26;7839655-5;ORLANDO NAVARRO;Roberto;Antillanca;Nataly;475915;0;0;Transferencia;En Caja Operacional;48;;475915;0
+Geronimo Mendez;223382;09-02-26;77009905-6;SERVICIOS BARC SPA;Maiko;Ventas Local;Maiko;257980;0;0;Débito;En Caja Operacional;354782;;257980;0
+Antillanca;223381;09-02-26;78008271-2;COMERCIO DE ACCESORIOS Y REPUESTOS AUTOMOTRICES GONZALO GUZMAN EIRL;Roberto;Antillanca;Nataly;684214;0;0;Transferencia;En Caja Operacional;39;;684214;0
+Antillanca;223380;09-02-26;77622400-6;SOC TRANSPORTES Y TURISMOS DEL NORTE Y COMPANIA LIMITADA;Nataly;Antillanca;Nataly;2473068;0;0;Transferencia;En Caja Operacional;47;;2473068;0
+Antillanca;223379;09-02-26;76172902-0;EMPRESA DE TRANSPORTES FABIAN MARCELO GREZ SANHUEZA EIRL;Matias Felipe;Antillanca;Nataly;459500;0;0;Transferencia;En Caja Operacional;43;;459500;0
+Antillanca;223378;09-02-26;24809434-6;JUAN  CHOMBA;Victoria;Antillanca;Nataly;331872;0;0;Transferencia;En Caja Operacional;21;;331872;0
+Antillanca;223377;09-02-26;76891319-6;TRANSPORTE Y ALQUILER ISAN SPA;Nataly;Antillanca;Nataly;937644;0;0;Crédito;En Caja Operacional;5092;;937644;0
+Rojas Magallanes;223376;07-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Cristian;38537;0;0;Débito;En Caja Operacional;324156;;38537;0
+Geronimo Mendez;223375;07-02-26;9668829-6;ALBERTINA BERNARDITA ALARCON;Maiko;Ventas Local;Maiko;3405030;0;0;Débito;En Caja Operacional;280672;;3405030;0
+Rojas Magallanes;223374;07-02-26;78054624-7;CONSTRUCCIONES BARBIERI SPA;Marisol;Rojas Magallanes;Marisol;55678;0;0;Débito;En Caja Operacional;424854;;55678;0
+Ovalle;223373;07-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;55165;0;0;Efectivo;En Caja Operacional;;;55165;0
+Geronimo Mendez;223372;07-02-26;76284404-4;CLAUDIO ELSON SANTOS YAVAR VELSA LUBRICANTES E I R L;Omar;Contraloria;Maria;3858394;0;0;Cheque;En Caja Operacional;3778;24-01-26;3858394;0
+Ovalle;223371;07-02-26;77903917-K;TRANSPORTES ZA SPA;Emilio;Ovalle;Emilio;32716;0;0;Débito;En Caja Operacional;2370;;32716;0
+Geronimo Mendez;223370;07-02-26;12803010-7;ALFREDO LOPEZ;Omar;Contraloria;Maria;1388840;0;0;Transferencia;En Caja Operacional;278673;;1388840;0
+Geronimo Mendez;223369;07-02-26;3376926-1;EDGARDO ASTUDILLO;Omar;Contraloria;Maria;474476;0;0;Cheque;En Caja Operacional;5472629;06-02-26;474476;0
+Linares;223368;07-02-26;9262987-2;EDUARDO ENRIQUE PONCE;Eduardo;Linares;Eduardo;221204;0;0;Efectivo;En Caja Operacional;;;21204;0
+Linares;223368;07-02-26;9262987-2;EDUARDO ENRIQUE PONCE;Eduardo;Linares;Eduardo;221204;0;0;Débito;En Caja Operacional;948607;;200000;0
+Geronimo Mendez;223367;07-02-26;76476552-4;COMERCIAL KAZOOIE LTDA;Omar;Contraloria;Maria;80000;0;0;Efectivo;En Caja Operacional;;;80000;0
+Geronimo Mendez;223366;07-02-26;76297433-9;HERNAN GONZALEZ C. REP AUTOMOTRICES EIRL;Omar;Contraloria;Maria;286805;0;0;Efectivo;En Caja Operacional;;;100000;0
+Geronimo Mendez;223366;07-02-26;76297433-9;HERNAN GONZALEZ C. REP AUTOMOTRICES EIRL;Omar;Contraloria;Maria;286805;0;0;Transferencia;En Caja Operacional;278684;;186805;0
+Geronimo Mendez;223365;07-02-26;9341458-6;GUILLERMO ARAYA;Omar;Contraloria;Maria;50000;0;0;Efectivo;En Caja Operacional;;;50000;0
+Geronimo Mendez;223364;07-02-26;76310275-0;TRANSPORTES SALVADOR DOMINGO MAYA MORA;Alex;Contraloria;Maria;15000;0;0;Transferencia;En Caja Operacional;278339;;15000;0
+Geronimo Mendez;223363;07-02-26;77657591-7;FERRETERIA CUELLO SPA;Alex;Contraloria;Maria;421133;0;0;Transferencia;En Caja Operacional;278338;;421133;0
+Geronimo Mendez;223362;07-02-26;12844515-3;YURI BARRAZA;Omar;Contraloria;Maria;200000;0;0;Transferencia;En Caja Operacional;278658;;200000;0
+Geronimo Mendez;223361;07-02-26;13759949-K;MANUEL JESUS ESPINOZA;Omar;Contraloria;Maria;406121;0;0;Transferencia;En Caja Operacional;278694;;406121;0
+Geronimo Mendez;223360;07-02-26;77941898-7;COMERCIAL E INVERSIONES NUEVA AURORA SPA;Omar;Contraloria;Maria;1628740;0;0;Transferencia;En Caja Operacional;278659;;1628740;0
+Geronimo Mendez;223359;07-02-26;76907317-5;COMERCIAL MICHAEL FLORES CABRERA E.I.R.L;Omar;Contraloria;Maria;1816316;0;0;Transferencia;En Caja Operacional;278693;;316316;0
+Geronimo Mendez;223359;07-02-26;76907317-5;COMERCIAL MICHAEL FLORES CABRERA E.I.R.L;Omar;Contraloria;Maria;1816316;0;0;Cheque;En Caja Operacional;9503927;23-02-26;500000;0
+Geronimo Mendez;223359;07-02-26;76907317-5;COMERCIAL MICHAEL FLORES CABRERA E.I.R.L;Omar;Contraloria;Maria;1816316;0;0;Cheque;En Caja Operacional;9503928;23-03-26;500000;0
+Geronimo Mendez;223359;07-02-26;76907317-5;COMERCIAL MICHAEL FLORES CABRERA E.I.R.L;Omar;Contraloria;Maria;1816316;0;0;Cheque;En Caja Operacional;9503930;27-04-26;500000;0
+Geronimo Mendez;223358;07-02-26;76291402-6;JEANNETTE OLIVARES V. E HIJA LTDA;Omar;Contraloria;Maria;441573;0;0;Cheque;En Caja Operacional;6359832;06-03-26;147191;0
+Geronimo Mendez;223358;07-02-26;76291402-6;JEANNETTE OLIVARES V. E HIJA LTDA;Omar;Contraloria;Maria;441573;0;0;Cheque;En Caja Operacional;6359833;06-04-26;147191;0
+Geronimo Mendez;223358;07-02-26;76291402-6;JEANNETTE OLIVARES V. E HIJA LTDA;Omar;Contraloria;Maria;441573;0;0;Cheque;En Caja Operacional;6359834;06-05-26;147191;0
+Geronimo Mendez;223357;07-02-26;13875343-3;ROBERTO GARCIA;Omar;Contraloria;Maria;369709;0;0;Transferencia;En Caja Operacional;278690;;369709;0
+Geronimo Mendez;223356;07-02-26;77772361-8;INVERSIONES JP CORTES SPA;Omar;Contraloria;Maria;158614;0;0;Transferencia;En Caja Operacional;278688;;158614;0
+Geronimo Mendez;223355;07-02-26;76723343-4;ROBERTO ANTONIO IRIARTE MARIN SERVICIO DE TRANSPORTE DE TRABAJADORES;Omar;Contraloria;Maria;460313;0;0;Transferencia;En Caja Operacional;278687;;460313;0
+Linares;223354;07-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;39884;0;0;Crédito;En Caja Operacional;347315;;39884;0
+Rojas Magallanes;223353;07-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;44868;0;0;Crédito;En Caja Operacional;564;;44868;0
+Geronimo Mendez;223352;07-02-26;78107094-7;REPUESTOS H Y E SPA;Omar;Contraloria;Maria;393713;0;0;Transferencia;En Caja Operacional;278685;;393713;0
+Geronimo Mendez;223351;07-02-26;77121882-2;PARABRISAS LA SERENA SPA;Omar;Contraloria;Maria;776864;0;0;Transferencia;En Caja Operacional;278683;;566977;0
+Geronimo Mendez;223351;07-02-26;77121882-2;PARABRISAS LA SERENA SPA;Omar;Contraloria;Maria;776864;0;0;Transferencia;En Caja Operacional;278683;;54929;0
+Geronimo Mendez;223351;07-02-26;77121882-2;PARABRISAS LA SERENA SPA;Omar;Contraloria;Maria;776864;0;0;Transferencia;En Caja Operacional;278683;;100729;0
+Geronimo Mendez;223351;07-02-26;77121882-2;PARABRISAS LA SERENA SPA;Omar;Contraloria;Maria;776864;0;0;Transferencia;En Caja Operacional;278683;;54229;0
+Geronimo Mendez;223350;07-02-26;77711816-1;LUBRICENTRO RG SPA;Omar;Contraloria;Maria;830019;0;0;Cheque;En Caja Operacional;9449179;06-03-26;276673;0
+Geronimo Mendez;223350;07-02-26;77711816-1;LUBRICENTRO RG SPA;Omar;Contraloria;Maria;830019;0;0;Cheque;En Caja Operacional;9449180;06-04-26;276673;0
+Geronimo Mendez;223350;07-02-26;77711816-1;LUBRICENTRO RG SPA;Omar;Contraloria;Maria;830019;0;0;Cheque;En Caja Operacional;9449181;06-05-26;276673;0
+Ovalle;223349;07-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;24051;0;0;Débito;En Caja Operacional;706537;;24051;0
+Geronimo Mendez;223348;07-02-26;77065356-8;COMERCIAL GMF LIMITADA;Omar;Contraloria;Maria;407339;0;0;Transferencia;En Caja Operacional;278681;;407339;0
+Geronimo Mendez;223347;07-02-26;5776265-9;EDUARDO FLORES;Omar;Contraloria;Maria;812460;0;0;Cheque;En Caja Operacional;9444397;26-02-26;203115;0
+Geronimo Mendez;223347;07-02-26;5776265-9;EDUARDO FLORES;Omar;Contraloria;Maria;812460;0;0;Cheque;En Caja Operacional;9444398;26-03-26;203115;0
+Geronimo Mendez;223347;07-02-26;5776265-9;EDUARDO FLORES;Omar;Contraloria;Maria;812460;0;0;Cheque;En Caja Operacional;9444399;17-04-26;203115;0
+Geronimo Mendez;223347;07-02-26;5776265-9;EDUARDO FLORES;Omar;Contraloria;Maria;812460;0;0;Cheque;En Caja Operacional;9444400;24-04-26;203115;0
+Ovalle;223346;07-02-26;11941529-2;YARELA CHACOFF;Emilio;Ovalle;Emilio;44678;0;0;Efectivo;En Caja Operacional;;;44678;0
+Geronimo Mendez;223345;07-02-26;11537174-6;JUAN CARTES;Omar;Contraloria;Maria;564682;0;0;Cheque;En Caja Operacional;2432260;11-03-26;284682;0
+Geronimo Mendez;223345;07-02-26;11537174-6;JUAN CARTES;Omar;Contraloria;Maria;564682;0;0;Cheque;En Caja Operacional;2432261;11-04-26;280000;0
+Geronimo Mendez;223344;07-02-26;79648980-4;SOC COMERCIAL DELARD Y COMPANIA LIMITADA;Omar;Contraloria;Maria;536781;0;0;Cheque;En Caja Operacional;525519;26-03-26;536781;0
+Geronimo Mendez;223343;07-02-26;76191245-3;SOC.CO. E INDUSTRIAL ROJAS REQUENA LTDA;Omar;Contraloria;Maria;98590;0;0;Cheque;En Caja Operacional;2212653;08-02-26;98590;0
+Geronimo Mendez;223342;07-02-26;76633102-5;SERVIMOVIL COPIAPO GONZALO GARROTE G.;Omar;Contraloria;Maria;236175;0;0;Cheque;En Caja Operacional;6296140;26-02-26;236175;0
+Geronimo Mendez;223341;07-02-26;8131434-9;MARIO ALEJANDRO TABILO;Omar;Contraloria;Maria;70000;0;0;Transferencia;En Caja Operacional;278674;;70000;0
+Geronimo Mendez;223340;07-02-26;13530655-K;RUDY SALAS;Omar;Contraloria;Maria;887323;0;0;Cheque;En Caja Operacional;7289790;04-03-26;295774;0
+Geronimo Mendez;223340;07-02-26;13530655-K;RUDY SALAS;Omar;Contraloria;Maria;887323;0;0;Cheque;En Caja Operacional;7289791;04-04-26;295774;0
+Geronimo Mendez;223340;07-02-26;13530655-K;RUDY SALAS;Omar;Contraloria;Maria;887323;0;0;Cheque;En Caja Operacional;7289792;04-05-26;295775;0
+Geronimo Mendez;223339;07-02-26;9210869-4;CARLOS OLIVARES;Omar;Contraloria;Maria;1206000;0;0;Efectivo;En Caja Operacional;;;1206000;0
+Geronimo Mendez;223338;07-02-26;4910363-8;HECTOR FREDES;Omar;Contraloria;Maria;75400;0;1;Efectivo;En Caja Operacional;;;75400;0
+Geronimo Mendez;223337;07-02-26;6119534-3;FERNANDO VALLEJOS;Omar;Contraloria;Maria;609667;0;0;Cheque;En Caja Operacional;9400040;28-02-26;203222;0
+Geronimo Mendez;223337;07-02-26;6119534-3;FERNANDO VALLEJOS;Omar;Contraloria;Maria;609667;0;0;Cheque;En Caja Operacional;9400041;19-03-26;203222;0
+Geronimo Mendez;223337;07-02-26;6119534-3;FERNANDO VALLEJOS;Omar;Contraloria;Maria;609667;0;0;Cheque;En Caja Operacional;9400042;30-04-26;203223;0
+Linares;223336;07-02-26;78338269-5;CONSTRU-ARTE SPA;Eduardo;Linares;Eduardo;94139;0;0;Débito;En Caja Operacional;243862;;94139;0
+Ovalle;223335;07-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;39947;0;0;Débito;En Caja Operacional;9064;;39947;0
+Geronimo Mendez;223334;07-02-26;76692550-2;FRANCISCO DIAZ Y CIA. LTDA.;Omar;Contraloria;Maria;2593310;0;0;Cheque;En Caja Operacional;4630764;06-02-26;369000;0
+Geronimo Mendez;223334;07-02-26;76692550-2;FRANCISCO DIAZ Y CIA. LTDA.;Omar;Contraloria;Maria;2593310;0;0;Cheque;En Caja Operacional;4630763;06-03-26;368969;0
+Geronimo Mendez;223334;07-02-26;76692550-2;FRANCISCO DIAZ Y CIA. LTDA.;Omar;Contraloria;Maria;2593310;0;0;Cheque;En Caja Operacional;4630771;26-02-26;618500;0
+Geronimo Mendez;223334;07-02-26;76692550-2;FRANCISCO DIAZ Y CIA. LTDA.;Omar;Contraloria;Maria;2593310;0;0;Cheque;En Caja Operacional;4630772;26-03-26;618500;0
+Geronimo Mendez;223334;07-02-26;76692550-2;FRANCISCO DIAZ Y CIA. LTDA.;Omar;Contraloria;Maria;2593310;0;0;Cheque;En Caja Operacional;4630773;26-04-26;618341;0
+Linares;223333;07-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;32242;0;0;Débito;En Caja Operacional;926513;;32242;0
+Geronimo Mendez;223332;07-02-26;14115831-7;ROBERTO ALVAREZ;Omar;Contraloria;Maria;428204;0;0;Cheque;En Caja Operacional;9330497;06-03-26;428204;0
+Geronimo Mendez;223331;07-02-26;5806082-8;VICTOR ALVAREZ;Omar;Contraloria;Maria;480497;0;0;Cheque;En Caja Operacional;4806090;21-02-26;332613;0
+Geronimo Mendez;223331;07-02-26;5806082-8;VICTOR ALVAREZ;Omar;Contraloria;Maria;480497;0;0;Cheque;En Caja Operacional;4806091;28-02-26;147884;0
+Geronimo Mendez;223330;07-02-26;76026604-3;CARVAJAL HERMANOS LTDA;Omar;Contraloria;Maria;627723;0;0;Cheque;En Caja Operacional;9454811;06-03-26;209241;0
+Geronimo Mendez;223330;07-02-26;76026604-3;CARVAJAL HERMANOS LTDA;Omar;Contraloria;Maria;627723;0;0;Cheque;En Caja Operacional;9454813;06-04-26;209241;0
+Geronimo Mendez;223330;07-02-26;76026604-3;CARVAJAL HERMANOS LTDA;Omar;Contraloria;Maria;627723;0;0;Cheque;En Caja Operacional;9454814;06-05-26;209241;0
+Rojas Magallanes;223329;07-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;5200;0;0;Débito;En Caja Operacional;2618;;5200;0
+Geronimo Mendez;223328;07-02-26;76238597-K;COMERCIAL REQUENA Y OTROS LTDA;Omar;Contraloria;Maria;124220;0;0;Cheque;En Caja Operacional;4652202;17-03-26;124220;0
+Geronimo Mendez;223327;07-02-26;79716590-5;COMERCIAL REQUENA HNOS. LTDA.;Omar;Contraloria;Maria;640100;0;0;Cheque;En Caja Operacional;4619353;02-02-26;320050;0
+Geronimo Mendez;223327;07-02-26;79716590-5;COMERCIAL REQUENA HNOS. LTDA.;Omar;Contraloria;Maria;640100;0;0;Cheque;En Caja Operacional;4619354;03-03-26;320050;0
+Geronimo Mendez;223326;07-02-26;78067241-2;YOYOSCAR SPA;Omar;Contraloria;Maria;1283280;0;0;Transferencia;En Caja Operacional;278661;;1283280;0
+Geronimo Mendez;223325;07-02-26;17492941-6;EVANGELI VALDIVIA;Omar;Contraloria;Maria;1726000;0;0;Efectivo;En Caja Operacional;;;1726000;0
+Linares;223324;07-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;37305;0;0;Débito;En Caja Operacional;856700;;37305;0
+Geronimo Mendez;223323;07-02-26;76727109-3;SOC. DE REPUESTOS Y ACCESORIOS RASSE LIMITADA;Omar;Contraloria;Maria;275828;0;0;Transferencia;En Caja Operacional;278675;;275828;0
+Ovalle;223322;07-02-26;16110554-6;FIDEL ANDRES ROJAS;Emilio;Ovalle;Emilio;208064;0;0;Débito;En Caja Operacional;838397;;208064;0
+Linares;223321;07-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;51539;0;0;Débito;En Caja Operacional;8831;;51539;0
+Geronimo Mendez;223320;07-02-26;66666666-6;Cliente retail generico;Alejandra;Ventas Local;SoporteVenta;50244;0;0;Débito;En Caja Operacional;335200;;50244;0
+Linares;223319;07-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;55879;0;0;Débito;En Caja Operacional;925393;;55879;0
+Ovalle;223318;07-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;25715;0;0;Débito;En Caja Operacional;858269;;25715;0
+Linares;223317;07-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;63551;0;0;Débito;En Caja Operacional;5290;;63551;0
+Geronimo Mendez;223316;07-02-26;76482117-3;MACIAS PINO LIMITADA;Maiko;Ventas Local;Maiko;101237;0;0;Efectivo;En Caja Operacional;;;80000;0
+Geronimo Mendez;223316;07-02-26;76482117-3;MACIAS PINO LIMITADA;Maiko;Ventas Local;Maiko;101237;0;0;Débito;En Caja Operacional;30445;;21237;0
+Ovalle;223315;07-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;25715;0;0;Efectivo;En Caja Operacional;;;25715;0
+Linares;223314;07-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;31350;0;0;Débito;En Caja Operacional;501334;;31350;0
+Geronimo Mendez;223313;07-02-26;76675885-1;SOCIEDAD RIVERA MONTENEGRO Y CIA.LTDA.;Omar;Ventas Local;SoporteVenta;324090;0;0;Transferencia;En Caja Operacional;278815;;324090;0
+Ovalle;223312;07-02-26;76694048-K;DISTRIBUIDORA DE COMBUSTIBLES OPECC RAFAEL ROJAS E I R L;Emilio;Ovalle;Emilio;123213;0;0;Crédito;En Caja Operacional;78977;;123213;0
+Linares;223311;07-02-26;9262987-2;EDUARDO ENRIQUE PONCE;Eduardo;Linares;Eduardo;69128;0;0;Crédito;En Caja Operacional;223963;;69128;0
+Geronimo Mendez;223311;07-02-26;66666666-6;Cliente GERONIMO MENDEZ Generico;Maiko;Ventas Local;Maiko;34906;0;0;Débito;En Caja Operacional;510284;;34906;0
+Geronimo Mendez;223310;07-02-26;77499199-9;TRANSPORTES Y MANTENCION DE VEHICULOS JORGE GODOY BONILLA SPA;Maiko;Ventas Local;Maiko;422245;0;0;Débito;En Caja Operacional;35605;;422245;0
+Geronimo Mendez;223309;07-02-26;10839568-0;JUAN ZULETA;Maiko;Ventas Local;SoporteVenta;198409;0;0;Débito;En Caja Operacional;755240;;198409;0
+Linares;223308;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;74499;0;0;Débito;En Caja Operacional;638471;;68200;0
+Linares;223308;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;74499;0;0;Débito;En Caja Operacional;713875;;6299;0
+Linares;223307;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;44678;0;0;Débito;En Caja Operacional;311256;;44678;0
+Linares;223306;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;31350;0;0;Efectivo;En Caja Operacional;;;31350;0
+Geronimo Mendez;223305;06-02-26;76297762-1;VISION PERFORACIONES SPA;Maiko;Ventas Local;SoporteVenta;24990;0;0;Efectivo;En Caja Operacional;;;9990;0
+Geronimo Mendez;223305;06-02-26;76297762-1;VISION PERFORACIONES SPA;Maiko;Ventas Local;SoporteVenta;24990;0;0;Débito;En Caja Operacional;20398;;15000;0
+Geronimo Mendez;223305;06-02-26;76854475-1;TRANSPORTES GL SPA;Maiko;Ventas Local;Maiko;706860;0;0;Débito;En Caja Operacional;623684;;706860;0
+Linares;223304;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;37305;0;0;Efectivo;En Caja Operacional;;;37305;0
+Rojas Magallanes;223303;06-02-26;77796923-4;BEER KINGS COMPANY SPA;Marisol;Rojas Magallanes;Marisol;110966;0;1;Débito;En Caja Operacional;48810;;110966;0
+Linares;223302;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;44678;0;0;Crédito;En Caja Operacional;214075;;44678;0
+Linares;223301;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;179624;0;0;Débito;En Caja Operacional;958087;;179624;0
+Rojas Magallanes;223300;06-02-26;7819835-4;EDITH MARIANNE HERMAN;Marisol;Rojas Magallanes;Marisol;39947;0;0;Débito;En Caja Operacional;1221;;39947;0
+Ovalle;223299;06-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;29996;0;0;Débito;En Caja Operacional;853570;;29996;0
+Rojas Magallanes;223298;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;39947;0;0;Débito;En Caja Operacional;8289;;39947;0
+Linares;223297;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;30636;0;0;Efectivo;En Caja Operacional;;;30636;0
+Linares;223296;06-02-26;76664307-8;CORA WELDING SHOP SPA;Eduardo;Linares;Eduardo;120529;0;0;Débito;En Caja Operacional;244075;;120529;0
+Geronimo Mendez;223295;06-02-26;78070879-4;NOVA SPA;Omar;Ventas Local;SoporteVenta;157134;0;0;Transferencia;En Caja Operacional;60;;157134;0
+Linares;223294;06-02-26;77598901-7;TRANPORTE TRANSVEL SPA;Maiko;Linares;Eduardo;83605;0;0;Débito;En Caja Operacional;455838;;83605;0
+Geronimo Mendez;223293;06-02-26;5757476-3;TOMAS GONZALEZ;Maiko;Ventas Local;Maiko;503408;0;0;Débito;En Caja Operacional;132619;;503408;0
+Ovalle;223292;06-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;32622;0;0;Débito;En Caja Operacional;704901;;32622;0
+Rojas Magallanes;223291;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;61826;0;0;Débito;En Caja Operacional;242452;;31826;0
+Rojas Magallanes;223291;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;61826;0;0;Débito;En Caja Operacional;86487;;30000;0
+Rojas Magallanes;223290;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;31745;0;0;Débito;En Caja Operacional;71386;;31745;0
+Linares;223289;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;45444;0;0;Efectivo;En Caja Operacional;;;45444;0
+Geronimo Mendez;223288;06-02-26;77767537-0;LUBRICENTRO ROBINSON SPA;Omar;Ventas Local;SoporteVenta;236175;0;0;Transferencia;En Caja Operacional;278807;;236175;0
+Ovalle;223287;06-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;30739;0;0;Débito;En Caja Operacional;306716;;30739;0
+Ovalle;223286;06-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;30636;0;0;Débito;En Caja Operacional;6404;;30636;0
+Linares;223285;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;78737;0;0;Débito;En Caja Operacional;325399;;78737;0
+Linares;223284;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;31350;0;0;Efectivo;En Caja Operacional;;;31350;0
+Rojas Magallanes;223283;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;133790;0;0;Crédito;En Caja Operacional;772705;;133790;0
+Geronimo Mendez;223282;06-02-26;76335362-1;SOC. TRANS. Y GRUAS JORGE CONTADOR LTDA.;Maiko;Ventas Local;SoporteVenta;703576;0;0;Transferencia;En Caja Operacional;56;;703576;0
+Geronimo Mendez;223281;06-02-26;76335362-1;SOC. TRANS. Y GRUAS JORGE CONTADOR LTDA.;Maiko;Ventas Local;SoporteVenta;263637;0;0;Transferencia;En Caja Operacional;57;;263637;0
+Rojas Magallanes;223280;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;46875;0;0;Débito;En Caja Operacional;734672;;46875;0
+Ovalle;223279;06-02-26;12569531-0;EMILIO SANTOS;Emilio;Ovalle;Emilio;41620;0;0;Efectivo;En Caja Operacional;;;41620;0
+Linares;223278;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;46474;0;0;Efectivo;En Caja Operacional;;;46474;0
+Rojas Magallanes;223277;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;39885;0;0;Crédito;En Caja Operacional;741995;;39885;0
+Geronimo Mendez;223276;06-02-26;76360138-2;TRANSPORTES DIAZ Y BARRERA LIMITADA;Maiko;Ventas Local;Maiko;645046;0;0;Débito;En Caja Operacional;996336;;645046;0
+Linares;223275;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;30446;0;0;Crédito;En Caja Operacional;145487;;30446;0
+Geronimo Mendez;223274;06-02-26;76485877-8;ELECTRICIDAD H Y D LTDA;Maiko;Ventas Local;SoporteVenta;102953;0;0;Transferencia;En Caja Operacional;278804;;102953;0
+Rojas Magallanes;223273;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;68978;0;0;Débito;En Caja Operacional;111880;;68978;0
+Geronimo Mendez;223272;06-02-26;83162400-0;EMARESA;Luis;Ventas Local;Maiko;44982;0;0;Débito;En Caja Operacional;923;;44982;0
+Ovalle;223271;06-02-26;12569531-0;EMILIO SANTOS;Emilio;Ovalle;Emilio;152680;0;0;Crédito;En Caja Operacional;202859;;152680;0
+Linares;223270;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;30739;0;0;Débito;En Caja Operacional;722320;;30739;0
+Linares;223269;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;38847;0;0;Efectivo;En Caja Operacional;;;6547;0
+Linares;223269;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;38847;0;0;Débito;En Caja Operacional;611732;;32300;0
+Ovalle;223268;06-02-26;66666666-6;Cliente OVALLE Generico;Emilio;Ovalle;Emilio;131877;0;0;Débito;En Caja Operacional;956767;;131877;0
+Linares;223267;06-02-26;78190663-8;AQUAYENY SPA;Eduardo;Linares;Eduardo;45483;0;0;Efectivo;En Caja Operacional;;;45483;0
+Rojas Magallanes;223266;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;43127;0;0;Débito;En Caja Operacional;639622;;43127;0
+Rojas Magallanes;223265;06-02-26;76495857-8;AUTO MOTO REPUESTOS LIMITADA;Marisol;Rojas Magallanes;Marisol;58631;0;0;Débito;En Caja Operacional;620194;;58631;0
+Rojas Magallanes;223264;06-02-26;66666666-6;Cliente ROJAS MAGALLANES Generico;Marisol;Rojas Magallanes;Marisol;41836;0;0;Débito;En Caja Operacional;301;;41836;0
+Geronimo Mendez;223263;06-02-26;11806267-1;YERKO VILLAFANA;Alex;Contraloria;Maria;277000;0;1480;Transferencia;En Caja Operacional;278335;;277000;0
+Geronimo Mendez;223262;06-02-26;9829395-7;JUAN ROBERTO CORDOVA;Alex;Contraloria;Maria;100000;0;0;Transferencia;En Caja Operacional;278336;;100000;0
+Geronimo Mendez;223261;06-02-26;9325276-4;RAUL SAMUEL LEYTON;Alex;Contraloria;Maria;348868;0;0;Transferencia;En Caja Operacional;278337;;348868;0
+Geronimo Mendez;223260;06-02-26;9016892-4;ALFONSO VILLEGAS;Alex;Contraloria;Maria;3662282;0;0;Cheque;En Caja Operacional;4565192;28-02-26;915000;0
+Geronimo Mendez;223260;06-02-26;9016892-4;ALFONSO VILLEGAS;Alex;Contraloria;Maria;3662282;0;0;Cheque;En Caja Operacional;4565193;30-03-26;915000;0
+Geronimo Mendez;223260;06-02-26;9016892-4;ALFONSO VILLEGAS;Alex;Contraloria;Maria;3662282;0;0;Cheque;En Caja Operacional;4565194;30-04-26;915000;0
+Geronimo Mendez;223260;06-02-26;9016892-4;ALFONSO VILLEGAS;Alex;Contraloria;Maria;3662282;0;0;Cheque;En Caja Operacional;4565195;30-05-26;917282;0
+Geronimo Mendez;223259;06-02-26;77251358-5;COMERCIAL V E K SPA;Alex;Contraloria;Maria;1116920;0;0;Cheque;En Caja Operacional;2411140;20-02-26;280000;0
+Geronimo Mendez;223259;06-02-26;77251358-5;COMERCIAL V E K SPA;Alex;Contraloria;Maria;1116920;0;0;Cheque;En Caja Operacional;2411141;20-03-26;280000;0
+Geronimo Mendez;223259;06-02-26;77251358-5;COMERCIAL V E K SPA;Alex;Contraloria;Maria;1116920;0;0;Cheque;En Caja Operacional;2411142;20-04-26;280000;0
+Geronimo Mendez;223259;06-02-26;77251358-5;COMERCIAL V E K SPA;Alex;Contraloria;Maria;1116920;0;0;Cheque;En Caja Operacional;2411143;20-05-26;276920;0
+Ovalle;223258;06-02-26;16110554-6;FIDEL ANDRES ROJAS;Emilio;Ovalle;Emilio;386498;0;0;Débito;En Caja Operacional;516352;;386498;0
+Linares;223257;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;150616;0;0;Débito;En Caja Operacional;724659;;150616;0
+Geronimo Mendez;223256;06-02-26;12941518-5;RAUL ELISEO ALVAREZ;Maiko;Ventas Local;SoporteVenta;942480;0;0;Cheque;En Caja Operacional;4770738;06-02-26;237480;0
+Geronimo Mendez;223256;06-02-26;12941518-5;RAUL ELISEO ALVAREZ;Maiko;Ventas Local;SoporteVenta;942480;0;0;Cheque;En Caja Operacional;4770739;06-03-26;235000;0
+Geronimo Mendez;223256;06-02-26;12941518-5;RAUL ELISEO ALVAREZ;Maiko;Ventas Local;SoporteVenta;942480;0;0;Cheque;En Caja Operacional;4770740;06-04-26;235000;0
+Geronimo Mendez;223256;06-02-26;12941518-5;RAUL ELISEO ALVAREZ;Maiko;Ventas Local;SoporteVenta;942480;0;0;Cheque;En Caja Operacional;4770741;06-05-26;235000;0
+Geronimo Mendez;223255;06-02-26;12267788-5;CARLOS EDUARDO  CORREA;Omar;Ventas Local;SoporteVenta;118978;0;0;Débito;En Caja Operacional;3497;;118978;0
+Linares;223254;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;102426;0;0;Efectivo;En Caja Operacional;;;102426;0
+Geronimo Mendez;223253;06-02-26;77418193-8;SOCIEDAD COMERCIAL A Y R SPA;Omar;Ventas Local;Maiko;122995;0;0;Débito;En Caja Operacional;445551;;122995;0
+Geronimo Mendez;223252;06-02-26;78255035-7;COMERCIAL DFT SPA;Maiko;Ventas Local;Maiko;799037;0;0;Débito;En Caja Operacional;6528;;799037;0
+Linares;223251;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;25715;0;0;Efectivo;En Caja Operacional;;;16715;0
+Linares;223251;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;25715;0;0;Débito;En Caja Operacional;602;;9000;0
+Linares;223250;06-02-26;66666666-6;Cliente LINARES Generico;Eduardo;Linares;Eduardo;18128;0;0;Efectivo;En Caja Operacional;;;18128;0
+Geronimo Mendez;223249;06-02-26;78088982-9;TRANSPORTES ANDRES EDGARDO BUSTAMANTE ROJAS E I R L;Maiko;Ventas Local;Maiko;118087;0;0;Débito;En Caja Operacional;809423;;118087;0

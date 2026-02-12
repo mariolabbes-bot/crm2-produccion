@@ -14,13 +14,28 @@ const getMonthRange = (date) => {
 
 router.get('/kpis', auth(), async (req, res) => {
     try {
+        const { vendedor_id } = req.query;
+        const isManager = req.user.rol.toUpperCase() === 'MANAGER';
+        let filterVendedor = vendedor_id || (isManager ? null : req.user.id);
+
         const now = new Date();
         const currentMonth = getMonthRange(now);
         const lastYearDate = new Date(now);
         lastYearDate.setFullYear(now.getFullYear() - 1);
         const lastYearMonth = getMonthRange(lastYearDate);
 
-        console.log(`📊 [ProductAnalytics] KPIs Request (Master Table).`);
+        console.log(`📊 [ProductAnalytics] KPIs Request (Filtered: ${filterVendedor || 'ALL'}).`);
+
+        let dynamicWhere = '';
+        let queryParams = [currentMonth.start, currentMonth.end, lastYearMonth.start, lastYearMonth.end];
+
+        if (filterVendedor) {
+            const vData = await pool.query('SELECT alias FROM usuario WHERE id = $1 OR rut = $1', [filterVendedor]);
+            if (vData.rows.length > 0) {
+                dynamicWhere = `AND v.vendedor_documento = $5`;
+                queryParams.push(vData.rows[0].alias);
+            }
+        }
 
         const getKpiData = async (label, valueExpression, whereClause) => {
             const query = `
@@ -31,6 +46,7 @@ router.get('/kpis', auth(), async (req, res) => {
                 JOIN clasificacion_productos cp ON v.sku = cp.sku
                 WHERE v.fecha_emision BETWEEN $1 AND $2
                   AND ${whereClause}
+                  ${dynamicWhere}
                 
                 UNION ALL
                 
@@ -41,9 +57,10 @@ router.get('/kpis', auth(), async (req, res) => {
                 JOIN clasificacion_productos cp ON v.sku = cp.sku
                 WHERE v.fecha_emision BETWEEN $3 AND $4
                   AND ${whereClause}
+                  ${dynamicWhere}
             `;
 
-            const result = await pool.query(query, [currentMonth.start, currentMonth.end, lastYearMonth.start, lastYearMonth.end]);
+            const result = await pool.query(query, queryParams);
             const current = parseFloat(result.rows.find(r => r.period === 'Current')?.total || 0);
             const lastYear = parseFloat(result.rows.find(r => r.period === 'LastYear')?.total || 0);
 

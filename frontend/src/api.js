@@ -105,7 +105,16 @@ export const getSaldoCreditoTotal = (params = {}) => {
 };
 
 // PRODUCT ANALYTICS
-export const getProductKpis = () => apiFetch(`${API_URL}/product-analytics/kpis`);
+export const getProductKpis = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/product-analytics/kpis${qs ? `?${qs}` : ''}`);
+};
+
+// SALES REPORT
+export const getVentasReport = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/sales/report${qs ? `?${qs}` : ''}`);
+};
 
 export const getRankingVendedores = () => apiFetch(`${API_URL}/kpis/ranking-vendedores`);
 
@@ -159,33 +168,10 @@ export const importSalesJson = (rows) => apiFetch(`${API_URL}/sales/import-json`
 });
 
 // ABONOS
-export const getAbonos = (params = {}) => {
-  const queryString = new URLSearchParams(params).toString();
-  return apiFetch(`${API_URL}/abonos${queryString ? `?${queryString}` : ''}`);
-};
-
-export const getAbonosEstadisticas = (params = {}) => {
-  const queryString = new URLSearchParams(params).toString();
-  return apiFetch(`${API_URL}/abonos/estadisticas${queryString ? `?${queryString}` : ''}`);
-};
-
-export const getAbonosComparativo = (params = {}) => {
-  const queryString = new URLSearchParams(params).toString();
-  return apiFetch(`${API_URL}/abonos/comparativo${queryString ? `?${queryString}` : ''}`);
-};
-
-export const getAbonosPorVendedor = (params = {}) => {
-  const queryString = new URLSearchParams(params).toString();
-  return apiFetch(`${API_URL}/abonos/por-vendedor${queryString ? `?${queryString}` : ''}`);
-};
-
-export const getTiposPago = () => apiFetch(`${API_URL}/abonos/tipos-pago`);
+// (Eliminado)
 
 // COMPARATIVAS
-export const getComparativasMensuales = (params = {}) => {
-  const queryString = new URLSearchParams(params).toString();
-  return apiFetch(`${API_URL}/comparativas/mensuales${queryString ? `?${queryString}` : ''}`);
-};
+// (Eliminado)
 
 // IMPORTACIÓN
 
@@ -270,55 +256,6 @@ export const uploadVentasFile = async (file) => {
     return result;
 
   } catch (error) {
-    console.error('❌ Error en import:', error);
-    throw error;
-  }
-};
-
-export const uploadAbonosFile = async (file) => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const token = getToken();
-  console.log('📤 Iniciando upload de abonos:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
-
-  try {
-    // 1. Subir archivo y recibir jobId
-    const response = await fetch(`${API_URL}/import/abonos`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('❌ Error response:', response.status, errorData);
-      const err = new Error(errorData.msg || 'Error al subir archivo');
-      err.status = response.status;
-      err.data = errorData;
-      throw err;
-    }
-
-    const result = await response.json();
-
-    // 2. Si es respuesta asíncrona (202), hacer polling (aunque abonos aún es síncrono)
-    if (response.status === 202 && result.jobId) {
-      console.log('⏳ Importación de abonos iniciada (job:', result.jobId, ') - Polling status...');
-      return await pollJobStatus(result.jobId, 15);
-    }
-
-    // 3. Si es respuesta síncrona (200), retornar directamente
-    console.log('✅ Upload exitoso:', result);
-    if (typeof window !== 'undefined') {
-      window.__ultimaRespuestaImportAbonos = result;
-      console.log('🪟 window.__ultimaRespuestaImportAbonos disponible');
-    }
-    return result;
-
-  } catch (error) {
-    console.error('❌ Error en import:', error);
     throw error;
   }
 };
@@ -326,11 +263,6 @@ export const uploadAbonosFile = async (file) => {
 export const downloadPlantillaVentas = () => {
   const token = getToken();
   window.open(`${API_URL}/import/plantilla/ventas?token=${token}`, '_blank');
-};
-
-export const downloadPlantillaAbonos = () => {
-  const token = getToken();
-  window.open(`${API_URL}/import/plantilla/abonos?token=${token}`, '_blank');
 };
 
 export const downloadPlantillaClientes = () => {

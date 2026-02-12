@@ -15,8 +15,6 @@ import ActivityEditor from './components/ActivityEditor';
 import Goals from './components/Goals';
 import AdminManager from './components/AdminManager';
 import DashboardNuevo from './components/DashboardNuevo';
-import Abonos from './components/Abonos';
-import ComparativoVentasAbonos from './components/ComparativoVentasAbonos';
 import ImportPanel from './components/ImportPanel';
 import MainLayout from './components/MainLayout';
 import ClientManager from './components/ClientManager';
@@ -25,9 +23,10 @@ import VisitMapPoC from './components/VisitMapPoC';
 // Pages
 import DashboardPage from './pages/DashboardPage';
 import ClientesPage from './pages/ClientesPage';
-import ProductsPage from './pages/ProductsPage'; // Nueva página
+import ProductsPage from './pages/ProductsPage';
 import ClientDetailPage from './pages/ClientDetailPage';
 import AssistantPage from './pages/AssistantPage';
+import VentasPage from './pages/VentasPage';
 
 // Styles
 import './styles/layout.css';
@@ -46,7 +45,8 @@ const App = () => {
                             <Route path="/" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
                                 <Route index element={<DashboardPage />} />
                                 <Route path="clientes" element={<ClientesPage />} />
-                                <Route path="productos" element={<ProductsPage />} /> {/* Nueva Ruta */}
+                                <Route path="ventas" element={<VentasPage />} />
+                                <Route path="productos" element={<ProductsPage />} />
                                 <Route path="cliente/:rut" element={<ClientDetailPage />} />
                                 <Route path="mapa-visitas" element={<VisitMapPoC />} />
                                 <Route path="assistant" element={<AssistantPage />} />
@@ -60,8 +60,6 @@ const App = () => {
                             <Route path="/goals" element={<PrivateRoute><Goals /></PrivateRoute>} />
                             <Route path="/admin" element={<ManagerRoute><AdminManager /></ManagerRoute>} />
                             <Route path="/import-data" element={<ManagerRoute><ImportPanel /></ManagerRoute>} />
-                            <Route path="/abonos" element={<PrivateRoute><Abonos /></PrivateRoute>} />
-                            <Route path="/comparativo" element={<PrivateRoute><ComparativoVentasAbonos /></PrivateRoute>} />
                             <Route path="/dashboard-nuevo" element={<DashboardNuevo />} />
 
                             <Route path="*" element={<Navigate to="/" />} />

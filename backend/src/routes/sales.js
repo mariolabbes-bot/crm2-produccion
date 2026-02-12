@@ -45,7 +45,7 @@ router.post('/bulk', auth(), upload.single('file'), async (req, res) => {
         const insertedSales = [];
         const failedSales = [];
         const clientRutMap = new Map();
-  const allClients = await client.query('SELECT id, rut FROM cliente');
+        const allClients = await client.query('SELECT id, rut FROM cliente');
         allClients.rows.forEach(c => clientRutMap.set(c.rut, c.id));
 
         for (const sale of salesData) {
@@ -104,53 +104,97 @@ router.post('/bulk', auth(), upload.single('file'), async (req, res) => {
     });
 });
 
-module.exports = router;
-
-// @route POST /api/sales/import-json
-// @desc  Importar ventas desde JSON [{rut, invoice_number, invoice_date, net_amount}]
-// @access Private
-router.post('/import-json', auth(), async (req, res) => {
-  const payload = req.body;
-  if (!Array.isArray(payload) || payload.length === 0) {
-    return res.status(400).json({ msg: 'JSON vacío o formato inválido (se esperaba array).' });
-  }
-  const client = await pool.connect();
+// @route   GET /api/sales/report
+// @desc    Obtener reporte detallado de ventas con comparativas
+// @access  Private
+router.get('/report', auth(), async (req, res) => {
   try {
-    await client.query('BEGIN');
-    const clientRutMap = new Map();
-  const allClients = await client.query('SELECT id, rut FROM cliente');
-    allClients.rows.forEach(c => clientRutMap.set(c.rut, c.id));
+    const { vendedor_id, categoria } = req.query;
+    const isManager = req.user.rol.toUpperCase() === 'MANAGER';
 
-    const inserted = [];
-    const failed = [];
-    for (const row of payload) {
-      const { rut, invoice_number, invoice_date, net_amount } = row;
-      if (!rut || !invoice_number || !invoice_date || net_amount == null) {
-        failed.push({ ...row, motivo: 'Campos requeridos faltantes' });
-        continue;
-      }
-      const clientId = clientRutMap.get(rut);
-      if (!clientId) {
-        failed.push({ ...row, motivo: 'Cliente no encontrado' });
-        continue;
-      }
-      try {
-        const ins = await client.query(
-          'INSERT INTO sales (client_id, invoice_number, invoice_date, net_amount) VALUES ($1,$2,$3,$4) ON CONFLICT (client_id, invoice_number) DO NOTHING RETURNING *',
-          [clientId, invoice_number, invoice_date, parseFloat(net_amount)]
-        );
-        if (ins.rows.length > 0) inserted.push(ins.rows[0]);
-        else failed.push({ ...row, motivo: 'Duplicado' });
-      } catch (e) {
-        failed.push({ ...row, motivo: 'Error al insertar: ' + e.message });
+    // Determinar vendedor a filtrar
+    let filterVendedor = vendedor_id || (isManager ? null : req.user.id);
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    // Rango Mes Actual
+    const startCurrent = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+    const endCurrent = new Date(currentYear, currentMonth, 0).toISOString().split('T')[0];
+
+    // Rango Mes Año Anterior
+    const startLastYear = `${currentYear - 1}-${String(currentMonth).padStart(2, '0')}-01`;
+    const endLastYear = new Date(currentYear - 1, currentMonth, 0).toISOString().split('T')[0];
+
+    // Rango 6 meses anteriores (sin contar el actual)
+    // Ejemplo: si es Feb, meses son: Ene, Dic, Nov, Oct, Sep, Ago
+    const start6m = new Date(currentYear, currentMonth - 7, 1).toISOString().split('T')[0];
+    const end6m = new Date(currentYear, currentMonth - 1, 0).toISOString().split('T')[0];
+
+    let whereClauses = [];
+    let params = [startCurrent, endCurrent, startLastYear, endLastYear, start6m, end6m];
+
+    if (filterVendedor) {
+      // Necesitamos buscar el alias del vendedor si se pasa un ID (rut)
+      const vData = await pool.query('SELECT alias FROM usuario WHERE id = $1 OR rut = $1', [filterVendedor]);
+      if (vData.rows.length > 0) {
+        whereClauses.push(`v.vendedor_documento = $${params.length + 1}`);
+        params.push(vData.rows[0].alias);
       }
     }
-    await client.query('COMMIT');
-    return res.json({ inserted: inserted.length, failed: failed.length, detalles_fallidos: failed });
-  } catch (e) {
-    await client.query('ROLLBACK');
-    return res.status(500).json({ msg: 'Error procesando importación', detail: e.message });
-  } finally {
-    client.release();
+
+    if (categoria && categoria !== 'TODOS LOS PRODUCTOS') {
+      if (categoria === 'APLUS TBR') {
+        whereClauses.push("UPPER(cp.subfamilia) LIKE '%TBR%' AND UPPER(cp.marca) = 'APLUS'");
+      } else if (categoria === 'APLUS PCR') {
+        whereClauses.push("UPPER(cp.subfamilia) LIKE '%PCR%' AND UPPER(cp.marca) = 'APLUS'");
+      } else if (categoria === 'LUBRICANTES') {
+        whereClauses.push("UPPER(cp.familia) LIKE '%LUBRICANTE%'");
+      } else if (categoria === 'REENCAUCHE') {
+        whereClauses.push("UPPER(cp.familia) LIKE '%REENCAUCHE%'");
+      }
+    }
+
+    const whereSql = whereClauses.length > 0 ? 'AND ' + whereClauses.join(' AND ') : '';
+
+    const query = `
+            WITH ventas_agrupadas AS (
+                SELECT 
+                    cp.sku,
+                    cp.descripcion,
+                    cp.litros,
+                    SUM(CASE WHEN v.fecha_emision BETWEEN $1 AND $2 THEN v.cantidad ELSE 0 END) as qty_actual,
+                    SUM(CASE WHEN v.fecha_emision BETWEEN $1 AND $2 THEN v.valor_total ELSE 0 END) as monto_actual,
+                    SUM(CASE WHEN v.fecha_emision BETWEEN $3 AND $4 THEN v.cantidad ELSE 0 END) as qty_anio_ant,
+                    SUM(CASE WHEN v.fecha_emision BETWEEN $5 AND $6 THEN v.cantidad ELSE 0 END) as qty_6m
+                FROM venta v
+                JOIN clasificacion_productos cp ON v.sku = cp.sku
+                WHERE (v.fecha_emision BETWEEN $1 AND $2 
+                   OR v.fecha_emision BETWEEN $3 AND $4 
+                   OR v.fecha_emision BETWEEN $5 AND $6)
+                ${whereSql}
+                GROUP BY cp.sku, cp.descripcion, cp.litros
+            )
+            SELECT 
+                descripcion,
+                qty_actual as cantidad_mes_actual,
+                (qty_actual * litros) as litros_mes_actual,
+                monto_actual as volumen_dinero_mes_actual,
+                CASE WHEN qty_anio_ant > 0 THEN ROUND(((qty_actual - qty_anio_ant) / qty_anio_ant * 100), 1) ELSE 0 END as perc_vs_anio_ant,
+                CASE WHEN qty_6m > 0 THEN ROUND(((qty_actual - (qty_6m / 6.0)) / (qty_6m / 6.0) * 100), 1) ELSE 0 END as perc_vs_prom_6m
+            FROM ventas_agrupadas
+            WHERE qty_actual > 0 OR qty_anio_ant > 0 OR qty_6m > 0
+            ORDER BY volumen_dinero_mes_actual DESC
+        `;
+
+    const result = await pool.query(query, params);
+    res.json({ success: true, data: result.rows });
+
+  } catch (error) {
+    console.error('❌ Error Reporte Ventas:', error);
+    res.status(500).json({ success: false, msg: 'Error generando reporte de ventas', detail: error.message });
   }
 });
+
+module.exports = router;

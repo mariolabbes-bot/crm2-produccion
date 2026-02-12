@@ -56,8 +56,6 @@ app.use('/api/opportunities', require('./routes/opportunities'));
 app.use('/api/threats', require('./routes/threats'));
 app.use('/api/sales', require('./routes/sales'));
 app.use('/api/kpis', require('./routes/kpis'));
-app.use('/api/abonos', require('./routes/abonos'));
-app.use('/api/comparativas', require('./routes/comparativas'));
 app.use('/api/import', require('./routes/import'));
 app.use('/api/import-stats', require('./routes/importStats'));
 app.use('/api/diagnostico', require('./routes/diagnostico'));
