@@ -25,15 +25,18 @@ import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedor
 import { useAuth } from '../contexts/AuthContext';
 
 import MobileHomePage from './MobileHomePage';
+import MobileManagerDashboard from './MobileManagerDashboard';
 import useIsMobile from '../hooks/useIsMobile';
 
 const DashboardPage = () => {
   const { user, isManager } = useAuth();
   const isMobile = useIsMobile();
 
-  // Si es móvil, mostramos el Dashboard Simplificado ("Mi Ruta")
-  // Excepción: Si el usuario quiere forzar vista escritorio (futura mejora), aquí podría ir la condición.
+  // Si es móvil, mostramos versión adaptativa
   if (isMobile) {
+    if (isManager()) {
+      return <MobileManagerDashboard />;
+    }
     return <MobileHomePage />;
   }
 
