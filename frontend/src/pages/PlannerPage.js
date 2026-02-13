@@ -60,10 +60,21 @@ const PlannerPage = () => {
 
             <Box p={2}>
                 <Typography variant="subtitle2" sx={{ mb: 2, textTransform: 'uppercase', color: '#6B7280' }}>
-                    Sugerencias ({suggestions.length})
+                    Sugerencias ({suggestions?.length || 0})
                 </Typography>
 
-                {suggestions.map(client => (
+                {(!suggestions || suggestions.length === 0) && (
+                    <Paper sx={{ p: 4, textAlign: 'center', bgcolor: '#F9FAFB' }}>
+                        <Typography variant="body1" color="text.secondary">
+                            No encontramos sugerencias automáticas para hoy.
+                        </Typography>
+                        <Button sx={{ mt: 2 }} variant="outlined" onClick={() => window.location.reload()}>
+                            Reintentar
+                        </Button>
+                    </Paper>
+                )}
+
+                {Array.isArray(suggestions) && suggestions.map(client => (
                     <Paper
                         key={client.rut}
                         sx={{
