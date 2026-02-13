@@ -17,9 +17,9 @@ export const getEnv = (name, fallback = '') => {
         // process might be a restricted object in some environments
     }
 
-    // Clave de API de Google Maps real (Fallback para PoC)
+    // Clave de API de Google Maps
     if (name === 'REACT_APP_GOOGLE_MAPS_API_KEY' && !fallback) {
-        return 'AIzaSyCwYFrggx0KRvpVpA2mJHjXnqtrX5o3Zj8';
+        return ''; // No fallback hardcodeado por seguridad
     }
 
     // Smart Fallback for production if variables are missing

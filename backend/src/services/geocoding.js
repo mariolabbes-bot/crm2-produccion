@@ -5,7 +5,7 @@ const axios = require('axios');
  */
 class GeocodingService {
     constructor(apiKey) {
-        this.apiKey = apiKey || process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyCwYFrggx0KRvpVpA2mJHjXnqtrX5o3Zj8';
+        this.apiKey = apiKey || process.env.GOOGLE_MAPS_API_KEY;
         this.baseUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
     }
 
