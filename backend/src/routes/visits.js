@@ -185,19 +185,24 @@ router.get('/suggestions', auth(), async (req, res) => {
 
         // FALLBACK SIMPLE: Traer todos los clientes (o filtrar por nombre si es posible)
         // Para este MVP, traeremos clientes donde el nombre del vendedor coincida o todos si es manager.
-        const userQuery = 'SELECT nombre FROM usuario WHERE id = $1';
+        const userQuery = 'SELECT nombre_vendedor FROM usuario WHERE id = $1';
         const userRes = await pool.query(userQuery, [vendedorId]);
-        const nombreVendedor = userRes.rows[0].nombre;
+
+        if (userRes.rows.length === 0) {
+            return res.json([]);
+        }
+
+        const nombreVendedor = userRes.rows[0].nombre_vendedor;
 
         const suggestionsQuery = `
-            SELECT c.rut, c.nombre, c.direccion, c.comuna, c.circuito, c.deuda_total
+            SELECT c.rut, c.nombre, c.direccion, c.comuna, c.circuito, c.deuda_total, c.latitud, c.longitud
             FROM cliente c
             WHERE c.nombre_vendedor ILIKE $1
             AND NOT EXISTS (
                 SELECT 1 FROM visitas_registro vr 
                 WHERE vr.cliente_rut = c.rut AND vr.fecha = CURRENT_DATE
             )
-            LIMIT 20
+            LIMIT 50
         `;
 
         const suggestions = await pool.query(suggestionsQuery, [`%${nombreVendedor}%`]);
