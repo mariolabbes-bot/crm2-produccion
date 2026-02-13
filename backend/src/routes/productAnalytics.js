@@ -16,7 +16,7 @@ router.get('/kpis', auth(), async (req, res) => {
     try {
         const { vendedor_id } = req.query;
         const isManager = req.user.rol.toUpperCase() === 'MANAGER';
-        let filterVendedor = vendedor_id || (isManager ? null : req.user.id);
+        let targetRut = vendedor_id || (isManager ? null : req.user.rut);
 
         const now = new Date();
         const currentMonth = getMonthRange(now);
@@ -24,17 +24,19 @@ router.get('/kpis', auth(), async (req, res) => {
         lastYearDate.setFullYear(now.getFullYear() - 1);
         const lastYearMonth = getMonthRange(lastYearDate);
 
-        console.log(`📊 [ProductAnalytics] KPIs Request (Filtered: ${filterVendedor || 'ALL'}).`);
+        console.log(`📊 [ProductAnalytics] KPIs Request (Target RUT: ${targetRut || 'ALL'}).`);
 
         let dynamicWhere = '';
+        let vendorJoin = '';
         let queryParams = [currentMonth.start, currentMonth.end, lastYearMonth.start, lastYearMonth.end];
 
-        if (filterVendedor) {
-            const vData = await pool.query('SELECT alias FROM usuario WHERE id = $1 OR rut = $1', [filterVendedor]);
-            if (vData.rows.length > 0) {
-                dynamicWhere = `AND v.vendedor_documento = $5`;
-                queryParams.push(vData.rows[0].alias);
-            }
+        if (targetRut) {
+            queryParams.push(targetRut);
+            vendorJoin = `
+                LEFT JOIN usuario u_filt ON UPPER(TRIM(u_filt.nombre_vendedor)) = UPPER(TRIM(v.vendedor_cliente))
+                LEFT JOIN usuario u2_filt ON UPPER(TRIM(u2_filt.alias)) = UPPER(TRIM(v.vendedor_documento))
+            `;
+            dynamicWhere = `AND COALESCE(u_filt.rut, u2_filt.rut) = $${queryParams.length}`;
         }
 
         const getKpiData = async (label, valueExpression, whereClause) => {
@@ -44,6 +46,7 @@ router.get('/kpis', auth(), async (req, res) => {
                     SUM(${valueExpression}) as total
                 FROM venta v
                 JOIN clasificacion_productos cp ON v.sku = cp.sku
+                ${vendorJoin}
                 WHERE v.fecha_emision BETWEEN $1 AND $2
                   AND ${whereClause}
                   ${dynamicWhere}
@@ -55,6 +58,7 @@ router.get('/kpis', auth(), async (req, res) => {
                     SUM(${valueExpression}) as total
                 FROM venta v
                 JOIN clasificacion_productos cp ON v.sku = cp.sku
+                ${vendorJoin}
                 WHERE v.fecha_emision BETWEEN $3 AND $4
                   AND ${whereClause}
                   ${dynamicWhere}
@@ -83,8 +87,7 @@ router.get('/kpis', auth(), async (req, res) => {
             "UPPER(cp.familia) LIKE '%LUBRICANTE%'"
         );
 
-        // 2. TBR (General, no solo Aplus, según verificador)
-        // Subfamilia incluye 'Neumaticos TBR'
+        // 2. TBR (General, no solo Aplus)
         const kpiTbrAplus = await getKpiData(
             'Unidades TBR',
             'v.cantidad',
@@ -92,7 +95,6 @@ router.get('/kpis', auth(), async (req, res) => {
         );
 
         // 3. PCR (General, no solo Aplus)
-        // Subfamilia incluye 'Neumaticos PCR'
         const kpiPcrAplus = await getKpiData(
             'Unidades PCR',
             'v.cantidad',
@@ -100,7 +102,6 @@ router.get('/kpis', auth(), async (req, res) => {
         );
 
         // 4. REENCAUCHE (Unidades)
-        // Familia incluye 'REENCAUCHE'
         const kpiReencauche = await getKpiData(
             'Unidades Reencauche',
             'v.cantidad',

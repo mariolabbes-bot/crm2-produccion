@@ -112,8 +112,13 @@ router.get('/report', auth(), async (req, res) => {
     const { vendedor_id, categoria, sort_by = 'monto' } = req.query;
     const isManager = req.user.rol.toUpperCase() === 'MANAGER';
 
-    // Determinar vendedor a filtrar
-    let filterVendedor = vendedor_id || (isManager ? null : req.user.id);
+    // 2. Filtro Vendedor (RUT)
+    let targetRut = null;
+    if (isManager && vendedor_id) {
+      targetRut = vendedor_id;
+    } else if (!isManager) {
+      targetRut = req.user.rut;
+    }
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -134,15 +139,6 @@ router.get('/report', auth(), async (req, res) => {
     let whereClauses = [];
     let params = [startCurrent, endCurrent, startLastYear, endLastYear, start6m, end6m];
 
-    if (filterVendedor) {
-      // Necesitamos buscar el alias del vendedor si se pasa un ID (rut)
-      const vData = await pool.query('SELECT alias FROM usuario WHERE id = $1 OR rut = $1', [filterVendedor]);
-      if (vData.rows.length > 0) {
-        whereClauses.push(`v.vendedor_documento = $${params.length + 1}`);
-        params.push(vData.rows[0].alias);
-      }
-    }
-
     if (categoria && categoria !== 'TODOS LOS PRODUCTOS') {
       if (categoria === 'APLUS TBR') {
         whereClauses.push("UPPER(cp.subfamilia) LIKE '%TBR%' AND UPPER(cp.marca) = 'APLUS'");
@@ -158,6 +154,17 @@ router.get('/report', auth(), async (req, res) => {
     const whereSql = whereClauses.length > 0 ? 'AND ' + whereClauses.join(' AND ') : '';
     const sortColumn = sort_by === 'cantidad' ? 'cantidad_mes_actual' : 'volumen_dinero_mes_actual';
 
+    let vendorFilterSql = '';
+    let vendorJoinSql = '';
+    if (targetRut) {
+      params.push(targetRut);
+      vendorJoinSql = `
+        LEFT JOIN usuario u_filt ON UPPER(TRIM(u_filt.nombre_vendedor)) = UPPER(TRIM(v.vendedor_cliente))
+        LEFT JOIN usuario u2_filt ON UPPER(TRIM(u2_filt.alias)) = UPPER(TRIM(v.vendedor_documento))
+      `;
+      vendorFilterSql = `AND COALESCE(u_filt.rut, u2_filt.rut) = $${params.length}`;
+    }
+
     const query = `
             WITH ventas_agrupadas AS (
                 SELECT 
@@ -170,10 +177,12 @@ router.get('/report', auth(), async (req, res) => {
                     SUM(CASE WHEN v.fecha_emision BETWEEN $5 AND $6 THEN v.cantidad ELSE 0 END) as qty_6m
                 FROM venta v
                 JOIN clasificacion_productos cp ON v.sku = cp.sku
+                ${vendorJoinSql}
                 WHERE (v.fecha_emision BETWEEN $1 AND $2 
                    OR v.fecha_emision BETWEEN $3 AND $4 
                    OR v.fecha_emision BETWEEN $5 AND $6)
                 ${whereSql}
+                ${vendorFilterSql}
                 GROUP BY cp.sku, cp.descripcion, cp.litros
             )
             SELECT 
