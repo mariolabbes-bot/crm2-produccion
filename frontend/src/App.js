@@ -14,6 +14,7 @@ import ActivityDetail from './components/ActivityDetail';
 import ActivityEditor from './components/ActivityEditor';
 import Goals from './components/Goals';
 import AdminManager from './components/AdminManager';
+import DashboardNuevo from './components/DashboardNuevo';
 import ImportPanel from './components/ImportPanel';
 import MainLayout from './components/MainLayout';
 import ClientManager from './components/ClientManager';
