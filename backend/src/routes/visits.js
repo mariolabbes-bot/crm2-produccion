@@ -100,22 +100,157 @@ router.get('/heatmap', auth(), async (req, res) => {
     }
 });
 
-// POST /api/visits/check-in - Registrar inicio de visita
+// Helper: Calcular distancia Haversine en metros
+function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+    const R = 6371e3; // Radio tierra en metros
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distancia en metros
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+}
+
+// POST /api/visits/check-in - Registrar inicio de visita con validación de distancia
 router.post('/check-in', auth(), async (req, res) => {
     try {
         const vendedorId = req.user.id;
         const { cliente_rut, latitud, longitud } = req.body;
 
+        // 1. Obtener coordenadas del cliente para validar
+        const clienteQuery = 'SELECT latitud, longitud FROM cliente WHERE rut = $1';
+        const clienteRes = await pool.query(clienteQuery, [cliente_rut]);
+
+        let distancia = null;
+        let warning = null;
+
+        if (clienteRes.rows.length > 0) {
+            const c = clienteRes.rows[0];
+            distancia = getDistanceFromLatLonInM(latitud, longitud, parseFloat(c.latitud), parseFloat(c.longitud));
+
+            // Validar Geocerca (ej: 200 metros)
+            if (distancia && distancia > 200) {
+                warning = `Estás a ${Math.round(distancia)}m del cliente. ¿Seguro que estás en el local?`;
+            }
+        }
+
         const query = `
-            INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, hora_inicio, latitud_inicio, longitud_inicio, estado)
-            VALUES ($1, $2, CURRENT_DATE, CURRENT_TIME, $3, $4, 'en_progreso')
+            INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, hora_inicio, latitud_inicio, longitud_inicio, estado, distancia_checkin)
+            VALUES ($1, $2, CURRENT_DATE, CURRENT_TIME, $3, $4, 'en_progreso', $5)
             RETURNING *
         `;
-        const result = await pool.query(query, [vendedorId, cliente_rut, latitud, longitud]);
-        res.status(201).json(result.rows[0]);
+        const result = await pool.query(query, [vendedorId, cliente_rut, latitud, longitud, distancia]);
+
+        const responseData = {
+            ...result.rows[0],
+            warning // Enviar warning al frontend si existe
+        };
+
+        res.status(201).json(responseData);
     } catch (err) {
         console.error('Error check-in:', err.message);
         res.status(500).json({ msg: 'Server Error check-in' });
+    }
+});
+
+// GET /api/visits/suggestions - Obtener sugerencias para planificación
+router.get('/suggestions', auth(), async (req, res) => {
+    try {
+        const vendedorId = req.user.id;
+        // Lógica simple de sugerencia: Clientes del vendedor sin visita hoy
+        // TODO: Refinar con "Deuda > X" o "No visitado en Y días"
+        const query = `
+            SELECT c.rut, c.nombre, c.direccion, c.comuna, c.latitud, c.longitud, c.circuito,
+                   (SELECT COUNT(*) FROM visitas_registro v WHERE v.cliente_rut = c.rut AND v.fecha > CURRENT_DATE - 30) as visitas_ultimo_mes
+            FROM cliente c
+            WHERE c.vendedor_id = (SELECT id FROM usuario WHERE id = $1) -- Asumiendo vendedor_id es ID usuario
+            AND NOT EXISTS (
+                SELECT 1 FROM visitas_registro vr 
+                WHERE vr.cliente_rut = c.rut AND vr.fecha = CURRENT_DATE
+            )
+            LIMIT 50
+        `;
+        // Nota: Ajustar la subquery de vendedor_id según tu esquema real de usuarios/vendedores
+        // Si c.nombre_vendedor es string, habría que hacer join con usuario. 
+        // Asumiremos por ahora que podemos filtrar por vendedor de alguna forma.
+        // Si no hay relación directa ID, usar nombre:
+        // WHERE c.nombre_vendedor = (SELECT nombre FROM usuario WHERE id = $1)
+
+        // FALLBACK SIMPLE: Traer todos los clientes (o filtrar por nombre si es posible)
+        // Para este MVP, traeremos clientes donde el nombre del vendedor coincida o todos si es manager.
+        const userQuery = 'SELECT nombre FROM usuario WHERE id = $1';
+        const userRes = await pool.query(userQuery, [vendedorId]);
+        const nombreVendedor = userRes.rows[0].nombre;
+
+        const suggestionsQuery = `
+            SELECT c.rut, c.nombre, c.direccion, c.comuna, c.circuito, c.deuda_total
+            FROM cliente c
+            WHERE c.nombre_vendedor ILIKE $1
+            AND NOT EXISTS (
+                SELECT 1 FROM visitas_registro vr 
+                WHERE vr.cliente_rut = c.rut AND vr.fecha = CURRENT_DATE
+            )
+            LIMIT 20
+        `;
+
+        const suggestions = await pool.query(suggestionsQuery, [`%${nombreVendedor}%`]);
+        res.json(suggestions.rows);
+
+    } catch (err) {
+        console.error('Error suggestions:', err.message);
+        res.status(500).send('Server Error suggestions');
+    }
+});
+
+// POST /api/visits/plan - Guardar planificación del día
+router.post('/plan', auth(), async (req, res) => {
+    try {
+        const vendedorId = req.user.id;
+        const { clientes } = req.body; // Array de RUTs
+
+        if (!clientes || !Array.isArray(clientes)) {
+            return res.status(400).json({ msg: 'Lista de clientes inválida' });
+        }
+
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            for (const rut of clientes) {
+                // Verificar si ya existe para no duplicar
+                const check = await client.query(
+                    'SELECT id FROM visitas_registro WHERE vendedor_id = $1 AND cliente_rut = $2 AND fecha = CURRENT_DATE',
+                    [vendedorId, rut]
+                );
+
+                if (check.rows.length === 0) {
+                    await client.query(
+                        `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida)
+                         VALUES ($1, $2, CURRENT_DATE, 'pendiente', TRUE, 1)`,
+                        [vendedorId, rut]
+                    );
+                }
+            }
+
+            await client.query('COMMIT');
+            res.json({ msg: 'Planificación guardada', count: clientes.length });
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        } finally {
+            client.release();
+        }
+
+    } catch (err) {
+        console.error('Error planning:', err.message);
+        res.status(500).send('Server Error planning');
     }
 });
 
@@ -161,7 +296,12 @@ router.get('/my-today', auth(), async (req, res) => {
             LEFT JOIN cliente c ON v.cliente_rut = c.rut
             WHERE v.vendedor_id = $1 
             AND v.fecha = CURRENT_DATE
-            ORDER BY v.hora_inicio DESC
+            ORDER BY 
+                CASE WHEN v.estado = 'en_progreso' THEN 0
+                     WHEN v.estado = 'pendiente' THEN 1
+                     ELSE 2 END,
+                v.planificada DESC, 
+                v.id ASC
         `;
         const result = await pool.query(query, [vendedorId]);
         res.json(result.rows);

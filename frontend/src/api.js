@@ -383,6 +383,8 @@ export const getHeatmapData = (vendedorId) => {
 export const checkInVisita = (data) => apiFetch(`${API_URL}/visits/check-in`, { method: 'POST', body: JSON.stringify(data) });
 export const checkOutVisita = (data) => apiFetch(`${API_URL}/visits/check-out`, { method: 'POST', body: JSON.stringify(data) });
 export const getMyVisitsToday = () => apiFetch(`${API_URL}/visits/my-today`);
+export const getVisitSuggestions = () => apiFetch(`${API_URL}/visits/suggestions`);
+export const submitVisitPlan = (clientes) => apiFetch(`${API_URL}/visits/plan`, { method: 'POST', body: JSON.stringify({ clientes }) });
 
 
 // ADMIN - Reset Database

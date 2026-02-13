@@ -32,6 +32,8 @@ import MobileVisitsPage from './pages/MobileVisitsPage';
 // Styles
 import './styles/layout.css';
 
+import PlannerPage from './pages/PlannerPage';
+
 const App = () => {
     return (
         <ThemeProvider theme={lubricarTheme}>
@@ -50,8 +52,10 @@ const App = () => {
                                 <Route path="productos" element={<ProductsPage />} />
                                 <Route path="cliente/:rut" element={<ClientDetailPage />} />
                                 <Route path="mapa-visitas" element={<MobileVisitsPage />} />
+                                <Route path="planificar" element={<PlannerPage />} />
                                 <Route path="assistant" element={<AssistantPage />} />
                             </Route>
+
 
                             {/* Rutas antiguas (mantener temporalmente por compatibilidad) */}
                             <Route path="/clients" element={<PrivateRoute><ClientManager /></PrivateRoute>} />
