@@ -30,6 +30,22 @@ router.get('/kpis', auth(), async (req, res) => {
         let vendorJoin = '';
         let queryParams = [currentMonth.start, currentMonth.end, lastYearMonth.start, lastYearMonth.end];
 
+        // Optimización: Consulta única consolidada
+        // Definimos las condiciones SQL para cada métrica
+        const metrics = [
+            { id: 'lubricantes', label: 'Litros Lubricantes', unit: 'Lts', val: 'v.cantidad * cp.litros', cond: "UPPER(cp.familia) LIKE '%LUBRICANTE%'" },
+            { id: 'tbr_aplus', label: 'Unidades TBR', unit: 'Un', val: 'v.cantidad', cond: "UPPER(cp.subfamilia) LIKE '%TBR%'" }, // TBR General
+            { id: 'pcr_aplus', label: 'Unidades PCR', unit: 'Un', val: 'v.cantidad', cond: "UPPER(cp.subfamilia) LIKE '%PCR%'" }, // PCR General
+            { id: 'reencauche', label: 'Unidades Reencauche', unit: 'Un', val: 'v.cantidad', cond: "UPPER(cp.familia) LIKE '%REENCAUCHE%'" }
+        ];
+
+        // Construir partes del SELECT dinámicamente
+        const selectParts = [];
+        metrics.forEach(m => {
+            selectParts.push(`SUM(CASE WHEN (v.fecha_emision BETWEEN $1 AND $2) AND (${m.cond}) THEN ${m.val} ELSE 0 END) as "${m.id}_current"`);
+            selectParts.push(`SUM(CASE WHEN (v.fecha_emision BETWEEN $3 AND $4) AND (${m.cond}) THEN ${m.val} ELSE 0 END) as "${m.id}_lastyear"`);
+        });
+
         if (targetRut) {
             queryParams.push(targetRut);
             vendorJoin = `
@@ -39,84 +55,41 @@ router.get('/kpis', auth(), async (req, res) => {
             dynamicWhere = `AND COALESCE(u_filt.rut, u2_filt.rut) = $${queryParams.length}`;
         }
 
-        const getKpiData = async (label, valueExpression, whereClause) => {
-            const query = `
-                SELECT 
-                    'Current' as period,
-                    SUM(${valueExpression}) as total
-                FROM venta v
-                JOIN clasificacion_productos cp ON v.sku = cp.sku
-                ${vendorJoin}
-                WHERE v.fecha_emision BETWEEN $1 AND $2
-                  AND ${whereClause}
-                  ${dynamicWhere}
-                
-                UNION ALL
-                
-                SELECT 
-                    'LastYear' as period,
-                    SUM(${valueExpression}) as total
-                FROM venta v
-                JOIN clasificacion_productos cp ON v.sku = cp.sku
-                ${vendorJoin}
-                WHERE v.fecha_emision BETWEEN $3 AND $4
-                  AND ${whereClause}
-                  ${dynamicWhere}
-            `;
+        const bigQuery = `
+            SELECT 
+                ${selectParts.join(',\n                ')}
+            FROM venta v
+            JOIN clasificacion_productos cp ON v.sku = cp.sku
+            ${vendorJoin}
+            WHERE (v.fecha_emision BETWEEN $1 AND $2 OR v.fecha_emision BETWEEN $3 AND $4)
+              ${dynamicWhere}
+        `;
 
-            const result = await pool.query(query, queryParams);
-            const current = parseFloat(result.rows.find(r => r.period === 'Current')?.total || 0);
-            const lastYear = parseFloat(result.rows.find(r => r.period === 'LastYear')?.total || 0);
+        const result = await pool.query(bigQuery, queryParams);
+        const row = result.rows[0] || {};
+
+        const kpis = metrics.map(m => {
+            const current = parseFloat(row[`${m.id}_current`] || 0);
+            const lastYear = parseFloat(row[`${m.id}_lastyear`] || 0);
 
             let variation = 0;
             if (lastYear > 0) variation = ((current - lastYear) / lastYear) * 100;
             else if (current > 0) variation = 100;
 
             return {
-                label,
+                id: m.id,
+                label: m.label,
+                unit: m.unit,
                 current: Math.round(current),
                 lastYear: Math.round(lastYear),
                 variation: parseFloat(variation.toFixed(1))
             };
-        };
-
-        // 1. LUBRICANTES (Litros reales desde Maestro)
-        const kpiLubricantes = await getKpiData(
-            'Litros Lubricantes',
-            'v.cantidad * cp.litros',
-            "UPPER(cp.familia) LIKE '%LUBRICANTE%'"
-        );
-
-        // 2. TBR (General, no solo Aplus)
-        const kpiTbrAplus = await getKpiData(
-            'Unidades TBR',
-            'v.cantidad',
-            "UPPER(cp.subfamilia) LIKE '%TBR%'"
-        );
-
-        // 3. PCR (General, no solo Aplus)
-        const kpiPcrAplus = await getKpiData(
-            'Unidades PCR',
-            'v.cantidad',
-            "UPPER(cp.subfamilia) LIKE '%PCR%'"
-        );
-
-        // 4. REENCAUCHE (Unidades)
-        const kpiReencauche = await getKpiData(
-            'Unidades Reencauche',
-            'v.cantidad',
-            "UPPER(cp.familia) LIKE '%REENCAUCHE%'"
-        );
+        });
 
         res.json({
             success: true,
             period: { current: currentMonth, lastYear: lastYearMonth },
-            kpis: [
-                { ...kpiLubricantes, id: 'lubricantes', unit: 'Lts' },
-                { ...kpiTbrAplus, id: 'tbr_aplus', unit: 'Un' },
-                { ...kpiPcrAplus, id: 'pcr_aplus', unit: 'Un' },
-                { ...kpiReencauche, id: 'reencauche', unit: 'Un' }
-            ]
+            kpis: kpis
         });
 
     } catch (error) {

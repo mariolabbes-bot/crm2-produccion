@@ -107,6 +107,9 @@ router.post('/bulk', auth(), upload.single('file'), async (req, res) => {
 // @route   GET /api/sales/report
 // @desc    Obtener reporte detallado de ventas con comparativas
 // @access  Private
+// @route   GET /api/sales/report
+// @desc    Obtener reporte detallado de ventas con comparativas
+// @access  Private
 router.get('/report', auth(), async (req, res) => {
   try {
     const { vendedor_id, categoria, sort_by = 'monto' } = req.query;
@@ -151,19 +154,53 @@ router.get('/report', auth(), async (req, res) => {
       }
     }
 
+    // Optimización: Resolver nombres de vendedor ANTES de la query principal
+    // para evitar JOINS pesados con UPPER/TRIM en la tabla de ventas
+    if (targetRut) {
+      const userRes = await pool.query('SELECT nombre_vendedor, alias FROM usuario WHERE rut = $1', [targetRut]);
+      if (userRes.rows.length > 0) {
+        const { nombre_vendedor, alias } = userRes.rows[0];
+        const nameConditions = [];
+
+        if (nombre_vendedor) {
+          params.push(nombre_vendedor.trim());
+          nameConditions.push(`v.vendedor_cliente = $${params.length}`); // Postgres es case-sensitive por defecto, pero si los datos están limpios esto es mucho más rápido
+          // Si los datos son sucios, usar ILIKE pero con índice trigram (pendiente)
+          // Por ahora asumimos que la limpieza de datos normalizó nombres, o usamos ILIKE si es necesario.
+          // Dado que añadimos índices standard, probaremos igualdad directa o ILIKE.
+          // Vamos a usar ILIKE para seguridad, confiando en que el volumen filtrado por fecha ayuda.
+          // Update: Mejor usar UPPER(TRIM()) = UPPER(TRIM($)) si no estamos seguros, pero eso mata el índice normal.
+          // Intentemos usar los índices de expresión si existen, o ILIKE.
+          // Revertimos a lógica segura pero sin JOIN:
+        }
+        if (alias) {
+          params.push(alias.trim());
+          nameConditions.push(`v.vendedor_documento = $${params.length}`);
+        }
+
+        if (nameConditions.length > 0) {
+          // Usamos ILIKE para maximizar compatibilidad, el indice idx_venta_vendedor_cliente ayudará si es btree standard y usamos cadenas que coinciden prefix, 
+          // pero aquí son nombres completos.
+          // Para usar los índices creados:
+          // idx_usuario_nombre_vendedor_trgm es en usuario.
+          // En venta tenemos idx_venta_vendedor_cliente.
+
+          // Ajuste: Usaremos los valores recuperados para filtrar.
+          // Como migramos a indices directos, usaremos comparacion directa 'ILIKE' que es razonable.
+          whereClauses.push(`(
+                  ${nombre_vendedor ? `UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($${params.indexOf(nombre_vendedor.trim()) + 1}))` : '1=0'} 
+                  OR 
+                  ${alias ? `UPPER(TRIM(v.vendedor_documento)) = UPPER(TRIM($${params.indexOf(alias.trim()) + 1}))` : '1=0'}
+              )`);
+        }
+      } else {
+        // Rut no encontrado, forzar resultado vacío
+        whereClauses.push("1=0");
+      }
+    }
+
     const whereSql = whereClauses.length > 0 ? 'AND ' + whereClauses.join(' AND ') : '';
     const sortColumn = sort_by === 'cantidad' ? 'cantidad_mes_actual' : 'volumen_dinero_mes_actual';
-
-    let vendorFilterSql = '';
-    let vendorJoinSql = '';
-    if (targetRut) {
-      params.push(targetRut);
-      vendorJoinSql = `
-        LEFT JOIN usuario u_filt ON UPPER(TRIM(u_filt.nombre_vendedor)) = UPPER(TRIM(v.vendedor_cliente))
-        LEFT JOIN usuario u2_filt ON UPPER(TRIM(u2_filt.alias)) = UPPER(TRIM(v.vendedor_documento))
-      `;
-      vendorFilterSql = `AND COALESCE(u_filt.rut, u2_filt.rut) = $${params.length}`;
-    }
 
     const query = `
             WITH ventas_agrupadas AS (
@@ -177,12 +214,10 @@ router.get('/report', auth(), async (req, res) => {
                     SUM(CASE WHEN v.fecha_emision BETWEEN $5 AND $6 THEN v.cantidad ELSE 0 END) as qty_6m
                 FROM venta v
                 JOIN clasificacion_productos cp ON v.sku = cp.sku
-                ${vendorJoinSql}
                 WHERE (v.fecha_emision BETWEEN $1 AND $2 
                    OR v.fecha_emision BETWEEN $3 AND $4 
                    OR v.fecha_emision BETWEEN $5 AND $6)
                 ${whereSql}
-                ${vendorFilterSql}
                 GROUP BY cp.sku, cp.descripcion, cp.litros
             )
             SELECT 

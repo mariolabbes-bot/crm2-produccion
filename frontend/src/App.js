@@ -27,6 +27,7 @@ import ProductsPage from './pages/ProductsPage';
 import ClientDetailPage from './pages/ClientDetailPage';
 import AssistantPage from './pages/AssistantPage';
 import VentasPage from './pages/VentasPage';
+import MobileVisitsPage from './pages/MobileVisitsPage';
 
 // Styles
 import './styles/layout.css';
@@ -48,7 +49,7 @@ const App = () => {
                                 <Route path="ventas" element={<VentasPage />} />
                                 <Route path="productos" element={<ProductsPage />} />
                                 <Route path="cliente/:rut" element={<ClientDetailPage />} />
-                                <Route path="mapa-visitas" element={<VisitMapPoC />} />
+                                <Route path="mapa-visitas" element={<MobileVisitsPage />} />
                                 <Route path="assistant" element={<AssistantPage />} />
                             </Route>
 

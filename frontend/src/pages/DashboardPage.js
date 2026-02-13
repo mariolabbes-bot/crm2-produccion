@@ -24,8 +24,19 @@ import {
 import { getKpisMesActual, getEvolucionMensual, getVentasPorFamilia, getVendedores, getSaldoCreditoTotal, getRankingVendedores, API_URL } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
+import MobileHomePage from './MobileHomePage';
+import useIsMobile from '../hooks/useIsMobile';
+
 const DashboardPage = () => {
   const { user, isManager } = useAuth();
+  const isMobile = useIsMobile();
+
+  // Si es móvil, mostramos el Dashboard Simplificado ("Mi Ruta")
+  // Excepción: Si el usuario quiere forzar vista escritorio (futura mejora), aquí podría ir la condición.
+  if (isMobile) {
+    return <MobileHomePage />;
+  }
+
   const [vendedores, setVendedores] = useState([]);
   const [vendedorSeleccionado, setVendedorSeleccionado] = useState('todos');
   const [kpis, setKpis] = useState({

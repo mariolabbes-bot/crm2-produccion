@@ -100,4 +100,75 @@ router.get('/heatmap', auth(), async (req, res) => {
     }
 });
 
+// POST /api/visits/check-in - Registrar inicio de visita
+router.post('/check-in', auth(), async (req, res) => {
+    try {
+        const vendedorId = req.user.id;
+        const { cliente_rut, latitud, longitud } = req.body;
+
+        const query = `
+            INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, hora_inicio, latitud_inicio, longitud_inicio, estado)
+            VALUES ($1, $2, CURRENT_DATE, CURRENT_TIME, $3, $4, 'en_progreso')
+            RETURNING *
+        `;
+        const result = await pool.query(query, [vendedorId, cliente_rut, latitud, longitud]);
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error('Error check-in:', err.message);
+        res.status(500).json({ msg: 'Server Error check-in' });
+    }
+});
+
+// POST /api/visits/check-out - Registrar fin de visita
+router.post('/check-out', auth(), async (req, res) => {
+    try {
+        const { visita_id, latitud, longitud, resultado, notas } = req.body;
+
+        const query = `
+            UPDATE visitas_registro 
+            SET hora_fin = CURRENT_TIME, 
+                latitud_fin = $1, 
+                longitud_fin = $2, 
+                estado = 'completada',
+                resultado = $3,
+                notas = $4
+            WHERE id = $5
+            RETURNING *
+        `;
+        const result = await pool.query(query, [latitud, longitud, resultado, notas, visita_id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ msg: 'Visita no encontrada' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error check-out:', err.message);
+        res.status(500).json({ msg: 'Server Error check-out' });
+    }
+});
+
+// GET /api/visits/my-today - Obtener visitas del día actual para el vendedor
+router.get('/my-today', auth(), async (req, res) => {
+    try {
+        const vendedorId = req.user.id;
+        const query = `
+            SELECT 
+                v.*, 
+                c.nombre as cliente_nombre, 
+                c.direccion as cliente_direccion
+            FROM visitas_registro v
+            LEFT JOIN cliente c ON v.cliente_rut = c.rut
+            WHERE v.vendedor_id = $1 
+            AND v.fecha = CURRENT_DATE
+            ORDER BY v.hora_inicio DESC
+        `;
+        const result = await pool.query(query, [vendedorId]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error my-today:', err.message);
+        res.status(500).send('Server Error my-today');
+    }
+});
+
 module.exports = router;

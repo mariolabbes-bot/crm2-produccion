@@ -380,6 +380,11 @@ export const getHeatmapData = (vendedorId) => {
   return apiFetch(url);
 };
 
+export const checkInVisita = (data) => apiFetch(`${API_URL}/visits/check-in`, { method: 'POST', body: JSON.stringify(data) });
+export const checkOutVisita = (data) => apiFetch(`${API_URL}/visits/check-out`, { method: 'POST', body: JSON.stringify(data) });
+export const getMyVisitsToday = () => apiFetch(`${API_URL}/visits/my-today`);
+
+
 // ADMIN - Reset Database
 export const resetDatabase = (confirmString) => apiFetch(`${API_URL}/admin/reset-database`, {
   method: 'POST',

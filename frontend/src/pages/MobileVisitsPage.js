@@ -1,0 +1,260 @@
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
+import { Box, Typography, Paper, CircularProgress, Chip, Stack, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@mui/material';
+import { LocationOn, CheckCircle, DirectionsCar, Schedule, Flag } from '@mui/icons-material';
+import { getHeatmapData, checkInVisita, checkOutVisita } from '../api';
+import { getEnv } from '../utils/env';
+
+const containerStyle = {
+    width: '100%',
+    height: '45vh', // Altura mapa en móvil
+    borderRadius: '0 0 16px 16px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+};
+
+const defaultCenter = {
+    lat: -33.4489,
+    lng: -70.6693
+};
+
+const circuitColors = {
+    'CIRCUITO NORTE': '#3498db',
+    'CIRCUITO SUR': '#e74c3c',
+    'CIRCUITO CENTRO': '#2ecc71',
+    'General': '#95a5a6'
+};
+
+const MobileVisitsPage = () => {
+    const apiKey = getEnv('REACT_APP_GOOGLE_MAPS_API_KEY');
+    const { isLoaded, loadError } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: apiKey
+    });
+
+    const [clients, setClients] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedClient, setSelectedClient] = useState(null);
+    const [activeVisit, setActiveVisit] = useState(null); // ID de la visita activa
+    const [checkOutDialogOpen, setCheckOutDialogOpen] = useState(false);
+    const [checkOutData, setCheckOutData] = useState({ resultado: 'venta', notas: '' });
+    const [userLocation, setUserLocation] = useState(null);
+
+    const fetchData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const data = await getHeatmapData(); // Devuelve clientes asignados
+            if (Array.isArray(data)) {
+                setClients(data);
+            } else {
+                setClients([]);
+            }
+        } catch (err) {
+            console.error('Error heatmap:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+        // Obtener ubicación actual usuario
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    });
+                },
+                () => console.log('Ubicación no disponible')
+            );
+        }
+    }, [fetchData]);
+
+    const handleCheckIn = async (client) => {
+        try {
+            const location = userLocation || { lat: 0, lng: 0 }; // Fallback
+            const res = await checkInVisita({
+                cliente_rut: client.rut,
+                latitud: location.lat,
+                longitud: location.lng
+            });
+            setActiveVisit(res); // Guardar visita activa
+            setSelectedClient(null); // Cerrar info window
+            alert(`✅ Visita iniciada con ${client.nombre}`);
+        } catch (error) {
+            console.error('Error check-in:', error);
+            alert('Error al iniciar visita');
+        }
+    };
+
+    const handleCheckOut = async () => {
+        if (!activeVisit) return;
+        try {
+            const location = userLocation || { lat: 0, lng: 0 };
+            await checkOutVisita({
+                visita_id: activeVisit.id,
+                latitud: location.lat,
+                longitud: location.lng,
+                resultado: checkOutData.resultado,
+                notas: checkOutData.notas
+            });
+            setActiveVisit(null);
+            setCheckOutDialogOpen(false);
+            alert('🏁 Visita finalizada exitosamente');
+        } catch (error) {
+            console.error('Error check-out:', error);
+            alert('Error al finalizar visita');
+        }
+    };
+
+    const getMarkerIcon = (circuit) => ({
+        path: window.google.maps.SymbolPath.CIRCLE,
+        fillColor: circuitColors[circuit] || circuitColors['General'],
+        fillOpacity: 1,
+        strokeWeight: 2,
+        strokeColor: '#ffffff',
+        scale: 8
+    });
+
+    if (loadError) return <Box p={3}>Error Maps</Box>;
+    if (!isLoaded || loading) return <Box p={5} display="flex" justifyContent="center"><CircularProgress /></Box>;
+
+    return (
+        <Box sx={{ position: 'relative', height: '100vh', bgcolor: '#f5f5f5', pb: 8 }}>
+            {/* Mapa Arriba */}
+            <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={userLocation || defaultCenter}
+                zoom={12}
+                options={{ disableDefaultUI: true, zoomControl: true }}
+            >
+                {clients.map((client) => {
+                    // Validar coords
+                    const lat = parseFloat(client.latitud);
+                    const lng = parseFloat(client.longitud);
+                    if (isNaN(lat) || isNaN(lng)) return null;
+
+                    return (
+                        <Marker
+                            key={client.id}
+                            position={{ lat, lng }}
+                            icon={getMarkerIcon(client.circuito)}
+                            onClick={() => setSelectedClient(client)}
+                        />
+                    );
+                })}
+                {/* Geolocalización Usuario */}
+                {userLocation && (
+                    <Marker
+                        position={userLocation}
+                        icon={{
+                            path: window.google.maps.SymbolPath.CIRCLE,
+                            scale: 6,
+                            fillColor: '#4285F4',
+                            fillOpacity: 1,
+                            strokeColor: 'white',
+                            strokeWeight: 2,
+                        }}
+                    />
+                )}
+            </GoogleMap>
+
+            {/* Panel Flotante de Cliente Seleccionado en Mapa */}
+            {selectedClient && (
+                <Paper sx={{ position: 'absolute', top: '38vh', left: 16, right: 16, p: 2, borderRadius: 3, zIndex: 10 }}>
+                    <Box display="flex" justifyContent="space-between">
+                        <Box>
+                            <Typography variant="subtitle1" fontWeight="bold">{selectedClient.nombre}</Typography>
+                            <Typography variant="body2" color="text.secondary">{selectedClient.direccion}</Typography>
+                        </Box>
+                        <Chip label={selectedClient.circuito || 'S/C'} size="small" sx={{ bgcolor: circuitColors[selectedClient.circuito] || '#ddd', color: 'white', fontWeight: 'bold' }} />
+                    </Box>
+                    <Box mt={2} display="flex" gap={1}>
+                        <Button
+                            variant="contained"
+                            fullWidth
+                            color={activeVisit && activeVisit.cliente_rut === selectedClient.rut ? "success" : "primary"}
+                            onClick={() => {
+                                if (activeVisit && activeVisit.cliente_rut === selectedClient.rut) {
+                                    setCheckOutDialogOpen(true);
+                                } else if (activeVisit) {
+                                    alert('Termina tu visita actual antes de iniciar otra.');
+                                } else {
+                                    handleCheckIn(selectedClient);
+                                }
+                            }}
+                        >
+                            {activeVisit && activeVisit.cliente_rut === selectedClient.rut ? "FINALIZAR VISITA" : "HACER CHECK-IN"}
+                        </Button>
+                    </Box>
+                </Paper>
+            )}
+
+            {/* Lista Scrollable Abajo */}
+            <Box sx={{ p: 2, mt: selectedClient ? 8 : 0 }}>
+                <Typography variant="h6" fontWeight="bold" mb={2}>Ruta Sugerida</Typography>
+                {clients.slice(0, 10).map(client => (
+                    <Paper key={client.id} sx={{ p: 2, mb: 2, borderRadius: 2 }} onClick={() => setSelectedClient(client)}>
+                        <Box display="flex" gap={2} alignItems="center">
+                            <Box sx={{ bgcolor: '#eee', p: 1, borderRadius: '50%' }}>
+                                <LocationOn color="action" />
+                            </Box>
+                            <Box flexGrow={1}>
+                                <Typography variant="subtitle2" fontWeight="bold">{client.nombre}</Typography>
+                                <Typography variant="caption" color="text.secondary">{client.comuna} • A 1.2 km</Typography>
+                            </Box>
+                        </Box>
+                    </Paper>
+                ))}
+            </Box>
+
+            {/* Dialog Check-out */}
+            <Dialog open={checkOutDialogOpen} onClose={() => setCheckOutDialogOpen(false)} fullWidth>
+                <DialogTitle>Finalizar Visita</DialogTitle>
+                <DialogContent>
+                    <Typography variant="subtitle1" gutterBottom>Resultado:</Typography>
+                    <Box display="flex" gap={1} mb={2}>
+                        {['venta', 'no_venta', 'cobranza'].map((res) => (
+                            <Chip
+                                key={res}
+                                label={res.replace('_', ' ').toUpperCase()}
+                                onClick={() => setCheckOutData({ ...checkOutData, resultado: res })}
+                                color={checkOutData.resultado === res ? "primary" : "default"}
+                                variant={checkOutData.resultado === res ? "filled" : "outlined"}
+                            />
+                        ))}
+                    </Box>
+                    <TextField
+                        fullWidth
+                        multiline
+                        rows={3}
+                        label="Notas de la visita"
+                        value={checkOutData.notas}
+                        onChange={(e) => setCheckOutData({ ...checkOutData, notas: e.target.value })}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setCheckOutDialogOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleCheckOut} variant="contained" color="primary">Confirmar cierre</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Indicador Visita Activa (Floating Sticky) */}
+            {activeVisit && (
+                <Paper sx={{ position: 'fixed', bottom: 70, left: 16, right: 16, bgcolor: '#2e7d32', color: 'white', p: 1.5, borderRadius: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 100 }}>
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <Schedule fontSize="small" />
+                        <Typography variant="body2" fontWeight="bold">Visita en curso...</Typography>
+                    </Box>
+                    <Button size="small" variant="contained" color="warning" onClick={() => setCheckOutDialogOpen(true)}>
+                        TERMINAR
+                    </Button>
+                </Paper>
+            )}
+        </Box>
+    );
+};
+
+export default MobileVisitsPage;
