@@ -1,16 +1,23 @@
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Grid, Checkbox, Button, Chip, CircularProgress, Alert } from '@mui/material';
-import { AddTask, ArrowForward, AccessTime } from '@mui/icons-material';
+import { Box, Typography, Paper, Grid, Checkbox, Button, Chip, CircularProgress, Alert, InputBase, IconButton } from '@mui/material';
+import { AddTask, ArrowForward, AccessTime, Search as SearchIcon } from '@mui/icons-material';
 import { getVisitSuggestions, submitVisitPlan } from '../api';
 import { useNavigate } from 'react-router-dom';
 
 const PlannerPage = () => {
     const navigate = useNavigate();
     const [suggestions, setSuggestions] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [selected, setSelected] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Filter logic
+    const filteredSuggestions = suggestions.filter(c =>
+        c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.direccion && c.direccion.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -59,22 +66,37 @@ const PlannerPage = () => {
             {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
 
             <Box p={2}>
+                {/* Search Bar */}
+                <Paper sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', mb: 2, borderRadius: 3 }}>
+                    <InputBase
+                        sx={{ ml: 1, flex: 1 }}
+                        placeholder="Buscar cliente..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <IconButton sx={{ p: '10px' }}>
+                        <SearchIcon />
+                    </IconButton>
+                </Paper>
+
                 <Typography variant="subtitle2" sx={{ mb: 2, textTransform: 'uppercase', color: '#6B7280' }}>
-                    Sugerencias ({suggestions?.length || 0})
+                    Sugerencias ({filteredSuggestions?.length || 0})
                 </Typography>
 
-                {(!suggestions || suggestions.length === 0) && (
+                {(!filteredSuggestions || filteredSuggestions.length === 0) && (
                     <Paper sx={{ p: 4, textAlign: 'center', bgcolor: '#F9FAFB' }}>
                         <Typography variant="body1" color="text.secondary">
-                            No encontramos sugerencias automáticas para hoy.
+                            {searchTerm ? 'No hay resultados para tu búsqueda.' : 'No encontramos sugerencias automáticas para hoy.'}
                         </Typography>
-                        <Button sx={{ mt: 2 }} variant="outlined" onClick={() => window.location.reload()}>
-                            Reintentar
-                        </Button>
+                        {!searchTerm && (
+                            <Button sx={{ mt: 2 }} variant="outlined" onClick={() => window.location.reload()}>
+                                Reintentar
+                            </Button>
+                        )}
                     </Paper>
                 )}
 
-                {Array.isArray(suggestions) && suggestions.map(client => (
+                {Array.isArray(filteredSuggestions) && filteredSuggestions.map(client => (
                     <Paper
                         key={client.rut}
                         sx={{
