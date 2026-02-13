@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const auth = require('../middleware/auth');
+const ClientService = require('../services/clientService');
 
 // GET /api/visits/plans/today - Obtener plan de hoy para el vendedor logueado
 router.get('/plans/today', auth(), async (req, res) => {
@@ -164,49 +165,34 @@ router.post('/check-in', auth(), async (req, res) => {
 router.get('/suggestions', auth(), async (req, res) => {
     try {
         const vendedorId = req.user.id;
-        // Lógica simple de sugerencia: Clientes del vendedor sin visita hoy
-        // TODO: Refinar con "Deuda > X" o "No visitado en Y días"
-        const query = `
-            SELECT c.rut, c.nombre, c.direccion, c.comuna, c.latitud, c.longitud, c.circuito,
-                   (SELECT COUNT(*) FROM visitas_registro v WHERE v.cliente_rut = c.rut AND v.fecha > CURRENT_DATE - 30) as visitas_ultimo_mes
-            FROM cliente c
-            WHERE c.vendedor_id = (SELECT id FROM usuario WHERE id = $1) -- Asumiendo vendedor_id es ID usuario
-            AND NOT EXISTS (
-                SELECT 1 FROM visitas_registro vr 
-                WHERE vr.cliente_rut = c.rut AND vr.fecha = CURRENT_DATE
-            )
-            LIMIT 50
-        `;
-        // Nota: Ajustar la subquery de vendedor_id según tu esquema real de usuarios/vendedores
-        // Si c.nombre_vendedor es string, habría que hacer join con usuario. 
-        // Asumiremos por ahora que podemos filtrar por vendedor de alguna forma.
-        // Si no hay relación directa ID, usar nombre:
-        // WHERE c.nombre_vendedor = (SELECT nombre FROM usuario WHERE id = $1)
+        console.log(`[DEBUG] /suggestions (via ClientService) for user: ${vendedorId}`);
 
-        // FALLBACK SIMPLE: Traer todos los clientes (o filtrar por nombre si es posible)
-        // Para este MVP, traeremos clientes donde el nombre del vendedor coincida o todos si es manager.
-        const userQuery = 'SELECT nombre_vendedor FROM usuario WHERE id = $1';
-        const userRes = await pool.query(userQuery, [vendedorId]);
+        // 1. Obtener TODOS los clientes asignados usando la misma lógica que el módulo de Clientes
+        // Esto garantiza consistencia con la tabla que "sí funciona"
+        const allClients = await ClientService.getAllClients(req.user);
 
-        if (userRes.rows.length === 0) {
+        if (!allClients || allClients.length === 0) {
+            console.log('[DEBUG] ClientService returned 0 clients');
             return res.json([]);
         }
 
-        const nombreVendedor = userRes.rows[0].nombre_vendedor;
-
-        const suggestionsQuery = `
-            SELECT c.rut, c.nombre, c.direccion, c.comuna, c.circuito, c.deuda_total, c.latitud, c.longitud
-            FROM cliente c
-            WHERE c.nombre_vendedor ILIKE $1
-            AND NOT EXISTS (
-                SELECT 1 FROM visitas_registro vr 
-                WHERE vr.cliente_rut = c.rut AND vr.fecha = CURRENT_DATE
-            )
-            LIMIT 50
+        // 2. Obtener visitas de hoy para filtrar
+        const visitsQuery = `
+            SELECT cliente_rut FROM visitas_registro 
+            WHERE fecha = CURRENT_DATE
         `;
+        const visitsRes = await pool.query(visitsQuery);
+        const visitedRuts = new Set(visitsRes.rows.map(v => v.cliente_rut));
 
-        const suggestions = await pool.query(suggestionsQuery, [`%${nombreVendedor}%`]);
-        res.json(suggestions.rows);
+        // 3. Filtrar: Solo clientes NO visitados hoy
+        // Priorizamos devolver los primeros 50 para no saturar
+        const suggestions = allClients
+            .filter(c => !visitedRuts.has(c.rut))
+            .slice(0, 100); // Aumentamos límite a 100 para dar más opciones
+
+        console.log(`[DEBUG] ClientService found ${allClients.length} clients. Returning ${suggestions.length} suggestions after filter.`);
+
+        res.json(suggestions);
 
     } catch (err) {
         console.error('Error suggestions:', err.message);
