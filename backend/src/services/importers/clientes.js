@@ -35,6 +35,8 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
         const colDireccion = findCol([/^Direccion$/i, /^Dirección$/i]);
         const colNumero = findCol([/^Numero$/i, /^Número$/i, /^N°$/i, /^Nro$/i]);
         const colVendedor = findCol([/^Nombre.*vendedor$/i, /^Vendedor$/i]);
+        const colCupo = findCol([/^Cupo$/i, /^L[ií]mite.*Cr[eé]dito$/i]);
+        const colCupoUtilizado = findCol([/^Cupo.*Utilizado$/i, /^Utilizado$/i, /^Deuda$/i, /^Saldo.*Utilizado$/i]);
 
         if (!colRUT || !colNombre) {
             throw new Error('Faltan columnas requeridas: RUT, Nombre');
@@ -145,7 +147,9 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                 ciudad: colCiudad && row[colCiudad] ? String(row[colCiudad]).trim() : null,
                 direccion: colDireccion && row[colDireccion] ? String(row[colDireccion]).trim() : null,
                 numero: colNumero && row[colNumero] ? String(row[colNumero]).trim() : null,
-                vendedor: finalVendedor
+                vendedor: finalVendedor,
+                cupo: colCupo && row[colCupo] ? parseInt(row[colCupo]) || 0 : 0,
+                cupo_utilizado: colCupoUtilizado && row[colCupoUtilizado] ? parseInt(row[colCupoUtilizado]) || 0 : 0
             });
         }
 
@@ -160,8 +164,8 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                         `INSERT INTO cliente (
               rut, nombre, email, telefono_principal, sucursal,
               categoria, subcategoria, comuna, ciudad, direccion,
-              numero, nombre_vendedor
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+              numero, nombre_vendedor, cupo, cupo_utilizado
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
             ON CONFLICT (rut) DO UPDATE
             SET nombre = EXCLUDED.nombre,
                 email = EXCLUDED.email,
@@ -173,9 +177,11 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                 ciudad = EXCLUDED.ciudad,
                 direccion = EXCLUDED.direccion,
                 numero = EXCLUDED.numero,
-                nombre_vendedor = EXCLUDED.nombre_vendedor
+                nombre_vendedor = EXCLUDED.nombre_vendedor,
+                cupo = EXCLUDED.cupo,
+                cupo_utilizado = EXCLUDED.cupo_utilizado
             RETURNING (xmax = 0) AS inserted`,
-                        [item.rut, item.nombre, item.email, item.telefono, item.sucursal, item.categoria, item.subcategoria, item.comuna, item.ciudad, item.direccion, item.numero, item.vendedor]
+                        [item.rut, item.nombre, item.email, item.telefono, item.sucursal, item.categoria, item.subcategoria, item.comuna, item.ciudad, item.direccion, item.numero, item.vendedor, item.cupo, item.cupo_utilizado]
                     );
                     if (res.rows[0].inserted) insertedCount++; else updatedCount++;
                 } catch (err) {

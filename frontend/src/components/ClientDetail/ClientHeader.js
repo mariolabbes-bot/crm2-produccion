@@ -113,6 +113,38 @@ function ClientHeader({ cliente }) {
             </Typography>
           </Box>
         </Grid>
+
+        {/* Cupo y Crédito */}
+        <Grid item xs={12}>
+          <Card variant="outlined" sx={{ p: 2, mt: 1, backgroundColor: '#fff' }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <Typography variant="caption" sx={{ color: '#666' }}>
+                  Cupo Total
+                </Typography>
+                <Typography variant="h6" sx={{ color: '#1976d2' }}>
+                  {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(cliente.cupo || 0)}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Typography variant="caption" sx={{ color: '#666' }}>
+                  Cupo Utilizado
+                </Typography>
+                <Typography variant="h6" sx={{ color: '#d32f2f' }}>
+                  {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(cliente.cupo_utilizado || 0)}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Typography variant="caption" sx={{ color: '#666' }}>
+                  Cupo Disponible
+                </Typography>
+                <Typography variant="h6" sx={{ color: (cliente.cupo - cliente.cupo_utilizado) < 0 ? '#d32f2f' : '#2e7d32' }}>
+                  {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format((cliente.cupo || 0) - (cliente.cupo_utilizado || 0))}
+                </Typography>
+              </Grid>
+            </Grid>
+          </Card>
+        </Grid>
       </Grid>
     </Card>
   );
