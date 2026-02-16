@@ -5,7 +5,7 @@ async function seedManager() {
   const managerEmail = 'manager@crm.com'; // Using a default email
 
   // Check if manager exists
-  const user = await pool.query('SELECT * FROM users WHERE email = $1', [managerEmail]);
+  const user = await pool.query('SELECT * FROM usuario WHERE email = $1', [managerEmail]);
   if (user.rows.length > 0) {
     console.log('Manager user already exists.');
     pool.end();
@@ -18,7 +18,7 @@ async function seedManager() {
 
   // Create manager user
   await pool.query(
-    'INSERT INTO users (nombre, email, password, rol) VALUES ($1, $2, $3, $4)',
+    'INSERT INTO usuario (nombre, email, password, rol) VALUES ($1, $2, $3, $4)',
     ['MANAGER', managerEmail, hashedPassword, 'manager']
   );
 
