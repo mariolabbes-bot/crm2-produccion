@@ -35,6 +35,7 @@ import './styles/layout.css';
 import PlannerPage from './pages/PlannerPage';
 
 import AssistantFloatingButton from './components/ai/AssistantFloatingButton';
+import DebugUser from './components/DebugUser'; // Importar Debug
 
 // ... (imports)
 
@@ -44,7 +45,8 @@ const App = () => {
             <AuthProvider>
                 <UIProvider>
                     <BrowserRouter>
-                        <AssistantFloatingButton /> {/* Flotante global, el componente chequea auth internamente */}
+                        <AssistantFloatingButton />
+                        <DebugUser /> {/* Renderizar Debug */}
                         <Routes>
                             <Route path="/login" element={<Login />} />
 
