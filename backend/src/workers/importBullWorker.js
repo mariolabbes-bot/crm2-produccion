@@ -9,34 +9,36 @@ const REDIS_URL = process.env.REDIS_URL || process.env.REDIS || 'redis://localho
 console.log(`🔌 [ImportWorker] Usando Redis en: ${REDIS_URL}`);
 
 // Configuración robusta de Redis para Producción (Render)
-const redisConfig = {
-    redis: {
-        port: 6379,
-        host: 'localhost',
-        // Opciones adicionales para prods
+// Configuración robusta de Redis para Producción (Render) y Desarrollo
+const getRedisConfig = () => {
+    if (REDIS_URL) {
+        const url = new URL(REDIS_URL);
+        const isTls = REDIS_URL.startsWith('rediss://');
+        
+        return {
+            redis: {
+                port: url.port,
+                host: url.hostname,
+                password: url.password,
+                username: url.username,
+                tls: isTls ? { rejectUnauthorized: false } : undefined,
+                maxRetriesPerRequest: null,
+                enableReadyCheck: false
+            }
+        };
     }
+    
+    // Fallback local
+    return { 
+        redis: { 
+            port: 6379, 
+            host: 'localhost', 
+            maxRetriesPerRequest: null 
+        } 
+    };
 };
 
-if (REDIS_URL) {
-    const url = new URL(REDIS_URL);
-    redisConfig.redis = {
-        port: url.port,
-        host: url.hostname,
-        password: url.password,
-        username: url.username,
-        tls: REDIS_URL.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
-        maxRetriesPerRequest: null, // Importante: Requerido por Bull
-        enableReadyCheck: false
-    };
-    if (REDIS_URL.startsWith('rediss://')) {
-        console.log('🔒 [ImportWorker] Usando conexión segura (TLS) para Redis');
-    }
-}
-
-// Configuración fallback para local (si no hay REDIS_URL) se asegura de tener opciones básicas si es necesario
-const queueConfig = REDIS_URL
-    ? { redis: redisConfig.redis }
-    : { redis: { port: 6379, host: 'localhost', maxRetriesPerRequest: null } };
+const queueConfig = getRedisConfig();
 
 const importQueue = new Queue('import-jobs', queueConfig);
 

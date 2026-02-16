@@ -12,16 +12,35 @@ const PROCESSED_DIR = path.join(AUTO_IMPORT_DIR, 'processed');
 const FAILED_DIR = path.join(AUTO_IMPORT_DIR, 'failed');
 
 const ensureDirs = () => {
-    [IN_DIR, PROCESSED_DIR, FAILED_DIR].forEach(d => {
-        if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
-    });
+    try {
+        [IN_DIR, PROCESSED_DIR, FAILED_DIR].forEach(d => {
+            if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+        });
+    } catch (err) {
+        console.warn('⚠️ [AutoImport] No se pudieron crear directorios (posible entorno readonly o cloud):', err.message);
+    }
 };
 
 const runAutoImport = async () => {
+    // Si estamos en un entorno cloud efímero sin persistencia configurada, loguear aviso
+    if (process.env.RENDER_SERVICE_ID && !process.env.PERSISTENT_STORAGE_ENABLED) {
+        console.log('ℹ️ [AutoImport] Ejecución omitida en entorno efímero sin almacenamiento persistente. Use endpoint de carga directa.');
+        return;
+    }
+
     ensureDirs();
     console.log('🤖 [AutoImport] Iniciando escaneo de archivos...');
 
-    const files = fs.readdirSync(IN_DIR).filter(f => !f.startsWith('.'));
+    let files = [];
+    try {
+        if (fs.existsSync(IN_DIR)) {
+            files = fs.readdirSync(IN_DIR).filter(f => !f.startsWith('.'));
+        }
+    } catch (err) {
+        console.error('❌ [AutoImport] Error leyendo directorio de entrada:', err.message);
+        return;
+    }
+
     if (files.length === 0) {
         console.log('🤖 [AutoImport] No hay archivos pendientes.');
         return;
@@ -95,7 +114,7 @@ const runAutoImport = async () => {
                 fileRes.finalPath = moveDest;
             }
         } catch (mvErr) {
-            console.error('Error moviendo archivo:', mvErr);
+            console.error('Error moviendo archivo (posiblemente locked o readonly):', mvErr);
             fileRes.moveError = mvErr.message;
         }
 
@@ -151,9 +170,6 @@ const sendSummaryEmail = async (report) => {
     }
     html += `</ul>`;
 
-    // Send to admin (using env var or default hardcoded for now if user didn't specify)
-    // Assuming the user receiving this is the admin.
-    // Ideally we assume an ADMIN_EMAIL env var.
     const to = process.env.ADMIN_EMAIL || 'admin@crm2.com';
 
     await sendEmail({ to, subject, html });

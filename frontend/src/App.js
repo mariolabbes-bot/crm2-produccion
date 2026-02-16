@@ -34,14 +34,20 @@ import './styles/layout.css';
 
 import PlannerPage from './pages/PlannerPage';
 
+import AssistantFloatingButton from './components/ai/AssistantFloatingButton';
+
+// ... (imports)
+
 const App = () => {
     return (
         <ThemeProvider theme={lubricarTheme}>
             <AuthProvider>
                 <UIProvider>
                     <BrowserRouter>
+                        <AssistantFloatingButton /> {/* Flotante global, el componente chequea auth internamente */}
                         <Routes>
                             <Route path="/login" element={<Login />} />
+
                             <Route path="/register" element={<ManagerRoute><Register /></ManagerRoute>} />
 
                             {/* Rutas con MainLayout (diseño moderno) */}
