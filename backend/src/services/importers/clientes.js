@@ -157,35 +157,70 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
         let updatedCount = 0;
 
         if (toImport.length > 0) {
-            console.log(`🔄 [Job ${jobId}] Iniciando UPSERT ${toImport.length}...`);
-            for (const item of toImport) {
-                try {
-                    const res = await client.query(
-                        `INSERT INTO cliente (
-              rut, nombre, email, telefono_principal, sucursal,
-              categoria, subcategoria, comuna, ciudad, direccion,
-              numero, nombre_vendedor, cupo, cupo_utilizado
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-            ON CONFLICT (rut) DO UPDATE
-            SET nombre = EXCLUDED.nombre,
-                email = EXCLUDED.email,
-                telefono_principal = EXCLUDED.telefono_principal,
-                sucursal = EXCLUDED.sucursal,
-                categoria = EXCLUDED.categoria,
-                subcategoria = EXCLUDED.subcategoria,
-                comuna = EXCLUDED.comuna,
-                ciudad = EXCLUDED.ciudad,
-                direccion = EXCLUDED.direccion,
-                numero = EXCLUDED.numero,
-                nombre_vendedor = EXCLUDED.nombre_vendedor,
-                cupo = EXCLUDED.cupo,
-                cupo_utilizado = EXCLUDED.cupo_utilizado
-            RETURNING (xmax = 0) AS inserted`,
-                        [item.rut, item.nombre, item.email, item.telefono, item.sucursal, item.categoria, item.subcategoria, item.comuna, item.ciudad, item.direccion, item.numero, item.vendedor, item.cupo, item.cupo_utilizado]
+            console.log(`🔄 [Job ${jobId}] Iniciando UPSERT masivo de ${toImport.length} registros...`);
+
+            // Batch size for processing
+            const BATCH_SIZE = 500;
+
+            for (let i = 0; i < toImport.length; i += BATCH_SIZE) {
+                const batch = toImport.slice(i, i + BATCH_SIZE);
+                const values = [];
+                const params = [];
+                let paramIndex = 1;
+
+                batch.forEach(item => {
+                    params.push(
+                        item.rut, item.nombre, item.email, item.telefono, item.sucursal,
+                        item.categoria, item.subcategoria, item.comuna, item.ciudad, item.direccion,
+                        item.numero, item.vendedor, item.cupo, item.cupo_utilizado
                     );
-                    if (res.rows[0].inserted) insertedCount++; else updatedCount++;
+
+                    // Generate placeholders ($1, $2, ... $14), ($15, ...)
+                    const rowPlaceholders = Array.from({ length: 14 }, () => `$${paramIndex++}`).join(', ');
+                    values.push(`(${rowPlaceholders})`);
+                });
+
+                const query = `
+                    INSERT INTO cliente (
+                        rut, nombre, email, telefono_principal, sucursal,
+                        categoria, subcategoria, comuna, ciudad, direccion,
+                        numero, nombre_vendedor, cupo, cupo_utilizado
+                    ) VALUES ${values.join(', ')}
+                    ON CONFLICT (rut) DO UPDATE
+                    SET nombre = EXCLUDED.nombre,
+                        email = EXCLUDED.email,
+                        telefono_principal = EXCLUDED.telefono_principal,
+                        sucursal = EXCLUDED.sucursal,
+                        categoria = EXCLUDED.categoria,
+                        subcategoria = EXCLUDED.subcategoria,
+                        comuna = EXCLUDED.comuna,
+                        ciudad = EXCLUDED.ciudad,
+                        direccion = EXCLUDED.direccion,
+                        numero = EXCLUDED.numero,
+                        nombre_vendedor = EXCLUDED.nombre_vendedor,
+                        cupo = EXCLUDED.cupo,
+                        cupo_utilizado = EXCLUDED.cupo_utilizado
+                    RETURNING (xmax = 0) AS inserted
+                `;
+
+                try {
+                    const res = await client.query(query, params);
+                    res.rows.forEach(row => {
+                        if (row.inserted) insertedCount++; else updatedCount++;
+                    });
+                    console.log(`   Processed batch ${i} - ${i + batch.length} / ${toImport.length}`);
                 } catch (err) {
-                    observations.push({ fila: 'N/A', rut: item.rut, campo: 'DB', detalle: err.message });
+                    console.error(`❌ Error en batch ${i}:`, err.message);
+                    // Fallback: If batch fails, try one by one to isolate error (or just log generic error for batch)
+                    // For now, logging general error and continuing is safer to avoid crashing everything, 
+                    // but ideally, we should retry row-by-row if critical.
+                    // Adding generic observation for the batch range
+                    observations.push({
+                        fila: `${i + 2} - ${i + batch.length + 1}`,
+                        rut: 'BATCH ERROR',
+                        campo: 'DB',
+                        detalle: `Error en lote: ${err.message}`
+                    });
                 }
             }
         }

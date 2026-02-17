@@ -1,6 +1,6 @@
 const Queue = require('bull');
 const Redis = require('ioredis');
-const { processVentasFileAsync, processAbonosFileAsync, processClientesFileAsync, processSaldoCreditoFileAsync, updateJobStatus } = require('../services/importJobs');
+// const { processVentasFileAsync, ... } = require('../services/importJobs'); // Moved to importProcessor.js
 
 const REDIS_URL = process.env.REDIS_URL || process.env.REDIS || 'redis://localhost:6379';
 // if (!REDIS_URL) {
@@ -14,7 +14,7 @@ const getRedisConfig = () => {
     if (REDIS_URL) {
         const url = new URL(REDIS_URL);
         const isTls = REDIS_URL.startsWith('rediss://');
-        
+
         return {
             redis: {
                 port: url.port,
@@ -27,14 +27,14 @@ const getRedisConfig = () => {
             }
         };
     }
-    
+
     // Fallback local
-    return { 
-        redis: { 
-            port: 6379, 
-            host: 'localhost', 
-            maxRetriesPerRequest: null 
-        } 
+    return {
+        redis: {
+            port: 6379,
+            host: 'localhost',
+            maxRetriesPerRequest: null
+        }
     };
 };
 
@@ -42,31 +42,13 @@ const queueConfig = getRedisConfig();
 
 const importQueue = new Queue('import-jobs', queueConfig);
 
-importQueue.process(async (job) => {
-    const { jobId, type, filePath, originalName, userRut, options } = job.data;
+const path = require('path');
 
-    console.log(`👷 [Worker] Procesando job ${jobId} tipo ${type}`);
+// ... (Queue initialization remains the same)
 
-    try {
-        if (type === 'ventas') {
-            await processVentasFileAsync(jobId, filePath, originalName, options);
-        } else if (type === 'abonos') {
-            await processAbonosFileAsync(jobId, filePath, originalName, options);
-        } else if (type === 'clientes') {
-            await processClientesFileAsync(jobId, filePath, originalName, options);
-        } else if (type === 'saldo_credito') {
-            await processSaldoCreditoFileAsync(jobId, filePath, originalName, options);
-        } else {
-            throw new Error(`Tipo de importación desconocido: ${type}`);
-        }
-
-        return Promise.resolve();
-    } catch (err) {
-        console.error(`❌ [Worker] Error en job ${jobId}:`, err);
-        await updateJobStatus(jobId, 'failed', { errorMessage: err.message });
-        throw err;
-    }
-});
+// USE SANDBOXED PROCESSOR: Prevents Main Thread Blocking
+// This spawns a child process for each job (or reuses them).
+importQueue.process(path.join(__dirname, 'importProcessor.js'));
 
 const enqueueImport = async (jobData) => {
     // jobData: { jobId, type, filePath, originalName, userRut }

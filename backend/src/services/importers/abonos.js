@@ -164,11 +164,36 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos (Standardized)...`);
 
             // Using Row-by-Row to support detailed error reporting and ON CONFLICT handling
-            for (let i = 0; i < toImport.length; i++) {
-                const item = toImport[i];
-                const query = `
-                    INSERT INTO abono (sucursal, folio, fecha, identificador, cliente, vendedor_cliente, caja_operacion, usuario_ingreso, monto_total, saldo_a_favor, saldo_a_favor_total, tipo_pago, estado_abono, identificador_abono, fecha_vencimiento, monto, monto_neto, created_at)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW())
+            if (toImport.length > 0) {
+                console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos (Masivo)...`);
+
+                const BATCH_SIZE = 500;
+                for (let i = 0; i < toImport.length; i += BATCH_SIZE) {
+                    const batch = toImport.slice(i, i + BATCH_SIZE);
+                    const values = [];
+                    const params = [];
+                    let paramIndex = 1;
+
+                    batch.forEach(item => {
+                        params.push(
+                            item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
+                            item.vendedorClienteNombre, item.cajaOperacion, item.usuarioIngreso, item.montoTotal,
+                            item.saldoFavor, item.saldoFavorTotal, item.tipoPago, item.estadoAbono,
+                            item.identificadorAbono, item.fechaVencimiento, item.monto, item.montoNeto
+                        );
+
+                        // Generate placeholders ($1, $2, ... $17)
+                        const rowPlaceholders = Array.from({ length: 17 }, () => `$${paramIndex++}`).join(', ');
+                        values.push(`(${rowPlaceholders})`);
+                    });
+
+                    const query = `
+                    INSERT INTO abono (
+                        sucursal, folio, fecha, identificador, cliente, vendedor_cliente, 
+                        caja_operacion, usuario_ingreso, monto_total, saldo_a_favor, 
+                        saldo_a_favor_total, tipo_pago, estado_abono, identificador_abono, 
+                        fecha_vencimiento, monto, monto_neto, created_at
+                    ) VALUES ${values.join(', ')}
                     ON CONFLICT (folio, identificador_abono, fecha) DO UPDATE SET
                         identificador = COALESCE(EXCLUDED.identificador, abono.identificador),
                         cliente = COALESCE(EXCLUDED.cliente, abono.cliente),
@@ -178,22 +203,23 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
                         monto_neto = EXCLUDED.monto_neto
                     RETURNING (xmax = 0) AS inserted
                 `;
-                const values = [
-                    item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
-                    item.vendedorClienteNombre, item.cajaOperacion, item.usuarioIngreso, item.montoTotal,
-                    item.saldoFavor, item.saldoFavorTotal, item.tipoPago, item.estadoAbono,
-                    item.identificadorAbono, item.fechaVencimiento, item.monto, item.montoNeto
-                ];
 
-                try {
-                    const res = await client.query(query, values);
-                    if (res.rows[0].inserted) importedCount++;
-                } catch (err) {
-                    console.error(`❌ [Job ${jobId}] Row insert error (Folio ${item.folio}):`, err.message);
-                    observations.push({ fila: i + 2, folio: item.folio, campo: 'DB', detalle: err.detail || err.message });
+                    try {
+                        const res = await client.query(query, params);
+                        res.rows.forEach(row => {
+                            if (row.inserted) importedCount++;
+                        });
+                        console.log(`   Processed batch ${i} - ${i + batch.length} / ${toImport.length}`);
+                    } catch (err) {
+                        console.error(`❌ [Job ${jobId}] Error en batch ${i}:`, err.message);
+                        observations.push({
+                            fila: `${i + 2} - ${i + batch.length + 1}`,
+                            folio: 'BATCH ERROR',
+                            campo: 'DB',
+                            detalle: `Error en lote: ${err.message}`
+                        });
+                    }
                 }
-
-                if (i % 500 === 0 && i > 0) console.log(`   [Job ${jobId}] Progress: ${i} / ${toImport.length}`);
             }
         }
 

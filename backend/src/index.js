@@ -24,6 +24,14 @@ app.listen(PORT, HOST, () => {
   // Iniciar keep-alive service para evitar que Render se duerma
   startKeepAlive();
 
+  // Iniciar Google Drive Watcher (Importación Automática)
+  try {
+    const { startScheduler } = require('./services/importAutomation');
+    startScheduler();
+  } catch (err) {
+    console.error('❌ Error iniciando Drive Automation:', err);
+  }
+
   // Iniciar Cron Jobs de importación automática
   try {
     const { initCronJobs } = require('./services/cronService');
