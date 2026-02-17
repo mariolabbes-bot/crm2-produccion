@@ -44,24 +44,17 @@ const {
   processSaldoCreditoFileAsync
 } = require('../services/importJobs');
 
-// POST /ventas (Async/Sync)
+// POST /ventas (Async Queue Only)
 router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res) => {
   console.log('🟢 [Request] /ventas recibido:', req.file?.originalname);
   try {
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
-    const forceSync = false; // ASYNC QUEUE FOR PRODUCTION
+    // const forceSync = false; // DEPRECATED: Always Async for stability
 
     const jobId = await createJob('ventas', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
-
-    if (forceSync) {
-      console.log(`⚡ [Sync] Ejecutando ventas job ${jobId} sincrónicamente`);
-      // Ejecutar directamente (bypass queue)
-      const result = await processVentasFileAsync(jobId, permanentPath, req.file.originalname);
-      return res.json({ success: true, jobId, status: 'completed', result });
-    }
 
     // Async Queue
     await enqueueImport({
@@ -85,7 +78,7 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
   }
 });
 
-// POST /abonos (Async/Sync)
+// POST /abonos (Async Queue Only)
 router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res) => {
   console.log('🔵 [Request] /abonos recibido:', req.file?.originalname);
   try {
@@ -93,16 +86,9 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
 
     const userRut = req.user?.rut || 'unknown';
     const updateMissing = (req.query.updateMissing === '1' || req.query.updateMissing === 'true');
-    const forceSync = false; // ASYNC QUEUE FOR PRODUCTION
 
     const jobId = await createJob('abonos', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
-
-    if (forceSync) {
-      console.log(`⚡ [Sync] Ejecutando abonos job ${jobId} sincrónicamente`);
-      const result = await processAbonosFileAsync(jobId, permanentPath, req.file.originalname, { updateMissing });
-      return res.json({ success: true, jobId, status: 'completed', result });
-    }
 
     await enqueueImport({
       jobId,
@@ -127,23 +113,16 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
   }
 });
 
-// POST /clientes (Async/Sync)
+// POST /clientes (Async Queue Only)
 router.post('/clientes', auth(['manager']), upload.single('file'), async (req, res) => {
   console.log('🟣 [Request] /clientes recibido:', req.file?.originalname);
   try {
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
-    const forceSync = false; // ASYNC QUEUE FOR PRODUCTION
 
     const jobId = await createJob('clientes', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
-
-    if (forceSync) {
-      console.log(`⚡ [Sync] Ejecutando clientes job ${jobId} sincrónicamente`);
-      const result = await processClientesFileAsync(jobId, permanentPath, req.file.originalname);
-      return res.json({ success: true, jobId, status: 'completed', result });
-    }
 
     await enqueueImport({
       jobId,
@@ -167,23 +146,16 @@ router.post('/clientes', auth(['manager']), upload.single('file'), async (req, r
   }
 });
 
-// POST /saldo-credito (Async/Sync)
+// POST /saldo-credito (Async Queue Only)
 router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (req, res) => {
   console.log('🟢 [Request] /saldo-credito recibido:', req.file?.originalname);
   try {
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
-    const forceSync = false; // ASYNC QUEUE FOR PRODUCTION
 
     const jobId = await createJob('saldo_credito', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
-
-    if (forceSync) {
-      console.log(`⚡ [Sync] Ejecutando saldo-credito job ${jobId} sincrónicamente`);
-      const result = await processSaldoCreditoFileAsync(jobId, permanentPath, req.file.originalname);
-      return res.json({ success: true, jobId, status: 'completed', result });
-    }
 
     await enqueueImport({
       jobId,

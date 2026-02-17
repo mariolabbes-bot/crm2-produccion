@@ -63,7 +63,7 @@ const ImportPanel = () => {
 
       if (data.success) {
         alert(`✅ Reasignación completada!\n\nAlejandra → Luis: ${data.results.alejandra.updated} abonos\nOctavio → Joaquín: ${data.results.octavio.updated} abonos\nRestantes: ${data.results.remaining}`);
-        
+
         // Actualizar el resultado para reflejar el cambio
         if (result && result.missingVendors) {
           setResult({
@@ -125,28 +125,28 @@ const ImportPanel = () => {
       } else if (importType === 'saldo-credito') {
         response = await uploadSaldoCreditoFile(selectedFile);
       } else {
-          // Abonos: si está activo updateMissing, hacemos llamada manual con query
-          if (updateMissingAbonos) {
-            const token = getToken();
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            const fetchUrl = `${API_URL}/import/abonos?updateMissing=1`;
-            const resp = await fetch(fetchUrl, {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}` },
-              body: formData
-            });
-            if (!resp.ok) {
-              const errorData = await resp.json().catch(() => ({}));
-              const err = new Error(errorData.msg || 'Error al subir archivo');
-              err.status = resp.status;
-              err.data = errorData;
-              throw err;
-            }
-            response = await resp.json();
-          } else {
-            response = await uploadAbonosFile(selectedFile);
+        // Abonos: si está activo updateMissing, hacemos llamada manual con query
+        if (updateMissingAbonos) {
+          const token = getToken();
+          const formData = new FormData();
+          formData.append('file', selectedFile);
+          const fetchUrl = `${API_URL}/import/abonos?updateMissing=1`;
+          const resp = await fetch(fetchUrl, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          });
+          if (!resp.ok) {
+            const errorData = await resp.json().catch(() => ({}));
+            const err = new Error(errorData.msg || 'Error al subir archivo');
+            err.status = resp.status;
+            err.data = errorData;
+            throw err;
           }
+          response = await resp.json();
+        } else {
+          response = await uploadAbonosFile(selectedFile);
+        }
       }
 
       setResult(response);
@@ -165,6 +165,14 @@ const ImportPanel = () => {
           removeToken();
           navigate('/login');
         }, 1500);
+      }
+
+      // Manejo específico para "Failed to fetch" (Timeout del navegador o caída de red)
+      if (err.message && err.message.includes('Failed to fetch')) {
+        setError(
+          '⚠️ Error de conexión: El servidor tardó demasiado en responder o se perdió la conexión. ' +
+          'Si el archivo es muy grande (>10MB), intente subirlo en una red más rápida o verifique si la importación continúa en segundo plano.'
+        );
       }
     } finally {
       setLoading(false);
@@ -269,7 +277,7 @@ const ImportPanel = () => {
                 >
                   Descargar Plantilla de {
                     importType === 'clientes' ? 'Clientes' :
-                    importType === 'ventas' ? 'Ventas' : 'Abonos'
+                      importType === 'ventas' ? 'Ventas' : 'Abonos'
                   }
                 </Button>
               ) : (
@@ -285,42 +293,42 @@ const ImportPanel = () => {
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 3. Sube tu archivo
               </Typography>
-                {importType === 'abonos' && (
-                  <Box sx={{ mb: 2, mt: 1, p: 2, border: '1px solid #ddd', borderRadius: 2, bgcolor: '#fafafa' }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                      Opciones avanzadas (Abonos)
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                      <input
-                        id="chk-update-missing"
-                        type="checkbox"
-                        checked={updateMissingAbonos}
-                        onChange={e => setUpdateMissingAbonos(e.target.checked)}
-                        style={{ transform: 'scale(1.2)', cursor: 'pointer' }}
-                      />
-                      <label htmlFor="chk-update-missing" style={{ cursor: 'pointer' }}>
-                        Actualizar datos faltantes (cliente / vendedor) sin duplicar
-                      </label>
-                    </Box>
-                    <Typography variant="caption" color="textSecondary" display="block" sx={{ mb: 2 }}>
-                      Usa esto después de cargar nuevos clientes o vendedores. Los folios existentes se completarán.
-                    </Typography>
-                    <Divider sx={{ my: 2 }} />
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      onClick={handleReassignVendors}
-                      disabled={reassigning}
-                      fullWidth
-                      sx={{ textTransform: 'none' }}
-                    >
-                      {reassigning ? 'Reasignando...' : '🔄 Reasignar Alejandra→Luis y Octavio→Joaquín'}
-                    </Button>
-                    <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
-                      Usa este botón para reasignar automáticamente los abonos de vendedores no encontrados
-                    </Typography>
+              {importType === 'abonos' && (
+                <Box sx={{ mb: 2, mt: 1, p: 2, border: '1px solid #ddd', borderRadius: 2, bgcolor: '#fafafa' }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                    Opciones avanzadas (Abonos)
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <input
+                      id="chk-update-missing"
+                      type="checkbox"
+                      checked={updateMissingAbonos}
+                      onChange={e => setUpdateMissingAbonos(e.target.checked)}
+                      style={{ transform: 'scale(1.2)', cursor: 'pointer' }}
+                    />
+                    <label htmlFor="chk-update-missing" style={{ cursor: 'pointer' }}>
+                      Actualizar datos faltantes (cliente / vendedor) sin duplicar
+                    </label>
                   </Box>
-                )}
+                  <Typography variant="caption" color="textSecondary" display="block" sx={{ mb: 2 }}>
+                    Usa esto después de cargar nuevos clientes o vendedores. Los folios existentes se completarán.
+                  </Typography>
+                  <Divider sx={{ my: 2 }} />
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={handleReassignVendors}
+                    disabled={reassigning}
+                    fullWidth
+                    sx={{ textTransform: 'none' }}
+                  >
+                    {reassigning ? 'Reasignando...' : '🔄 Reasignar Alejandra→Luis y Octavio→Joaquín'}
+                  </Button>
+                  <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
+                    Usa este botón para reasignar automáticamente los abonos de vendedores no encontrados
+                  </Typography>
+                </Box>
+              )}
               <Box
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
@@ -400,19 +408,19 @@ const ImportPanel = () => {
               {result && (
                 <Box>
                   {/* Resumen */}
-                    <Card sx={{ mb: 2, bgcolor: result.dataImported ? '#e8f5e9' : result.canProceed ? '#e8f5e9' : '#fff3e0' }}>
+                  <Card sx={{ mb: 2, bgcolor: result.dataImported ? '#e8f5e9' : result.canProceed ? '#e8f5e9' : '#fff3e0' }}>
                     <CardContent>
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                          {result.dataImported ? (
+                        {result.dataImported ? (
                           <CheckIcon sx={{ color: '#4caf50', fontSize: 40, mr: 2 }} />
-                          ) : result.canProceed ? (
-                            <CheckIcon sx={{ color: '#4caf50', fontSize: 40, mr: 2 }} />
+                        ) : result.canProceed ? (
+                          <CheckIcon sx={{ color: '#4caf50', fontSize: 40, mr: 2 }} />
                         ) : (
                           <WarningIcon sx={{ color: '#ff9800', fontSize: 40, mr: 2 }} />
                         )}
                         <Box>
                           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                              {result.dataImported ? '¡Importación Exitosa!' : result.canProceed ? 'Listo para importar' : 'Atención: Hay pendientes'}
+                            {result.dataImported ? '¡Importación Exitosa!' : result.canProceed ? 'Listo para importar' : 'Atención: Hay pendientes'}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             {result.totalRows} filas procesadas
@@ -420,16 +428,16 @@ const ImportPanel = () => {
                         </Box>
                       </Box>
 
-                        {result.dataImported && (
-                          <Alert severity="success" sx={{ mb: 2 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              ✅ Se han guardado {result.imported} registro{result.imported !== 1 ? 's' : ''} en la base de datos
-                            </Typography>
-                            <Typography variant="caption">
-                              Los datos ya están disponibles en el sistema
-                            </Typography>
-                          </Alert>
-                        )}
+                      {result.dataImported && (
+                        <Alert severity="success" sx={{ mb: 2 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            ✅ Se han guardado {result.imported} registro{result.imported !== 1 ? 's' : ''} en la base de datos
+                          </Typography>
+                          <Typography variant="caption">
+                            Los datos ya están disponibles en el sistema
+                          </Typography>
+                        </Alert>
+                      )}
 
                       <Grid container spacing={2}>
                         {importType === 'saldo-credito' && result.registrosInsertados !== undefined ? (
@@ -526,7 +534,7 @@ const ImportPanel = () => {
                               ))}
                               {result.missingVendors.length > 5 && (
                                 <ListItem>
-                                  <ListItemText 
+                                  <ListItemText
                                     primary={`... y ${result.missingVendors.length - 5} más`}
                                     primaryTypographyProps={{ variant: 'caption', color: 'textSecondary' }}
                                   />
@@ -552,7 +560,7 @@ const ImportPanel = () => {
                               ))}
                               {result.missingClients.length > 5 && (
                                 <ListItem>
-                                  <ListItemText 
+                                  <ListItemText
                                     primary={`... y ${result.missingClients.length - 5} más`}
                                     primaryTypographyProps={{ variant: 'caption', color: 'textSecondary' }}
                                   />

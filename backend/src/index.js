@@ -9,6 +9,7 @@ console.log('✅ NUEVO: Widget ImportStats + endpoint /api/import-stats/stats');
 // Iniciar Workers en el mismo proceso (para deployments simples en Render)
 try {
   require('./worker');
+  require('./workers/importBullWorker'); // Force start import worker
   console.log('✅ [Main] Workers in-process iniciados correctamente');
 } catch (err) {
   console.error('❌ [Main] Error al iniciar Workers:', err);
