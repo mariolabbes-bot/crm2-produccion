@@ -51,7 +51,7 @@ router.post('/ventas', auth(['manager']), upload.single('file'), async (req, res
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
-    const forceSync = true; // FORCE ALWAYS SYNC FOR DEBUGGING
+    const forceSync = false; // ASYNC QUEUE FOR PRODUCTION
 
     const jobId = await createJob('ventas', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
@@ -93,7 +93,7 @@ router.post('/abonos', auth(['manager']), upload.single('file'), async (req, res
 
     const userRut = req.user?.rut || 'unknown';
     const updateMissing = (req.query.updateMissing === '1' || req.query.updateMissing === 'true');
-    const forceSync = true; // FORCE ALWAYS SYNC FOR DEBUGGING
+    const forceSync = false; // ASYNC QUEUE FOR PRODUCTION
 
     const jobId = await createJob('abonos', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
@@ -134,7 +134,7 @@ router.post('/clientes', auth(['manager']), upload.single('file'), async (req, r
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
-    const forceSync = true; // FORCE ALWAYS SYNC FOR DEBUGGING
+    const forceSync = false; // ASYNC QUEUE FOR PRODUCTION
 
     const jobId = await createJob('clientes', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
@@ -174,7 +174,7 @@ router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (r
     if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
 
     const userRut = req.user?.rut || 'unknown';
-    const forceSync = true; // FORCE ALWAYS SYNC FOR DEBUGGING
+    const forceSync = false; // ASYNC QUEUE FOR PRODUCTION
 
     const jobId = await createJob('saldo_credito', req.file.originalname, userRut);
     const permanentPath = moveToPending(req, jobId);
