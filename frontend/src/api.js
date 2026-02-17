@@ -214,6 +214,7 @@ const apiFetch = async (url, options = {}) => {
 
       // Si el status es 'processing' o 'pending', continuar polling
       if (job.status === 'pending') {
+        // Debug: Job still pending...
         console.log(`⏳ Job ${jobId} en cola... (Intento ${i + 1}/${maxAttempts})`);
       }
     }
