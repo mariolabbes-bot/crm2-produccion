@@ -32,9 +32,9 @@ router.get('/stats', auth(), async (req, res) => {
     // 2. Abonos - Fecha más reciente
     try {
       const abonosRes = await pool.query(`
-        SELECT MAX(fecha_abono) as ultima_fecha, COUNT(*) as total
+        SELECT MAX(fecha) as ultima_fecha, COUNT(*) as total
         FROM abono
-        WHERE fecha_abono IS NOT NULL
+        WHERE fecha IS NOT NULL
       `);
       stats.abonos = {
         ultima_fecha: abonosRes.rows[0]?.ultima_fecha || null,
@@ -50,7 +50,7 @@ router.get('/stats', auth(), async (req, res) => {
     // 3. Clientes - Fecha de creación/actualización más reciente
     try {
       const clientesRes = await pool.query(`
-        SELECT MAX(COALESCE(updated_at, created_at)) as ultima_fecha, COUNT(*) as total
+        SELECT MAX(created_at) as ultima_fecha, COUNT(*) as total
         FROM cliente
       `);
       stats.clientes = {
