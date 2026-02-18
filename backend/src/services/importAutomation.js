@@ -51,17 +51,19 @@ async function runDriveImportCycle() {
             else if (name.includes('SALDO') && name.includes('CREDITO')) { type = 'import-saldo'; importer = processSaldoCreditoFileAsync; }
 
             if (!importer) {
-                console.log(`⚠️ [DriveBot] Archivo ignorado (Formato desconocido): ${file.name}`);
+                // console.log(`⚠️ [DriveBot] Archivo ignorado (Formato desconocido): ${file.name}`);
                 continue;
             }
 
             const localPath = path.join(TEMP_DIR, file.name);
             await downloadFile(file.id, localPath);
 
-            const job = await createJob(type, 'SYSTEM_BOT');
+            // createJob(type, user, originalname)
+            const job = await createJob(type.replace('import-', ''), 'SYSTEM_BOT', file.name);
 
             try {
-                // Execute Import
+                // Execute Import - Pass jobId, path, originalName
+                // Importers expected signature: (jobId, filePath, originalName)
                 const result = await importer(job.id, localPath, file.name);
 
                 // Notification: Success
