@@ -13,7 +13,8 @@ const importQueue = new Queue('import-jobs', REDIS_URL, {
     redis: {
         tls: REDIS_URL.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
         maxRetriesPerRequest: null,
-        enableReadyCheck: false
+        enableReadyCheck: false,
+        family: 0 // Force dual-stack lookup to fix AggregateError issues
     }
 });
 
