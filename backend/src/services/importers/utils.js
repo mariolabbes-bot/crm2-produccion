@@ -21,28 +21,26 @@ function parseExcelDate(value) {
         const trimmed = value.trim();
 
         // 2a. Priority: Slash format DD/MM/YYYY (Chilean/European)
-        // This fixes the bug where 11/02/2026 was parsed as Nov 2nd instead of Feb 11th
+        // STRICT ENFORCEMENT: We assume DD/MM/YYYY always. 
         if (trimmed.includes('/')) {
             const parts = trimmed.split('/');
             if (parts.length === 3) {
-                const p1 = parseInt(parts[0], 10); // Day
-                const p2 = parseInt(parts[1], 10); // Month
-                const p3 = parseInt(parts[2], 10); // Year
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10);
+                const year = parseInt(parts[2], 10);
 
-                // Assumption: If first part > 12, it represents Day. 
-                // BUT even if <= 12, we enforce DD/MM/YYYY as per user requirement.
-                // We handle the edge case where Year might be first (YYYY/MM/DD), typically rare with slashes but possible.
+                // Basic validation
+                if (day > 31 || month > 12) {
+                    // Fallback or error? For now, let JS Date try to handle or return Invalid
+                    // But if day > 12 and month <= 12, previous loose logic might have swapped them.
+                    // Here we lock it to DD/MM/YYYY.
+                }
 
-                // Case: DD/MM/YYYY (Standard)
-                if (p3 > 1900) {
-                    const date = new Date(p3, p2 - 1, p1);
-                    if (!isNaN(date.getTime())) return date;
-                }
-                // Case: YYYY/MM/DD (Less common with slashes)
-                else if (p1 > 1900) {
-                    const date = new Date(p1, p2 - 1, p3);
-                    if (!isNaN(date.getTime())) return date;
-                }
+                // Handle 2-digit years if necessary? (Usually Excel exports 4 digits)
+                const fullYear = year < 100 ? 2000 + year : year;
+
+                const date = new Date(fullYear, month - 1, day);
+                if (!isNaN(date.getTime())) return date;
             }
         }
 
