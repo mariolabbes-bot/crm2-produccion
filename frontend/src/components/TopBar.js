@@ -18,6 +18,7 @@ import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
 import MenuIcon from '@mui/icons-material/Menu';
+import NotificationCenter from './common/NotificationCenter';
 
 const TopBar = ({ title = 'Dashboard', subtitle = null, isMobile = false }) => {
   const { user } = useAuth();
@@ -92,19 +93,7 @@ const TopBar = ({ title = 'Dashboard', subtitle = null, isMobile = false }) => {
 
           {/* Notificaciones */}
           <Tooltip title="Notificaciones">
-            <IconButton
-              sx={{
-                color: '#6B7280',
-                '&:hover': {
-                  backgroundColor: 'rgba(229, 122, 45, 0.1)',
-                  color: '#E57A2D'
-                }
-              }}
-            >
-              <Badge badgeContent={3} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            <NotificationCenter />
           </Tooltip>
 
           {/* Configuración - Ocultar en móvil, mover a menú inferior */}

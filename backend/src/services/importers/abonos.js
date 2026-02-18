@@ -13,9 +13,10 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
     if (updateMissing) console.log(`🛠️ [Job ${jobId}] updateMissing ACTIVADO`);
 
     try {
-        console.log(`🔵 [Job ${jobId}] Procesando Abonos: ${originalname}`);
+        console.log(`🔵 [Job ${jobId}] Procesando Abonos (Smart Merge): ${originalname}`);
         await updateJobStatus(jobId, 'processing');
 
+        // 1. Read Excel
         const workbook = XLSX.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
@@ -24,25 +25,23 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         console.log(`📊 Total filas: ${data.length}`);
         if (!Array.isArray(data) || data.length === 0) throw new Error('Excel vacío');
 
-        // Robust header detection
+        // 2. Header Detection
         const scanLimit = Math.min(data.length, 50);
         const headersSet = new Set();
-        for (let i = 0; i < scanLimit; i++) {
-            Object.keys(data[i] || {}).forEach(k => headersSet.add(k));
-        }
+        for (let i = 0; i < scanLimit; i++) Object.keys(data[i] || {}).forEach(k => headersSet.add(k));
         const headers = Array.from(headersSet);
         const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
 
         const colFolio = findCol([/^Folio$/i, /Folio/i]);
         const colFecha = findCol([/^Fecha$/i, /Fecha.*abono/i, /Fecha/i]);
-        const colMonto = findCol([/^Monto$/i]); // This is the TOTAL amount column in Excel
-
-        // Headers specific handling
-        const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i, /^Identificador.*cliente$/i]);
+        const colMonto = findCol([/^Monto$/i]);
         const colIdentificadorAbono = findCol([/^Identificador_1$/i, /^Identificador.*abono/i, /^Identificador.*2$/i]);
-        const colSucursal = findCol([/^Sucursal$/i]);
+
+        // Optional Cols
+        const colIdentificador = findCol([/^Identificador$/i, /^RUT$/i, /^Identificador.*cliente$/i]);
         const colCliente = findCol([/^Cliente$/i]);
         const colVendedorCliente = findCol([/^Vendedor.*clie/i, /^Vendedor/i]);
+        const colSucursal = findCol([/^Sucursal$/i]);
         const colCajaOperacion = findCol([/^Caja.*operaci/i]);
         const colUsuarioIngreso = findCol([/^Usuario.*in/i]);
         const colMontoTotal = findCol([/^Monto.*total$/i]);
@@ -52,30 +51,16 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         const colEstadoAbono = findCol([/^Estado.*abono$/i]);
         const colFechaVencimiento = findCol([/^Fecha.*vencir/i, /^Fecha.*vencimiento$/i]);
 
-        if (!colFolio || !colFecha || !colMonto) {
-            throw new Error(`Faltan columnas requeridas: Folio, Fecha, Monto`);
-        }
+        if (!colFolio || !colFecha || !colMonto) throw new Error(`Faltan columnas requeridas: Folio, Fecha, Monto`);
 
-        // --- 1. Client Cache ---
-        const clientsRes = await client.query("SELECT rut FROM cliente");
-        const clientsByRut = new Set(clientsRes.rows.filter(c => c.rut).map(c => norm(c.rut)));
-
-        // --- 2. Existing abonos logic (for split payments/duplicates) ---
-        // Fetch existing keys to avoid collisions
-        const existingAbonos = await client.query(`SELECT folio, fecha, identificador_abono FROM abono WHERE folio IS NOT NULL`);
-        const existingKeys = new Set();
-        existingAbonos.rows.forEach(a => {
-            const f = norm(a.folio || '');
-            const d = new Date(a.fecha);
-            const dateStr = !isNaN(d) ? d.toISOString().split('T')[0] : '';
-            const key = `${f}|${dateStr}|${norm(a.identificador_abono || '')}`;
-            existingKeys.add(key);
-        });
-
+        // 3. Prepare Staging Data
         const toImport = [];
         const observations = [];
-        const processedKeys = new Set();
-        const missingClients = new Set();
+
+        // Vendor Alias Cache
+        const vendorMap = new Map(); // TODO: Load if needed, currently using resolveVendorName per row or cache it?
+        // Optimizing with simple cache if needed, but for now standard resolve is fine or we can reuse map from Ventas if shared. 
+        // Let's stick to simple resolution for now to avoid complexity, or bulk load user aliases if perf is key.
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
@@ -83,171 +68,141 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             const fecha = parseExcelDate(row[colFecha]);
             const montoExcel = parseNumeric(row[colMonto]);
 
-            // Logic: Monto in Excel is Total. We need Net -> Monto / 1.19
-            const montoNetoCalc = montoExcel ? Math.round(montoExcel / 1.19) : 0;
-
             if (!folio || !fecha || !montoExcel) continue;
 
-            const sucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
+            const idAbonoRaw = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : '';
+            // If ID is empty, we flag it but we MUST import it. We'll use '' as ID.
+
+            const montoNetoCalc = Math.round(montoExcel / 1.19);
             const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null;
             const clienteNombre = colCliente && row[colCliente] ? String(row[colCliente]).trim() : null;
 
-            // STUB CLIENT
-            if (identificador) {
-                const rutNorm = norm(identificador);
-                if (!clientsByRut.has(rutNorm)) {
-                    if (!missingClients.has(rutNorm)) {
-                        try {
-                            await client.query("INSERT INTO cliente (rut, nombre) VALUES ($1, $2) ON CONFLICT (rut) DO NOTHING", [identificador, clienteNombre || 'Unknown']);
-                            clientsByRut.add(rutNorm);
-                        } catch (e) {
-                            observations.push({ fila: i + 2, campo: 'Cliente', detalle: `Error creando stub cliente: ${e.message}` });
-                        }
-                    }
-                }
-            }
-
-            // VENDOR RESOLUTION
+            // Resolve Vendor
             const rawVendor = colVendedorCliente && row[colVendedorCliente] ? String(row[colVendedorCliente]).trim() : null;
             let vendedorNombre = null;
-            if (rawVendor) {
-                // Use Standard Resolution
-                vendedorNombre = await resolveVendorName(rawVendor);
-            }
-
-            const cajaOperacion = colCajaOperacion && row[colCajaOperacion] ? String(row[colCajaOperacion]).trim() : null;
-            const usuarioIngreso = colUsuarioIngreso && row[colUsuarioIngreso] ? String(row[colUsuarioIngreso]).trim() : null;
-            const montoTotalExcel = colMontoTotal ? parseNumeric(row[colMontoTotal]) : null;
-            const saldoFavor = colSaldoFavor ? parseNumeric(row[colSaldoFavor]) : null;
-            const saldoFavorTotal = colSaldoFavorTotal ? parseNumeric(row[colSaldoFavorTotal]) : null;
-            const tipoPago = colTipoPago && row[colTipoPago] ? String(row[colTipoPago]).trim() : null;
-            const estadoAbono = colEstadoAbono && row[colEstadoAbono] ? String(row[colEstadoAbono]).trim() : null;
-            const identificadorAbono = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : '';
-            const fechaVencimiento = colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null;
-
-            // Deduplication / Key Generation
-            const folioNorm = norm(folio);
-            const rawId = norm(identificadorAbono || '');
-            let finalKey = `${folioNorm}|${fecha}|${rawId}`;
-            let idAbonoFinal = identificadorAbono || '';
-
-            if (processedKeys.has(finalKey)) {
-                // Intra-batch duplicate logic
-                let dupIndex = 1;
-                while (true) {
-                    const suffix = `_${dupIndex}`;
-                    const candidateId = `${(identificadorAbono || '')}${suffix}`;
-                    const candidateIdNorm = `${rawId}${suffix}`;
-                    const candidateKey = `${folioNorm}|${fecha}|${candidateIdNorm}`;
-
-                    if (!existingKeys.has(candidateKey) && !processedKeys.has(candidateKey)) {
-                        idAbonoFinal = candidateId;
-                        finalKey = candidateKey;
-                        break;
-                    }
-                    dupIndex++;
-                }
-            }
-
-            processedKeys.add(finalKey);
-            existingKeys.add(finalKey);
+            if (rawVendor) vendedorNombre = await resolveVendorName(rawVendor);
 
             toImport.push({
-                sucursal, folio, fecha, identificador, clienteNombre, vendedorClienteNombre: vendedorNombre,
-                cajaOperacion, usuarioIngreso, montoTotal: montoTotalExcel, saldoFavor, saldoFavorTotal, tipoPago,
-                estadoAbono, identificadorAbono: idAbonoFinal, fechaVencimiento, monto: montoExcel, montoNeto: montoNetoCalc
+                sucursal: colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null,
+                folio,
+                fecha,
+                identificador, // RUT
+                cliente: clienteNombre,
+                vendedor_cliente: vendedorNombre,
+                caja_operacion: colCajaOperacion && row[colCajaOperacion] ? String(row[colCajaOperacion]).trim() : null,
+                usuario_ingreso: colUsuarioIngreso && row[colUsuarioIngreso] ? String(row[colUsuarioIngreso]).trim() : null,
+                monto_total: colMontoTotal ? parseNumeric(row[colMontoTotal]) : null,
+                saldo_a_favor: colSaldoFavor ? parseNumeric(row[colSaldoFavor]) : null,
+                saldo_a_favor_total: colSaldoFavorTotal ? parseNumeric(row[colSaldoFavorTotal]) : null,
+                tipo_pago: colTipoPago && row[colTipoPago] ? String(row[colTipoPago]).trim() : null,
+                estado_abono: colEstadoAbono && row[colEstadoAbono] ? String(row[colEstadoAbono]).trim() : null,
+                identificador_abono: idAbonoRaw,
+                fecha_vencimiento: colFechaVencimiento ? parseExcelDate(row[colFechaVencimiento]) : null,
+                monto: montoExcel,
+                monto_neto: montoNetoCalc
             });
         }
 
-        let importedCount = 0;
-        if (toImport.length > 0) {
-            console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos (Standardized)...`);
+        if (toImport.length === 0) throw new Error('No se extrajeron filas válidas');
 
-            // Using Row-by-Row to support detailed error reporting and ON CONFLICT handling
-            if (toImport.length > 0) {
-                console.log(`✅ [Job ${jobId}] Insertando ${toImport.length} abonos (Masivo)...`);
+        // 4. TEMP TABLE & BULK INSERT
+        const tempTable = `temp_abono_import_${jobId}`;
+        await client.query(`
+            CREATE TEMP TABLE ${tempTable} (
+                sucursal text, folio text, fecha date, identificador text, cliente text, 
+                vendedor_cliente text, caja_operacion text, usuario_ingreso text, monto_total numeric, 
+                saldo_a_favor numeric, saldo_a_favor_total numeric, tipo_pago text, estado_abono text, 
+                identificador_abono text, fecha_vencimiento date, monto numeric, monto_neto numeric
+            ) ON COMMIT DROP
+        `);
 
-                const BATCH_SIZE = 500;
-                for (let i = 0; i < toImport.length; i += BATCH_SIZE) {
-                    const batch = toImport.slice(i, i + BATCH_SIZE);
-                    const values = [];
-                    const params = [];
-                    let paramIndex = 1;
+        console.log(`⚡ Insertando ${toImport.length} filas en Staging Table...`);
 
-                    batch.forEach(item => {
-                        params.push(
-                            item.sucursal, item.folio, item.fecha, item.identificador, item.clienteNombre,
-                            item.vendedorClienteNombre, item.cajaOperacion, item.usuarioIngreso, item.montoTotal,
-                            item.saldoFavor, item.saldoFavorTotal, item.tipoPago, item.estadoAbono,
-                            item.identificadorAbono, item.fechaVencimiento, item.monto, item.montoNeto
-                        );
+        // Batch Insert into Temp
+        const BATCH_SIZE = 1000;
+        for (let i = 0; i < toImport.length; i += BATCH_SIZE) {
+            const batch = toImport.slice(i, i + BATCH_SIZE);
+            let params = [];
+            let placeholders = [];
+            let pIdx = 1;
 
-                        // Generate placeholders ($1, $2, ... $17)
-                        const rowPlaceholders = Array.from({ length: 17 }, () => `$${paramIndex++}`).join(', ');
-                        values.push(`(${rowPlaceholders})`);
-                    });
-
-                    const query = `
-                    INSERT INTO abono (
-                        sucursal, folio, fecha, identificador, cliente, vendedor_cliente, 
-                        caja_operacion, usuario_ingreso, monto_total, saldo_a_favor, 
-                        saldo_a_favor_total, tipo_pago, estado_abono, identificador_abono, 
-                        fecha_vencimiento, monto, monto_neto, created_at
-                    ) VALUES ${values.join(', ')}
-                    ON CONFLICT (folio, identificador_abono, fecha) DO UPDATE SET
-                        identificador = COALESCE(EXCLUDED.identificador, abono.identificador),
-                        cliente = COALESCE(EXCLUDED.cliente, abono.cliente),
-                        vendedor_cliente = COALESCE(EXCLUDED.vendedor_cliente, abono.vendedor_cliente),
-                        estado_abono = EXCLUDED.estado_abono,
-                        monto = EXCLUDED.monto,
-                        monto_neto = EXCLUDED.monto_neto
-                    RETURNING (xmax = 0) AS inserted
-                `;
-
-                    try {
-                        const res = await client.query(query, params);
-                        res.rows.forEach(row => {
-                            if (row.inserted) importedCount++;
-                        });
-                        console.log(`   Processed batch ${i} - ${i + batch.length} / ${toImport.length}`);
-                    } catch (err) {
-                        console.error(`❌ [Job ${jobId}] Error en batch ${i}:`, err.message);
-                        observations.push({
-                            fila: `${i + 2} - ${i + batch.length + 1}`,
-                            folio: 'BATCH ERROR',
-                            campo: 'DB',
-                            detalle: `Error en lote: ${err.message}`
-                        });
-                    }
-                }
+            for (const row of batch) {
+                params.push(
+                    row.sucursal, row.folio, row.fecha, row.identificador, row.cliente,
+                    row.vendedor_cliente, row.caja_operacion, row.usuario_ingreso, row.monto_total,
+                    row.saldo_a_favor, row.saldo_a_favor_total, row.tipo_pago, row.estado_abono,
+                    row.identificador_abono, row.fecha_vencimiento, row.monto, row.monto_neto
+                );
+                placeholders.push(`($${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++})`);
             }
+
+            await client.query(
+                `INSERT INTO ${tempTable} VALUES ${placeholders.join(', ')}`,
+                params
+            );
         }
 
-        let observationsReportPath = null;
-        if (observations.length > 0) {
-            const wbObs = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wbObs, XLSX.utils.json_to_sheet(observations.map(o => ({ 'Folio': o.folio, 'Error': o.detalle }))), 'Observaciones');
-            const reportDir = 'uploads/reports';
-            if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
-            observationsReportPath = path.join(reportDir, `observaciones_abonos_${jobId}.xlsx`);
-            XLSX.writeFile(wbObs, observationsReportPath);
-        }
+        // 5. SMART MERGE (The Magic)
+        console.log('🔮 Ejecutando MERGE (Update Existing + Insert New)...');
+
+        // A. UPDATE existing records (Correct Dates based on Key: Folio + ID)
+        const updateQuery = `
+            UPDATE abono t
+            SET 
+                fecha = s.fecha,
+                monto = s.monto,
+                monto_neto = s.monto_neto,
+                estado_abono = s.estado_abono,
+                updated_at = NOW()
+            FROM ${tempTable} s
+            WHERE t.folio = s.folio 
+              AND t.identificador_abono = s.identificador_abono
+              AND (t.fecha <> s.fecha OR t.monto <> s.monto)
+        `;
+        const resUpdate = await client.query(updateQuery);
+        console.log(`   🔄 Actualizados (Corregidos): ${resUpdate.rowCount}`);
+
+        // B. INSERT New records
+        const insertQuery = `
+            INSERT INTO abono (
+                sucursal, folio, fecha, identificador, cliente, vendedor_cliente, 
+                caja_operacion, usuario_ingreso, monto_total, saldo_a_favor, 
+                saldo_a_favor_total, tipo_pago, estado_abono, identificador_abono, 
+                fecha_vencimiento, monto, monto_neto, created_at
+            )
+            SELECT 
+                s.sucursal, s.folio, s.fecha, s.identificador, s.cliente, s.vendedor_cliente, 
+                s.caja_operacion, s.usuario_ingreso, s.monto_total, s.saldo_a_favor, 
+                s.saldo_a_favor_total, s.tipo_pago, s.estado_abono, s.identificador_abono, 
+                s.fecha_vencimiento, s.monto, s.monto_neto, NOW()
+            FROM ${tempTable} s
+            WHERE NOT EXISTS (
+                SELECT 1 FROM abono t 
+                WHERE t.folio = s.folio 
+                  AND t.identificador_abono = s.identificador_abono
+            )
+        `;
+        const resInsert = await client.query(insertQuery);
+        console.log(`   ✨ Nuevos Insertados: ${resInsert.rowCount}`);
 
         const result = {
             success: true,
             totalRows: data.length,
             toImport: toImport.length,
-            imported: importedCount,
-            observationsReportUrl: observationsReportPath ? `/api/import/download-report/${path.basename(observationsReportPath)}` : null,
-            dataImported: importedCount > 0
+            updated: resUpdate.rowCount,
+            inserted: resInsert.rowCount,
+            observationsReportUrl: null, // No obs report for now, assumed clean or just db errors thrown
+            dataImported: (resUpdate.rowCount + resInsert.rowCount) > 0
         };
 
         await updateJobStatus(jobId, 'completed', {
-            totalRows: data.length, importedRows: importedCount, errorRows: observations.length,
-            resultData: result, observationsFilename: observationsReportPath ? path.basename(observationsReportPath) : null
+            totalRows: data.length,
+            importedRows: resInsert.rowCount,
+            updatedRows: resUpdate.rowCount,
+            resultData: result
         });
 
-        console.log(`✅ [Job ${jobId}] Abonos finalizado (Standardized)`);
+        console.log(`✅ [Job ${jobId}] Abonos Finalizado.`);
         return result;
 
     } catch (error) {

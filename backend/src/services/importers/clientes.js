@@ -154,16 +154,29 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
         }
 
         let insertedCount = 0;
+        // Deduplicate toImport by RUT (keep last) to avoid "ON CONFLICT ... cannot affect row a second time"
+        const uniqueClients = new Map();
+        toImport.forEach(item => {
+            if (item.rut) {
+                uniqueClients.set(norm(item.rut), item);
+            }
+        });
+        const cleanToImport = Array.from(uniqueClients.values());
+
+        console.log(`🧹 Deduplicación: ${toImport.length} -> ${cleanToImport.length} registros únicos.`);
+
+        let importedCount = 0;
         let updatedCount = 0;
 
-        if (toImport.length > 0) {
-            console.log(`🔄 [Job ${jobId}] Iniciando UPSERT masivo de ${toImport.length} registros...`);
+        if (cleanToImport.length > 0) {
+            console.log(`🔄 [Job ${jobId}] Iniciando UPSERT masivo de ${cleanToImport.length} registros...`);
 
             // Batch size for processing
             const BATCH_SIZE = 500;
 
-            for (let i = 0; i < toImport.length; i += BATCH_SIZE) {
-                const batch = toImport.slice(i, i + BATCH_SIZE);
+            for (let batchStart = 0; batchStart < cleanToImport.length; batchStart += BATCH_SIZE) {
+                const batchEnd = Math.min(batchStart + BATCH_SIZE, cleanToImport.length);
+                const batch = cleanToImport.slice(batchStart, batchEnd);
                 const values = [];
                 const params = [];
                 let paramIndex = 1;
@@ -208,15 +221,16 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                     res.rows.forEach(row => {
                         if (row.inserted) insertedCount++; else updatedCount++;
                     });
-                    console.log(`   Processed batch ${i} - ${i + batch.length} / ${toImport.length}`);
+                    importedCount += res.rowCount;
+                    console.log(`📊 [Job ${jobId}] Progreso: ${importedCount}/${cleanToImport.length}`);
                 } catch (err) {
-                    console.error(`❌ Error en batch ${i}:`, err.message);
+                    console.error(`❌ Error en batch ${batchStart}:`, err.message);
                     // Fallback: If batch fails, try one by one to isolate error (or just log generic error for batch)
                     // For now, logging general error and continuing is safer to avoid crashing everything, 
                     // but ideally, we should retry row-by-row if critical.
                     // Adding generic observation for the batch range
                     observations.push({
-                        fila: `${i + 2} - ${i + batch.length + 1}`,
+                        fila: `${batchStart + 2} - ${batchStart + batch.length + 1}`,
                         rut: 'BATCH ERROR',
                         campo: 'DB',
                         detalle: `Error en lote: ${err.message}`

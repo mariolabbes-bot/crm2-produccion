@@ -6,7 +6,8 @@ const { processClientesFileAsync } = require('./importers/clientes');
 const { processVentasFileAsync } = require('./importers/ventas');
 const { processAbonosFileAsync } = require('./importers/abonos');
 const { processSaldoCreditoFileAsync } = require('./importers/saldo_credito');
-const { createJob } = require('../jobManager');
+const { createJob } = require('./jobManager');
+const { createNotification } = require('./notificationService'); // Added Notification Service
 
 // CONSTANTS
 const DRIVE_FOLDER_ID = '1qPyGG4hYSIgdYSQimFnYiBrubOYC6U_7';
@@ -25,13 +26,21 @@ async function runDriveImportCycle() {
         const files = await listUnprocessedFiles(DRIVE_FOLDER_ID);
         console.log(`🤖 [DriveBot] Encontrados ${files.length} archivos pendientes.`);
 
+        // PRIORITIZE CLIENTS
+        files.sort((a, b) => {
+            const nameA = a.name.toUpperCase();
+            const nameB = b.name.toUpperCase();
+            const scoreA = nameA.includes('CLIENTE') ? 1 : 2;
+            const scoreB = nameB.includes('CLIENTE') ? 1 : 2;
+            return scoreA - scoreB;
+        });
+
         if (files.length === 0) return;
 
         // 3. Process each file
         for (const file of files) {
             console.log(`🤖 [DriveBot] Procesando: ${file.name} (ID: ${file.id})`);
 
-            // Determine Type
             let importer = null;
             let type = '';
             const name = file.name.toUpperCase();
@@ -46,18 +55,23 @@ async function runDriveImportCycle() {
                 continue;
             }
 
-            // Download
             const localPath = path.join(TEMP_DIR, file.name);
             await downloadFile(file.id, localPath);
 
-            // Create Job Tracking
             const job = await createJob(type, 'SYSTEM_BOT');
 
             try {
                 // Execute Import
-                await importer(job.id, localPath, file.name);
+                const result = await importer(job.id, localPath, file.name);
 
-                // On Success: Move to PROCESADOS
+                // Notification: Success
+                await createNotification({
+                    userRole: 'admin',
+                    type: 'success',
+                    title: `Importación Auto: ${type.split('-')[1].toUpperCase()}`,
+                    message: `Archivo "${file.name}" procesado. Filas: ${result.imported || 0} insertadas.`
+                });
+
                 if (folders.PROCESADOS) {
                     await moveFile(file.id, DRIVE_FOLDER_ID, folders.PROCESADOS);
                     console.log(`✅ [DriveBot] Archivo movido a PROCESADOS: ${file.name}`);
@@ -66,13 +80,19 @@ async function runDriveImportCycle() {
             } catch (error) {
                 console.error(`❌ [DriveBot] Falló importación de ${file.name}:`, error.message);
 
-                // On Error: Move to ERRORES
+                // Notification: Error
+                await createNotification({
+                    userRole: 'admin',
+                    type: 'error',
+                    title: `Error Importación Auto: ${file.name}`,
+                    message: `Fallo al procesar: ${error.message}`
+                });
+
                 if (folders.ERRORES) {
                     await moveFile(file.id, DRIVE_FOLDER_ID, folders.ERRORES);
                     console.log(`bk [DriveBot] Archivo movido a ERRORES: ${file.name}`);
                 }
             } finally {
-                // Cleanup local temp
                 if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
             }
         }
