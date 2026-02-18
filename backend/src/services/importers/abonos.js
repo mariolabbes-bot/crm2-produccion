@@ -94,6 +94,27 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         if (toImport.length === 0) throw new Error('No se extrajeron filas válidas');
 
+        // Deduplicate toImport to prevent 23505 errors if Excel has exact dupes
+        const uniqueMap = new Map();
+        const dedupedImport = [];
+
+        for (const item of toImport) {
+            // Key: Folio + ID_Abono (Fecha excluded? No, constraint includes Fecha, but typically Folio+ID should be unqiue enough?
+            // User said: Folio + Identificador is the unique key.
+            // Constraint says: Folio + ID + Fecha.
+            // Let's deduce strictly on Folio + ID. If we have same Folio+ID but diff Date, it's weird.
+            // But let's stick to the strictest unique constraint trigger: (folio, id, fecha).
+            // Actually, if we have duplicate lines in Excel, they usually match on everything.
+            const uniqueKey = `${item.folio}-${item.identificador_abono}-${item.fecha.getTime()}`;
+
+            if (!uniqueMap.has(uniqueKey)) {
+                uniqueMap.set(uniqueKey, true);
+                dedupedImport.push(item);
+            }
+        }
+        console.log(`🧹 Deduplicación: ${toImport.length} -> ${dedupedImport.length} filas únicas.`);
+
+
         // 4. TRANSACTIONAL IMPORT
         console.log(`⚡ Iniciando Transacción para ${toImport.length} filas...`);
         await client.query('BEGIN');
@@ -115,11 +136,12 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
                 identificador_abono text, fecha_vencimiento date, monto numeric, monto_neto numeric
             ) ON COMMIT DROP
         `);
+        console.log(`⚡ Insertando ${dedupedImport.length} filas en Staging Table...`);
 
         // Bulk Load Temp Table
         const BATCH_SIZE = 1000;
-        for (let i = 0; i < toImport.length; i += BATCH_SIZE) {
-            const batch = toImport.slice(i, i + BATCH_SIZE);
+        for (let i = 0; i < dedupedImport.length; i += BATCH_SIZE) {
+            const batch = dedupedImport.slice(i, i + BATCH_SIZE);
             let params = [];
             let placeholders = [];
             let pIdx = 1;
@@ -186,7 +208,7 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         const result = {
             success: true,
             totalRows: data.length,
-            toImport: toImport.length,
+            toImport: dedupedImport.length,
             updated: updatedCount,
             inserted: insertedCount,
             observationsReportUrl: null,
