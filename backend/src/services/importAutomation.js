@@ -47,7 +47,7 @@ async function runDriveImportCycle() {
 
             if (name.includes('CLIENTE')) { type = 'import-clientes'; importer = processClientesFileAsync; }
             else if (name.includes('VENTA')) { type = 'import-ventas'; importer = processVentasFileAsync; }
-            else if (name.includes('ABONO')) { type = 'import-abonos'; importer = processAbonosFileAsync; }
+            else if (name.includes('ABONO') || name.includes('RECAUDACION')) { type = 'import-abonos'; importer = processAbonosFileAsync; }
             else if (name.includes('SALDO') && name.includes('CREDITO')) { type = 'import-saldo'; importer = processSaldoCreditoFileAsync; }
 
             if (!importer) {
