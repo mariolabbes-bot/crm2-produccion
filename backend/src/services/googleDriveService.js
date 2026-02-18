@@ -6,8 +6,19 @@ const CREDENTIALS_PATH = path.join(__dirname, '../../google_drive_credentials.js
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 
 // Initialize Auth
+let authData;
+if (process.env.GOOGLE_CREDENTIALS_JSON) {
+    try {
+        console.log('🔑 [DriveService] Cargando credenciales desde ENV (GOOGLE_CREDENTIALS_JSON)...');
+        authData = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+    } catch (e) {
+        console.error('❌ Error parseando GOOGLE_CREDENTIALS_JSON:', e.message);
+    }
+}
+
 const auth = new google.auth.GoogleAuth({
-    keyFile: CREDENTIALS_PATH,
+    keyFile: !authData ? CREDENTIALS_PATH : undefined,
+    credentials: authData,
     scopes: SCOPES,
 });
 
