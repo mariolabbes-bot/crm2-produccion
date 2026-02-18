@@ -143,9 +143,8 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             SET 
                 fecha = s.fecha,
                 monto = s.monto,
-                monto_neto = s.monto_neto,
-                estado_abono = s.estado_abono,
-                updated_at = NOW()
+                estado_abono = s.estado_abono
+
             FROM ${tempTable} s
             WHERE t.folio = s.folio 
               AND t.identificador_abono = s.identificador_abono
