@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { getUnreadNotifications, markAsRead } = require('../services/notificationService');
-const { verifyToken } = require('../middleware/auth'); // Assuming this exists
+const auth = require('../middleware/auth'); // Correct Import
 
 // GET /api/notifications - Get unread for current user's role
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', auth(), async (req, res) => {
     try {
         // Assume req.user.rol exists from token
         const role = req.user.rol || 'seller';
@@ -20,7 +20,7 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // PUT /api/notifications/:id/read - Mark as read
-router.put('/:id/read', verifyToken, async (req, res) => {
+router.put('/:id/read', auth(), async (req, res) => {
     try {
         await markAsRead(req.params.id);
         res.json({ success: true });
