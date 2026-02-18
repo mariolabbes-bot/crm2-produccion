@@ -4,16 +4,13 @@ const fs = require('fs');
 const path = require('path');
 const { updateJobStatus } = require('../jobManager');
 const { norm, parseExcelDate, parseNumeric } = require('./utils');
-const { resolveVendorName } = require('../../utils/vendorAlias'); // Standard Vendor Resolution
+const { resolveVendorName } = require('../../utils/vendorAlias');
 
 async function processAbonosFileAsync(jobId, filePath, originalname, options = {}) {
     const client = await pool.connect();
-    const updateMissing = !!options.updateMissing;
-
-    if (updateMissing) console.log(`🛠️ [Job ${jobId}] updateMissing ACTIVADO`);
 
     try {
-        console.log(`🔵 [Job ${jobId}] Procesando Abonos (Smart Merge): ${originalname}`);
+        console.log(`🔵 [Job ${jobId}] Procesando Abonos (Transactional Smart Merge): ${originalname}`);
         await updateJobStatus(jobId, 'processing');
 
         // 1. Read Excel
@@ -22,7 +19,7 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         const sheet = workbook.Sheets[sheetName];
         const data = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
-        console.log(`📊 Total filas: ${data.length}`);
+        console.log(`📊 Total filas Excel: ${data.length}`);
         if (!Array.isArray(data) || data.length === 0) throw new Error('Excel vacío');
 
         // 2. Header Detection
@@ -53,14 +50,8 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         if (!colFolio || !colFecha || !colMonto) throw new Error(`Faltan columnas requeridas: Folio, Fecha, Monto`);
 
-        // 3. Prepare Staging Data
+        // 3. Prepare Data
         const toImport = [];
-        const observations = [];
-
-        // Vendor Alias Cache
-        const vendorMap = new Map(); // TODO: Load if needed, currently using resolveVendorName per row or cache it?
-        // Optimizing with simple cache if needed, but for now standard resolve is fine or we can reuse map from Ventas if shared. 
-        // Let's stick to simple resolution for now to avoid complexity, or bulk load user aliases if perf is key.
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
@@ -71,8 +62,6 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             if (!folio || !fecha || !montoExcel) continue;
 
             const idAbonoRaw = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : '';
-            // If ID is empty, we flag it but we MUST import it. We'll use '' as ID.
-
             const montoNetoCalc = Math.round(montoExcel / 1.19);
             const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null;
             const clienteNombre = colCliente && row[colCliente] ? String(row[colCliente]).trim() : null;
@@ -105,8 +94,19 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         if (toImport.length === 0) throw new Error('No se extrajeron filas válidas');
 
-        // 4. TEMP TABLE & BULK INSERT
-        const tempTable = `temp_abono_import_${jobId}`;
+        // 4. TRANSACTIONAL IMPORT
+        console.log(`⚡ Iniciando Transacción para ${toImport.length} filas...`);
+        await client.query('BEGIN');
+
+        let insertedCount = 0;
+        let updatedCount = 0;
+
+        // Use a loop for finer control and error handling per row if enabling 'continue on error'
+        // For mass speed, we could use temp table, but here we want to ensure specific logic holds.
+        // We will stick to the temp table approach but within a transaction, 
+        // AND we will be very explicit about the MERGE logic ensuring ID is respected.
+
+        const tempTable = `temp_abono_import_${jobId}_${Date.now()}`;
         await client.query(`
             CREATE TEMP TABLE ${tempTable} (
                 sucursal text, folio text, fecha date, identificador text, cliente text, 
@@ -116,16 +116,13 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             ) ON COMMIT DROP
         `);
 
-        console.log(`⚡ Insertando ${toImport.length} filas en Staging Table...`);
-
-        // Batch Insert into Temp
+        // Bulk Load Temp Table
         const BATCH_SIZE = 1000;
         for (let i = 0; i < toImport.length; i += BATCH_SIZE) {
             const batch = toImport.slice(i, i + BATCH_SIZE);
             let params = [];
             let placeholders = [];
             let pIdx = 1;
-
             for (const row of batch) {
                 params.push(
                     row.sucursal, row.folio, row.fecha, row.identificador, row.cliente,
@@ -135,17 +132,12 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
                 );
                 placeholders.push(`($${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++}, $${pIdx++})`);
             }
-
-            await client.query(
-                `INSERT INTO ${tempTable} VALUES ${placeholders.join(', ')}`,
-                params
-            );
+            await client.query(`INSERT INTO ${tempTable} VALUES ${placeholders.join(', ')}`, params);
         }
 
-        // 5. SMART MERGE (The Magic)
-        console.log('🔮 Ejecutando MERGE (Update Existing + Insert New)...');
-
-        // A. UPDATE existing records (Correct Dates based on Key: Folio + ID)
+        // A. UPDATE existing
+        // We match strictly on (folio, identificador_abono).
+        // If identificador_abono in DB is '', and incoming is '', it matches.
         const updateQuery = `
             UPDATE abono t
             SET 
@@ -160,9 +152,13 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
               AND (t.fecha <> s.fecha OR t.monto <> s.monto)
         `;
         const resUpdate = await client.query(updateQuery);
-        console.log(`   🔄 Actualizados (Corregidos): ${resUpdate.rowCount}`);
+        updatedCount = resUpdate.rowCount;
 
-        // B. INSERT New records
+        // B. INSERT New
+        // Strict check: Not exists with same Folio + ID.
+        // Note: 'identificador_abono' column in schema is NOT NULL? checkSchema said NO (Nullable). 
+        // But in code we default to ''. Let's ensure schema logic aligns.
+        // Assuming we populated temp table with '' for empties, comparison works fine in Postgres (text = text).
         const insertQuery = `
             INSERT INTO abono (
                 sucursal, folio, fecha, identificador, cliente, vendedor_cliente, 
@@ -183,34 +179,38 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             )
         `;
         const resInsert = await client.query(insertQuery);
-        console.log(`   ✨ Nuevos Insertados: ${resInsert.rowCount}`);
+        insertedCount = resInsert.rowCount;
+
+        await client.query('COMMIT');
+        console.log(`✅ COMMIT Exitoso. Insertados: ${insertedCount}, Actualizados: ${updatedCount}`);
 
         const result = {
             success: true,
             totalRows: data.length,
             toImport: toImport.length,
-            updated: resUpdate.rowCount,
-            inserted: resInsert.rowCount,
-            observationsReportUrl: null, // No obs report for now, assumed clean or just db errors thrown
-            dataImported: (resUpdate.rowCount + resInsert.rowCount) > 0
+            updated: updatedCount,
+            inserted: insertedCount,
+            observationsReportUrl: null,
+            dataImported: (insertedCount + updatedCount) > 0
         };
 
         await updateJobStatus(jobId, 'completed', {
             totalRows: data.length,
-            importedRows: resInsert.rowCount,
-            updatedRows: resUpdate.rowCount,
+            importedRows: insertedCount,
+            updatedRows: updatedCount,
             resultData: result
         });
 
-        console.log(`✅ [Job ${jobId}] Abonos Finalizado.`);
         return result;
 
     } catch (error) {
-        console.error(`❌ [Job ${jobId}] Falló abonos:`, error);
+        await client.query('ROLLBACK');
+        console.error(`❌ [Job ${jobId}] Falló abonos (ROLLBACK):`, error);
         await updateJobStatus(jobId, 'failed', { errorMessage: error.message });
         throw error;
     } finally {
         client.release();
     }
 }
+
 module.exports = { processAbonosFileAsync };
