@@ -3,8 +3,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { Box, Typography, Paper, CircularProgress, Chip, Stack, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@mui/material';
 import { LocationOn, CheckCircle, DirectionsCar, Schedule, Flag } from '@mui/icons-material';
-import { getHeatmapData, checkInVisita, checkOutVisita } from '../api';
+import { getHeatmapData, checkInVisita, checkOutVisita, getCircuits } from '../api';
 import { getEnv } from '../utils/env';
+import { getDistance, formatDistance } from '../utils/geoUtils';
 
 const containerStyle = {
     width: '100%',
@@ -18,10 +19,7 @@ const defaultCenter = {
     lng: -70.6693
 };
 
-const circuitColors = {
-    'CIRCUITO NORTE': '#3498db',
-    'CIRCUITO SUR': '#e74c3c',
-    'CIRCUITO CENTRO': '#2ecc71',
+const defaultCircuitColors = {
     'General': '#95a5a6'
 };
 
@@ -39,22 +37,34 @@ const MobileVisitsPage = () => {
     const [checkOutDialogOpen, setCheckOutDialogOpen] = useState(false);
     const [checkOutData, setCheckOutData] = useState({ resultado: 'venta', notas: '' });
     const [userLocation, setUserLocation] = useState(null);
+    const [circuits, setCircuits] = useState([]);
 
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await getHeatmapData(); // Devuelve clientes asignados
-            if (Array.isArray(data)) {
-                setClients(data);
-            } else {
-                setClients([]);
+            const [heatmapData, circuitsData] = await Promise.all([
+                getHeatmapData(),
+                getCircuits().catch(() => [])
+            ]);
+
+            let finalClients = Array.isArray(heatmapData) ? heatmapData : [];
+
+            // Si tenemos ubicación, calculamos distancias y ordenamos
+            if (userLocation && finalClients.length > 0) {
+                finalClients = finalClients.map(c => ({
+                    ...c,
+                    distance: (c.lat && c.lng) ? getDistance(userLocation.lat, userLocation.lng, c.lat, c.lng) : Infinity
+                })).sort((a, b) => a.distance - b.distance);
             }
+
+            setClients(finalClients);
+            setCircuits(circuitsData);
         } catch (err) {
             console.error('Error heatmap:', err);
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [userLocation]);
 
     useEffect(() => {
         fetchData();
@@ -72,7 +82,19 @@ const MobileVisitsPage = () => {
         }
     }, [fetchData]);
 
-    const handleCheckIn = async (client) => {
+    const handleCheckIn = async (clientArg) => {
+        const client = clientArg || selectedClient;
+        if (!client) return;
+
+        // Validación de proximidad (Opcional: 500 metros = 0.5 km)
+        if (client.distance > 0.5) {
+            const currentDist = formatDistance(client.distance);
+            const confirmVisit = window.confirm(
+                `Estás a ${currentDist} del cliente. La ubicación sugerida es mayor a 500 metros. ¿Deseas iniciar la visita de todas formas?`
+            );
+            if (!confirmVisit) return;
+        }
+
         try {
             const location = userLocation || { lat: 0, lng: 0 }; // Fallback
             const res = await checkInVisita({
@@ -109,14 +131,17 @@ const MobileVisitsPage = () => {
         }
     };
 
-    const getMarkerIcon = (circuit) => ({
-        path: window.google.maps.SymbolPath.CIRCLE,
-        fillColor: circuitColors[circuit] || circuitColors['General'],
-        fillOpacity: 1,
-        strokeWeight: 2,
-        strokeColor: '#ffffff',
-        scale: 8
-    });
+    const getMarkerIcon = (circuitName) => {
+        const circuit = circuits.find(c => c.nombre === circuitName);
+        return {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            fillColor: circuit ? circuit.color : defaultCircuitColors['General'],
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#ffffff',
+            scale: 8
+        };
+    };
 
     if (loadError) return <Box p={3}>Error Maps</Box>;
     if (!isLoaded || loading) return <Box p={5} display="flex" justifyContent="center"><CircularProgress /></Box>;
@@ -169,7 +194,17 @@ const MobileVisitsPage = () => {
                             <Typography variant="subtitle1" fontWeight="bold">{selectedClient.nombre}</Typography>
                             <Typography variant="body2" color="text.secondary">{selectedClient.direccion}</Typography>
                         </Box>
-                        <Chip label={selectedClient.circuito || 'S/C'} size="small" sx={{ bgcolor: circuitColors[selectedClient.circuito] || '#ddd', color: 'white', fontWeight: 'bold' }} />
+                        {selectedClient.circuito && (
+                            <Chip
+                                label={selectedClient.circuito}
+                                size="small"
+                                sx={{
+                                    bgcolor: circuits.find(cc => cc.nombre === selectedClient.circuito)?.color || '#ddd',
+                                    color: 'white',
+                                    fontWeight: 'bold'
+                                }}
+                            />
+                        )}
                     </Box>
                     <Box mt={2} display="flex" gap={1}>
                         <Button
@@ -182,7 +217,7 @@ const MobileVisitsPage = () => {
                                 } else if (activeVisit) {
                                     alert('Termina tu visita actual antes de iniciar otra.');
                                 } else {
-                                    handleCheckIn(selectedClient);
+                                    handleCheckIn();
                                 }
                             }}
                         >
@@ -203,7 +238,12 @@ const MobileVisitsPage = () => {
                             </Box>
                             <Box flexGrow={1}>
                                 <Typography variant="subtitle2" fontWeight="bold">{client.nombre}</Typography>
-                                <Typography variant="caption" color="text.secondary">{client.comuna} • A 1.2 km</Typography>
+                                <Box display="flex" alignItems="center" gap={0.5}>
+                                    <DirectionsCar sx={{ fontSize: '0.9rem', color: '#6B7280' }} />
+                                    <Typography variant="caption" color="text.secondary">
+                                        {formatDistance(client.distance)}
+                                    </Typography>
+                                </Box>
                             </Box>
                         </Box>
                     </Paper>

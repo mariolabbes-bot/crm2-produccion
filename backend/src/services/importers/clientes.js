@@ -3,7 +3,8 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const { updateJobStatus } = require('../jobManager');
-const { norm } = require('./utils');
+const { norm, parseNumeric } = require('./utils');
+const { resolveVendorName } = require('../../utils/vendorAlias');
 
 async function processClientesFileAsync(jobId, filePath, originalname) {
     const client = await pool.connect();
@@ -37,6 +38,7 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
         const colVendedor = findCol([/^Nombre.*vendedor$/i, /^Vendedor$/i]);
         const colCupo = findCol([/^Cupo$/i, /^L[ií]mite.*Cr[eé]dito$/i]);
         const colCupoUtilizado = findCol([/^Cupo.*Utilizado$/i, /^Utilizado$/i, /^Deuda$/i, /^Saldo.*Utilizado$/i]);
+        const colCircuito = findCol([/^Circuito$/i, /^Ruta$/i, /^Zona$/i]);
 
         if (!colRUT || !colNombre) {
             throw new Error('Faltan columnas requeridas: RUT, Nombre');
@@ -129,11 +131,7 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
             let finalVendedor = null;
             if (colVendedor && row[colVendedor]) {
                 let rawV = String(row[colVendedor]).trim();
-                // Apply Normalization
-                if (normalizationMap.has(rawV.toLowerCase())) {
-                    rawV = normalizationMap.get(rawV.toLowerCase());
-                }
-                finalVendedor = aliasMap.get(rawV.toLowerCase()) || rawV;
+                finalVendedor = await resolveVendorName(rawV);
             }
 
             toImport.push({
@@ -148,8 +146,9 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                 direccion: colDireccion && row[colDireccion] ? String(row[colDireccion]).trim() : null,
                 numero: colNumero && row[colNumero] ? String(row[colNumero]).trim() : null,
                 vendedor: finalVendedor,
-                cupo: colCupo && row[colCupo] ? parseInt(row[colCupo]) || 0 : 0,
-                cupo_utilizado: colCupoUtilizado && row[colCupoUtilizado] ? parseInt(row[colCupoUtilizado]) || 0 : 0
+                cupo: colCupo ? parseNumeric(row[colCupo]) || 0 : 0,
+                cupo_utilizado: colCupoUtilizado ? parseNumeric(row[colCupoUtilizado]) || 0 : 0,
+                circuito: colCircuito && row[colCircuito] ? String(row[colCircuito]).trim().toUpperCase() : null
             });
         }
 
@@ -185,19 +184,17 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                     params.push(
                         item.rut, item.nombre, item.email, item.telefono, item.sucursal,
                         item.categoria, item.subcategoria, item.comuna, item.ciudad, item.direccion,
-                        item.numero, item.vendedor, item.cupo, item.cupo_utilizado
+                        item.numero, item.vendedor, item.cupo, item.cupo_utilizado, item.circuito
                     );
 
-                    // Generate placeholders ($1, $2, ... $14), ($15, ...)
-                    const rowPlaceholders = Array.from({ length: 14 }, () => `$${paramIndex++}`).join(', ');
+                    const rowPlaceholders = Array.from({ length: 15 }, () => `$${paramIndex++}`).join(', ');
                     values.push(`(${rowPlaceholders})`);
                 });
 
                 const query = `
-                    INSERT INTO cliente (
                         rut, nombre, email, telefono_principal, sucursal,
                         categoria, subcategoria, comuna, ciudad, direccion,
-                        numero, nombre_vendedor, cupo, cupo_utilizado
+                        numero, nombre_vendedor, cupo, cupo_utilizado, circuito
                     ) VALUES ${values.join(', ')}
                     ON CONFLICT (rut) DO UPDATE
                     SET nombre = EXCLUDED.nombre,
@@ -212,7 +209,8 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                         numero = EXCLUDED.numero,
                         nombre_vendedor = EXCLUDED.nombre_vendedor,
                         cupo = EXCLUDED.cupo,
-                        cupo_utilizado = EXCLUDED.cupo_utilizado
+                        cupo_utilizado = EXCLUDED.cupo_utilizado,
+                        circuito = COALESCE(EXCLUDED.circuito, cliente.circuito)
                     RETURNING (xmax = 0) AS inserted
                 `;
 

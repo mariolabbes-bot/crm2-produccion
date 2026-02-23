@@ -40,7 +40,9 @@ router.get('/:rut', auth(), async (req, res) => {
         comuna,
         direccion,
         categoria,
-        subcategoria
+        subcategoria,
+        cupo,
+        cupo_utilizado
       FROM cliente
       WHERE rut = $1
     `;

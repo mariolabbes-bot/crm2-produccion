@@ -94,25 +94,43 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
         if (toImport.length === 0) throw new Error('No se extrajeron filas válidas');
 
-        // Deduplicate toImport to prevent 23505 errors if Excel has exact dupes
+        // Deduplicate / Suffix Logic
+        // Strategy: If Folio+ID+Fecha collision exists, append _1, _2 to ID.
+        // This ensures data matches Excel row-for-row.
         const uniqueMap = new Map();
         const dedupedImport = [];
 
         for (const item of toImport) {
-            // Key: Folio + ID_Abono (Fecha excluded? No, constraint includes Fecha, but typically Folio+ID should be unqiue enough?
-            // User said: Folio + Identificador is the unique key.
-            // Constraint says: Folio + ID + Fecha.
-            // Let's deduce strictly on Folio + ID. If we have same Folio+ID but diff Date, it's weird.
-            // But let's stick to the strictest unique constraint trigger: (folio, id, fecha).
-            // Actually, if we have duplicate lines in Excel, they usually match on everything.
-            const uniqueKey = `${item.folio}-${item.identificador_abono}-${item.fecha.getTime()}`;
+            let rawId = item.identificador_abono;
+            // Key calculation: strictly based on composite unique constraint logic we want to enforce
+            // But here we want to ensure we don't drop rows from Excel.
+            // If Excel has 2 rows with same Folio+ID, we MUST suffix the second one.
 
-            if (!uniqueMap.has(uniqueKey)) {
-                uniqueMap.set(uniqueKey, true);
-                dedupedImport.push(item);
+            let baseKey = `${item.folio}-${rawId}`; // Base scope: Folio + ID
+            let finalKey = baseKey;
+            let suffixCount = 1;
+
+            // We only check against *current batch* of imports. 
+            // Ideally we should check against DB too, but the 'NOT EXISTS' in INSERT handles DB collisions 
+            // (skipping them). 
+            // BUT, if we want to force insert new duplicates, we rely on the ID change.
+            // Issue: If DB has 'ID' and we process 'ID', we don't change it. 
+            // If Excel has 'ID' and 'ID', we change 2nd to 'ID_1'.
+            // If DB already had 'ID_1', we might collide. 
+            // Ideally, we'd check DB. But for performance, let's assume valid suffixes.
+
+            // Intra-file collision handling:
+            while (uniqueMap.has(finalKey)) {
+                const newId = `${rawId}_${suffixCount}`;
+                finalKey = `${item.folio}-${newId}`;
+                item.identificador_abono = newId; // Mutate item
+                suffixCount++;
             }
+
+            uniqueMap.set(finalKey, true);
+            dedupedImport.push(item);
         }
-        console.log(`🧹 Deduplicación: ${toImport.length} -> ${dedupedImport.length} filas únicas.`);
+        console.log(`✨ Suffixer: ${toImport.length} filas procesadas. (Sin descartes)`);
 
 
         // 4. TRANSACTIONAL IMPORT

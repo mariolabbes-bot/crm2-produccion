@@ -66,6 +66,7 @@ app.use('/api/product-analytics', require('./routes/productAnalytics')); // Anal
 app.use('/api/mobile', require('./routes/mobile')); // Dashboard Móvil
 app.use('/api/ai', require('./routes/ai')); // Módulo IA
 app.use('/api/notifications', require('./routes/notifications')); // Notificaciones Internas
+app.use('/api/circuits', require('./routes/circuits')); // Maestro de Circuitos
 
 app.get('/', (req, res) => {
   res.json({

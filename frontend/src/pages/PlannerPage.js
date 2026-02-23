@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid, Checkbox, Button, Chip, CircularProgress, Alert, InputBase, IconButton } from '@mui/material';
 import { AddTask, ArrowForward, AccessTime, Search as SearchIcon } from '@mui/icons-material';
-import { getVisitSuggestions, submitVisitPlan } from '../api';
+import { getVisitSuggestions, submitVisitPlan, getCircuits } from '../api';
 import { useNavigate } from 'react-router-dom';
 
 const PlannerPage = () => {
@@ -12,20 +12,29 @@ const PlannerPage = () => {
     const [selected, setSelected] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [circuits, setCircuits] = useState([]);
+    const [filterCircuit, setFilterCircuit] = useState('ALL');
 
     // Filter logic
-    const filteredSuggestions = suggestions.filter(c =>
-        c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.direccion && c.direccion.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const filteredSuggestions = suggestions.filter(c => {
+        const matchesSearch = c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (c.direccion && c.direccion.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesCircuit = filterCircuit === 'ALL' || c.circuito === filterCircuit;
+        return matchesSearch && matchesCircuit;
+    });
 
     useEffect(() => {
-        const fetchSuggestions = async () => {
+        const loadInitialData = async () => {
             try {
-                const data = await getVisitSuggestions();
-                if (Array.isArray(data)) {
-                    setSuggestions(data);
+                const [suggestionsData, circuitsData] = await Promise.all([
+                    getVisitSuggestions(),
+                    getCircuits().catch(() => []) // Fallback to empty if fails
+                ]);
+
+                if (Array.isArray(suggestionsData)) {
+                    setSuggestions(suggestionsData);
                 }
+                setCircuits(circuitsData);
             } catch (err) {
                 console.error(err);
                 setError('No pudimos cargar las sugerencias.');
@@ -33,7 +42,7 @@ const PlannerPage = () => {
                 setLoading(false);
             }
         };
-        fetchSuggestions();
+        loadInitialData();
     }, []);
 
     const toggleSelect = (rut) => {
@@ -79,6 +88,28 @@ const PlannerPage = () => {
                     </IconButton>
                 </Paper>
 
+                <Box sx={{ mb: 2, display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
+                    <Chip
+                        label="TODOS"
+                        onClick={() => setFilterCircuit('ALL')}
+                        color={filterCircuit === 'ALL' ? 'primary' : 'default'}
+                        variant={filterCircuit === 'ALL' ? 'filled' : 'outlined'}
+                    />
+                    {circuits.map(circuit => (
+                        <Chip
+                            key={circuit.id}
+                            label={circuit.nombre}
+                            onClick={() => setFilterCircuit(circuit.nombre)}
+                            sx={{
+                                bgcolor: filterCircuit === circuit.nombre ? circuit.color : 'transparent',
+                                color: filterCircuit === circuit.nombre ? 'white' : 'inherit',
+                                borderColor: circuit.color
+                            }}
+                            variant={filterCircuit === circuit.nombre ? 'filled' : 'outlined'}
+                        />
+                    ))}
+                </Box>
+
                 <Typography variant="subtitle2" sx={{ mb: 2, textTransform: 'uppercase', color: '#6B7280' }}>
                     Sugerencias ({filteredSuggestions?.length || 0})
                 </Typography>
@@ -114,7 +145,18 @@ const PlannerPage = () => {
                                 <Typography variant="subtitle1" fontWeight="bold">{client.nombre}</Typography>
                                 <Typography variant="caption" color="text.secondary" display="block">{client.direccion}, {client.comuna}</Typography>
                                 <Box mt={1} display="flex" gap={1}>
-                                    {client.circuito && <Chip label={client.circuito} size="small" sx={{ fontSize: '0.6rem' }} />}
+                                    {client.circuito && (
+                                        <Chip
+                                            label={client.circuito}
+                                            size="small"
+                                            sx={{
+                                                fontSize: '0.6rem',
+                                                bgcolor: circuits.find(cc => cc.nombre === client.circuito)?.color || '#ddd',
+                                                color: 'white',
+                                                fontWeight: 'bold'
+                                            }}
+                                        />
+                                    )}
                                     <Chip
                                         icon={<AccessTime sx={{ fontSize: '1rem !important' }} />}
                                         label="Sin visita hoy"

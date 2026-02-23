@@ -392,6 +392,18 @@ export const getMyVisitsToday = () => apiFetch(`${API_URL}/visits/my-today`);
 export const getVisitSuggestions = () => apiFetch(`${API_URL}/visits/suggestions`);
 export const submitVisitPlan = (clientes) => apiFetch(`${API_URL}/visits/plan`, { method: 'POST', body: JSON.stringify({ clientes }) });
 
+// CIRCUITS
+export const getCircuits = () => apiFetch(`${API_URL}/circuits`);
+export const createCircuit = (circuitData) => apiFetch(`${API_URL}/circuits`, { method: 'POST', body: JSON.stringify(circuitData) });
+export const updateCircuit = (id, circuitData) => apiFetch(`${API_URL}/circuits/${id}`, { method: 'PUT', body: JSON.stringify(circuitData) });
+export const deleteCircuit = (id) => apiFetch(`${API_URL}/circuits/${id}`, { method: 'DELETE' });
+
+// BULK CLIENTS
+export const bulkAssignCircuit = (ruts, circuito) => apiFetch(`${API_URL}/clients/bulk-circuit`, {
+  method: 'PATCH',
+  body: JSON.stringify({ ruts, circuito })
+});
+
 
 // ADMIN - Reset Database
 export const resetDatabase = (confirmString) => apiFetch(`${API_URL}/admin/reset-database`, {

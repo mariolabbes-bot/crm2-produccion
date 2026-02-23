@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { Box, Typography, Paper, CircularProgress, Chip, Stack } from '@mui/material';
-import { getHeatmapData } from '../api';
+import { getHeatmapData, getCircuits } from '../api';
 import { getEnv } from '../utils/env';
 
 const containerStyle = {
@@ -16,10 +16,8 @@ const defaultCenter = {
     lng: -70.6693
 };
 
-const circuitColors = {
-    'CIRCUITO NORTE': '#3498db', // Azul
-    'CIRCUITO SUR': '#e74c3c',   // Rojo
-    'CIRCUITO CENTRO': '#2ecc71', // Verde
+// Fallback colors if none found
+const defaultCircuitColors = {
     'General': '#95a5a6'
 };
 
@@ -35,19 +33,22 @@ const VisitMapPoC = () => {
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedClient, setSelectedClient] = useState(null);
+    const [circuits, setCircuits] = useState([]);
 
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await getHeatmapData(11); // For PoC, Eduardo Rojas
-            if (Array.isArray(data)) {
-                setClients(data);
-            } else {
-                console.error('Heatmap data is not an array:', data);
-                setClients([]);
+            const [heatmapData, circuitsData] = await Promise.all([
+                getHeatmapData(11), // For PoC, Eduardo Rojas
+                getCircuits().catch(() => [])
+            ]);
+
+            if (Array.isArray(heatmapData)) {
+                setClients(heatmapData);
             }
+            setCircuits(circuitsData);
         } catch (err) {
-            console.error('Error fetching heatmap data:', err);
+            console.error('Error fetching data:', err);
         } finally {
             setLoading(false);
         }
@@ -57,10 +58,11 @@ const VisitMapPoC = () => {
         fetchData();
     }, [fetchData]);
 
-    const getMarkerIcon = (circuit) => {
+    const getMarkerIcon = (circuitName) => {
+        const circuit = circuits.find(c => c.nombre === circuitName);
         return {
             path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-            fillColor: circuitColors[circuit] || circuitColors['General'],
+            fillColor: circuit ? circuit.color : defaultCircuitColors['General'],
             fillOpacity: 1,
             strokeWeight: 2,
             strokeColor: '#ffffff',
@@ -95,8 +97,8 @@ const VisitMapPoC = () => {
                     📍 Mapa de Ruta - Proof of Concept
                 </Typography>
                 <Stack direction="row" spacing={1}>
-                    {Object.entries(circuitColors).map(([name, color]) => (
-                        <Chip key={name} label={name} size="small" sx={{ bgcolor: color, color: 'white', fontWeight: 'bold' }} />
+                    {circuits.map((c) => (
+                        <Chip key={c.id} label={c.nombre} size="small" sx={{ bgcolor: c.color, color: 'white', fontWeight: 'bold' }} />
                     ))}
                 </Stack>
             </Box>

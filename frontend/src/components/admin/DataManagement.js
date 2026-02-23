@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Paper, Tabs, Tab, Box } from '@mui/material';
 import ProductCleanup from './ProductCleanup';
 import ClientCleanup from './ClientCleanup';
+import CircuitManagement from './CircuitManagement';
 
 const DataManagement = () => {
     const [tabIndex, setTabIndex] = useState(0);
@@ -17,6 +18,7 @@ const DataManagement = () => {
                 <Tabs value={tabIndex} onChange={handleChange} centered>
                     <Tab label="Clasificación de Productos" />
                     <Tab label="Completar Clientes" />
+                    <Tab label="Gestión de Circuitos" />
                 </Tabs>
             </Paper>
 
@@ -26,6 +28,10 @@ const DataManagement = () => {
 
             <Box role="tabpanel" hidden={tabIndex !== 1}>
                 {tabIndex === 1 && <ClientCleanup />}
+            </Box>
+
+            <Box role="tabpanel" hidden={tabIndex !== 2}>
+                {tabIndex === 2 && <CircuitManagement />}
             </Box>
         </Box>
     );
