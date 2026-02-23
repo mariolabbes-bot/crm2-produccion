@@ -68,7 +68,10 @@ const MobileVisitsPage = () => {
 
     useEffect(() => {
         fetchData();
-        // Obtener ubicación actual usuario
+    }, []); // Fetch initially
+
+    useEffect(() => {
+        // Obtener ubicación actual usuario una vez al inicio
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -77,10 +80,30 @@ const MobileVisitsPage = () => {
                         lng: position.coords.longitude
                     });
                 },
-                () => console.log('Ubicación no disponible')
+                (err) => console.log('Ubicación no disponible:', err)
             );
+
+            // Opcional: monitorear movimiento sin disparar fetchData en loop
+            const watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const newLoc = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    setUserLocation(prev => {
+                        // Solo actualizar si hay un cambio significativo (> 10m aprox) para evitar re-renders excesivos
+                        if (!prev || Math.abs(prev.lat - newLoc.lat) > 0.0001 || Math.abs(prev.lng - newLoc.lng) > 0.0001) {
+                            return newLoc;
+                        }
+                        return prev;
+                    });
+                },
+                (err) => console.log('Error monitoreo:', err),
+                { enableHighAccuracy: true, distanceFilter: 10 }
+            );
+            return () => navigator.geolocation.clearWatch(watchId);
         }
-    }, [fetchData]);
+    }, []);
 
     const handleCheckIn = async (clientArg) => {
         const client = clientArg || selectedClient;
