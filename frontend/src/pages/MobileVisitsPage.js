@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { Box, Typography, Paper, CircularProgress, Chip, Stack, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@mui/material';
 import { LocationOn, CheckCircle, DirectionsCar, Schedule, Flag } from '@mui/icons-material';
@@ -30,14 +30,18 @@ const MobileVisitsPage = () => {
         googleMapsApiKey: apiKey
     });
 
-    const [clients, setClients] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedClient, setSelectedClient] = useState(null);
-    const [activeVisit, setActiveVisit] = useState(null); // ID de la visita activa
-    const [checkOutDialogOpen, setCheckOutDialogOpen] = useState(false);
-    const [checkOutData, setCheckOutData] = useState({ resultado: 'venta', notas: '' });
-    const [userLocation, setUserLocation] = useState(null);
     const [circuits, setCircuits] = useState([]);
+
+    // Memoized Map Options to prevent unnecessary re-renders
+    const mapOptions = useMemo(() => ({
+        disableDefaultUI: true,
+        zoomControl: true,
+        styles: [ // Optional: clean map style
+            { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }
+        ]
+    }), []);
+
+    const center = useMemo(() => userLocation || defaultCenter, [userLocation]);
 
     const fetchData = useCallback(async () => {
         try {
@@ -47,24 +51,26 @@ const MobileVisitsPage = () => {
                 getCircuits().catch(() => [])
             ]);
 
-            let finalClients = Array.isArray(heatmapData) ? heatmapData : [];
-
-            // Si tenemos ubicación, calculamos distancias y ordenamos
-            if (userLocation && finalClients.length > 0) {
-                finalClients = finalClients.map(c => ({
-                    ...c,
-                    distance: (c.lat && c.lng) ? getDistance(userLocation.lat, userLocation.lng, c.lat, c.lng) : Infinity
-                })).sort((a, b) => a.distance - b.distance);
+            if (Array.isArray(heatmapData)) {
+                setClients(heatmapData);
             }
-
-            setClients(finalClients);
             setCircuits(circuitsData);
         } catch (err) {
             console.error('Error heatmap:', err);
         } finally {
             setLoading(false);
         }
-    }, [userLocation]);
+    }, []); // No userLocation dependency here
+
+    // Dynamic sorting and distance calculation
+    const sortedClients = useMemo(() => {
+        if (!userLocation || clients.length === 0) return clients;
+
+        return clients.map(c => ({
+            ...c,
+            distance: (c.latitud && c.longitud) ? getDistance(userLocation.lat, userLocation.lng, parseFloat(c.latitud), parseFloat(c.longitud)) : Infinity
+        })).sort((a, b) => a.distance - b.distance);
+    }, [clients, userLocation]);
 
     useEffect(() => {
         fetchData();
@@ -174,11 +180,11 @@ const MobileVisitsPage = () => {
             {/* Mapa Arriba */}
             <GoogleMap
                 mapContainerStyle={containerStyle}
-                center={userLocation || defaultCenter}
+                center={center}
                 zoom={12}
-                options={{ disableDefaultUI: true, zoomControl: true }}
+                options={mapOptions}
             >
-                {clients.map((client) => {
+                {sortedClients.map((client) => {
                     // Validar coords
                     const lat = parseFloat(client.latitud);
                     const lng = parseFloat(client.longitud);
@@ -253,7 +259,7 @@ const MobileVisitsPage = () => {
             {/* Lista Scrollable Abajo */}
             <Box sx={{ p: 2, mt: selectedClient ? 8 : 0 }}>
                 <Typography variant="h6" fontWeight="bold" mb={2}>Ruta Sugerida</Typography>
-                {clients.slice(0, 10).map(client => (
+                {sortedClients.slice(0, 10).map(client => (
                     <Paper key={client.id} sx={{ p: 2, mb: 2, borderRadius: 2 }} onClick={() => setSelectedClient(client)}>
                         <Box display="flex" gap={2} alignItems="center">
                             <Box sx={{ bgcolor: '#eee', p: 1, borderRadius: '50%' }}>
