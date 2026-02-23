@@ -30,6 +30,13 @@ const MobileVisitsPage = () => {
         googleMapsApiKey: apiKey
     });
 
+    const [clients, setClients] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedClient, setSelectedClient] = useState(null);
+    const [activeVisit, setActiveVisit] = useState(null); // ID de la visita activa
+    const [checkOutDialogOpen, setCheckOutDialogOpen] = useState(false);
+    const [checkOutData, setCheckOutData] = useState({ resultado: 'venta', notas: '' });
+    const [userLocation, setUserLocation] = useState(null);
     const [circuits, setCircuits] = useState([]);
 
     // Memoized Map Options to prevent unnecessary re-renders
