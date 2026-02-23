@@ -81,8 +81,8 @@ async function moveFile(fileId, currentFolderId, targetFolderId) {
             fields: 'parents'
         });
 
-        // 2. Move
-        const previousParents = file.data.parents.map(parent => parent.id).join(',');
+        // 2. Move (Google Drive API v3: parents is an array of strings, no .id property needed)
+        const previousParents = file.data.parents.join(',');
         await drive.files.update({
             fileId: fileId,
             addParents: targetFolderId,

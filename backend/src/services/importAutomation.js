@@ -92,7 +92,7 @@ async function runDriveImportCycle() {
 
                 if (folders.ERRORES) {
                     await moveFile(file.id, DRIVE_FOLDER_ID, folders.ERRORES);
-                    console.log(`bk [DriveBot] Archivo movido a ERRORES: ${file.name}`);
+                    console.log(`❌ [DriveBot] Archivo movido a ERRORES: ${file.name}`);
                 }
             } finally {
                 if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
