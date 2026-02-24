@@ -51,7 +51,17 @@ async function runDriveImportCycle() {
             else if (name.includes('SALDO') && name.includes('CREDITO')) { type = 'import-saldo'; importer = processSaldoCreditoFileAsync; }
 
             if (!importer) {
-                // console.log(`⚠️ [DriveBot] Archivo ignorado (Formato desconocido): ${file.name}`);
+                console.log(`⚠️ [DriveBot] Archivo ignorado (Formato desconocido): ${file.name}`);
+                await createNotification({
+                    userRole: 'admin',
+                    type: 'warning',
+                    title: `DriveBot: Archivo ignorado`,
+                    message: `Archivo "${file.name}" no tiene un formato reconocido.`
+                });
+                if (folders.ERRORES) {
+                    await moveFile(file.id, DRIVE_FOLDER_ID, folders.ERRORES);
+                    console.log(`⚠️ [DriveBot] Archivo movido a ERRORES por formato desconocido: ${file.name}`);
+                }
                 continue;
             }
 
@@ -67,11 +77,12 @@ async function runDriveImportCycle() {
                 const result = await importer(job.id, localPath, file.name);
 
                 // Notification: Success
+                const filas = result.imported !== undefined ? result.imported : (result.inserted !== undefined ? result.inserted + (result.updated || 0) : 0);
                 await createNotification({
                     userRole: 'admin',
                     type: 'success',
                     title: `Importación Auto: ${type.split('-')[1].toUpperCase()}`,
-                    message: `Archivo "${file.name}" procesado. Filas: ${result.imported || 0} insertadas.`
+                    message: `Archivo "${file.name}" procesado. Filas: ${filas} importadas.`
                 });
 
                 if (folders.PROCESADOS) {

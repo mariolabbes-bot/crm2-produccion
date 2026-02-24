@@ -82,13 +82,19 @@ async function moveFile(fileId, currentFolderId, targetFolderId) {
         });
 
         // 2. Move (Google Drive API v3: parents is an array of strings, no .id property needed)
-        const previousParents = file.data.parents.join(',');
-        await drive.files.update({
+        const previousParents = file.data.parents ? file.data.parents.join(',') : '';
+
+        const updateParams = {
             fileId: fileId,
             addParents: targetFolderId,
-            removeParents: previousParents,
             fields: 'id, parents'
-        });
+        };
+
+        if (previousParents) {
+            updateParams.removeParents = previousParents;
+        }
+
+        await drive.files.update(updateParams);
     } catch (error) {
         console.error(`Error moving file ${fileId}:`, error.message);
         // Don't throw, just log. Moving is non-critical for the import itself, just for cleanup.
