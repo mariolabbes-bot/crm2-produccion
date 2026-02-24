@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { processSalesFileAsync } = require('./importers/ventas');
+const { processVentasFileAsync } = require('./importers/ventas');
 const { processAbonosFileAsync } = require('./importers/abonos');
-const { processClientsFileAsync } = require('./importers/clientes');
+const { processClientesFileAsync } = require('./importers/clientes');
 const { processSaldoCreditoFileAsync } = require('./importers/saldo_credito');
 const { sendEmail } = require('../providers/emailProvider');
 
@@ -78,12 +78,12 @@ const runAutoImport = async () => {
 
             let result = null;
             if (type === 'venta') {
-                result = await processSalesFileAsync(jobId, filePath, file, { updateMissing: true });
+                result = await processVentasFileAsync(jobId, filePath, file);
             } else if (type === 'abono') {
                 result = await processAbonosFileAsync(jobId, filePath, file, { updateMissing: true });
             } else if (type === 'cliente') {
-                if (processClientsFileAsync) {
-                    result = await processClientsFileAsync(jobId, filePath, file);
+                if (processClientesFileAsync) {
+                    result = await processClientesFileAsync(jobId, filePath, file);
                 } else {
                     throw new Error('Importador de clientes no configurado aún');
                 }

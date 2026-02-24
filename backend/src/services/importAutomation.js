@@ -103,14 +103,14 @@ async function runDriveImportCycle() {
     }
 }
 
-// Scheduler: Run every hour (at minute 0)
+// Scheduler: Run every 5 minutes
 function startScheduler() {
-    console.log('🕰️ [DriveBot] Programador iniciado: Ejecutando cada hora.');
+    console.log('🕰️ [DriveBot] Programador iniciado: Ejecutando cada 5 minutos.');
     // Run immediately on boot
     runDriveImportCycle();
 
     // Schedule
-    cron.schedule('0 * * * *', () => {
+    cron.schedule('*/5 * * * *', () => {
         runDriveImportCycle();
     });
 }

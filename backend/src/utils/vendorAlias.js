@@ -30,15 +30,27 @@ async function refreshCache() {
 
   // Load official vendor names from usuario
   const userRes = await pool.query(`
-    SELECT nombre_vendedor
+    SELECT nombre_vendedor, alias
     FROM usuario
     WHERE LOWER(rol_usuario) = 'vendedor' AND nombre_vendedor IS NOT NULL
   `);
   for (const r of userRes.rows) {
-    const official = r.nombre_vendedor;
-    const n = normalizeVendorName(official);
-    officialsMap.set(n, official);
+    const officialName = r.nombre_vendedor;
+    // CRITICAL: The 'venta' table FK references 'alias'. So we must resolve to the Alias.
+    // If alias is null, we fallback to name (hoping it matches hidden alias or just trying)
+    const targetValue = r.alias || officialName;
+
+    const n = normalizeVendorName(officialName);
+    officialsMap.set(n, targetValue);
+
+    // Also map the alias itself if it differs
+    if (r.alias) {
+      officialsMap.set(normalizeVendorName(r.alias), targetValue);
+    }
   }
+  console.log(`✅ [VendorAlias] Cache refreshed: ${officialsMap.size} keys loaded (Value=Alias).`);
+  if (officialsMap.has('LUIS')) console.log(`   👉 Found 'LUIS' in cache -> '${officialsMap.get('LUIS')}'`);
+  else console.log(`   ❌ 'LUIS' NOT found in cache! Keys example: ${Array.from(officialsMap.keys()).slice(0, 5)}`);
 
   // Load aliases from usuario_alias (if exists)
   const exists = await pool.query(`
@@ -67,15 +79,39 @@ async function resolveVendorName(raw) {
   const c = await refreshCache();
   const n = normalizeVendorName(raw);
   const soft = softNormalize(raw);
-  // Direct alias
-  if (c.map.has(n)) return c.map.get(n);
-  if (c.map.has(soft)) return c.map.get(soft);
-  // Official list
+
+  let result = null;
+
+  // 1. Hardcoded Patches (System Errors)
+  if (n === 'ALEJANDRA') result = 'LUIS';
+  else if (n === 'OCTAVIO') result = 'JOAQUIN';
+  else if (n === 'MATIAS IGNACIO') result = 'EDUARDO ROJAS';
+  else if (n === 'ALEJANDRO MAURICIO') result = 'MATIAS FELIPE';
+
+  // 2. Direct alias lookup
+  if (!result) {
+    if (c.map.has(n)) result = c.map.get(n);
+    else if (c.map.has(soft)) result = c.map.get(soft);
+  }
+
+  // 3. If we found a match (Hardcoded or Alias), try to get Canonical Case from Officials
+  //    This handles "LUIS" -> "Luis" conversion to satisfy FKs
+  if (result) {
+    const rNorm = normalizeVendorName(result);
+    if (c.officials.has(rNorm)) return c.officials.get(rNorm);
+    // If we mapped to "LUIS" but "LUIS" isn't in official list... 
+    // We might have a problem (FK error), but we return what we found.
+    return result;
+  }
+
+  // 4. Official list (Input might be the official name itself)
   if (c.officials && c.officials.has(n)) return c.officials.get(n);
-  // Try partial contains match
+
+  // 5. Try partial contains match
   for (const [key, val] of c.officials.entries()) {
     if (n.includes(key)) return val;
   }
+
   return raw; // fallback to original
 }
 

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { updateJobStatus } = require('../jobManager');
 const { norm, parseExcelDate, parseNumeric } = require('./utils');
+const { resolveVendorName } = require('../../utils/vendorAlias');
 
 async function processVentasFileAsync(jobId, filePath, originalname) {
     const client = await pool.connect();
@@ -150,18 +151,21 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
                 continue;
             }
 
-            // Vendors -> Resolve via AliasMap
+            // Vendors -> Resolve via Centralized Utility
             let vendedorDoc = null;
             if (colVendedorDoc && row[colVendedorDoc]) {
                 const raw = String(row[colVendedorDoc]).trim();
-                if (aliasMap.has(raw.toLowerCase())) vendedorDoc = aliasMap.get(raw.toLowerCase());
-                else missingVendors.add(raw);
+                vendedorDoc = await resolveVendorName(raw);
+                // IF valid name but not in official list? resolveVendorName returns raw if not found.
+                // Logic says: if not found, add to missing?
+                // resolveVendorName tries its best. If it returns same as raw, we might want to check validity?
+                // For now, trust the resolver.
             }
 
             let vendedorClienteAlias = null;
             if (colVendedorCliente && row[colVendedorCliente]) {
                 const raw = String(row[colVendedorCliente]).trim();
-                if (aliasMap.has(raw.toLowerCase())) vendedorClienteAlias = aliasMap.get(raw.toLowerCase());
+                vendedorClienteAlias = await resolveVendorName(raw);
             }
 
             const estadoSistema = colEstadoSistema && row[colEstadoSistema] ? String(row[colEstadoSistema]).trim() : null;

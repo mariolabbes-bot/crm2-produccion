@@ -192,6 +192,7 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                 });
 
                 const query = `
+                    INSERT INTO cliente (
                         rut, nombre, email, telefono_principal, sucursal,
                         categoria, subcategoria, comuna, ciudad, direccion,
                         numero, nombre_vendedor, cupo, cupo_utilizado, circuito
