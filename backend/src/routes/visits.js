@@ -44,57 +44,113 @@ router.post('/plans', auth(), async (req, res) => {
     }
 });
 
+// Helper: Obtener clientes con Nota Cliente (HeatScore) calculada en 4 dimensiones
+async function getClientsWithHeatscore(vendedorId) {
+    const query = `
+        WITH client_sales AS (
+            SELECT 
+                identificador AS rut,
+                COALESCE(SUM(valor_total) / 12.0, 0) as prom_ventas,
+                COUNT(DISTINCT TO_CHAR(fecha_emision, 'YYYY-MM')) as meses_con_venta
+            FROM venta
+            WHERE fecha_emision >= NOW() - INTERVAL '12 months'
+            GROUP BY identificador
+        ),
+        client_debt AS (
+            SELECT
+                rut,
+                COALESCE(SUM(saldo_factura), 0) as deuda_total,
+                MAX(CURRENT_DATE - fecha_emision) as max_dias_mora
+            FROM saldo_credito
+            GROUP BY rut
+        ),
+        stats AS (
+            SELECT 
+                c.id, c.rut, c.nombre, c.latitud, c.longitud, c.direccion, c.comuna, c.ciudad, c.circuito,
+                c.last_visit_date,
+                COALESCE(cd.deuda_total, 0) as deuda_total,
+                COALESCE(cd.max_dias_mora, 0) as dias_mora,
+                COALESCE(cs.prom_ventas, 0) as prom_ventas,
+                COALESCE(cs.meses_con_venta, 0) as meses_con_venta
+            FROM cliente c
+            LEFT JOIN client_sales cs ON c.rut = cs.rut
+            LEFT JOIN client_debt cd ON c.rut = cd.rut
+            WHERE c.vendedor_id = $1
+        )
+        SELECT * FROM stats
+    `;
+    const result = await pool.query(query, [vendedorId]);
+
+    return result.rows.map(c => {
+        const daysSinceVisit = c.last_visit_date ? Math.floor((new Date() - new Date(c.last_visit_date)) / (1000 * 60 * 60 * 24)) : 999;
+
+        // 1. Volumen de venta (Promedio mensual últimos 12 meses)
+        let notaVolumen = 4;
+        if (c.prom_ventas > 1000000) notaVolumen = 10;
+        else if (c.prom_ventas > 500000 && c.prom_ventas <= 1000000) notaVolumen = 7;
+
+        // 2. Periodicidad de venta (Meses con compra en 12 meses)
+        let notaPeriodicidad = 4;
+        if (c.meses_con_venta >= 10) notaPeriodicidad = 10;
+        else if (c.meses_con_venta >= 4 && c.meses_con_venta <= 9) notaPeriodicidad = 7;
+
+        // 3. Saldo Crédito
+        let notaSaldo = 4;
+        if (c.deuda_total > 0) {
+            const ratioDeuda = c.prom_ventas > 0 ? (c.deuda_total / c.prom_ventas) : 999;
+            if (c.dias_mora >= 61) {
+                notaSaldo = 10;
+            } else if (c.dias_mora >= 30 && c.dias_mora <= 60) {
+                if (ratioDeuda > 1.5 && ratioDeuda <= 2.5) {
+                    notaSaldo = 7;
+                } else if (ratioDeuda > 2.5) {
+                    notaSaldo = 10;
+                } else {
+                    notaSaldo = 4;
+                }
+            } else if (c.dias_mora < 30) {
+                if (ratioDeuda <= 1.5) {
+                    notaSaldo = 4;
+                } else {
+                    notaSaldo = 7;
+                }
+            }
+        }
+
+        // 4. Última Visita
+        let notaVisita = daysSinceVisit > 30 ? 10 : 4;
+
+        // Promedio final de Nota Cliente (Score 4 a 10)
+        // Convertiremos la escala 4-10 a una escala visual de calor 0-100 para el frontend:
+        // Nota 10 -> 100, Nota 4 -> 0
+        const rawScore = (notaVolumen + notaPeriodicidad + notaSaldo + notaVisita) / 4;
+        const heatScore = ((rawScore - 4) / 6) * 100;
+
+        return {
+            ...c,
+            heatScore: Math.round(heatScore), // 0 a 100
+            rawScore, // 4 a 10
+            daysSinceVisit
+        };
+    });
+}
+
 // GET /api/visits/heatmap - Datos para el mapa de calor
 router.get('/heatmap', auth(), async (req, res) => {
     try {
         const isManager = req.user.rol.toUpperCase() === 'MANAGER';
         const vendedorId = req.query.vendedor_id || req.user.id;
 
-        // Si no es manager y quiere ver otro, denegar (a menos que haya otra lógica)
-        if (!isManager && vendedorId !== req.user.id) {
+        if (!isManager && String(vendedorId) !== String(req.user.id)) {
             return res.status(403).json({ msg: 'Access denied' });
         }
 
-        // Consulta para obtener clientes con sus coordenadas y KPIs básicos
-        // Calcularemos el HeatScore en memoria o en la query si es posible
-        const query = `
-            WITH stats AS (
-                SELECT 
-                    c.id, c.rut, c.nombre, c.latitud, c.longitud, c.direccion, c.comuna, c.ciudad,
-                    c.last_visit_date,
-                    COALESCE(SUM(sc.saldo_factura), 0) as deuda_total,
-                    (SELECT COALESCE(SUM(v.valor_total), 0) / 3.0 
-                     FROM venta v WHERE v.vendedor_cliente = u.nombre_vendedor 
-                     AND v.fecha_emision >= NOW() - INTERVAL '3 months') as prom_ventas
-                FROM cliente c
-                LEFT JOIN usuario u ON c.vendedor_id = u.id
-                LEFT JOIN saldo_credito sc ON c.rut = sc.rut
-                WHERE c.vendedor_id = $1 AND c.latitud IS NOT NULL
-                GROUP BY c.id, c.rut, c.nombre, c.latitud, u.nombre_vendedor
-            )
-            SELECT * FROM stats
-        `;
-        const result = await pool.query(query, [vendedorId]);
+        const allScoredClients = await getClientsWithHeatscore(vendedorId);
 
-        // Calcular HeatScore rápido en Node para flexibilidad
-        const data = result.rows.map(c => {
-            const daysSinceVisit = c.last_visit_date ? Math.floor((new Date() - new Date(c.last_visit_date)) / (1000 * 60 * 60 * 24)) : 999;
+        // El mapa solo puede pintar los que tienen latitud válida
+        const mapData = allScoredClients.filter(c => c.latitud !== null && c.longitud !== null);
 
-            // Pesos: Recencia 40, Deuda 30, Valor 30
-            const recencyScore = daysSinceVisit > 30 ? 100 : (daysSinceVisit / 30) * 100;
-            const debtScore = Math.min(100, (c.deuda_total / 1000000) * 100); // Normalizado a 1M
-            const valueScore = Math.min(100, (c.prom_ventas / 500000) * 100); // Normalizado a 500k
-
-            const heatScore = (recencyScore * 0.4) + (debtScore * 0.3) + (valueScore * 0.3);
-
-            return {
-                ...c,
-                heatScore: Math.round(heatScore),
-                daysSinceVisit
-            };
-        });
-
-        res.json(data);
+        res.json(mapData);
     } catch (err) {
         console.error('Error heatmap:', err.message);
         res.status(500).send('Server Error');
@@ -165,32 +221,27 @@ router.post('/check-in', auth(), async (req, res) => {
 router.get('/suggestions', auth(), async (req, res) => {
     try {
         const vendedorId = req.user.id;
-        console.log(`[DEBUG] /suggestions (via ClientService) for user: ${vendedorId}`);
 
-        // 1. Obtener TODOS los clientes asignados usando la misma lógica que el módulo de Clientes
-        // Esto garantiza consistencia con la tabla que "sí funciona"
-        const allClients = await ClientService.getAllClients(req.user);
+        // 1. Obtener todos los clientes del vendedor con su Score de Calor (Nota Cliente)
+        const allScoredClients = await getClientsWithHeatscore(vendedorId);
 
-        if (!allClients || allClients.length === 0) {
-            console.log('[DEBUG] ClientService returned 0 clients');
+        if (!allScoredClients || allScoredClients.length === 0) {
             return res.json([]);
         }
 
         // 2. Obtener visitas de hoy para filtrar
         const visitsQuery = `
             SELECT cliente_rut FROM visitas_registro 
-            WHERE fecha = CURRENT_DATE
+            WHERE fecha = CURRENT_DATE AND vendedor_id = $1
         `;
-        const visitsRes = await pool.query(visitsQuery);
+        const visitsRes = await pool.query(visitsQuery, [vendedorId]);
         const visitedRuts = new Set(visitsRes.rows.map(v => v.cliente_rut));
 
-        // 3. Filtrar: Solo clientes NO visitados hoy
-        // Priorizamos devolver los primeros 50 para no saturar
-        const suggestions = allClients
+        // 3. Filtrar: Solo clientes NO visitados hoy y Ordenar por mayor HeatScore (Urgencia) primero
+        const suggestions = allScoredClients
             .filter(c => !visitedRuts.has(c.rut))
-            .slice(0, 100); // Aumentamos límite a 100 para dar más opciones
-
-        console.log(`[DEBUG] ClientService found ${allClients.length} clients. Returning ${suggestions.length} suggestions after filter.`);
+            .sort((a, b) => b.heatScore - a.heatScore)
+            .slice(0, 100); // Retornar el Top 100 más urgente
 
         res.json(suggestions);
 

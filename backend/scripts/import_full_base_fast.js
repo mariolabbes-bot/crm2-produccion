@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const { from: copyFrom } = require('pg-copy-streams');
 const path = require('path');
+const { resolveVendorName } = require('../src/utils/vendorAlias');
 
 const BULK_DIR = path.join(__dirname, '../bulk_data');
 const NEON_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_DYTSqK9GI8Ei@ep-rapid-sky-ace1kx9r-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require';
@@ -165,12 +166,9 @@ async function importData() {
         const cliente = sanitize(r[colCliente]);
 
         // Vendors - Resolve using Map (Aliases)
+        // Vendors - Resolve using Centralized Utility
         let vendDocRaw = colVendedorDoc && r[colVendedorDoc] ? sanitize(r[colVendedorDoc]) : '';
-        let vendDoc = vendDocRaw;
-        // Case-insensitive lookup to get the Real Alias from DB
-        if (vendDocRaw && aliasMap.has(vendDocRaw.toLowerCase())) {
-          vendDoc = aliasMap.get(vendDocRaw.toLowerCase());
-        }
+        let vendDoc = await resolveVendorName(vendDocRaw);
 
         const vendCli = colVendedorCli && r[colVendedorCli] ? sanitize(r[colVendedorCli]) : '';
 

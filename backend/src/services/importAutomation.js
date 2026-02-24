@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const cron = require('node-cron'); // Will install if missing
+// const cron = require('node-cron'); // Will install if missing (COMMENTED OUT TEMPORARILY)
 const { listUnprocessedFiles, downloadFile, moveFile, ensureSubfolders } = require('./googleDriveService');
 const { processClientesFileAsync } = require('./importers/clientes');
 const { processVentasFileAsync } = require('./importers/ventas');
