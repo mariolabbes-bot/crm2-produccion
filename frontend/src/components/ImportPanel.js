@@ -23,7 +23,7 @@ import {
   Warning as WarningIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
-import { uploadVentasFile, uploadAbonosFile, uploadClientesFile, uploadSaldoCreditoFile, downloadPlantillaVentas, downloadPlantillaAbonos, downloadPlantillaClientes, downloadInformePendientes, API_URL } from '../api';
+import { uploadVentasFile, uploadClientesFile, uploadSaldoCreditoFile, downloadPlantillaVentas, downloadPlantillaClientes, downloadInformePendientes, API_URL } from '../api';
 import { removeToken, getToken } from '../utils/auth';
 
 const ImportPanel = () => {
@@ -125,28 +125,10 @@ const ImportPanel = () => {
       } else if (importType === 'saldo-credito') {
         response = await uploadSaldoCreditoFile(selectedFile);
       } else {
-        // Abonos: si está activo updateMissing, hacemos llamada manual con query
-        if (updateMissingAbonos) {
-          const token = getToken();
-          const formData = new FormData();
-          formData.append('file', selectedFile);
-          const fetchUrl = `${API_URL}/import/abonos?updateMissing=1`;
-          const resp = await fetch(fetchUrl, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: formData
-          });
-          if (!resp.ok) {
-            const errorData = await resp.json().catch(() => ({}));
-            const err = new Error(errorData.msg || 'Error al subir archivo');
-            err.status = resp.status;
-            err.data = errorData;
-            throw err;
-          }
-          response = await resp.json();
-        } else {
-          response = await uploadAbonosFile(selectedFile);
-        }
+        // Abonos: This block is now deprecated.
+        setError('La importación de Abonos está deshabilitada.');
+        setLoading(false);
+        return;
       }
 
       setResult(response);
@@ -185,7 +167,8 @@ const ImportPanel = () => {
     } else if (importType === 'ventas') {
       downloadPlantillaVentas();
     } else if (importType === 'abonos') {
-      downloadPlantillaAbonos();
+      // Abonos: This action is now deprecated.
+      alert('La descarga de plantilla de Abonos está deshabilitada.');
     }
     // Saldo Crédito no tiene plantilla (se importa directamente desde archivo del sistema)
   };
@@ -249,6 +232,7 @@ const ImportPanel = () => {
                   variant={importType === 'abonos' ? 'contained' : 'outlined'}
                   onClick={() => setImportType('abonos')}
                   fullWidth
+                  disabled // Disable Abonos button
                 >
                   Abonos
                 </Button>
@@ -274,6 +258,7 @@ const ImportPanel = () => {
                   onClick={handleDownloadPlantilla}
                   fullWidth
                   sx={{ mb: 3 }}
+                  disabled={importType === 'abonos'} // Disable download for Abonos
                 >
                   Descargar Plantilla de {
                     importType === 'clientes' ? 'Clientes' :
@@ -298,6 +283,9 @@ const ImportPanel = () => {
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                     Opciones avanzadas (Abonos)
                   </Typography>
+                  <Alert severity="warning" sx={{ mb: 2 }}>
+                    La importación de Abonos está deshabilitada.
+                  </Alert>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                     <input
                       id="chk-update-missing"
@@ -305,6 +293,7 @@ const ImportPanel = () => {
                       checked={updateMissingAbonos}
                       onChange={e => setUpdateMissingAbonos(e.target.checked)}
                       style={{ transform: 'scale(1.2)', cursor: 'pointer' }}
+                      disabled // Disable checkbox
                     />
                     <label htmlFor="chk-update-missing" style={{ cursor: 'pointer' }}>
                       Actualizar datos faltantes (cliente / vendedor) sin duplicar
@@ -373,7 +362,7 @@ const ImportPanel = () => {
                   fullWidth
                   sx={{ mt: 3 }}
                   onClick={handleUpload}
-                  disabled={loading}
+                  disabled={loading || importType === 'abonos'} // Disable upload for Abonos
                   startIcon={<UploadIcon />}
                 >
                   {loading ? 'Procesando...' : 'Importar y Procesar'}

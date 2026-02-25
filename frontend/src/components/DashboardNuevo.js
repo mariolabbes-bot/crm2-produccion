@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select, useTheme, useMediaQuery, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import VisionCard from './ui/VisionCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { getAbonosEstadisticas, getAbonosComparativo, getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual, getSaldoCreditoTotal, getAbonosPorVendedor, getRankingVendedores } from '../api';
+import { getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual, getSaldoCreditoTotal, getRankingVendedores } from '../api';
 import { removeToken, getUser } from '../utils/auth';
 import './DashboardNuevo.css';
 import Papa from 'papaparse';
@@ -270,22 +270,10 @@ const DashboardNuevo = () => {
       if (!isManager && user?.rut) {
         params.vendedor_id = user.rut;
       }
-      const [abonosStats, comparativoData, vendedoresData, ventasVendedorMesData, comparativasData, kpisMesData, saldoCreditoData, ventasPorVendedorData, rankingData] = await Promise.all([
-        getAbonosEstadisticas(params).catch(e => {
-          console.error('[loadData] Error en getAbonosEstadisticas:', e);
-          return { success: false, error: e.message, status: e.status };
-        }),
-        getAbonosComparativo(params).catch(e => {
-          console.error('[loadData] Error en getAbonosComparativo:', e);
-          return { success: false, error: e.message, status: e.status };
-        }),
+      const [vendedoresData, comparativasData, kpisMesData, saldoCreditoData, rankingData] = await Promise.all([
         getVendedores().catch(e => {
           console.error('[loadData] Error en getVendedores:', e);
           return [];
-        }),
-        getAbonosComparativo(params).catch(e => {
-          console.error('[loadData] Error en getAbonosComparativo (2):', e);
-          return { success: false, error: e.message, status: e.status };
         }),
         getComparativasMensuales().catch(e => {
           console.error('[loadData] Error en getComparativasMensuales:', e);
@@ -299,10 +287,6 @@ const DashboardNuevo = () => {
           console.error('[loadData] Error en getSaldoCreditoTotal:', e);
           return { success: false, error: e.message, status: e.status };
         }),
-        isManager ? getAbonosPorVendedor(params).catch(e => {
-          console.error('[loadData] Error en getAbonosPorVendedor:', e);
-          return { success: false, error: e.message };
-        }) : Promise.resolve({ success: true, data: [] }),
         isManager ? getRankingVendedores().catch(e => {
           console.error('[loadData] Error en getRankingVendedores:', e);
           return { success: false, data: [] };
@@ -310,8 +294,8 @@ const DashboardNuevo = () => {
       ]);
 
       // Validar estructura y mostrar errores específicos
-      if (!abonosStats || abonosStats.success === false || !abonosStats.data) {
-        if (abonosStats?.status === 401 || abonosStats?.status === 403) {
+      if (!vendedoresData) {
+        if (kpisMesData?.status === 401 || kpisMesData?.status === 403) {
           setError('Tu sesión expiró. Ingresa nuevamente.');
           navigate('/login');
           return;
