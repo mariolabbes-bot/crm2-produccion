@@ -168,16 +168,14 @@ router.get('/debug-jobs', async (req, res) => {
 
     // Diagnósticos exactos para descubrir por qué faltan los abonos
     const stats = await pool.query(`
-      SELECT 
-        (SELECT COUNT(*) FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = '2026-02') as count_abonos_feb,
-        (SELECT SUM(monto) FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = '2026-02') as sum_abonos_feb,
-        (SELECT COUNT(*) FROM venta WHERE TO_CHAR(fecha_emision, 'YYYY-MM') = '2026-02') as count_ventas_feb,
-        (SELECT TO_CHAR(MAX(fecha_emision), 'YYYY-MM') FROM venta) as ultimo_mes_ventas
+      SELECT vendedor_cliente, COUNT(*), SUM(monto) as sum_abonos
+      FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = '2026-02'
+      GROUP BY vendedor_cliente ORDER BY COUNT(*) DESC
     `);
 
     res.json({
       success: true,
-      stats: stats.rows[0],
+      stats: stats.rows,
       jobs: jobs.rows,
       notifications: notifs.rows
     });
