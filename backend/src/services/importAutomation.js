@@ -68,8 +68,8 @@ async function runDriveImportCycle() {
             const localPath = path.join(TEMP_DIR, file.name);
             await downloadFile(file.id, localPath);
 
-            // createJob(type, user, originalname)
-            const jobId = await createJob(type.replace('import-', ''), 'SYSTEM_BOT', file.name);
+            // createJob(type, filename, userRut)
+            const jobId = await createJob(type.replace('import-', ''), file.name, 'SYSTEM_BOT');
 
             try {
                 // Execute Import - Pass jobId, path, originalName
