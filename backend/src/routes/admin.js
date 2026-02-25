@@ -147,4 +147,17 @@ router.get('/download-mapping', auth(['manager']), async (req, res) => {
   }
 });
 
+// GET /api/admin/trigger-drive - Manually trigger Drive import cycle
+router.get('/trigger-drive', async (req, res) => {
+  try {
+    console.log('Admin triggered Drive Import Cycle');
+    const { runDriveImportCycle } = require('../services/importAutomation');
+    await runDriveImportCycle();
+    res.json({ success: true, message: 'Drive cycle triggered. Check logs or database.' });
+  } catch (err) {
+    console.error('Error triggering drive cycle:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
