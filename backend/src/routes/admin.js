@@ -165,10 +165,26 @@ router.get('/debug-jobs', async (req, res) => {
   try {
     const jobs = await pool.query("SELECT id, job_id, tipo, filename, status, created_at, error_message, result_data FROM import_job ORDER BY id DESC LIMIT 10");
     const notifs = await pool.query("SELECT id, type, title, message, created_at FROM app_notifications ORDER BY id DESC LIMIT 5");
-    res.json({ success: true, jobs: jobs.rows, notifications: notifs.rows });
+
+    // Diagnósticos exactos para descubrir por qué faltan los abonos
+    const stats = await pool.query(`
+      SELECT 
+        (SELECT COUNT(*) FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = '2026-02') as count_abonos_feb,
+        (SELECT SUM(monto) FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = '2026-02') as sum_abonos_feb,
+        (SELECT COUNT(*) FROM venta WHERE TO_CHAR(fecha_emision, 'YYYY-MM') = '2026-02') as count_ventas_feb,
+        (SELECT TO_CHAR(MAX(fecha_emision), 'YYYY-MM') FROM venta) as ultimo_mes_ventas
+    `);
+
+    res.json({
+      success: true,
+      stats: stats.rows[0],
+      jobs: jobs.rows,
+      notifications: notifs.rows
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
 module.exports = router;
+
