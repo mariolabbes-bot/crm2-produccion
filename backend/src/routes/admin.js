@@ -160,4 +160,15 @@ router.get('/trigger-drive', async (req, res) => {
   }
 });
 
+// GET /api/admin/debug-jobs - Temporary diagnostic endpoint to view database logs
+router.get('/debug-jobs', async (req, res) => {
+  try {
+    const jobs = await pool.query("SELECT id, job_id, tipo, filename, status, created_at, error_message, result_data FROM import_job ORDER BY id DESC LIMIT 10");
+    const notifs = await pool.query("SELECT id, type, title, message, created_at FROM app_notifications ORDER BY id DESC LIMIT 5");
+    res.json({ success: true, jobs: jobs.rows, notifications: notifs.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
