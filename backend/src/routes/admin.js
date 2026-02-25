@@ -173,9 +173,13 @@ router.get('/debug-jobs', async (req, res) => {
       GROUP BY vendedor_cliente ORDER BY COUNT(*) DESC
     `);
 
+    // Y necesitamos ver los IDs de usuario para comparar!
+    const users = await pool.query("SELECT rut, alias, nombre_vendedor FROM usuario WHERE UPPER(rol_usuario) IN ('VENDEDOR', 'MANAGER')");
+
     res.json({
       success: true,
       stats: stats.rows,
+      users: users.rows,
       jobs: jobs.rows,
       notifications: notifs.rows
     });
