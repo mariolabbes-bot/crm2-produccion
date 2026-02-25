@@ -98,19 +98,23 @@ async function resolveVendorName(raw) {
   //    This handles "LUIS" -> "Luis" conversion to satisfy FKs
   if (result) {
     const rNorm = normalizeVendorName(result);
-    if (c.officials.has(rNorm)) return c.officials.get(rNorm);
-    // If we mapped to "LUIS" but "LUIS" isn't in official list... 
-    // We might have a problem (FK error), but we return what we found.
-    return result;
+    if (c.officials.has(rNorm)) {
+      return c.officials.get(rNorm);
+    } else {
+      // Discard stale or broken alias mapping so it can fallback to substring match
+      result = null;
+    }
   }
 
-  // 4. Official list (Input might be the official name itself)
-  if (c.officials && c.officials.has(n)) return c.officials.get(n);
+  if (!result) {
+    // 4. Official list (Input might be the official name itself)
+    if (c.officials && c.officials.has(n)) return c.officials.get(n);
 
-  // 5. Try partial contains match
-  // Fix: The long official name (key) should contain the short raw name (n), not the other way around!
-  for (const [key, val] of c.officials.entries()) {
-    if (key.includes(n)) return val;
+    // 5. Try partial contains match
+    // Fix: The long official name (key) should contain the short raw name (n), not the other way around!
+    for (const [key, val] of c.officials.entries()) {
+      if (key.includes(n) && !val.startsWith('STUB_')) return val; // Skip STUBs in substring match to prevent 'STUB_Omar' from intercepting 'Omar' before 'OMAR MAXIMILIANO'
+    }
   }
 
   return raw; // fallback to original
