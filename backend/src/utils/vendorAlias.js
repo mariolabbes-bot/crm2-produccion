@@ -32,7 +32,7 @@ async function refreshCache() {
   const userRes = await pool.query(`
     SELECT nombre_vendedor, alias
     FROM usuario
-    WHERE LOWER(rol_usuario) = 'vendedor' AND nombre_vendedor IS NOT NULL
+    WHERE LOWER(rol_usuario) IN ('vendedor', 'manager') AND nombre_vendedor IS NOT NULL
   `);
   for (const r of userRes.rows) {
     const officialName = r.nombre_vendedor;
