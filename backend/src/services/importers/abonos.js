@@ -145,7 +145,8 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         // We will stick to the temp table approach but within a transaction, 
         // AND we will be very explicit about the MERGE logic ensuring ID is respected.
 
-        const tempTable = `temp_abono_import_${jobId}_${Date.now()}`;
+        const safeJobId = jobId.replace(/-/g, '_');
+        const tempTable = `temp_abono_import_${safeJobId}_${Date.now()}`;
         await client.query(`
             CREATE TEMP TABLE ${tempTable} (
                 sucursal text, folio text, fecha date, identificador text, cliente text, 

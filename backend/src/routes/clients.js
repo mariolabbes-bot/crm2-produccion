@@ -142,6 +142,24 @@ router.get('/search', auth(), async (req, res) => {
   }
 });
 
+// PATCH Bulk Assign Circuit
+router.patch('/bulk-circuit', auth(), async (req, res) => {
+  try {
+    const { ruts, circuito } = req.body;
+    if (!ruts || !Array.isArray(ruts) || ruts.length === 0) {
+      return res.status(400).json({ msg: 'Debe proveer un array de ruts' });
+    }
+    if (!circuito) {
+      return res.status(400).json({ msg: 'Debe proveer un circuito' });
+    }
+    const result = await ClientService.bulkAssignCircuit(ruts, circuito, req.user);
+    res.json(result);
+  } catch (err) {
+    console.error('Error bulk-circuit:', err.message);
+    res.status(500).json({ msg: 'Error en asignación masiva', error: err.message });
+  }
+});
+
 // GET single client by RUT (last to avoid route conflict)
 router.get('/:id', auth(), async (req, res) => {
   try {

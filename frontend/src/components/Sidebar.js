@@ -86,7 +86,7 @@ const Sidebar = () => {
       managerOnly: true
     },
     {
-      title: 'Mapa (PoC)',
+      title: 'Rutas y Cobertura',
       icon: <MapIcon />,
       path: '/mapa-visitas',
       color: '#3B82F6',

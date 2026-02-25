@@ -276,6 +276,17 @@ class ClientModel {
     const result = await pool.query(query, params);
     return result.rows;
   }
+
+  static async bulkAssignCircuit(ruts, circuito) {
+    const query = `
+      UPDATE cliente 
+      SET circuito = $1 
+      WHERE rut = ANY($2::varchar[])
+      RETURNING rut, circuito
+    `;
+    const result = await pool.query(query, [circuito, ruts]);
+    return result.rows;
+  }
 }
 
 module.exports = ClientModel;

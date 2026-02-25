@@ -69,12 +69,12 @@ async function runDriveImportCycle() {
             await downloadFile(file.id, localPath);
 
             // createJob(type, user, originalname)
-            const job = await createJob(type.replace('import-', ''), 'SYSTEM_BOT', file.name);
+            const jobId = await createJob(type.replace('import-', ''), 'SYSTEM_BOT', file.name);
 
             try {
                 // Execute Import - Pass jobId, path, originalName
                 // Importers expected signature: (jobId, filePath, originalName)
-                const result = await importer(job.id, localPath, file.name);
+                const result = await importer(jobId, localPath, file.name);
 
                 // Notification: Success
                 const filas = result.imported !== undefined ? result.imported : (result.inserted !== undefined ? result.inserted + (result.updated || 0) : 0);

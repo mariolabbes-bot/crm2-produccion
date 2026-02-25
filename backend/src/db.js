@@ -14,7 +14,7 @@ const pool = new Pool({
   connectionString: connStr,
   // If local, allow non-SSL. If remote (NEON), it likely needs SSL but with rejectUnauthorized: false for some dev setups
   ssl: isLocal ? false : { rejectUnauthorized: false },
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 30000, // Increased from 5000 to 30000 for Neon cold starts
   idleTimeoutMillis: 30000,
   max: 20
 });

@@ -127,56 +127,78 @@ const PlannerPage = () => {
                     </Paper>
                 )}
 
-                {Array.isArray(filteredSuggestions) && filteredSuggestions.map(client => (
-                    <Paper
-                        key={client.rut}
-                        sx={{
-                            p: 2,
-                            mb: 2,
-                            borderRadius: 3,
-                            border: selected.includes(client.rut) ? '2px solid #2563EB' : '1px solid transparent',
-                            bgcolor: selected.includes(client.rut) ? '#EFF6FF' : 'white',
-                            transition: 'all 0.2s'
-                        }}
-                        onClick={() => toggleSelect(client.rut)}
-                    >
-                        <Grid container alignItems="center">
-                            <Grid item xs={10}>
-                                <Typography variant="subtitle1" fontWeight="bold">{client.nombre}</Typography>
-                                <Typography variant="caption" color="text.secondary" display="block">{client.direccion}, {client.comuna}</Typography>
-                                <Box mt={1} display="flex" gap={1}>
-                                    {client.circuito && (
+                {Array.isArray(filteredSuggestions) && filteredSuggestions.map(client => {
+                    const heatColor = client.heatScore >= 70 ? '#ef4444' : (client.heatScore >= 40 ? '#f59e0b' : '#10b981');
+                    const priorityLabel = client.heatScore >= 70 ? 'Urgente' : (client.heatScore >= 40 ? 'Media' : 'Baja');
+
+                    return (
+                        <Paper
+                            key={client.rut}
+                            sx={{
+                                p: 2,
+                                mb: 2,
+                                borderRadius: 3,
+                                border: selected.includes(client.rut) ? '2px solid #2563EB' : '1px solid transparent',
+                                bgcolor: selected.includes(client.rut) ? '#EFF6FF' : 'white',
+                                transition: 'all 0.2s'
+                            }}
+                            onClick={() => toggleSelect(client.rut)}
+                        >
+                            <Grid container alignItems="center">
+                                <Grid item xs={10}>
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                        <Typography variant="subtitle1" fontWeight="bold">{client.nombre}</Typography>
                                         <Chip
-                                            label={client.circuito}
+                                            label={`${priorityLabel} (${client.rawScore || '?'} pts)`}
                                             size="small"
-                                            sx={{
-                                                fontSize: '0.6rem',
-                                                bgcolor: circuits.find(cc => cc.nombre === client.circuito)?.color || '#ddd',
-                                                color: 'white',
-                                                fontWeight: 'bold'
-                                            }}
+                                            sx={{ height: 20, fontSize: '0.65rem', bgcolor: heatColor, color: 'white', fontWeight: 'bold' }}
                                         />
-                                    )}
-                                    <Chip
-                                        icon={<AccessTime sx={{ fontSize: '1rem !important' }} />}
-                                        label="Sin visita hoy"
-                                        size="small"
-                                        color="warning"
-                                        variant="outlined"
-                                        sx={{ fontSize: '0.6rem' }}
+                                    </Box>
+                                    <Typography variant="caption" color="text.secondary" display="block">{client.direccion}, {client.comuna}</Typography>
+                                    <Box mt={1} display="flex" gap={1} flexWrap="wrap">
+                                        {client.circuito && (
+                                            <Chip
+                                                label={client.circuito}
+                                                size="small"
+                                                sx={{
+                                                    fontSize: '0.6rem',
+                                                    height: 20,
+                                                    bgcolor: circuits.find(cc => cc.nombre === client.circuito)?.color || '#ddd',
+                                                    color: 'white',
+                                                    fontWeight: 'bold'
+                                                }}
+                                            />
+                                        )}
+                                        {client.deuda_total > 0 && (
+                                            <Chip
+                                                label={`Deuda: $${new Intl.NumberFormat('es-CL').format(client.deuda_total)}`}
+                                                size="small"
+                                                color="error"
+                                                variant="outlined"
+                                                sx={{ fontSize: '0.6rem', height: 20 }}
+                                            />
+                                        )}
+                                        <Chip
+                                            icon={<AccessTime sx={{ fontSize: '1rem !important' }} />}
+                                            label={client.daysSinceVisit < 999 ? `Últ. visita hace ${client.daysSinceVisit} d.` : 'Sin visita reciente'}
+                                            size="small"
+                                            color="warning"
+                                            variant="outlined"
+                                            sx={{ fontSize: '0.6rem', height: 20 }}
+                                        />
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={2} textAlign="right">
+                                    <Checkbox
+                                        checked={selected.includes(client.rut)}
+                                        onChange={() => toggleSelect(client.rut)}
+                                        color="primary"
                                     />
-                                </Box>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={2} textAlign="right">
-                                <Checkbox
-                                    checked={selected.includes(client.rut)}
-                                    onChange={() => toggleSelect(client.rut)}
-                                    color="primary"
-                                />
-                            </Grid>
-                        </Grid>
-                    </Paper>
-                ))}
+                        </Paper>
+                    );
+                })}
             </Box>
 
             {/* Floating Action Bar */}
