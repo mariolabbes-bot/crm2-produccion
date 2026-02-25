@@ -191,21 +191,35 @@ router.get('/debug-jobs', async (req, res) => {
 // GET /api/admin/fix-abonos - Retroactively fix missing vendor mappings for February
 router.get('/fix-abonos', async (req, res) => {
   try {
-    const { resolveVendorName } = require('../utils/vendorAlias');
-    const records = await pool.query("SELECT id, vendedor_cliente FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = '2026-02'");
+    const directMappings = {
+      'Eduardo': 'EDUARDO ENRIQUE ROJAS CASTILLO',
+      'Eduardo Rojas': 'EDUARDO ENRIQUE ROJAS CASTILLO',
+      'Omar': 'OMAR MAXIMILIANO SEPÚLVEDA PIUCHEN',
+      'Maiko': 'MAIKO PATRICIO MONTOYA  AQUEA',
+      'Nelson': 'NELSON ANTONIO MUÑOZ CORTES',
+      'Marisol': 'MARISOL DEL CARMEN  GALVEZ VELIZ',
+      'Alex': 'ALEX MAURICIO SILVA  HERRERA',
+      'Victoria': 'VICTORIA MAGDALENA PAEZ  RAMIREZ',
+      'Jorge': 'STUB_Jorge',
+      'Nataly': 'STUB_Nataly',
+      'Joaquin': 'JOAQUIN',
+      'Marcelo': 'STUB_Marcelo',
+      'Roberto': 'Roberto',
+      'luis': 'Luis Ramon Esquivel  Oyamadel',
+      'Matias Felipe': 'MATIAS FELIPE TAPIA  DURAN'
+    };
 
     let updated = 0;
     const client = await pool.connect();
 
     try {
       await client.query('BEGIN');
-      for (const row of records.rows) {
-        if (!row.vendedor_cliente) continue;
-        const newVendor = await resolveVendorName(row.vendedor_cliente);
-        if (newVendor && newVendor !== row.vendedor_cliente) {
-          await client.query('UPDATE abono SET vendedor_cliente = $1 WHERE id = $2', [newVendor, row.id]);
-          updated++;
-        }
+      for (const [oldName, newName] of Object.entries(directMappings)) {
+        const result = await client.query(
+          "UPDATE abono SET vendedor_cliente = $1 WHERE vendedor_cliente = $2 AND TO_CHAR(fecha, 'YYYY-MM') = '2026-02'",
+          [newName, oldName]
+        );
+        updated += result.rowCount;
       }
       await client.query('COMMIT');
     } catch (err) {
@@ -215,7 +229,7 @@ router.get('/fix-abonos', async (req, res) => {
       client.release();
     }
 
-    res.json({ success: true, message: `Se actualizaron ${updated} abonos que tenían el vendedor huérfano.` });
+    res.json({ success: true, message: `Se actualizaron ${updated} abonos que tenían el vendedor huérfano con mapeo manual.` });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
