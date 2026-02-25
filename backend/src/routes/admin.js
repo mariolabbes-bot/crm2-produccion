@@ -188,5 +188,37 @@ router.get('/debug-jobs', async (req, res) => {
   }
 });
 
-module.exports = router;
+// GET /api/admin/fix-abonos - Retroactively fix missing vendor mappings for February
+router.get('/fix-abonos', async (req, res) => {
+  try {
+    const { resolveVendorName } = require('../utils/vendorAlias');
+    const records = await pool.query("SELECT id, vendedor_cliente FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = '2026-02'");
 
+    let updated = 0;
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      for (const row of records.rows) {
+        if (!row.vendedor_cliente) continue;
+        const newVendor = await resolveVendorName(row.vendedor_cliente);
+        if (newVendor && newVendor !== row.vendedor_cliente) {
+          await client.query('UPDATE abono SET vendedor_cliente = $1 WHERE id = $2', [newVendor, row.id]);
+          updated++;
+        }
+      }
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+
+    res.json({ success: true, message: `Se actualizaron ${updated} abonos que tenían el vendedor huérfano.` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+module.exports = router;

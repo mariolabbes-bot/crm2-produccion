@@ -108,8 +108,9 @@ async function resolveVendorName(raw) {
   if (c.officials && c.officials.has(n)) return c.officials.get(n);
 
   // 5. Try partial contains match
+  // Fix: The long official name (key) should contain the short raw name (n), not the other way around!
   for (const [key, val] of c.officials.entries()) {
-    if (n.includes(key)) return val;
+    if (key.includes(n)) return val;
   }
 
   return raw; // fallback to original
