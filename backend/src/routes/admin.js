@@ -204,19 +204,27 @@ router.get('/debug-jobs', async (req, res) => {
       ORDER BY monto_total_abonos DESC
     `);
 
-    // New: Find inactive vendors (no sales in last 6 months)
+    // New: Find inactive vendors (no sales in last 6 months) and check for ANY historical dependency
     const inactiveRes = await pool.query(`
-      SELECT rut, nombre_vendedor, alias, rol_usuario
-      FROM usuario
-      WHERE LOWER(rol_usuario) IN ('vendedor', 'manager')
-      AND nombre_vendedor IS NOT NULL
-      AND alias NOT IN (
-        SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months' AND vendedor_cliente IS NOT NULL
+      WITH candidatos AS (
+        SELECT rut, nombre_vendedor, alias, rol_usuario
+        FROM usuario
+        WHERE LOWER(rol_usuario) IN ('vendedor', 'manager')
+        AND nombre_vendedor IS NOT NULL
+        AND alias NOT IN (
+          SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months' AND vendedor_cliente IS NOT NULL
+        )
+        AND nombre_vendedor NOT IN (
+          SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months' AND vendedor_cliente IS NOT NULL
+        )
       )
-      AND nombre_vendedor NOT IN (
-        SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months' AND vendedor_cliente IS NOT NULL
-      )
-      ORDER BY nombre_vendedor
+      SELECT 
+        c.*,
+        (SELECT COUNT(*) FROM venta WHERE vendedor_cliente = c.alias OR vendedor_cliente = c.nombre_vendedor) as total_ventas_historicas,
+        (SELECT COUNT(*) FROM abono WHERE vendedor_cliente = c.alias OR vendedor_cliente = c.nombre_vendedor) as total_abonos_historicos,
+        (SELECT COUNT(*) FROM cliente WHERE vendedor_asignado = c.alias OR vendedor_asignado = c.nombre_vendedor) as total_clientes_asignados
+      FROM candidatos c
+      ORDER BY c.nombre_vendedor
     `);
 
     res.json({
