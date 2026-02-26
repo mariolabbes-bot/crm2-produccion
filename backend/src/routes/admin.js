@@ -234,6 +234,7 @@ router.get('/debug-jobs', async (req, res) => {
 
     res.json({
       success: true,
+      deployment_ts: "2026-02-26T18:05:00Z",
       audit: {
         users: usersRes.rows,
         aliases: aliasRows,
