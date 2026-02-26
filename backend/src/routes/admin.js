@@ -163,26 +163,57 @@ router.get('/trigger-drive', async (req, res) => {
 // GET /api/admin/debug-jobs - Temporary diagnostic endpoint to view database logs
 router.get('/debug-jobs', async (req, res) => {
   try {
-    const jobs = await pool.query("SELECT id, job_id, tipo, filename, status, created_at, error_message, result_data FROM import_job ORDER BY id DESC LIMIT 10");
-    const notifs = await pool.query("SELECT id, type, title, message, created_at FROM app_notifications ORDER BY id DESC LIMIT 5");
-
-    // Diagnósticos exactos para descubrir por qué faltan los abonos
-    const stats = await pool.query(`
-      SELECT vendedor_cliente, COUNT(*), SUM(monto) as sum_abonos
-      FROM abono WHERE TO_CHAR(fecha, 'YYYY-MM') = '2026-02'
-      GROUP BY vendedor_cliente ORDER BY COUNT(*) DESC
+    const usersRes = await pool.query(`
+      SELECT rut, nombre_vendedor, alias, rol_usuario, sucursal, email
+      FROM usuario
+      WHERE LOWER(rol_usuario) IN ('vendedor', 'manager') AND nombre_vendedor IS NOT NULL
+      ORDER BY nombre_vendedor
     `);
 
-    // Y necesitamos ver los IDs de usuario para comparar!
-    const users = await pool.query("SELECT rut, alias, nombre_vendedor FROM usuario WHERE UPPER(rol_usuario) IN ('VENDEDOR', 'MANAGER')");
+    let aliasRows = [];
+    const aliasExists = await pool.query(`
+      SELECT EXISTS(
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'usuario_alias'
+      ) AS exists
+    `);
+    if (aliasExists.rows[0].exists) {
+      const aliasRes = await pool.query('SELECT alias, nombre_vendedor_oficial FROM usuario_alias ORDER BY nombre_vendedor_oficial');
+      aliasRows = aliasRes.rows;
+    }
+
+    const salesRes = await pool.query(`
+      SELECT 
+        COALESCE(vendedor_cliente, 'NULO/VACIO') as vendedor_str_en_db, 
+        COUNT(*) as total_transacciones, 
+        SUM(valor_total) as monto_total_ventas
+      FROM venta 
+      WHERE fecha_emision >= '2025-12-01' AND fecha_emision <= '2026-02-28'
+      GROUP BY vendedor_cliente 
+      ORDER BY monto_total_ventas DESC
+    `);
+
+    const abonosRes = await pool.query(`
+      SELECT 
+        COALESCE(vendedor_cliente, 'NULO/VACIO') as vendedor_str_en_db, 
+        COUNT(*) as total_transacciones, 
+        SUM(monto) as monto_total_abonos
+      FROM abono 
+      WHERE fecha >= '2025-12-01' AND fecha <= '2026-02-28'
+      GROUP BY vendedor_cliente 
+      ORDER BY monto_total_abonos DESC
+    `);
 
     res.json({
       success: true,
-      stats: stats.rows,
-      users: users.rows,
-      jobs: jobs.rows,
-      notifications: notifs.rows
+      audit: {
+        users: usersRes.rows,
+        aliases: aliasRows,
+        ventas_3_meses: salesRes.rows,
+        abonos_3_meses: abonosRes.rows
+      }
     });
+
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
