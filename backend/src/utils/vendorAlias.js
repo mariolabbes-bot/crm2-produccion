@@ -37,9 +37,10 @@ async function refreshCache() {
   for (const r of userRes.rows) {
     const officialName = r.nombre_vendedor;
     // CRITICAL: The 'venta' table FK references 'alias'. So we must resolve to the Alias.
-    // If alias is null, we fallback to name (hoping it matches hidden alias or just trying)
+    // If alias is null, we fallback to name
     const targetValue = r.alias || officialName;
 
+    // We map both the long official name AND the short alias to the targetValue (which is the alias)
     const n = normalizeVendorName(officialName);
     officialsMap.set(n, targetValue);
 
@@ -111,9 +112,8 @@ async function resolveVendorName(raw) {
     if (c.officials && c.officials.has(n)) return c.officials.get(n);
 
     // 5. Try partial contains match
-    // Fix: The long official name (key) should contain the short raw name (n), not the other way around!
     for (const [key, val] of c.officials.entries()) {
-      if (key.includes(n) && !val.startsWith('STUB_')) return val; // Skip STUBs in substring match to prevent 'STUB_Omar' from intercepting 'Omar' before 'OMAR MAXIMILIANO'
+      if (key.includes(n)) return val;
     }
   }
 
