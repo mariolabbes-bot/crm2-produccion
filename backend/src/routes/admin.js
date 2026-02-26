@@ -211,10 +211,10 @@ router.get('/debug-jobs', async (req, res) => {
       WHERE LOWER(rol_usuario) IN ('vendedor', 'manager')
       AND nombre_vendedor IS NOT NULL
       AND alias NOT IN (
-        SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months'
+        SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months' AND vendedor_cliente IS NOT NULL
       )
       AND nombre_vendedor NOT IN (
-        SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months'
+        SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months' AND vendedor_cliente IS NOT NULL
       )
       ORDER BY nombre_vendedor
     `);
