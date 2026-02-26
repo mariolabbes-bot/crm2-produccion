@@ -208,14 +208,13 @@ router.get('/debug-jobs', async (req, res) => {
     const inactiveRes = await pool.query(`
       WITH candidatos AS (
         SELECT rut, nombre_vendedor, alias, rol_usuario
-        FROM usuario
+        FROM usuario u
         WHERE LOWER(rol_usuario) IN ('vendedor', 'manager')
         AND nombre_vendedor IS NOT NULL
-        AND alias NOT IN (
-          SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months' AND vendedor_cliente IS NOT NULL
-        )
-        AND nombre_vendedor NOT IN (
-          SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months' AND vendedor_cliente IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM venta v 
+          WHERE v.fecha_emision >= CURRENT_DATE - INTERVAL '6 months' 
+          AND (v.vendedor_cliente = u.alias OR v.vendedor_cliente = u.nombre_vendedor)
         )
       )
       SELECT 
