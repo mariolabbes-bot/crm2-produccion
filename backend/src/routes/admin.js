@@ -223,21 +223,18 @@ router.get('/debug-jobs', async (req, res) => {
 router.get('/fix-abonos', async (req, res) => {
   try {
     const directMappings = {
-      'Eduardo': 'EDUARDO ENRIQUE ROJAS CASTILLO',
-      'Eduardo Rojas': 'EDUARDO ENRIQUE ROJAS CASTILLO',
-      'Omar': 'OMAR MAXIMILIANO SEPÚLVEDA PIUCHEN',
-      'Maiko': 'MAIKO PATRICIO MONTOYA  AQUEA',
-      'Nelson': 'NELSON ANTONIO MUÑOZ CORTES',
-      'Marisol': 'MARISOL DEL CARMEN  GALVEZ VELIZ',
-      'Alex': 'ALEX MAURICIO SILVA  HERRERA',
-      'Victoria': 'VICTORIA MAGDALENA PAEZ  RAMIREZ',
-      'Jorge': 'STUB_Jorge',
-      'Nataly': 'STUB_Nataly',
-      'Joaquin': 'JOAQUIN',
-      'Marcelo': 'STUB_Marcelo',
-      'Roberto': 'Roberto',
-      'luis': 'Luis Ramon Esquivel  Oyamadel',
-      'Matias Felipe': 'MATIAS FELIPE TAPIA  DURAN'
+      'EDUARDO ENRIQUE ROJAS CASTILLO': 'Eduardo',
+      'OMAR MAXIMILIANO SEPÚLVEDA PIUCHEN': 'Omar',
+      'MAIKO PATRICIO MONTOYA  AQUEA': 'Maiko',
+      'NELSON ANTONIO MUÑOZ CORTES': 'Nelson',
+      'MARISOL DEL CARMEN  GALVEZ VELIZ': 'Marisol',
+      'ALEX MAURICIO SILVA  HERRERA': 'Alex',
+      'VICTORIA MAGDALENA PAEZ  RAMIREZ': 'Victoria',
+      'STUB_Jorge': 'Jorge',
+      'STUB_Nataly': 'Nataly',
+      'STUB_Marcelo': 'Marcelo',
+      'Luis Ramon Esquivel  Oyamadel': 'Luis',
+      'MATIAS FELIPE TAPIA  DURAN': 'Matias Felipe'
     };
 
     let updated = 0;
@@ -245,10 +242,10 @@ router.get('/fix-abonos', async (req, res) => {
 
     try {
       await client.query('BEGIN');
-      for (const [oldName, newName] of Object.entries(directMappings)) {
+      for (const [longName, shortAlias] of Object.entries(directMappings)) {
         const result = await client.query(
           "UPDATE abono SET vendedor_cliente = $1 WHERE vendedor_cliente = $2 AND TO_CHAR(fecha, 'YYYY-MM') = '2026-02'",
-          [newName, oldName]
+          [shortAlias, longName]
         );
         updated += result.rowCount;
       }
@@ -260,7 +257,7 @@ router.get('/fix-abonos', async (req, res) => {
       client.release();
     }
 
-    res.json({ success: true, message: `Se actualizaron ${updated} abonos que tenían el vendedor huérfano con mapeo manual.` });
+    res.json({ success: true, message: `Cirugía Saneamiento Lista: Se corrigieron ${updated} abonos que tenían el nombre largo.` });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
