@@ -164,7 +164,7 @@ router.get('/trigger-drive', async (req, res) => {
 router.get('/debug-jobs', async (req, res) => {
   try {
     const usersRes = await pool.query(`
-      SELECT rut, nombre_vendedor, alias, rol_usuario, sucursal, email
+      SELECT rut, nombre_vendedor, alias, rol_usuario, email
       FROM usuario
       WHERE LOWER(rol_usuario) IN ('vendedor', 'manager') AND nombre_vendedor IS NOT NULL
       ORDER BY nombre_vendedor
