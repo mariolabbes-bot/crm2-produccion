@@ -206,7 +206,7 @@ router.get('/debug-jobs', async (req, res) => {
 
     // Schema check for cliente table
     const schemaRes = await pool.query(`
-      SELECT column_name 
+      SELECT column_name, data_type 
       FROM information_schema.columns 
       WHERE table_name = 'cliente'
     `);
@@ -234,7 +234,7 @@ router.get('/debug-jobs', async (req, res) => {
 
     res.json({
       success: true,
-      deployment_ts: "2026-02-26T18:05:00Z",
+      deployment_ts: "2026-02-26T20:55:00Z",
       audit: {
         users: usersRes.rows,
         aliases: aliasRows,
