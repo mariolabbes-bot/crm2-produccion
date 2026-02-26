@@ -207,7 +207,7 @@ router.get('/debug-jobs', async (req, res) => {
     // New: Find inactive vendors (no sales in last 6 months) and check for ANY historical dependency
     const inactiveRes = await pool.query(`
       WITH candidatos AS (
-        SELECT rut, nombre_vendedor, alias, rol_usuario
+        SELECT rut, nombre_vendedor, alias, rol_usuario, id
         FROM usuario u
         WHERE LOWER(rol_usuario) IN ('vendedor', 'manager')
         AND nombre_vendedor IS NOT NULL
@@ -221,7 +221,7 @@ router.get('/debug-jobs', async (req, res) => {
         c.*,
         (SELECT COUNT(*) FROM venta WHERE vendedor_cliente = c.alias OR vendedor_cliente = c.nombre_vendedor) as total_ventas_historicas,
         (SELECT COUNT(*) FROM abono WHERE vendedor_cliente = c.alias OR vendedor_cliente = c.nombre_vendedor) as total_abonos_historicos,
-        (SELECT COUNT(*) FROM cliente WHERE vendedor_asignado = c.alias OR vendedor_asignado = c.nombre_vendedor) as total_clientes_asignados
+        (SELECT COUNT(*) FROM cliente WHERE vendedor_alias = c.alias OR nombre_vendedor = c.nombre_vendedor OR vendedor_id = c.id) as total_clientes_asignados
       FROM candidatos c
       ORDER BY c.nombre_vendedor
     `);
