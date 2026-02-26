@@ -204,13 +204,29 @@ router.get('/debug-jobs', async (req, res) => {
       ORDER BY monto_total_abonos DESC
     `);
 
+    // New: Find inactive vendors (no sales in last 6 months)
+    const inactiveRes = await pool.query(`
+      SELECT rut, nombre_vendedor, alias, rol_usuario
+      FROM usuario
+      WHERE LOWER(rol_usuario) IN ('vendedor', 'manager')
+      AND nombre_vendedor IS NOT NULL
+      AND alias NOT IN (
+        SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months'
+      )
+      AND nombre_vendedor NOT IN (
+        SELECT DISTINCT vendedor_cliente FROM venta WHERE fecha_emision >= CURRENT_DATE - INTERVAL '6 months'
+      )
+      ORDER BY nombre_vendedor
+    `);
+
     res.json({
       success: true,
       audit: {
         users: usersRes.rows,
         aliases: aliasRows,
         ventas_3_meses: salesRes.rows,
-        abonos_3_meses: abonosRes.rows
+        abonos_3_meses: abonosRes.rows,
+        inactive_vendors: inactiveRes.rows
       }
     });
 
