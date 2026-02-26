@@ -204,7 +204,14 @@ router.get('/debug-jobs', async (req, res) => {
       ORDER BY monto_total_abonos DESC
     `);
 
-    // New: Find inactive vendors (no sales in last 6 months) and check for ANY historical dependency
+    // Schema check for cliente table
+    const schemaRes = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'cliente'
+    `);
+
+    // New: Find inactive vendors (no sales in last 6 months)
     const inactiveRes = await pool.query(`
       WITH candidatos AS (
         SELECT rut, nombre_vendedor, alias, rol_usuario, id
@@ -220,8 +227,7 @@ router.get('/debug-jobs', async (req, res) => {
       SELECT 
         c.*,
         (SELECT COUNT(*) FROM venta WHERE vendedor_cliente = c.alias OR vendedor_cliente = c.nombre_vendedor) as total_ventas_historicas,
-        (SELECT COUNT(*) FROM abono WHERE vendedor_cliente = c.alias OR vendedor_cliente = c.nombre_vendedor) as total_abonos_historicos,
-        (SELECT COUNT(*) FROM cliente WHERE vendedor_alias = c.alias OR nombre_vendedor = c.nombre_vendedor OR vendedor_id = c.id) as total_clientes_asignados
+        (SELECT COUNT(*) FROM abono WHERE vendedor_cliente = c.alias OR vendedor_cliente = c.nombre_vendedor) as total_abonos_historicos
       FROM candidatos c
       ORDER BY c.nombre_vendedor
     `);
@@ -233,7 +239,8 @@ router.get('/debug-jobs', async (req, res) => {
         aliases: aliasRows,
         ventas_3_meses: salesRes.rows,
         abonos_3_meses: abonosRes.rows,
-        inactive_vendors: inactiveRes.rows
+        inactive_vendors: inactiveRes.rows,
+        cliente_schema: schemaRes.rows
       }
     });
 
