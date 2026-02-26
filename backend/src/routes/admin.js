@@ -244,7 +244,7 @@ router.get('/fix-abonos', async (req, res) => {
       await client.query('BEGIN');
       for (const [longName, shortAlias] of Object.entries(directMappings)) {
         const result = await client.query(
-          "UPDATE abono SET vendedor_cliente = $1 WHERE vendedor_cliente = $2 AND TO_CHAR(fecha, 'YYYY-MM') = '2026-02'",
+          "UPDATE abono SET vendedor_cliente = $1 WHERE vendedor_cliente = $2",
           [shortAlias, longName]
         );
         updated += result.rowCount;
