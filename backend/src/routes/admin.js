@@ -222,32 +222,21 @@ router.get('/debug-jobs', async (req, res) => {
 // GET /api/admin/fix-abonos - Retroactively fix missing vendor mappings for February
 router.get('/fix-abonos', async (req, res) => {
   try {
-    const directMappings = {
-      'EDUARDO ENRIQUE ROJAS CASTILLO': 'Eduardo',
-      'OMAR MAXIMILIANO SEPÚLVEDA PIUCHEN': 'Omar',
-      'MAIKO PATRICIO MONTOYA  AQUEA': 'Maiko',
-      'NELSON ANTONIO MUÑOZ CORTES': 'Nelson',
-      'MARISOL DEL CARMEN  GALVEZ VELIZ': 'Marisol',
-      'ALEX MAURICIO SILVA  HERRERA': 'Alex',
-      'VICTORIA MAGDALENA PAEZ  RAMIREZ': 'Victoria',
-      'STUB_Jorge': 'Jorge',
-      'STUB_Nataly': 'Nataly',
-      'STUB_Marcelo': 'Marcelo',
-      'Luis Ramon Esquivel  Oyamadel': 'Luis',
-      'MATIAS FELIPE TAPIA  DURAN': 'Matias Felipe'
-    };
+    const { resolveVendorName } = require('../utils/vendorAlias');
+    const records = await pool.query("SELECT id, vendedor_cliente FROM abono");
 
     let updated = 0;
     const client = await pool.connect();
 
     try {
       await client.query('BEGIN');
-      for (const [longName, shortAlias] of Object.entries(directMappings)) {
-        const result = await client.query(
-          "UPDATE abono SET vendedor_cliente = $1 WHERE vendedor_cliente = $2",
-          [shortAlias, longName]
-        );
-        updated += result.rowCount;
+      for (const row of records.rows) {
+        if (!row.vendedor_cliente) continue;
+        const newVendor = await resolveVendorName(row.vendedor_cliente);
+        if (newVendor && newVendor !== row.vendedor_cliente) {
+          await client.query('UPDATE abono SET vendedor_cliente = $1 WHERE id = $2', [newVendor, row.id]);
+          updated++;
+        }
       }
       await client.query('COMMIT');
     } catch (err) {
@@ -257,7 +246,7 @@ router.get('/fix-abonos', async (req, res) => {
       client.release();
     }
 
-    res.json({ success: true, message: `Cirugía Saneamiento Lista: Se corrigieron ${updated} abonos que tenían el nombre largo.` });
+    res.json({ success: true, message: `Cirugía Dinámica Completa: Se corrigieron ${updated} abonos usando el nuevo algoritmo de mapeo.` });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
