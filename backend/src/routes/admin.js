@@ -160,26 +160,85 @@ router.get('/trigger-drive', async (req, res) => {
   }
 });
 
-// POST /api/admin/cleanup-inactive-vendors - approved cleanup of 23 orphaned vendors
-router.post('/cleanup-inactive-vendors', auth(['manager']), async (req, res) => {
-  const approvedIds = [
-    39, 40, 19, 20, 22, 24, 25, 17, 26, 33, 34, 18, 15, 35, 36, 16, 37, 38, 42, 41, 43, 52, 51
-  ];
-
+// GET /api/admin/debug-jobs - Temporary diagnostic endpoint to view database logs
+router.get('/debug-jobs', async (req, res) => {
   try {
-    const result = await pool.query(`
-      DELETE FROM usuario 
-      WHERE id = ANY($1::int[])
-      RETURNING id, nombre_vendedor
-    `, [approvedIds]);
+    const usersRes = await pool.query(`
+      SELECT rut, nombre_vendedor, alias, rol_usuario
+      FROM usuario
+      WHERE LOWER(rol_usuario) IN ('vendedor', 'manager') AND nombre_vendedor IS NOT NULL
+      ORDER BY nombre_vendedor
+    `);
+
+    let aliasRows = [];
+    const aliasExists = await pool.query(`
+      SELECT EXISTS(
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'usuario_alias'
+      ) AS exists
+    `);
+    if (aliasExists.rows[0].exists) {
+      const aliasRes = await pool.query('SELECT alias, nombre_vendedor_oficial FROM usuario_alias ORDER BY nombre_vendedor_oficial');
+      aliasRows = aliasRes.rows;
+    }
+
+    const salesRes = await pool.query(`
+      SELECT 
+        COALESCE(vendedor_cliente, 'NULO/VACIO') as vendedor_str_en_db, 
+        COUNT(*) as total_transacciones, 
+        SUM(valor_total) as monto_total_ventas
+      FROM venta 
+      WHERE fecha_emision >= '2025-12-01' AND fecha_emision <= '2026-02-28'
+      GROUP BY vendedor_cliente 
+      ORDER BY monto_total_ventas DESC
+    `);
+
+    const abonosRes = await pool.query(`
+      SELECT 
+        COALESCE(vendedor_cliente, 'NULO/VACIO') as vendedor_str_en_db, 
+        COUNT(*) as total_transacciones, 
+        SUM(monto) as monto_total_abonos
+      FROM abono 
+      WHERE fecha >= '2025-12-01' AND fecha <= '2026-02-28'
+      GROUP BY vendedor_cliente 
+      ORDER BY monto_total_abonos DESC
+    `);
+
+    // New: Find inactive vendors (no sales in last 6 months) and check for ANY historical dependency
+    const inactiveRes = await pool.query(`
+      WITH candidatos AS (
+        SELECT rut, nombre_vendedor, alias, rol_usuario, id
+        FROM usuario u
+        WHERE LOWER(rol_usuario) IN ('vendedor', 'manager')
+        AND nombre_vendedor IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM venta v 
+          WHERE v.fecha_emision >= CURRENT_DATE - INTERVAL '6 months' 
+          AND (v.vendedor_cliente = u.alias OR v.vendedor_cliente = u.nombre_vendedor)
+        )
+      )
+      SELECT 
+        c.*,
+        (SELECT COUNT(*) FROM venta WHERE vendedor_cliente = c.alias OR vendedor_cliente = c.nombre_vendedor) as total_ventas_historicas,
+        (SELECT COUNT(*) FROM abono WHERE vendedor_cliente = c.alias OR vendedor_cliente = c.nombre_vendedor) as total_abonos_historicos,
+        (SELECT COUNT(*) FROM cliente WHERE vendedor_id = c.id OR nombre_vendedor = c.nombre_vendedor) as total_clientes_asignados
+      FROM candidatos c
+      ORDER BY c.nombre_vendedor
+    `);
 
     res.json({
       success: true,
-      message: `Limpieza completada. Se eliminaron ${result.rowCount} registros de vendedores inactivos sin dependencias.`,
-      deleted: result.rows
+      deployment_ts: "2026-02-26T21:30:00Z",
+      audit: {
+        users: usersRes.rows,
+        aliases: aliasRows,
+        ventas_3_meses: salesRes.rows,
+        abonos_3_meses: abonosRes.rows,
+        inactive_vendors: inactiveRes.rows
+      }
     });
+
   } catch (err) {
-    console.error('Error during vendor cleanup:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
