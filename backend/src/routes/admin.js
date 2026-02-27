@@ -160,9 +160,17 @@ router.get('/trigger-drive', async (req, res) => {
   }
 });
 
-// GET /api/admin/debug-jobs - Temporary diagnostic endpoint to view database logs
+// GET /api/admin/debug-jobs - Diagnostic and approved cleanup
 router.get('/debug-jobs', async (req, res) => {
+  const { cleanup } = req.query;
+  const approvedIds = [39, 40, 19, 20, 22, 24, 25, 17, 26, 33, 34, 18, 15, 35, 36, 16, 37, 38, 42, 41, 43, 52, 51];
+  let cleanupResult = null;
+
   try {
+    if (cleanup === 'true') {
+      const del = await pool.query('DELETE FROM usuario WHERE id = ANY($1::int[]) RETURNING id, nombre_vendedor', [approvedIds]);
+      cleanupResult = { count: del.rowCount, deleted: del.rows };
+    }
     const usersRes = await pool.query(`
       SELECT rut, nombre_vendedor, alias, rol_usuario
       FROM usuario
@@ -228,7 +236,8 @@ router.get('/debug-jobs', async (req, res) => {
 
     res.json({
       success: true,
-      deployment_ts: "2026-02-26T21:30:00Z",
+      deployment_ts: "2026-02-26T21:35:00Z",
+      cleanup: cleanupResult,
       audit: {
         users: usersRes.rows,
         aliases: aliasRows,
