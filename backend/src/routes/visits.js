@@ -75,7 +75,7 @@ async function getClientsWithHeatscore(vendedorId) {
             FROM cliente c
             LEFT JOIN client_sales cs ON c.rut = cs.rut
             LEFT JOIN client_debt cd ON c.rut = cd.rut
-            WHERE c.vendedor_id = $1 AND c.es_terreno = true
+            WHERE ($1::int IS NULL OR c.vendedor_id = $1) AND c.es_terreno = true
         )
         SELECT * FROM stats
     `;
@@ -139,12 +139,14 @@ async function getClientsWithHeatscore(vendedorId) {
 router.get('/heatmap', auth(), async (req, res) => {
     try {
         const isManager = req.user.rol.toUpperCase() === 'MANAGER';
-        const vendedorId = req.query.vendedor_id || req.user.id;
+        let vendedorId = req.query.vendedor_id;
 
-        if (!isManager && String(vendedorId) !== String(req.user.id)) {
-            return res.status(403).json({ msg: 'Access denied' });
+        // Si no es manager, forzamos su propio ID
+        if (!isManager) {
+            vendedorId = req.user.id;
         }
 
+        // Si es manager y no envía vendedor_id, pasamos NULL para traer TODOS
         const allScoredClients = await getClientsWithHeatscore(vendedorId);
 
         // El mapa solo puede pintar los que tienen latitud válida

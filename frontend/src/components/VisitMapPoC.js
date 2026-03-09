@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, DrawingManager } from '@react-google-maps/api';
 import { Box, Typography, Paper, CircularProgress, Chip, Stack, FormControl, InputLabel, Select, MenuItem, Button, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { getHeatmapData, getCircuits, submitVisitPlan, bulkAssignCircuit } from '../api';
+import { getHeatmapData, getCircuits, submitVisitPlan, bulkAssignCircuit, getVendedores } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import { getEnv } from '../utils/env';
 
 const libraries = ['drawing', 'geometry'];
@@ -43,11 +44,14 @@ const VisitMapPoC = () => {
         libraries: libraries
     });
 
+    const { user, isManager } = useAuth();
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedClient, setSelectedClient] = useState(null);
     const [circuits, setCircuits] = useState([]);
+    const [vendedores, setVendedores] = useState([]);
 
+    const [filterVendedor, setFilterVendedor] = useState('ALL');
     const [filterCircuit, setFilterCircuit] = useState('ALL');
     const [filterPriority, setFilterPriority] = useState('ALL');
 
@@ -64,8 +68,9 @@ const VisitMapPoC = () => {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
+            const vId = filterVendedor === 'ALL' ? null : filterVendedor;
             const [heatmapData, circuitsData] = await Promise.all([
-                getHeatmapData(), // Traer todos los clientes del vendedor
+                getHeatmapData(vId),
                 getCircuits().catch(() => [])
             ]);
 
@@ -73,12 +78,17 @@ const VisitMapPoC = () => {
                 setClients(heatmapData);
             }
             setCircuits(circuitsData);
+
+            if (isManager() && vendedores.length === 0) {
+                const vData = await getVendedores().catch(() => []);
+                setVendedores(vData);
+            }
         } catch (err) {
             console.error('Error fetching data:', err);
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [filterVendedor, isManager, vendedores.length]);
 
     useEffect(() => {
         fetchData();
@@ -186,7 +196,23 @@ const VisitMapPoC = () => {
                     📍 Rutas y Cobertura Comercial
                 </Typography>
 
-                <Stack direction="row" spacing={2} sx={{ minWidth: 300 }}>
+                <Stack direction="row" spacing={2} sx={{ minWidth: 300, flexWrap: 'wrap', gap: 2 }}>
+                    {isManager() && (
+                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                            <InputLabel>Vendedor</InputLabel>
+                            <Select
+                                value={filterVendedor}
+                                label="Vendedor"
+                                onChange={(e) => setFilterVendedor(e.target.value)}
+                            >
+                                <MenuItem value="ALL">Todos los Vendedores</MenuItem>
+                                {vendedores.map(v => (
+                                    <MenuItem key={v.id} value={v.id}>{v.nombre_completo || v.alias}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    )}
+
                     <FormControl size="small" sx={{ minWidth: 150 }}>
                         <InputLabel>Circuito</InputLabel>
                         <Select
