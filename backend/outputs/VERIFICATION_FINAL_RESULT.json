@@ -1,0 +1,92 @@
+[
+  {
+    "rut": "STUB-7332968",
+    "nombre_vendedor": "Alejandra Del Carmen Mery Hern√°ndez",
+    "alias": "Alejandra Del Carmen Mery Hern√°ndez",
+    "rol_usuario": "VENDEDOR",
+    "id": 48,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "6"
+  },
+  {
+    "rut": "STUB-5133493",
+    "nombre_vendedor": "Alejandro Mauricio Valdivia Valdivia",
+    "alias": "Alejandro Mauricio Valdivia Valdivia",
+    "rol_usuario": "VENDEDOR",
+    "id": 47,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "155"
+  },
+  {
+    "rut": "STUB-7600342",
+    "nombre_vendedor": "Francisco   Fredes",
+    "alias": "Francisco   Fredes",
+    "rol_usuario": "VENDEDOR",
+    "id": 49,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "6"
+  },
+  {
+    "rut": "STUB-2761906",
+    "nombre_vendedor": "Matias Ignacio Ignacio Tapia Duran",
+    "alias": "Matias Ignacio Ignacio Tapia Duran",
+    "rol_usuario": "VENDEDOR",
+    "id": 50,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "2"
+  },
+  {
+    "rut": "STUB-5232659",
+    "nombre_vendedor": "Milton   Marin Blanco",
+    "alias": "Milton   Marin Blanco",
+    "rol_usuario": "VENDEDOR",
+    "id": 44,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "422"
+  },
+  {
+    "rut": "STUB-5979384",
+    "nombre_vendedor": "Octavio Enrique Contreras Acevedo",
+    "alias": "Octavio Enrique Contreras Acevedo",
+    "rol_usuario": "VENDEDOR",
+    "id": 45,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "143"
+  },
+  {
+    "rut": "STUB-8361540",
+    "nombre_vendedor": "STUB_Emilio",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 21,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "128",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-8888463",
+    "nombre_vendedor": "STUB_Milton",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 23,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "3",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-7591917",
+    "nombre_vendedor": "Tamara Isabel Lillo Avalos",
+    "alias": "Tamara Isabel Lillo Avalos",
+    "rol_usuario": "VENDEDOR",
+    "id": 46,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "1"
+  }
+]

@@ -75,7 +75,7 @@ async function getClientsWithHeatscore(vendedorId) {
             FROM cliente c
             LEFT JOIN client_sales cs ON c.rut = cs.rut
             LEFT JOIN client_debt cd ON c.rut = cd.rut
-            WHERE c.vendedor_id = $1
+            WHERE c.vendedor_id = $1 AND c.es_terreno = true
         )
         SELECT * FROM stats
     `;

@@ -1,0 +1,322 @@
+[
+  {
+    "rut": "STUB-3368472",
+    "nombre_vendedor": "Alejandra Del Carmen Mery HernÃ¡ndez",
+    "alias": "Alejandra Del Carmen Mery HernÃ¡ndez",
+    "rol_usuario": "VENDEDOR",
+    "id": 52,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-7332968",
+    "nombre_vendedor": "Alejandra Del Carmen Mery Hern√°ndez",
+    "alias": "Alejandra Del Carmen Mery Hern√°ndez",
+    "rol_usuario": "VENDEDOR",
+    "id": 48,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "6"
+  },
+  {
+    "rut": "STUB-5133493",
+    "nombre_vendedor": "Alejandro Mauricio Valdivia Valdivia",
+    "alias": "Alejandro Mauricio Valdivia Valdivia",
+    "rol_usuario": "VENDEDOR",
+    "id": 47,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "155"
+  },
+  {
+    "rut": "STUB-7600342",
+    "nombre_vendedor": "Francisco   Fredes",
+    "alias": "Francisco   Fredes",
+    "rol_usuario": "VENDEDOR",
+    "id": 49,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "6"
+  },
+  {
+    "rut": "STUB-2761906",
+    "nombre_vendedor": "Matias Ignacio Ignacio Tapia Duran",
+    "alias": "Matias Ignacio Ignacio Tapia Duran",
+    "rol_usuario": "VENDEDOR",
+    "id": 50,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "2"
+  },
+  {
+    "rut": "STUB-5232659",
+    "nombre_vendedor": "Milton   Marin Blanco",
+    "alias": "Milton   Marin Blanco",
+    "rol_usuario": "VENDEDOR",
+    "id": 44,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "422"
+  },
+  {
+    "rut": "STUB-5088415",
+    "nombre_vendedor": "Nelson Antonio MuÃ±oz Cortes",
+    "alias": "Nelson Antonio MuÃ±oz Cortes",
+    "rol_usuario": "VENDEDOR",
+    "id": 51,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-5979384",
+    "nombre_vendedor": "Octavio Enrique Contreras Acevedo",
+    "alias": "Octavio Enrique Contreras Acevedo",
+    "rol_usuario": "VENDEDOR",
+    "id": 45,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "143"
+  },
+  {
+    "rut": "STUB-2607601",
+    "nombre_vendedor": "STUB_Alejandra",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 39,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-3520547",
+    "nombre_vendedor": "STUB_Alejandro",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 40,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-1451383",
+    "nombre_vendedor": "STUB_Alex",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 19,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-9771004",
+    "nombre_vendedor": "STUB_Eduardo",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 20,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-7968508",
+    "nombre_vendedor": "STUB_Eduardo Rojas",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 22,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-8361540",
+    "nombre_vendedor": "STUB_Emilio",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 21,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "128",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-5893400",
+    "nombre_vendedor": "STUB_JOAQUIN",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 24,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-3409642",
+    "nombre_vendedor": "STUB_Jorge",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 25,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-8556258",
+    "nombre_vendedor": "STUB_Luis",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 17,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-9793360",
+    "nombre_vendedor": "STUB_Maiko",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 26,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-8233618",
+    "nombre_vendedor": "STUB_Marcelo",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 33,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-6292493",
+    "nombre_vendedor": "STUB_Marisol",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 34,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-5900915",
+    "nombre_vendedor": "STUB_Matias Felipe",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 18,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-5086051",
+    "nombre_vendedor": "STUB_Matias Ignacio",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 15,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-8888463",
+    "nombre_vendedor": "STUB_Milton",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 23,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "3",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-9977935",
+    "nombre_vendedor": "STUB_Nataly",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 35,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-1995213",
+    "nombre_vendedor": "STUB_Nelson",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 36,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-1516593",
+    "nombre_vendedor": "STUB_Octavio",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 16,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-6101129",
+    "nombre_vendedor": "STUB_Omar",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 37,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-2468993",
+    "nombre_vendedor": "STUB_Roberto",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 38,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-5956837",
+    "nombre_vendedor": "STUB_Victoria",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 42,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-6295512",
+    "nombre_vendedor": "STUB_vendedor",
+    "alias": null,
+    "rol_usuario": "VENDEDOR",
+    "id": 41,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  },
+  {
+    "rut": "STUB-7591917",
+    "nombre_vendedor": "Tamara Isabel Lillo Avalos",
+    "alias": "Tamara Isabel Lillo Avalos",
+    "rol_usuario": "VENDEDOR",
+    "id": 46,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "1"
+  },
+  {
+    "rut": "STUB-4874219",
+    "nombre_vendedor": "Vendedor Test",
+    "alias": "Vendedor Test",
+    "rol_usuario": "VENDEDOR",
+    "id": 43,
+    "total_ventas_historicas": "0",
+    "total_abonos_historicos": "0",
+    "total_clientes_asignados": "0"
+  }
+]

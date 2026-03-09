@@ -75,7 +75,7 @@ echo ""
 
 # Test 4: Database Connection (a través del API)
 echo -e "${YELLOW}🔍 Test 4: Conexión a Base de Datos...${NC}"
-DB_TEST_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/users" --max-time 30)
+DB_TEST_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/health" --max-time 30)
 
 if [ "$DB_TEST_STATUS" -eq 200 ] || [ "$DB_TEST_STATUS" -eq 401 ]; then
   echo -e "${GREEN}✅ Base de datos conectada (HTTP $DB_TEST_STATUS)${NC}"

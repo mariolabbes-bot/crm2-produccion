@@ -99,8 +99,22 @@ app.use((req, res, next) => {
 
 // Middleware para registrar errores
 app.use((err, req, res, next) => {
-  console.error('Error no controlado:', err);
-  res.status(500).json({ msg: 'Error interno del servidor', detail: process.env.NODE_ENV === 'development' ? err.message : undefined });
+  const errorDetail = {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.method !== 'GET' ? req.body : undefined,
+    user: req.user ? req.user.id : 'anonymous'
+  };
+
+  console.error('❌ [500] Error NO Controlado:', JSON.stringify(errorDetail, null, 2));
+
+  res.status(500).json({
+    msg: 'Error interno del servidor',
+    error_id: Date.now(),
+    detail: process.env.NODE_ENV === 'development' ? err.message : 'Consulte los logs del servidor'
+  });
 });
 
 module.exports = app;

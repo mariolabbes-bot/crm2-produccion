@@ -86,7 +86,7 @@ const Sidebar = () => {
       managerOnly: true
     },
     {
-      title: 'Rutas y Cobertura',
+      title: 'Mapa de Terreno',
       icon: <MapIcon />,
       path: '/mapa-visitas',
       color: '#3B82F6',

@@ -1,0 +1,651 @@
+{
+  "users": [
+    {
+      "rut": "STUB-9398910",
+      "nombre_vendedor": "Alejandra",
+      "alias": "Alejandra",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-3368472",
+      "nombre_vendedor": "Alejandra Del Carmen Mery HernÃ¡ndez",
+      "alias": "Alejandra Del Carmen Mery HernÃ¡ndez",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-7332968",
+      "nombre_vendedor": "Alejandra Del Carmen Mery Hern√°ndez",
+      "alias": "Alejandra Del Carmen Mery Hern√°ndez",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-5133493",
+      "nombre_vendedor": "Alejandro Mauricio Valdivia Valdivia",
+      "alias": "Alejandro Mauricio Valdivia Valdivia",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "11.599.857-9",
+      "nombre_vendedor": "Alex",
+      "alias": "Alex",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "09.262.987-2",
+      "nombre_vendedor": "Eduardo",
+      "alias": "Eduardo",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "13.830.417-5",
+      "nombre_vendedor": "Eduardo Rojas",
+      "alias": "Eduardo Rojas",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "12.569.531-0",
+      "nombre_vendedor": "Emilio",
+      "alias": "Emilio",
+      "rol_usuario": "MANAGER"
+    },
+    {
+      "rut": "STUB-7600342",
+      "nombre_vendedor": "Francisco   Fredes",
+      "alias": "Francisco   Fredes",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "7.775.897-6",
+      "nombre_vendedor": "JOAQUIN",
+      "alias": "Joaquin",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "05.715.101-3",
+      "nombre_vendedor": "Jorge",
+      "alias": "Jorge",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "11.823.790-0",
+      "nombre_vendedor": "Luis",
+      "alias": "luis",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "13.018.313-1",
+      "nombre_vendedor": "Maiko",
+      "alias": "Maiko",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "16.412.525-4",
+      "nombre_vendedor": "Marcelo",
+      "alias": "Marcelo",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "13.087.134-8",
+      "nombre_vendedor": "Marisol",
+      "alias": "Marisol",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "14.138.537-2",
+      "nombre_vendedor": "Matias Felipe",
+      "alias": "Matias Felipe",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-2761906",
+      "nombre_vendedor": "Matias Ignacio Ignacio Tapia Duran",
+      "alias": "Matias Ignacio Ignacio Tapia Duran",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "12.570.853-6",
+      "nombre_vendedor": "Milton",
+      "alias": "Milton",
+      "rol_usuario": "MANAGER"
+    },
+    {
+      "rut": "STUB-5232659",
+      "nombre_vendedor": "Milton   Marin Blanco",
+      "alias": "Milton   Marin Blanco",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "16.082.310-0",
+      "nombre_vendedor": "Nataly",
+      "alias": "Nataly",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "09.338.644-2",
+      "nombre_vendedor": "Nelson",
+      "alias": "Nelson",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-5088415",
+      "nombre_vendedor": "Nelson Antonio MuÃ±oz Cortes",
+      "alias": "Nelson Antonio MuÃ±oz Cortes",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-5979384",
+      "nombre_vendedor": "Octavio Enrique Contreras Acevedo",
+      "alias": "Octavio Enrique Contreras Acevedo",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "10.913.019-2",
+      "nombre_vendedor": "Omar",
+      "alias": "Omar",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "07.107.100-6",
+      "nombre_vendedor": "Roberto",
+      "alias": "Roberto",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-2607601",
+      "nombre_vendedor": "STUB_Alejandra",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-3520547",
+      "nombre_vendedor": "STUB_Alejandro",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-1451383",
+      "nombre_vendedor": "STUB_Alex",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-9771004",
+      "nombre_vendedor": "STUB_Eduardo",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-7968508",
+      "nombre_vendedor": "STUB_Eduardo Rojas",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-8361540",
+      "nombre_vendedor": "STUB_Emilio",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-5893400",
+      "nombre_vendedor": "STUB_JOAQUIN",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-3409642",
+      "nombre_vendedor": "STUB_Jorge",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-8556258",
+      "nombre_vendedor": "STUB_Luis",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-9793360",
+      "nombre_vendedor": "STUB_Maiko",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-8233618",
+      "nombre_vendedor": "STUB_Marcelo",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-6292493",
+      "nombre_vendedor": "STUB_Marisol",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-5900915",
+      "nombre_vendedor": "STUB_Matias Felipe",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-5086051",
+      "nombre_vendedor": "STUB_Matias Ignacio",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-8888463",
+      "nombre_vendedor": "STUB_Milton",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-9977935",
+      "nombre_vendedor": "STUB_Nataly",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-1995213",
+      "nombre_vendedor": "STUB_Nelson",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-1516593",
+      "nombre_vendedor": "STUB_Octavio",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-6101129",
+      "nombre_vendedor": "STUB_Omar",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-2468993",
+      "nombre_vendedor": "STUB_Roberto",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-5956837",
+      "nombre_vendedor": "STUB_Victoria",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-6295512",
+      "nombre_vendedor": "STUB_vendedor",
+      "alias": null,
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-7591917",
+      "nombre_vendedor": "Tamara Isabel Lillo Avalos",
+      "alias": "Tamara Isabel Lillo Avalos",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "STUB-4874219",
+      "nombre_vendedor": "Vendedor Test",
+      "alias": "Vendedor Test",
+      "rol_usuario": "VENDEDOR"
+    },
+    {
+      "rut": "12.051.321-4",
+      "nombre_vendedor": "Victoria",
+      "alias": "Victoria",
+      "rol_usuario": "VENDEDOR"
+    }
+  ],
+  "aliases": [
+    {
+      "alias": "Alex Mondaca",
+      "nombre_vendedor_oficial": "Alex Mauricio Mondaca Cortes"
+    },
+    {
+      "alias": "Eduardo Ponce",
+      "nombre_vendedor_oficial": "Eduardo Enrique Ponce Castillo"
+    },
+    {
+      "alias": "Eduardo Rojas Rojas",
+      "nombre_vendedor_oficial": "Eduardo Rojas Andres Rojas Del Campo"
+    },
+    {
+      "alias": "Emilio Santos",
+      "nombre_vendedor_oficial": "Emilio Alberto Santos Castillo"
+    },
+    {
+      "alias": "JOAQUIN MANRIQUEZ",
+      "nombre_vendedor_oficial": "JOAQUIN ALEJANDRO MANRIQUEZ MUNIZAGA"
+    },
+    {
+      "alias": "Jorge Gutierrez",
+      "nombre_vendedor_oficial": "Jorge Heriberto Gutierrez Silva"
+    },
+    {
+      "alias": "Luis Esquivel",
+      "nombre_vendedor_oficial": "Luis Ramon Esquivel Oyamadel"
+    },
+    {
+      "alias": "Maiko Flores",
+      "nombre_vendedor_oficial": "Maiko Ricardo Flores Maldonado"
+    },
+    {
+      "alias": "Marcelo Troncoso",
+      "nombre_vendedor_oficial": "Marcelo Hernan Troncoso Molina"
+    },
+    {
+      "alias": "Mario Labbe",
+      "nombre_vendedor_oficial": "Mario Andres Labbe Silva"
+    },
+    {
+      "alias": "Marisol Sanchez",
+      "nombre_vendedor_oficial": "Marisol De Lourdes Sanchez Roitman"
+    },
+    {
+      "alias": "Matias Felipe Tapia",
+      "nombre_vendedor_oficial": "Matias Felipe Felipe Tapia Valenzuela"
+    },
+    {
+      "alias": "Milton Marin",
+      "nombre_vendedor_oficial": "Milton Marin Blanco"
+    },
+    {
+      "alias": "Nataly Carrasco",
+      "nombre_vendedor_oficial": "Nataly Andrea Carrasco Rojas"
+    },
+    {
+      "alias": "Nelson Muñoz",
+      "nombre_vendedor_oficial": "Nelson Antonio Muñoz Cortes"
+    },
+    {
+      "alias": "Nelson Mu√±oz",
+      "nombre_vendedor_oficial": "Nelson Antonio Muñoz Cortes"
+    },
+    {
+      "alias": "Omar Maldonado",
+      "nombre_vendedor_oficial": "Omar Antonio Maldonado Castillo"
+    },
+    {
+      "alias": "Roberto Oyarzun",
+      "nombre_vendedor_oficial": "Roberto Otilio Oyarzun Alvarez"
+    },
+    {
+      "alias": "Victoria Hurtado",
+      "nombre_vendedor_oficial": "Victoria Andrea Hurtado Olivares"
+    }
+  ],
+  "ventas_3_meses": [
+    {
+      "vendedor_str_en_db": "Omar",
+      "total_transacciones": "2476",
+      "monto_total_ventas": "328424158.00"
+    },
+    {
+      "vendedor_str_en_db": "Nelson",
+      "total_transacciones": "963",
+      "monto_total_ventas": "239708765.00"
+    },
+    {
+      "vendedor_str_en_db": "Alex",
+      "total_transacciones": "817",
+      "monto_total_ventas": "217790417.00"
+    },
+    {
+      "vendedor_str_en_db": "Maiko",
+      "total_transacciones": "941",
+      "monto_total_ventas": "145545543.00"
+    },
+    {
+      "vendedor_str_en_db": "Matias Felipe",
+      "total_transacciones": "482",
+      "monto_total_ventas": "134943622.00"
+    },
+    {
+      "vendedor_str_en_db": "Nataly",
+      "total_transacciones": "353",
+      "monto_total_ventas": "130775179.00"
+    },
+    {
+      "vendedor_str_en_db": "Victoria",
+      "total_transacciones": "278",
+      "monto_total_ventas": "49214060.00"
+    },
+    {
+      "vendedor_str_en_db": "Jorge",
+      "total_transacciones": "277",
+      "monto_total_ventas": "47066703.00"
+    },
+    {
+      "vendedor_str_en_db": "Eduardo",
+      "total_transacciones": "2221",
+      "monto_total_ventas": "45873021.00"
+    },
+    {
+      "vendedor_str_en_db": "JOAQUIN",
+      "total_transacciones": "227",
+      "monto_total_ventas": "44359094.00"
+    },
+    {
+      "vendedor_str_en_db": "Roberto",
+      "total_transacciones": "168",
+      "monto_total_ventas": "44357789.00"
+    },
+    {
+      "vendedor_str_en_db": "Joaquin",
+      "total_transacciones": "168",
+      "monto_total_ventas": "42968876.00"
+    },
+    {
+      "vendedor_str_en_db": "Emilio",
+      "total_transacciones": "580",
+      "monto_total_ventas": "40221840.00"
+    },
+    {
+      "vendedor_str_en_db": "Marisol",
+      "total_transacciones": "709",
+      "monto_total_ventas": "27632548.00"
+    },
+    {
+      "vendedor_str_en_db": "Eduardo Rojas",
+      "total_transacciones": "163",
+      "monto_total_ventas": "20496968.00"
+    },
+    {
+      "vendedor_str_en_db": "Milton",
+      "total_transacciones": "16",
+      "monto_total_ventas": "16165597.00"
+    },
+    {
+      "vendedor_str_en_db": "Luis",
+      "total_transacciones": "86",
+      "monto_total_ventas": "12642299.00"
+    },
+    {
+      "vendedor_str_en_db": "Marcelo",
+      "total_transacciones": "62",
+      "monto_total_ventas": "7412727.00"
+    },
+    {
+      "vendedor_str_en_db": "luis",
+      "total_transacciones": "55",
+      "monto_total_ventas": "6532847.00"
+    },
+    {
+      "vendedor_str_en_db": "Alejandra",
+      "total_transacciones": "5",
+      "monto_total_ventas": "578595.00"
+    }
+  ],
+  "abonos_3_meses": [
+    {
+      "vendedor_str_en_db": "Alex",
+      "total_transacciones": "349",
+      "monto_total_abonos": "255539160.00"
+    },
+    {
+      "vendedor_str_en_db": "Omar",
+      "total_transacciones": "571",
+      "monto_total_abonos": "244767427.00"
+    },
+    {
+      "vendedor_str_en_db": "Nelson",
+      "total_transacciones": "362",
+      "monto_total_abonos": "235509512.00"
+    },
+    {
+      "vendedor_str_en_db": "Maiko",
+      "total_transacciones": "439",
+      "monto_total_abonos": "119835202.00"
+    },
+    {
+      "vendedor_str_en_db": "OMAR MAXIMILIANO SEPÚLVEDA PIUCHEN",
+      "total_transacciones": "259",
+      "monto_total_abonos": "115028987.00"
+    },
+    {
+      "vendedor_str_en_db": "Matias Felipe",
+      "total_transacciones": "139",
+      "monto_total_abonos": "112545492.00"
+    },
+    {
+      "vendedor_str_en_db": "Nataly",
+      "total_transacciones": "56",
+      "monto_total_abonos": "97966899.00"
+    },
+    {
+      "vendedor_str_en_db": "NELSON ANTONIO MUÑOZ CORTES",
+      "total_transacciones": "167",
+      "monto_total_abonos": "87645238.00"
+    },
+    {
+      "vendedor_str_en_db": "JOAQUIN",
+      "total_transacciones": "57",
+      "monto_total_abonos": "76084351.00"
+    },
+    {
+      "vendedor_str_en_db": "Roberto",
+      "total_transacciones": "83",
+      "monto_total_abonos": "56019362.00"
+    },
+    {
+      "vendedor_str_en_db": "MAIKO PATRICIO MONTOYA  AQUEA",
+      "total_transacciones": "182",
+      "monto_total_abonos": "48935802.00"
+    },
+    {
+      "vendedor_str_en_db": "Jorge",
+      "total_transacciones": "131",
+      "monto_total_abonos": "41928630.00"
+    },
+    {
+      "vendedor_str_en_db": "STUB_Nataly",
+      "total_transacciones": "15",
+      "monto_total_abonos": "38941476.00"
+    },
+    {
+      "vendedor_str_en_db": "Eduardo",
+      "total_transacciones": "721",
+      "monto_total_abonos": "37763769.00"
+    },
+    {
+      "vendedor_str_en_db": "Victoria",
+      "total_transacciones": "110",
+      "monto_total_abonos": "36633318.00"
+    },
+    {
+      "vendedor_str_en_db": "MATIAS FELIPE TAPIA  DURAN",
+      "total_transacciones": "46",
+      "monto_total_abonos": "35582432.00"
+    },
+    {
+      "vendedor_str_en_db": "Emilio",
+      "total_transacciones": "259",
+      "monto_total_abonos": "26085581.00"
+    },
+    {
+      "vendedor_str_en_db": "EDUARDO ENRIQUE ROJAS CASTILLO",
+      "total_transacciones": "346",
+      "monto_total_abonos": "20995762.00"
+    },
+    {
+      "vendedor_str_en_db": "Luis",
+      "total_transacciones": "75",
+      "monto_total_abonos": "20173607.00"
+    },
+    {
+      "vendedor_str_en_db": "Marisol",
+      "total_transacciones": "268",
+      "monto_total_abonos": "19989173.00"
+    },
+    {
+      "vendedor_str_en_db": "Milton",
+      "total_transacciones": "10",
+      "monto_total_abonos": "18171526.00"
+    },
+    {
+      "vendedor_str_en_db": "STUB_Emilio",
+      "total_transacciones": "128",
+      "monto_total_abonos": "15549861.00"
+    },
+    {
+      "vendedor_str_en_db": "ALEX MAURICIO SILVA  HERRERA",
+      "total_transacciones": "43",
+      "monto_total_abonos": "14820506.00"
+    },
+    {
+      "vendedor_str_en_db": "Eduardo Rojas",
+      "total_transacciones": "50",
+      "monto_total_abonos": "13718468.00"
+    },
+    {
+      "vendedor_str_en_db": "MARISOL DEL CARMEN  GALVEZ VELIZ",
+      "total_transacciones": "134",
+      "monto_total_abonos": "10609300.00"
+    },
+    {
+      "vendedor_str_en_db": "STUB_Jorge",
+      "total_transacciones": "21",
+      "monto_total_abonos": "7189599.00"
+    },
+    {
+      "vendedor_str_en_db": "VICTORIA MAGDALENA PAEZ  RAMIREZ",
+      "total_transacciones": "23",
+      "monto_total_abonos": "6688997.00"
+    },
+    {
+      "vendedor_str_en_db": "Luis Ramon Esquivel  Oyamadel",
+      "total_transacciones": "29",
+      "monto_total_abonos": "6113472.00"
+    },
+    {
+      "vendedor_str_en_db": "Marcelo",
+      "total_transacciones": "7",
+      "monto_total_abonos": "3823143.00"
+    },
+    {
+      "vendedor_str_en_db": "STUB_Marcelo",
+      "total_transacciones": "8",
+      "monto_total_abonos": "2484770.00"
+    },
+    {
+      "vendedor_str_en_db": "STUB_Milton",
+      "total_transacciones": "3",
+      "monto_total_abonos": "308882.00"
+    },
+    {
+      "vendedor_str_en_db": "Alejandra",
+      "total_transacciones": "2",
+      "monto_total_abonos": "284463.00"
+    },
+    {
+      "vendedor_str_en_db": "luis",
+      "total_transacciones": "1",
+      "monto_total_abonos": "44587.00"
+    }
+  ]
+}
