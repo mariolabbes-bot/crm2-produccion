@@ -88,7 +88,7 @@ const VisitMapPoC = () => {
         } finally {
             setLoading(false);
         }
-    }, [filterVendedor, isManager, vendedores.length]);
+    }, [filterVendedor, isManager]);
 
     useEffect(() => {
         fetchData();
