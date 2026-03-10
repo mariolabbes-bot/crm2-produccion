@@ -27,9 +27,11 @@ const MobileManagerDashboard = () => {
                 // 2. Ranking Vendedores
                 const rankingData = await getRankingVendedores();
 
+                const kpisData = kpiData.data || kpiData;
+
                 setKpis({
-                    ventasHoy: 1250000, // TODO: Crear endpoint real para "Ventas Hoy Global"
-                    ventasMes: kpiData.monto_ventas_mes || 0,
+                    ventasHoy: kpisData.monto_ventas_hoy || 0,
+                    ventasMes: kpisData.monto_ventas_mes || 0,
                     metaMes: 150000000 // Meta global ejemplo
                 });
 

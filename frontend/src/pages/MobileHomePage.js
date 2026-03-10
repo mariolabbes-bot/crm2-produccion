@@ -22,9 +22,9 @@ const MobileHomePage = () => {
         const fetchMobileData = async () => {
             try {
                 // 1. KPIs
-                const kpiData = await getKpisMesActual({ _t: Date.now() });
+                const kpisData = kpiData.data || kpiData;
                 setStats({
-                    ventas: kpiData.monto_ventas_mes || 0,
+                    ventas: kpisData.monto_ventas_mes || 0,
                     meta: 15000000
                 });
 

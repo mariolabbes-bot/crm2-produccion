@@ -62,13 +62,16 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       const qParams = [];
       let where = ' WHERE 1=1';
 
-      // Filtro Meses
+      // Filtro Meses o Día Exacto
       if (Array.isArray(months)) {
         const placeholders = months.map((m, i) => {
           qParams.push(m);
           return `$${qParams.length}`;
         }).join(',');
         where += ` AND TO_CHAR(t.${dateCol}, 'YYYY-MM') IN (${placeholders})`;
+      } else if (months.length === 10) { // YYYY-MM-DD
+        qParams.push(months);
+        where += ` AND TO_CHAR(t.${dateCol}, 'YYYY-MM-DD') = $${qParams.length}`;
       } else {
         qParams.push(months);
         where += ` AND TO_CHAR(t.${dateCol}, 'YYYY-MM') = $${qParams.length}`;
@@ -95,10 +98,13 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       return parseFloat(result.rows[0]?.total || 0);
     };
 
+    const hoy = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
     const montoVentasMes = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', mesActual, targetRut);
     const montoVentasAnioAnt = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', mesAnioAnterior, targetRut);
     const montoAbonosMes = await getSum(ABONOS_TABLE, 'fecha', 'COALESCE(t.monto_neto, t.monto / 1.19)', mesActual, targetRut);
     const montoVentasTrimestre = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', mesesTrimestre, targetRut);
+    const montoVentasHoy = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', hoy, targetRut);
 
     // Clientes con Venta (Lógica aparte por ser COUNT DISTINCT)
     const getClientCount = async (monthVal, rut) => {
@@ -138,6 +144,7 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       success: true,
       data: {
         monto_ventas_mes: montoVentasMes,
+        monto_ventas_hoy: montoVentasHoy,
         monto_ventas_anio_anterior: montoVentasAnioAnt,
         monto_abonos_mes: montoAbonosMes,
         variacion_vs_anio_anterior_pct: variacionPct,

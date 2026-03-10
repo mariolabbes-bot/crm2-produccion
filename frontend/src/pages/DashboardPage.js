@@ -32,14 +32,6 @@ const DashboardPage = () => {
   const { user, isManager } = useAuth();
   const isMobile = useIsMobile();
 
-  // Si es móvil, mostramos versión adaptativa
-  if (isMobile) {
-    if (isManager()) {
-      return <MobileManagerDashboard />;
-    }
-    return <MobileHomePage />;
-  }
-
   const [vendedores, setVendedores] = useState([]);
   const [vendedorSeleccionado, setVendedorSeleccionado] = useState('todos');
   const [kpis, setKpis] = useState({
@@ -56,6 +48,14 @@ const DashboardPage = () => {
   const [ventasPorFamilia, setVentasPorFamilia] = useState([]);
   const [rankingVendedores, setRankingVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // SI ES MÓVIL, mostramos versión adaptativa DESPUÉS de declarar los hooks básicos si fuera necesario, 
+  // pero lo mejor es que actúe como un switch limpio si no comparten estado complejo.
+  // Como MobileHomePage y MobileManagerDashboard manejan su propio fetching, podemos retornar aquí
+  // siempre que no haya hooks abajo que dependan de este componente.
+  if (isMobile) {
+    return isManager() ? <MobileManagerDashboard /> : <MobileHomePage />;
+  }
 
   // Cargar lista de vendedores si es manager
   useEffect(() => {
