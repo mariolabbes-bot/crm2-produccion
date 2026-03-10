@@ -244,6 +244,34 @@ const MobileVisitsPage = () => {
                     </Box>
                     <Box mt={2} display="flex" gap={1}>
                         <Button
+                            variant="outlined"
+                            fullWidth
+                            startIcon={<DirectionsCar />}
+                            onClick={() => {
+                                const lat = selectedClient.latitud;
+                                const lng = selectedClient.longitud;
+                                const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+                                window.open(url, '_blank');
+                            }}
+                        >
+                            MAPS
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            fullWidth
+                            startIcon={<DirectionsCar />}
+                            onClick={() => {
+                                const lat = selectedClient.latitud;
+                                const lng = selectedClient.longitud;
+                                const url = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+                                window.open(url, '_blank');
+                            }}
+                        >
+                            WAZE
+                        </Button>
+                    </Box>
+                    <Box mt={1} display="flex" gap={1}>
+                        <Button
                             variant="contained"
                             fullWidth
                             color={activeVisit && activeVisit.cliente_rut === selectedClient.rut ? "success" : "primary"}

@@ -11,6 +11,8 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PersonNameIcon from '@mui/icons-material/Badge';
+import DirectionsIcon from '@mui/icons-material/Directions';
+import { Button } from '@mui/material';
 
 /**
  * ClientHeader
@@ -94,10 +96,26 @@ function ClientHeader({ cliente }) {
                 Ubicación
               </Typography>
               <Typography variant="body2">
-                {cliente.ciudad && cliente.comuna
-                  ? `${cliente.ciudad}, ${cliente.comuna}`
-                  : '-'}
+                {cliente.direccion || `${cliente.ciudad}, ${cliente.comuna}`}
               </Typography>
+              <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<DirectionsIcon />}
+                  onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${cliente.latitud},${cliente.longitud}`, '_blank')}
+                >
+                  MAPS
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<DirectionsIcon />}
+                  onClick={() => window.open(`https://waze.com/ul?ll=${cliente.latitud},${cliente.longitud}&navigate=yes`, '_blank')}
+                >
+                  WAZE
+                </Button>
+              </Box>
             </Box>
           </Box>
         </Grid>

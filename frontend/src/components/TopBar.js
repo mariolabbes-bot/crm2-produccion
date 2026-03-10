@@ -13,6 +13,7 @@ import {
   Notifications as NotificationsIcon,
   Settings as SettingsIcon,
   HelpOutline as HelpIcon,
+  ExitToApp as LogoutIcon,
 } from '@mui/icons-material';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { useAuth } from '../contexts/AuthContext';
@@ -111,6 +112,20 @@ const TopBar = ({ title = 'Dashboard', subtitle = null, isMobile = false }) => {
                 <SettingsIcon />
               </IconButton>
             </Tooltip>
+          )}
+
+          {/* Logout para Móvil */}
+          {isMobile && (
+            <IconButton
+              sx={{ color: '#E57A2D' }}
+              onClick={() => {
+                if (window.confirm('¿Está seguro que desea cerrar sesión?')) {
+                  window.location.href = '/login'; // O usar context logout()
+                }
+              }}
+            >
+              <LogoutIcon />
+            </IconButton>
           )}
 
           {/* Avatar del Usuario */}

@@ -35,6 +35,7 @@ import './styles/layout.css';
 import PlannerPage from './pages/PlannerPage';
 
 import AssistantFloatingButton from './components/ai/AssistantFloatingButton';
+import useIsMobile from './hooks/useIsMobile';
 // import DebugUser from './components/DebugUser'; // Remover Debug
 
 // ... (imports)
