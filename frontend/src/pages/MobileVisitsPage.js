@@ -214,7 +214,7 @@ const MobileVisitsPage = () => {
                     >
                         <option value="">TODOS LOS VENDEDORES</option>
                         {vendedores.map(v => (
-                            <option key={v.rut} value={v.rut}>{v.nombre_vendedor || v.alias || v.rut}</option>
+                            <option key={v.rut} value={v.rut}>{v.nombre || v.alias || v.rut}</option>
                         ))}
                     </TextField>
                 </Paper>

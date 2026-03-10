@@ -62,10 +62,10 @@ const DashboardPage = () => {
     const fetchVendedores = async () => {
       if (isManager()) {
         try {
-          const vendedoresData = await getVendedores();
+          const vendedoresRes = await getVendedores();
+          const vendedoresData = vendedoresRes.data || vendedoresRes;
           console.log('📋 Vendedores recibidos:', vendedoresData);
-          console.log('📋 Cantidad:', vendedoresData?.length);
-          setVendedores(vendedoresData || []);
+          setVendedores(Array.isArray(vendedoresData) ? vendedoresData : []);
         } catch (error) {
           console.error('Error cargando vendedores:', error);
         }

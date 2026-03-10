@@ -105,20 +105,23 @@ router.get('/vendedores', async (req, res) => {
     res.setHeader('Expires', '0');
 
     const query = `
-      SELECT DISTINCT ON (LOWER(TRIM(nombre_vendedor)))
-        id,
-        rut,
-        nombre_vendedor as nombre,
-        correo,
-        rol_usuario as rol,
-        nombre_completo,
-        cargo,
-        local
-      FROM usuario
-      WHERE LOWER(rol_usuario) = 'vendedor'
-      AND nombre_vendedor IS NOT NULL
-      AND (alias IS NULL OR alias NOT LIKE '%_OLD')
-      ORDER BY LOWER(TRIM(nombre_vendedor)) ASC, id DESC
+      SELECT DISTINCT ON (u.rut)
+        u.id,
+        u.rut,
+        u.nombre_vendedor as nombre,
+        u.correo,
+        u.rol_usuario as rol,
+        u.alias
+      FROM usuario u
+      WHERE (LOWER(u.rol_usuario) = 'vendedor' OR LOWER(u.rol_usuario) = 'manager')
+      AND (
+        EXISTS (SELECT 1 FROM venta v WHERE UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor)) LIMIT 1)
+        OR EXISTS (SELECT 1 FROM venta v WHERE UPPER(TRIM(v.vendedor_documento)) = UPPER(TRIM(u.alias)) LIMIT 1)
+      )
+      AND u.nombre_vendedor IS NOT NULL
+      AND (u.alias IS NULL OR u.alias NOT ILIKE '%_OLD')
+      AND u.rut NOT ILIKE 'stub-%'
+      ORDER BY u.rut, LOWER(TRIM(u.nombre_vendedor)) ASC
     `;
 
     const vendedores = await pool.query(query);
