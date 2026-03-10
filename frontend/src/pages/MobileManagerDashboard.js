@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid, Chip, IconButton, List, ListItem, ListItemText, ListItemAvatar, Avatar } from '@mui/material';
-import { TrendingUp, Warning, CheckCircle, ArrowForwardIos, AttachMoney, People } from '@mui/icons-material';
+import { TrendingUp, Warning, CheckCircle, ArrowForwardIos, AttachMoney, People, ExitToApp } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { getKpisMesActual, getRankingVendedores } from '../api';
 import { useNavigate } from 'react-router-dom';
@@ -73,7 +73,12 @@ const MobileManagerDashboard = () => {
                     color: 'white'
                 }}
             >
-                <Typography variant="overline" sx={{ opacity: 0.7, letterSpacing: 1 }}>PULSO DEL NEGOCIO</Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="overline" sx={{ opacity: 0.7, letterSpacing: 1 }}>PULSO DEL NEGOCIO</Typography>
+                    <IconButton sx={{ color: 'white' }} onClick={() => logout()} size="small">
+                        <ExitToApp fontSize="small" />
+                    </IconButton>
+                </Box>
                 <Grid container spacing={2} sx={{ mt: 0.5 }}>
                     <Grid item xs={6}>
                         <Typography variant="caption" sx={{ opacity: 0.8 }}>Ventas Hoy</Typography>

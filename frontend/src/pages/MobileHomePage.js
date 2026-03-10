@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Paper, Button, List, ListItem, ListItemText, ListItemAvatar, Avatar, Chip, IconButton } from '@mui/material';
-import { LocationOn, DirectionsCar, CheckCircle, Warning, ArrowForwardIos } from '@mui/icons-material';
+import { LocationOn, DirectionsCar, CheckCircle, Warning, ArrowForwardIos, ExitToApp } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { getKpisMesActual, getMyVisitsToday } from '../api';
 import KPICard from '../components/KPICard';
@@ -76,14 +76,20 @@ const MobileHomePage = () => {
             {/* Header Timeline */}
             <Paper elevation={0} sx={{ p: 3, bgcolor: 'white', borderRadius: '0 0 24px 24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Typography variant="h6" fontWeight="bold">Tu Progreso</Typography>
+                    <Typography variant="h6" fontWeight="bold">Hola, {user?.nombre?.split(' ')[0] || 'Vendedor'}</Typography>
+                    <IconButton color="error" onClick={() => logout()} size="small">
+                        <ExitToApp />
+                    </IconButton>
+                </Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1} sx={{ mt: 1 }}>
+                    <Typography variant="body2" color="text.secondary">Tu Progreso</Typography>
                     <Chip label={`${completedCount}/${totalCount} Visitas`} color="primary" size="small" />
                 </Box>
                 <Box sx={{ width: '100%', height: 8, bgcolor: '#F3F4F6', borderRadius: 4, overflow: 'hidden' }}>
                     <Box sx={{ width: `${progress}%`, height: '100%', bgcolor: '#10B981', transition: 'width 1s ease' }} />
                 </Box>
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    Ventas acumulada hoy: <strong>{new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(stats.ventas)}</strong>
+                    Ventas acumuladas hoy: <strong>{new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(stats.ventas)}</strong>
                 </Typography>
             </Paper>
 
