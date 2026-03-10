@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
-import { Box, Typography, Paper, CircularProgress, Chip, Stack, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@mui/material';
-import { LocationOn, CheckCircle, DirectionsCar, Schedule, Flag, FilterList } from '@mui/icons-material';
+import { Box, Typography, Paper, CircularProgress, Chip, Stack, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions, IconButton } from '@mui/material';
+import { LocationOn, CheckCircle, DirectionsCar, Schedule, Flag, FilterList, Close } from '@mui/icons-material';
 import { getHeatmapData, checkInVisita, checkOutVisita, getCircuits, getVendedores } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import { getEnv } from '../utils/env';
@@ -261,7 +261,14 @@ const MobileVisitsPage = () => {
             {/* Panel Flotante de Cliente Seleccionado en Mapa */}
             {selectedClient && (
                 <Paper sx={{ position: 'absolute', top: '38vh', left: 16, right: 16, p: 2, borderRadius: 3, zIndex: 10 }}>
-                    <Box display="flex" justifyContent="space-between">
+                    <IconButton
+                        size="small"
+                        onClick={() => setSelectedClient(null)}
+                        sx={{ position: 'absolute', top: 8, right: 8, color: 'text.secondary' }}
+                    >
+                        <Close fontSize="small" />
+                    </IconButton>
+                    <Box display="flex" justifyContent="space-between" pr={3}>
                         <Box>
                             <Typography variant="subtitle1" fontWeight="bold">{selectedClient.nombre}</Typography>
                             <Typography variant="body2" color="text.secondary">{selectedClient.direccion}</Typography>

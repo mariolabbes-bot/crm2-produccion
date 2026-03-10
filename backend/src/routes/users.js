@@ -124,7 +124,10 @@ router.get('/vendedores', async (req, res) => {
     const vendedores = await pool.query(query);
     console.log(`📋 ✓ Encontrados ${vendedores.rows.length} vendedores (unicos)`);
 
-    res.json(vendedores.rows);
+    res.json({
+      success: true,
+      data: vendedores.rows
+    });
   } catch (err) {
     console.error('❌ Error al obtener vendedores:', err.message);
     console.error('❌ Stack:', err.stack);
