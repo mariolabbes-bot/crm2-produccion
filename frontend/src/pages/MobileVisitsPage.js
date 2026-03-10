@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { Box, Typography, Paper, CircularProgress, Chip, Stack, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@mui/material';
-import { LocationOn, CheckCircle, DirectionsCar, Schedule, Flag } from '@mui/icons-material';
-import { getHeatmapData, checkInVisita, checkOutVisita, getCircuits } from '../api';
+import { LocationOn, CheckCircle, DirectionsCar, Schedule, Flag, FilterList } from '@mui/icons-material';
+import { getHeatmapData, checkInVisita, checkOutVisita, getCircuits, getVendedores } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import { getEnv } from '../utils/env';
 import { getDistance, formatDistance } from '../utils/geoUtils';
 
@@ -43,31 +44,45 @@ const MobileVisitsPage = () => {
     const mapOptions = useMemo(() => ({
         disableDefaultUI: true,
         zoomControl: true,
-        styles: [ // Optional: clean map style
-            { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }
+        styles: [ // Clean map style - Ocultar POIs para evitar ruido
+            { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+            { featureType: "transit", elementType: "labels", stylers: [{ visibility: "off" }] },
+            { featureType: "administrative", elementType: "labels", stylers: [{ visibility: "off" }] },
+            { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+            { featureType: "water", elementType: "labels.text", stylers: [{ visibility: "off" }] }
         ]
     }), []);
 
+    const { user } = useAuth();
+    const isManager = user?.rol?.toUpperCase() === 'MANAGER';
+
+    const [vendedores, setVendedores] = useState([]);
+    const [selectedVendedor, setSelectedVendedor] = useState('');
+
     const center = useMemo(() => userLocation || defaultCenter, [userLocation]);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (vId) => {
         try {
             setLoading(true);
-            const [heatmapData, circuitsData] = await Promise.all([
-                getHeatmapData(),
-                getCircuits().catch(() => [])
+            const [heatmapData, circuitsData, vendedoresRes] = await Promise.all([
+                getHeatmapData(vId),
+                getCircuits().catch(() => []),
+                isManager ? getVendedores().catch(() => []) : Promise.resolve([])
             ]);
 
             if (Array.isArray(heatmapData)) {
                 setClients(heatmapData);
             }
             setCircuits(circuitsData);
+            if (vendedoresRes?.success) {
+                setVendedores(vendedoresRes.data || []);
+            }
         } catch (err) {
             console.error('Error heatmap:', err);
         } finally {
             setLoading(false);
         }
-    }, []); // No userLocation dependency here
+    }, [isManager]);
 
     // Dynamic sorting and distance calculation
     const sortedClients = useMemo(() => {
@@ -80,8 +95,8 @@ const MobileVisitsPage = () => {
     }, [clients, userLocation]);
 
     useEffect(() => {
-        fetchData();
-    }, []); // Fetch initially
+        fetchData(selectedVendedor);
+    }, [selectedVendedor, fetchData]);
 
     useEffect(() => {
         // Obtener ubicación actual usuario una vez al inicio
@@ -184,6 +199,27 @@ const MobileVisitsPage = () => {
 
     return (
         <Box sx={{ position: 'relative', height: '100vh', bgcolor: '#f5f5f5', pb: 8 }}>
+            {/* Header / Filtro Selector para Manager */}
+            {isManager && (
+                <Paper sx={{ p: 2, m: 1, borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'white', border: '1px solid #e0e0e0' }}>
+                    <FilterList color="primary" />
+                    <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        label="Filtrar por Vendedor"
+                        value={selectedVendedor}
+                        onChange={(e) => setSelectedVendedor(e.target.value)}
+                        SelectProps={{ native: true }}
+                    >
+                        <option value="">TODOS LOS VENDEDORES</option>
+                        {vendedores.map(v => (
+                            <option key={v.rut} value={v.rut}>{v.nombre_vendedor || v.alias || v.rut}</option>
+                        ))}
+                    </TextField>
+                </Paper>
+            )}
+
             {/* Mapa Arriba */}
             <GoogleMap
                 mapContainerStyle={containerStyle}
