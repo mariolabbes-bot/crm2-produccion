@@ -75,7 +75,8 @@ async function getClientsWithHeatscore(vendedorId) {
             FROM cliente c
             LEFT JOIN client_sales cs ON c.rut = cs.rut
             LEFT JOIN client_debt cd ON c.rut = cd.rut
-            WHERE ($1::text IS NULL OR c.vendedor_id = $1) AND c.en_terreno = true
+            LEFT JOIN usuario u ON c.vendedor_id = u.id
+            WHERE ($1::text IS NULL OR u.rut = $1) AND c.en_terreno = true
         )
         SELECT * FROM stats
     `;
@@ -141,7 +142,7 @@ router.get('/heatmap', auth(), async (req, res) => {
         const isManager = req.user.rol.toUpperCase() === 'MANAGER';
         let vendedorId = req.query.vendedor_id;
 
-        // Si no es manager, forzamos su propio RUT (vendedor_id en DB)
+        // Si no es manager, forzamos su propio RUT
         if (!isManager) {
             vendedorId = req.user.rut;
         }

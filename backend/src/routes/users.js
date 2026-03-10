@@ -58,12 +58,13 @@ router.post('/login', async (req, res) => {
     // Create and return token
     const payload = {
       user: {
+        id: user.rows[0].id,
         rut: user.rows[0].rut,
         alias: user.rows[0].alias,
         nombre: user.rows[0].nombre_completo,
         nombre_vendedor: user.rows[0].nombre_vendedor,
         rol: user.rows[0].rol_usuario,
-        features: user.rows[0].features // Incluir features en el token
+        features: user.rows[0].features
       }
     };
 
