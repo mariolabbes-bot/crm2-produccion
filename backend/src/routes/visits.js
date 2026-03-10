@@ -67,7 +67,6 @@ async function getClientsWithHeatscore(vendedorId) {
         stats AS (
             SELECT 
                 c.id, c.rut, c.nombre, c.latitud, c.longitud, c.direccion, c.comuna, c.ciudad, c.circuito,
-                c.last_visit_date,
                 COALESCE(cd.deuda_total, 0) as deuda_total,
                 COALESCE(cd.max_dias_mora, 0) as dias_mora,
                 COALESCE(cs.prom_ventas, 0) as prom_ventas,
@@ -76,14 +75,14 @@ async function getClientsWithHeatscore(vendedorId) {
             LEFT JOIN client_sales cs ON c.rut = cs.rut
             LEFT JOIN client_debt cd ON c.rut = cd.rut
             LEFT JOIN usuario u ON c.vendedor_id = u.id
-            WHERE ($1::text IS NULL OR u.rut = $1) AND c.en_terreno = true
+            WHERE ($1::text IS NULL OR $1 = '' OR u.rut = $1) AND c.en_terreno = true
         )
         SELECT * FROM stats
     `;
     const result = await pool.query(query, [vendedorId]);
 
     return result.rows.map(c => {
-        const daysSinceVisit = c.last_visit_date ? Math.floor((new Date() - new Date(c.last_visit_date)) / (1000 * 60 * 60 * 24)) : 999;
+        const daysSinceVisit = 999; // Fallback ya que no está la columna
 
         // 1. Volumen de venta (Promedio mensual últimos 12 meses)
         let notaVolumen = 4;
