@@ -105,7 +105,7 @@ router.get('/vendedores', async (req, res) => {
 
     const query = `
       SELECT DISTINCT ON (LOWER(TRIM(nombre_vendedor)))
-        rut as id,
+        id,
         nombre_vendedor as nombre,
         correo,
         rol_usuario as rol,
