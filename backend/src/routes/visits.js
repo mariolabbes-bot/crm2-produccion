@@ -7,7 +7,7 @@ const ClientService = require('../services/clientService');
 // GET /api/visits/plans/today - Obtener plan de hoy para el vendedor logueado
 router.get('/plans/today', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.id;
+        const vendedorId = req.user.rut; // Cambiado a rut para consistencia
         const query = `
             SELECT * FROM visit_plans 
             WHERE vendedor_id = $1 AND fecha = CURRENT_DATE
@@ -24,7 +24,7 @@ router.get('/plans/today', auth(), async (req, res) => {
 // POST /api/visits/plans - Crear o actualizar plan de hoy
 router.post('/plans', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.id;
+        const vendedorId = req.user.rut; // Cambiado a rut para consistencia
         const { clientes_json, notas } = req.body;
 
         const query = `
@@ -177,10 +177,10 @@ function deg2rad(deg) {
     return deg * (Math.PI / 180);
 }
 
-// POST /api/visits/check-in - Registrar inicio de visita con validación de distancia
+// POST /api/visits/check-in - Registrar inicio de visita con reporte de discrepancia
 router.post('/check-in', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.id;
+        const vendedorId = req.user.rut; // Usamos RUT para consistencia
         const { cliente_rut, latitud, longitud } = req.body;
 
         // 1. Obtener coordenadas del cliente para validar
@@ -222,7 +222,7 @@ router.post('/check-in', auth(), async (req, res) => {
 // GET /api/visits/suggestions - Obtener sugerencias para planificación
 router.get('/suggestions', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.id;
+        const vendedorId = req.user.rut; // Usamos RUT
 
         // 1. Obtener todos los clientes del vendedor con su Score de Calor (Nota Cliente)
         const allScoredClients = await getClientsWithHeatscore(vendedorId);
@@ -256,7 +256,7 @@ router.get('/suggestions', auth(), async (req, res) => {
 // POST /api/visits/plan - Guardar planificación del día
 router.post('/plan', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.id;
+        const vendedorId = req.user.rut; // Usamos RUT
         const { clientes } = req.body; // Array de RUTs
 
         if (!clientes || !Array.isArray(clientes)) {
@@ -330,7 +330,7 @@ router.post('/check-out', auth(), async (req, res) => {
 // GET /api/visits/my-today - Obtener visitas del día actual para el vendedor
 router.get('/my-today', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.id;
+        const vendedorId = req.user.rut; // Usamos RUT
         const query = `
             SELECT 
                 v.*, 
