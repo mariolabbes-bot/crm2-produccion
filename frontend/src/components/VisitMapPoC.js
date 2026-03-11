@@ -76,26 +76,20 @@ const VisitMapPoC = () => {
             ]);
 
             // Normalizar datos (pueden venir como array directo o {success, data: []})
-            const heatmapData = heatmapRes.data || heatmapRes;
-            const circuitsData = circuitsRes.data || circuitsRes;
+            const heatmapData = (heatmapRes && (heatmapRes.data || (Array.isArray(heatmapRes) ? heatmapRes : []))) || [];
+            const circuitsData = (circuitsRes && (circuitsRes.data || (Array.isArray(circuitsRes) ? circuitsRes : []))) || [];
 
-            if (Array.isArray(heatmapData)) {
-                setClients(heatmapData);
-            }
-            if (Array.isArray(circuitsData)) {
-                setCircuits(circuitsData);
-            }
+            setClients(Array.isArray(heatmapData) ? heatmapData : []);
+            setCircuits(Array.isArray(circuitsData) ? circuitsData : []);
 
             // Cargar Ranking de Circuitos Hot
             const hotRes = await getHotCircuits(vId).catch(() => []);
-            const hotData = hotRes.data || hotRes;
-            if (Array.isArray(hotData)) {
-                setHotRanking(hotData);
-            }
+            const hotData = (hotRes && (hotRes.data || (Array.isArray(hotRes) ? hotRes : []))) || [];
+            setHotRanking(Array.isArray(hotData) ? hotData : []);
 
-            if (isManager() && vendedores.length === 0) {
+            if (isManager() && (!vendedores || vendedores.length === 0)) {
                 const vRes = await getVendedores().catch(() => []);
-                const vData = vRes.data || vRes;
+                const vData = (vRes && (vRes.data || (Array.isArray(vRes) ? vRes : []))) || [];
                 if (Array.isArray(vData)) {
                     setVendedores(vData);
                 }
@@ -105,7 +99,7 @@ const VisitMapPoC = () => {
         } finally {
             setLoading(false);
         }
-    }, [filterVendedor, isManager]);
+    }, [filterVendedor, isManager, vendedores.length]);
 
     useEffect(() => {
         fetchData();
@@ -223,8 +217,8 @@ const VisitMapPoC = () => {
                                 onChange={(e) => setFilterVendedor(e.target.value)}
                             >
                                 <MenuItem value="ALL">Todos los Vendedores</MenuItem>
-                                {vendedores.map(v => (
-                                    <MenuItem key={v.id} value={v.rut}>{v.nombre_completo || v.alias || v.rut}</MenuItem>
+                                {Array.isArray(vendedores) && vendedores.map(v => (
+                                    <MenuItem key={v.id || v.rut} value={v.rut}>{v.nombre_vendedor || v.nombre || v.alias || v.rut}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
