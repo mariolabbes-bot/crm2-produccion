@@ -197,7 +197,7 @@ const DashboardPage = () => {
             >
               <MenuItem value="todos">Todos los vendedores</MenuItem>
               {vendedores.map((v) => (
-                <MenuItem key={v.id} value={v.id}>
+                <MenuItem key={v.rut} value={v.rut}>
                   {v.nombre}
                 </MenuItem>
               ))}

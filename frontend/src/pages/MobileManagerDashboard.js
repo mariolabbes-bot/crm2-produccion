@@ -86,7 +86,7 @@ const MobileManagerDashboard = () => {
                         style={{ width: '100%', border: 'none', background: 'none', fontSize: '1rem', fontWeight: 'bold', outline: 'none' }}
                     >
                         <option value="todos">Todos los Vendedores</option>
-                        {vendedores.map(v => <option key={v.id} value={v.id}>{v.nombre}</option>)}
+                        {vendedores.map(v => <option key={v.rut} value={v.rut}>{v.nombre}</option>)}
                     </select>
                 </Box>
             </Paper>
