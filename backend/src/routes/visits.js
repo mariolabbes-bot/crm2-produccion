@@ -18,6 +18,18 @@ router.get('/debug-schema', async (req, res) => {
     }
 });
 
+// GET /api/visits/run-migration - Forzar migración desde adentro
+router.get('/run-migration', async (req, res) => {
+    try {
+        await pool.query("ALTER TABLE cliente ADD COLUMN IF NOT EXISTS fecha_ultima_visita DATE");
+        await pool.query("ALTER TABLE cliente ADD COLUMN IF NOT EXISTS frecuencia_visita INTEGER DEFAULT 15");
+        await pool.query("ALTER TABLE cliente ADD COLUMN IF NOT EXISTS es_terreno BOOLEAN DEFAULT TRUE");
+        res.json({ success: true, msg: 'Migration executed from internal route' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // GET /api/visits/plans/today - Obtener plan de hoy para el vendedor logueado
 router.get('/plans/today', auth(), async (req, res) => {
     try {
