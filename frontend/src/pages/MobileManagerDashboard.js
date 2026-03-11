@@ -5,6 +5,7 @@ import { getKpisMesActual, getRankingVendedores, getVendedores, getSaldoCreditoT
 import MobileKPICard from '../components/MobileKPICard';
 import { ShoppingCart, Payment, People, AccountBalanceWallet, FilterList } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const MobileManagerDashboard = () => {
     const { user } = useAuth();

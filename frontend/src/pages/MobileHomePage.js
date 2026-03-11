@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Paper, Button, List, ListItem, ListItemText, ListItemAvatar, Avatar, Chip, IconButton } from '@mui/material';
 import { getKpisMesActual, getMyVisitsToday, getSaldoCreditoTotal } from '../api';
 import MobileKPICard from '../components/MobileKPICard';
-import { ShoppingCart, Payment, AccountBalanceWallet, Map, Timeline, ExitToApp, MoreHoriz } from '@mui/icons-material';
+import { ShoppingCart, Payment, AccountBalanceWallet, Map, AltRoute, ExitToApp, MoreHoriz } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
  * Diseño Fase 2: Timeline de Actividades y Next Stop
  */
 const MobileHomePage = () => {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [kpis, setKpis] = useState({
         ventasMes: 0,
         abonosMes: 0,
