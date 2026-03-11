@@ -53,9 +53,10 @@ const DashboardPage = () => {
   // pero lo mejor es que actúe como un switch limpio si no comparten estado complejo.
   // Como MobileHomePage y MobileManagerDashboard manejan su propio fetching, podemos retornar aquí
   // siempre que no haya hooks abajo que dependan de este componente.
-  if (isMobile) {
-    return isManager() ? <MobileManagerDashboard /> : <MobileHomePage />;
-  }
+  // ELIMINADO: Early return causaba violación de reglas de hooks
+  // if (isMobile) {
+  //   return isManager() ? <MobileManagerDashboard /> : <MobileHomePage />;
+  // }
 
   // Cargar lista de vendedores si es manager
   useEffect(() => {
@@ -168,6 +169,10 @@ const DashboardPage = () => {
       maximumFractionDigits: 0,
     }).format(value);
   };
+
+  if (isMobile) {
+    return isManager() ? <MobileManagerDashboard /> : <MobileHomePage />;
+  }
 
   return (
     <Box className="dashboard-page-container">
