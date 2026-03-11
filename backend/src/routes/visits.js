@@ -46,7 +46,8 @@ router.post('/plans', auth(), async (req, res) => {
 
 // Helper: Obtener clientes con Nota Cliente (HeatScore) calculada en 4 dimensiones
 async function getClientsWithHeatscore(vendedorId) {
-    const query = `
+    try {
+        const query = `
         WITH client_sales AS (
             SELECT 
                 identificador AS rut,
@@ -79,63 +80,64 @@ async function getClientsWithHeatscore(vendedorId) {
         )
         SELECT * FROM stats
     `;
-    const result = await pool.query(query, [vendedorId]);
+        const result = await pool.query(query, [vendedorId]);
 
-    return result.rows.map(c => {
-        const lastVisitDate = c.fecha_ultima_visita ? new Date(c.fecha_ultima_visita) : null;
-        const daysSinceVisit = lastVisitDate
-            ? Math.floor((new Date() - lastVisitDate) / (1000 * 60 * 60 * 24))
-            : 999;
+        return result.rows.map(c => {
+            const lastVisitDate = c.fecha_ultima_visita ? new Date(c.fecha_ultima_visita) : null;
+            const daysSinceVisit = lastVisitDate
+                ? Math.floor((new Date() - lastVisitDate) / (1000 * 60 * 60 * 24))
+                : 999;
 
-        // 1. Volumen de venta (Promedio mensual últimos 12 meses)
-        let notaVolumen = 4;
-        if (c.prom_ventas > 1000000) notaVolumen = 10;
-        else if (c.prom_ventas > 500000 && c.prom_ventas <= 1000000) notaVolumen = 7;
+            // 1. Volumen de venta (Promedio mensual últimos 12 meses)
+            let notaVolumen = 4;
+            if (c.prom_ventas > 1000000) notaVolumen = 10;
+            else if (c.prom_ventas > 500000 && c.prom_ventas <= 1000000) notaVolumen = 7;
 
-        // 2. Periodicidad de venta (Meses con compra en 12 meses)
-        let notaPeriodicidad = 4;
-        if (c.meses_con_venta >= 10) notaPeriodicidad = 10;
-        else if (c.meses_con_venta >= 4 && c.meses_con_venta <= 9) notaPeriodicidad = 7;
+            // 2. Periodicidad de venta (Meses con compra en 12 meses)
+            let notaPeriodicidad = 4;
+            if (c.meses_con_venta >= 10) notaPeriodicidad = 10;
+            else if (c.meses_con_venta >= 4 && c.meses_con_venta <= 9) notaPeriodicidad = 7;
 
-        // 3. Saldo Crédito
-        let notaSaldo = 4;
-        if (c.deuda_total > 0) {
-            const ratioDeuda = c.prom_ventas > 0 ? (c.deuda_total / c.prom_ventas) : 999;
-            if (c.dias_mora >= 61) {
-                notaSaldo = 10;
-            } else if (c.dias_mora >= 30 && c.dias_mora <= 60) {
-                if (ratioDeuda > 1.5 && ratioDeuda <= 2.5) {
-                    notaSaldo = 7;
-                } else if (ratioDeuda > 2.5) {
+            // 3. Saldo Crédito
+            let notaSaldo = 4;
+            if (c.deuda_total > 0) {
+                const ratioDeuda = c.prom_ventas > 0 ? (c.deuda_total / c.prom_ventas) : 999;
+                if (c.dias_mora >= 61) {
                     notaSaldo = 10;
-                } else {
-                    notaSaldo = 4;
-                }
-            } else if (c.dias_mora < 30) {
-                if (ratioDeuda <= 1.5) {
-                    notaSaldo = 4;
-                } else {
-                    notaSaldo = 7;
+                } else if (c.dias_mora >= 30 && c.dias_mora <= 60) {
+                    if (ratioDeuda > 1.5 && ratioDeuda <= 2.5) {
+                        notaSaldo = 7;
+                    } else if (ratioDeuda > 2.5) {
+                        notaSaldo = 10;
+                    } else {
+                        notaSaldo = 4;
+                    }
+                } else if (c.dias_mora < 30) {
+                    if (ratioDeuda <= 1.5) {
+                        notaSaldo = 4;
+                    } else {
+                        notaSaldo = 7;
+                    }
                 }
             }
-        }
 
-        // 4. Última Visita
-        let notaVisita = daysSinceVisit > 30 ? 10 : 4;
+            // 4. Última Visita
+            let notaVisita = daysSinceVisit > 30 ? 10 : 4;
 
-        // Promedio final de Nota Cliente (Score 4 a 10)
-        // Convertiremos la escala 4-10 a una escala visual de calor 0-100 para el frontend:
-        // Nota 10 -> 100, Nota 4 -> 0
-        const rawScore = (notaVolumen + notaPeriodicidad + notaSaldo + notaVisita) / 4;
-        const heatScore = ((rawScore - 4) / 6) * 100;
+            const rawScore = (notaVolumen + notaPeriodicidad + notaSaldo + notaVisita) / 4;
+            const heatScore = ((rawScore - 4) / 6) * 100;
 
-        return {
-            ...c,
-            heatScore: Math.round(heatScore), // 0 a 100
-            rawScore, // 4 a 10
-            daysSinceVisit
-        };
-    });
+            return {
+                ...c,
+                heatScore: Math.round(heatScore), // 0 a 100
+                rawScore, // 4 a 10
+                daysSinceVisit
+            };
+        });
+    } catch (err) {
+        console.error('❌ Error in getClientsWithHeatscore:', err);
+        throw err;
+    }
 }
 
 // GET /api/visits/hot-circuits - Obtener ranking de circuitos por urgencia de visita
@@ -192,8 +194,8 @@ router.get('/heatmap', auth(), async (req, res) => {
 
         res.json(mapData);
     } catch (err) {
-        console.error('Error heatmap:', err.message);
-        res.status(500).send('Server Error');
+        console.error('❌ Error heatmap route:', err);
+        res.status(500).json({ msg: 'Server Error heatmap', error: err.message });
     }
 });
 
