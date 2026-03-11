@@ -70,23 +70,35 @@ const VisitMapPoC = () => {
         try {
             setLoading(true);
             const vId = filterVendedor === 'ALL' ? null : filterVendedor;
-            const [heatmapData, circuitsData] = await Promise.all([
+            const [heatmapRes, circuitsRes] = await Promise.all([
                 getHeatmapData(vId),
                 getCircuits().catch(() => [])
             ]);
 
+            // Normalizar datos (pueden venir como array directo o {success, data: []})
+            const heatmapData = heatmapRes.data || heatmapRes;
+            const circuitsData = circuitsRes.data || circuitsRes;
+
             if (Array.isArray(heatmapData)) {
                 setClients(heatmapData);
             }
-            setCircuits(circuitsData);
+            if (Array.isArray(circuitsData)) {
+                setCircuits(circuitsData);
+            }
 
             // Cargar Ranking de Circuitos Hot
-            const hotData = await getHotCircuits(vId).catch(() => []);
-            setHotRanking(hotData);
+            const hotRes = await getHotCircuits(vId).catch(() => []);
+            const hotData = hotRes.data || hotRes;
+            if (Array.isArray(hotData)) {
+                setHotRanking(hotData);
+            }
 
             if (isManager() && vendedores.length === 0) {
-                const vData = await getVendedores().catch(() => []);
-                setVendedores(vData);
+                const vRes = await getVendedores().catch(() => []);
+                const vData = vRes.data || vRes;
+                if (Array.isArray(vData)) {
+                    setVendedores(vData);
+                }
             }
         } catch (err) {
             console.error('Error fetching data:', err);
