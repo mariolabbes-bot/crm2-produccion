@@ -23,7 +23,7 @@ const pool = new Pool({
 
 async function checkSchema() {
     try {
-        const tableNames = ['venta', 'abono', 'saldo_credito', 'estado_cuenta', 'estado_cuenta_diario', 'producto', 'cliente', 'usuario'];
+        const tableNames = ['venta', 'abono', 'saldo_credito', 'estado_cuenta', 'producto', 'cliente', 'usuario', 'visitas_registro', 'visit_plans'];
 
         // Construct the query dynamically for the specified tables
         const query = `

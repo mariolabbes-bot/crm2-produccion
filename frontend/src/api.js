@@ -390,6 +390,10 @@ export const checkInVisita = (data) => apiFetch(`${API_URL}/visits/check-in`, { 
 export const checkOutVisita = (data) => apiFetch(`${API_URL}/visits/check-out`, { method: 'POST', body: JSON.stringify(data) });
 export const getMyVisitsToday = () => apiFetch(`${API_URL}/visits/my-today`);
 export const getVisitSuggestions = () => apiFetch(`${API_URL}/visits/suggestions`);
+export const getHotCircuits = (vendedorId) => {
+  const url = vendedorId ? `${API_URL}/visits/hot-circuits?vendedor_id=${vendedorId}` : `${API_URL}/visits/hot-circuits`;
+  return apiFetch(url);
+};
 export const submitVisitPlan = (clientes) => apiFetch(`${API_URL}/visits/plan`, { method: 'POST', body: JSON.stringify({ clientes }) });
 
 // CIRCUITS

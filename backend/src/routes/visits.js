@@ -10,7 +10,7 @@ router.get('/plans/today', auth(), async (req, res) => {
         const vendedorId = req.user.rut; // Cambiado a rut para consistencia
         const query = `
             SELECT * FROM visit_plans 
-            WHERE vendedor_id = $1 AND fecha = CURRENT_DATE
+            WHERE (vendedor_id::text = $1) AND fecha = CURRENT_DATE
             ORDER BY created_at DESC LIMIT 1
         `;
         const result = await pool.query(query, [vendedorId]);
@@ -66,7 +66,7 @@ async function getClientsWithHeatscore(vendedorId) {
         ),
         stats AS (
             SELECT 
-                c.id, c.rut, c.nombre, c.latitud, c.longitud, c.direccion, c.comuna, c.ciudad, c.circuito,
+                c.id, c.rut, c.nombre, c.latitud, c.longitud, c.direccion, c.comuna, c.ciudad, c.circuito, c.fecha_ultima_visita, c.frecuencia_visita,
                 COALESCE(cd.deuda_total, 0) as deuda_total,
                 COALESCE(cd.max_dias_mora, 0) as dias_mora,
                 COALESCE(cs.prom_ventas, 0) as prom_ventas,
@@ -82,7 +82,10 @@ async function getClientsWithHeatscore(vendedorId) {
     const result = await pool.query(query, [vendedorId]);
 
     return result.rows.map(c => {
-        const daysSinceVisit = 999; // Fallback ya que no está la columna
+        const lastVisitDate = c.fecha_ultima_visita ? new Date(c.fecha_ultima_visita) : null;
+        const daysSinceVisit = lastVisitDate
+            ? Math.floor((new Date() - lastVisitDate) / (1000 * 60 * 60 * 24))
+            : 999;
 
         // 1. Volumen de venta (Promedio mensual últimos 12 meses)
         let notaVolumen = 4;
@@ -134,6 +137,41 @@ async function getClientsWithHeatscore(vendedorId) {
         };
     });
 }
+
+// GET /api/visits/hot-circuits - Obtener ranking de circuitos por urgencia de visita
+router.get('/hot-circuits', auth(), async (req, res) => {
+    try {
+        const isManager = req.user.rol.toUpperCase() === 'MANAGER';
+        let vendedorId = req.query.vendedor_id;
+        if (!isManager) vendedorId = req.user.rut;
+
+        const allScoredClients = await getClientsWithHeatscore(vendedorId);
+
+        // Agrupar por circuito y promediar HeatScore
+        const circuitStats = {};
+        allScoredClients.forEach(c => {
+            const circ = c.circuito || 'SIN CIRCUITO';
+            if (!circuitStats[circ]) {
+                circuitStats[circ] = { nombre: circ, totalScore: 0, count: 0, criticalCount: 0 };
+            }
+            circuitStats[circ].totalScore += c.heatScore;
+            circuitStats[circ].count += 1;
+            if (c.heatScore >= 70) circuitStats[circ].criticalCount += 1;
+        });
+
+        const ranking = Object.values(circuitStats)
+            .map(s => ({
+                ...s,
+                avgScore: Math.round(s.totalScore / s.count)
+            }))
+            .sort((a, b) => b.avgScore - a.avgScore);
+
+        res.json(ranking);
+    } catch (err) {
+        console.error('Error hot-circuits:', err.message);
+        res.status(500).send('Server Error hot-circuits');
+    }
+});
 
 // GET /api/visits/heatmap - Datos para el mapa de calor
 router.get('/heatmap', auth(), async (req, res) => {
@@ -205,7 +243,19 @@ router.post('/check-in', auth(), async (req, res) => {
             VALUES ($1, $2, CURRENT_DATE, CURRENT_TIME, $3, $4, 'en_progreso', $5)
             RETURNING *
         `;
-        const result = await pool.query(query, [vendedorId, cliente_rut, latitud, longitud, distancia]);
+
+        let result;
+        try {
+            result = await pool.query(query, [vendedorId, cliente_rut, latitud, longitud, distancia]);
+        } catch (dbErr) {
+            // Si falla por tipo (vendedor_id es INTEGER y enviamos RUT), intentamos con ID numérico
+            if (dbErr.code === '22P02' || dbErr.message.includes('invalid input syntax for type integer')) {
+                console.log('🔄 Fallback: vendedor_id es INTEGER, usando req.user.id en lugar de RUT');
+                result = await pool.query(query, [req.user.id, cliente_rut, latitud, longitud, distancia]);
+            } else {
+                throw dbErr;
+            }
+        }
 
         const responseData = {
             ...result.rows[0],
@@ -234,7 +284,7 @@ router.get('/suggestions', auth(), async (req, res) => {
         // 2. Obtener visitas de hoy para filtrar
         const visitsQuery = `
             SELECT cliente_rut FROM visitas_registro 
-            WHERE fecha = CURRENT_DATE AND vendedor_id = $1
+            WHERE fecha = CURRENT_DATE AND (vendedor_id::text = $1)
         `;
         const visitsRes = await pool.query(visitsQuery, [vendedorId]);
         const visitedRuts = new Set(visitsRes.rows.map(v => v.cliente_rut));
@@ -320,7 +370,20 @@ router.post('/check-out', auth(), async (req, res) => {
             return res.status(404).json({ msg: 'Visita no encontrada' });
         }
 
-        res.json(result.rows[0]);
+        const visita = result.rows[0];
+
+        // ACTUALIZACIÓN AUTOMÁTICA EN TABLA CLIENTE
+        try {
+            await pool.query(
+                'UPDATE cliente SET fecha_ultima_visita = CURRENT_DATE WHERE rut = $1',
+                [visita.cliente_rut]
+            );
+            console.log(`✅ [Check-out] fecha_ultima_visita actualizada para: ${visita.cliente_rut}`);
+        } catch (updateErr) {
+            console.error('⚠️ Error al actualizar fecha_ultima_visita en cliente:', updateErr.message);
+        }
+
+        res.json(visita);
     } catch (err) {
         console.error('Error check-out:', err.message);
         res.status(500).json({ msg: 'Server Error check-out' });
@@ -332,13 +395,10 @@ router.get('/my-today', auth(), async (req, res) => {
     try {
         const vendedorId = req.user.rut; // Usamos RUT
         const query = `
-            SELECT 
-                v.*, 
-                c.nombre as cliente_nombre, 
-                c.direccion as cliente_direccion
+            SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion
             FROM visitas_registro v
-            LEFT JOIN cliente c ON v.cliente_rut = c.rut
-            WHERE v.vendedor_id = $1 
+            JOIN cliente c ON v.cliente_rut = c.rut
+            WHERE (v.vendedor_id::text = $1) 
             AND v.fecha = CURRENT_DATE
             ORDER BY 
                 CASE WHEN v.estado = 'en_progreso' THEN 0

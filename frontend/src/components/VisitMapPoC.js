@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, DrawingManager } from '@react-google-maps/api';
 import { Box, Typography, Paper, CircularProgress, Chip, Stack, FormControl, InputLabel, Select, MenuItem, Button, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { getHeatmapData, getCircuits, submitVisitPlan, bulkAssignCircuit, getVendedores } from '../api';
+import { getHeatmapData, getCircuits, submitVisitPlan, bulkAssignCircuit, getVendedores, getHotCircuits } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import { getEnv } from '../utils/env';
 
@@ -49,6 +49,7 @@ const VisitMapPoC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedClient, setSelectedClient] = useState(null);
     const [circuits, setCircuits] = useState([]);
+    const [hotRanking, setHotRanking] = useState([]);
     const [vendedores, setVendedores] = useState([]);
 
     const [filterVendedor, setFilterVendedor] = useState('ALL');
@@ -78,6 +79,10 @@ const VisitMapPoC = () => {
                 setClients(heatmapData);
             }
             setCircuits(circuitsData);
+
+            // Cargar Ranking de Circuitos Hot
+            const hotData = await getHotCircuits(vId).catch(() => []);
+            setHotRanking(hotData);
 
             if (isManager() && vendedores.length === 0) {
                 const vData = await getVendedores().catch(() => []);
@@ -330,6 +335,10 @@ const VisitMapPoC = () => {
                                 <Typography variant="caption" display="block">
                                     <strong>Venta Promedio 12M:</strong> {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(selectedClient.prom_ventas)}
                                 </Typography>
+                                <Typography variant="caption" display="block">
+                                    <strong>Última Visita:</strong> {selectedClient.fecha_ultima_visita ? new Date(selectedClient.fecha_ultima_visita).toLocaleDateString() : 'Nunca'}
+                                    ({selectedClient.daysSinceVisit} días)
+                                </Typography>
                             </Box>
 
                             <Box sx={{ mt: 2, textAlign: 'center' }}>
@@ -347,6 +356,38 @@ const VisitMapPoC = () => {
                     </InfoWindow>
                 )}
             </GoogleMap>
+
+            {/* Ranking de Circuitos Sugeridos (Hot) */}
+            {hotRanking.length > 0 && (
+                <Box sx={{ mt: 3 }}>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom color="error" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        🔥 Circuitos con Mayor Urgencia (Hot)
+                    </Typography>
+                    <Stack direction="row" spacing={2} sx={{ overflowX: 'auto', pb: 1 }}>
+                        {hotRanking.slice(0, 5).map((r, idx) => (
+                            <Paper
+                                key={r.nombre}
+                                elevation={2}
+                                sx={{
+                                    p: 2,
+                                    minWidth: 180,
+                                    borderRadius: 3,
+                                    cursor: 'pointer',
+                                    border: '2px solid transparent',
+                                    '&:hover': { borderColor: 'error.main', bgcolor: '#fff5f5' }
+                                }}
+                                onClick={() => setFilterCircuit(r.nombre)}
+                            >
+                                <Typography variant="subtitle2" fontWeight="bold">#{idx + 1} {r.nombre}</Typography>
+                                <Typography variant="body2" color="error" fontWeight="bold">Score: {r.avgScore}%</Typography>
+                                <Typography variant="caption" color="textSecondary">
+                                    {r.criticalCount} clientes críticos de {r.count}
+                                </Typography>
+                            </Paper>
+                        ))}
+                    </Stack>
+                </Box>
+            )}
 
             {/* Modal de Asignación Masiva */}
             <Dialog open={assignmentModalOpen} onClose={handleCloseAssignmentModal} maxWidth="sm" fullWidth>
