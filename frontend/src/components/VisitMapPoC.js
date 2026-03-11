@@ -212,7 +212,7 @@ const VisitMapPoC = () => {
                             >
                                 <MenuItem value="ALL">Todos los Vendedores</MenuItem>
                                 {vendedores.map(v => (
-                                    <MenuItem key={v.id} value={v.id}>{v.nombre_completo || v.alias}</MenuItem>
+                                    <MenuItem key={v.id} value={v.rut}>{v.nombre_completo || v.alias || v.rut}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
