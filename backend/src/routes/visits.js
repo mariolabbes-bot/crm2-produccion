@@ -4,6 +4,20 @@ const pool = require('../db');
 const auth = require('../middleware/auth');
 const ClientService = require('../services/clientService');
 
+// GET /api/visits/debug-schema - Diagnosticar columnas en producción
+router.get('/debug-schema', async (req, res) => {
+    try {
+        const result = await pool.query("SELECT column_name FROM information_schema.columns WHERE table_name = 'cliente'");
+        res.json({
+            table: 'cliente',
+            columns: result.rows.map(r => r.column_name),
+            env_db_host: process.env.DATABASE_URL ? process.env.DATABASE_URL.split('@')[1].split('/')[0] : 'NOT_SET'
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // GET /api/visits/plans/today - Obtener plan de hoy para el vendedor logueado
 router.get('/plans/today', auth(), async (req, res) => {
     try {
