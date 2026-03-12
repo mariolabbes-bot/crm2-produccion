@@ -372,12 +372,15 @@ router.get('/:rut/actividades', auth(), async (req, res) => {
         ca.created_at,
         ua.alias as usuario_nombre,
         ua.nombre_vendedor_oficial,
-        ua.id as usuario_alias_id
+        ua.id as usuario_alias_id,
+        at.nombre as tipo_actividad,
+        at.icon as tipo_icono
       FROM cliente_actividad ca
       JOIN usuario_alias ua ON ca.usuario_alias_id = ua.id
+      LEFT JOIN activity_types at ON ca.activity_type_id = at.id
       WHERE ca.cliente_rut = $1
       ORDER BY ca.created_at DESC
-      LIMIT 3
+      LIMIT 10
     `;
 
     const result = await pool.query(query, [rut]);
@@ -441,19 +444,31 @@ router.post('/:rut/actividades', auth(), async (req, res) => {
 
     const usuarioAliasId = usuarioAliasResult.rows[0].id;
 
+    // Obtener ID del tipo de actividad (por nombre o ID directo)
+    const { activity_type = 'MENSAJE' } = req.body;
+    let activityTypeId;
+
+    if (typeof activity_type === 'number') {
+      activityTypeId = activity_type;
+    } else {
+      const typeRes = await pool.query('SELECT id FROM activity_types WHERE nombre = $1', [activity_type]);
+      activityTypeId = typeRes.rows[0]?.id;
+    }
+
     // Insertar actividad
     const query = `
-      INSERT INTO cliente_actividad (cliente_rut, usuario_alias_id, comentario, created_at)
-      VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+      INSERT INTO cliente_actividad (cliente_rut, usuario_alias_id, comentario, activity_type_id, created_at)
+      VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
       RETURNING 
         id,
         cliente_rut,
         usuario_alias_id,
         comentario,
+        activity_type_id,
         created_at
     `;
 
-    const result = await pool.query(query, [rut, usuarioAliasId, comentario.trim()]);
+    const result = await pool.query(query, [rut, usuarioAliasId, comentario.trim(), activityTypeId]);
 
     res.json({
       success: true,

@@ -12,6 +12,12 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PersonNameIcon from '@mui/icons-material/Badge';
 import DirectionsIcon from '@mui/icons-material/Directions';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { Button } from '@mui/material';
 
 /**
@@ -27,6 +33,57 @@ function ClientHeader({ cliente }) {
     return date.toLocaleDateString('es-CL');
   };
 
+
+  const [visitaActiva, setVisitaActiva] = React.useState(null);
+  const [loadingAction, setLoadingAction] = React.useState(false);
+
+  React.useEffect(() => {
+    checkActiveVisit();
+  }, [cliente.rut]);
+
+  const checkActiveVisit = async () => {
+    try {
+      const res = await api.getActiveVisit();
+      if (res && res.cliente_rut === cliente.rut) {
+        setVisitaActiva(res);
+      } else {
+        setVisitaActiva(null);
+      }
+    } catch (err) {
+      console.error('Error checking active visit:', err);
+    }
+  };
+
+  const handleAction = async (type) => {
+    try {
+      setLoadingAction(true);
+      if (type === 'CHECK_IN') {
+        const pos = await new Promise((resolve) => {
+          navigator.geolocation.getCurrentPosition(resolve, () => resolve({ coords: { latitude: 0, longitude: 0 } }));
+        });
+        await api.checkIn(cliente.rut, pos.coords.latitude, pos.coords.longitude);
+        await checkActiveVisit();
+      } else if (type === 'CHECK_OUT') {
+        const resultado = window.prompt('Resultado de la visita (ej: Venta Realizada, Cliente no estaba):');
+        if (resultado === null) return;
+        const pos = await new Promise((resolve) => {
+          navigator.geolocation.getCurrentPosition(resolve, () => resolve({ coords: { latitude: 0, longitude: 0 } }));
+        });
+        await api.checkOut(visitaActiva.id, pos.coords.latitude, pos.coords.longitude, resultado, '');
+        setVisitaActiva(null);
+      } else {
+        const note = window.prompt(`Registrar nota para ${type.toLowerCase()}:`);
+        if (note === null) return;
+        await api.createClientActividad(cliente.rut, note, type);
+        alert(`${type} registrado en el historial.`);
+      }
+    } catch (err) {
+      alert(err.response?.data?.msg || 'Error al ejecutar acción');
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
   return (
     <Card sx={{ p: 3, backgroundColor: '#f5f5f5' }}>
       <Grid container spacing={3} alignItems="center">
@@ -40,6 +97,52 @@ function ClientHeader({ cliente }) {
             variant="outlined"
             size="small"
           />
+        </Grid>
+
+        {/* Acciones Rápidas */}
+        <Grid item xs={12} sm={6}>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-end' } }}>
+            <Button
+              variant="contained"
+              color={visitaActiva ? "secondary" : "primary"}
+              startIcon={visitaActiva ? <LogoutIcon /> : <LoginIcon />}
+              onClick={() => handleAction(visitaActiva ? 'CHECK_OUT' : 'CHECK_IN')}
+              disabled={loadingAction}
+              sx={{ borderRadius: '20px', fontWeight: 'bold' }}
+            >
+              {visitaActiva ? 'CHECK OUT' : 'CHECK IN'}
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<PhoneIcon />}
+              onClick={() => {
+                window.location.href = `tel:${cliente.telefono}`;
+                handleAction('LLAMADA');
+              }}
+              sx={{ borderRadius: '20px' }}
+            >
+              LLAMAR
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<WhatsAppIcon />}
+              onClick={() => {
+                window.open(`https://wa.me/${cliente.telefono?.replace(/[^0-9]/g, '')}`, '_blank');
+                handleAction('MENSAJE');
+              }}
+              sx={{ borderRadius: '20px', color: '#25D366', borderColor: '#25D366' }}
+            >
+              WHATSAPP
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<ReceiptIcon />}
+              onClick={() => handleAction('COTIZACION')}
+              sx={{ borderRadius: '20px' }}
+            >
+              COTIZAR
+            </Button>
+          </Box>
         </Grid>
 
         {/* Vendedor */}

@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 const auth = require('../middleware/auth');
 const ClientService = require('../services/clientService');
+const { enqueueVisitMonitor } = require('../workers/visitMonitorWorker');
 
 // GET /api/visits/plans/today - Obtener plan de hoy para el vendedor logueado
 router.get('/plans/today', auth(), async (req, res) => {
@@ -221,9 +222,27 @@ function deg2rad(deg) {
 router.post('/check-in', auth(), async (req, res) => {
     try {
         const vendedorId = req.user.rut; // Usamos RUT para consistencia
-        const { cliente_rut, latitud, longitud } = req.body;
+        const { cliente_rut, latitud, longitud, activity_type = 'VISITA' } = req.body;
 
-        // 1. Obtener coordenadas del cliente para validar
+        // 1. Verificar si ya tiene una visita activa
+        const activeCheck = await pool.query(
+            'SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2) AND estado = \'en_progreso\'',
+            [vendedorId, req.user.id]
+        );
+
+        if (activeCheck.rows.length > 0) {
+            return res.status(400).json({
+                success: false,
+                msg: 'Ya tienes una visita en progreso. Debes finalizarla antes de iniciar otra.',
+                visita_id: activeCheck.rows[0].id
+            });
+        }
+
+        // 2. Obtener ID del tipo de actividad
+        const typeResult = await pool.query('SELECT id FROM activity_types WHERE nombre = $1', [activity_type]);
+        const activityTypeId = typeResult.rows[0]?.id;
+
+        // 3. Obtener coordenadas del cliente para validar
         const clienteQuery = 'SELECT latitud, longitud FROM cliente WHERE rut = $1';
         const clienteRes = await pool.query(clienteQuery, [cliente_rut]);
 
@@ -241,19 +260,19 @@ router.post('/check-in', auth(), async (req, res) => {
         }
 
         const query = `
-            INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, hora_inicio, latitud_inicio, longitud_inicio, estado, distancia_checkin)
-            VALUES ($1, $2, CURRENT_DATE, CURRENT_TIME, $3, $4, 'en_progreso', $5)
+            INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, hora_inicio, latitud_inicio, longitud_inicio, estado, distancia_checkin, activity_type_id)
+            VALUES ($1, $2, CURRENT_DATE, CURRENT_TIME, $3, $4, 'en_progreso', $5, $6)
             RETURNING *
         `;
 
         let result;
         try {
-            result = await pool.query(query, [vendedorId, cliente_rut, latitud, longitud, distancia]);
+            result = await pool.query(query, [vendedorId, cliente_rut, latitud, longitud, distancia, activityTypeId]);
         } catch (dbErr) {
             // Si falla por tipo (vendedor_id es INTEGER y enviamos RUT), intentamos con ID numérico
             if (dbErr.code === '22P02' || dbErr.message.includes('invalid input syntax for type integer')) {
                 console.log('🔄 Fallback: vendedor_id es INTEGER, usando req.user.id en lugar de RUT');
-                result = await pool.query(query, [req.user.id, cliente_rut, latitud, longitud, distancia]);
+                result = await pool.query(query, [req.user.id, cliente_rut, latitud, longitud, distancia, activityTypeId]);
             } else {
                 throw dbErr;
             }
@@ -263,6 +282,18 @@ router.post('/check-in', auth(), async (req, res) => {
             ...result.rows[0],
             warning // Enviar warning al frontend si existe
         };
+
+        // 4. Iniciar monitoreo automático (Bull Queue)
+        try {
+            await enqueueVisitMonitor({
+                visita_id: responseData.id,
+                cliente_rut: responseData.cliente_rut,
+                user_id: req.user.id
+            });
+            console.log(`🚀 [Monitor] Encolado monitoreo para visita: ${responseData.id}`);
+        } catch (queueErr) {
+            console.error('⚠️ Error al encolar monitoreo de visita:', queueErr.message);
+        }
 
         res.status(201).json(responseData);
     } catch (err) {
@@ -374,7 +405,7 @@ router.post('/check-out', auth(), async (req, res) => {
 
         const visita = result.rows[0];
 
-        // ACTUALIZACIÓN AUTOMÁTICA EN TABLA CLIENTE
+        // 1. ACTUALIZACIÓN AUTOMÁTICA EN TABLA CLIENTE
         try {
             await pool.query(
                 'UPDATE cliente SET fecha_ultima_visita = CURRENT_DATE WHERE rut = $1',
@@ -385,10 +416,51 @@ router.post('/check-out', auth(), async (req, res) => {
             console.error('⚠️ Error al actualizar fecha_ultima_visita en cliente:', updateErr.message);
         }
 
+        // 2. INTEGRACIÓN CON HISTORIAL DE ACTIVIDADES (cliente_actividad)
+        try {
+            // Obtener usuario_alias_id (necesario para la tabla cliente_actividad)
+            const aliasRes = await pool.query(
+                'SELECT id FROM usuario_alias WHERE UPPER(TRIM(nombre_vendedor_oficial)) = UPPER(TRIM($1)) OR UPPER(TRIM(alias)) = UPPER(TRIM($2))',
+                [req.user.nombre_vendedor || '', req.user.alias || '']
+            );
+
+            if (aliasRes.rows.length > 0) {
+                const uaId = aliasRes.rows[0].id;
+                const activityText = `[VISITA COMPLETADA] ${resultado || 'Finalizado'}.${notas ? ' Notas: ' + notas : ''}`;
+
+                await pool.query(
+                    'INSERT INTO cliente_actividad (cliente_rut, usuario_alias_id, comentario, activity_type_id, created_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)',
+                    [visita.cliente_rut, uaId, activityText, visita.activity_type_id]
+                );
+            }
+        } catch (actErr) {
+            console.error('⚠️ Error al crear espejo en cliente_actividad:', actErr.message);
+        }
+
         res.json(visita);
     } catch (err) {
         console.error('Error check-out:', err.message);
         res.status(500).json({ msg: 'Server Error check-out' });
+    }
+});
+
+// GET /api/visits/active - Obtener visita activa del vendedor
+router.get('/active', auth(), async (req, res) => {
+    try {
+        const vendedorId = req.user.rut;
+        const query = `
+            SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion
+            FROM visitas_registro v
+            JOIN cliente c ON v.cliente_rut = c.rut
+            WHERE (v.vendedor_id::text = $1 OR v.vendedor_id::text = $2)
+            AND v.estado = 'en_progreso'
+            LIMIT 1
+        `;
+        const result = await pool.query(query, [vendedorId, req.user.id]);
+        res.json(result.rows[0] || null);
+    } catch (err) {
+        console.error('Error fetching active visit:', err.message);
+        res.status(500).send('Server Error');
     }
 });
 

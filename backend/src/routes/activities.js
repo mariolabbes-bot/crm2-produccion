@@ -129,7 +129,7 @@ router.post('/', auth(), async (req, res) => {
     }
 
     await client.query('COMMIT');
-    
+
     // Refetch the created activity with its goals
     const finalResult = await client.query('SELECT * FROM activities WHERE id = $1', [activityId]);
     const finalGoals = await client.query('SELECT * FROM goals WHERE activity_id = $1', [activityId]);
@@ -231,6 +231,74 @@ router.delete('/:id', auth(), async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
+  }
+});
+
+// @route   GET /api/activities/report
+// @desc    Export activities to CSV for Managers
+// @access  Private (Manager only)
+router.get('/report', auth(), async (req, res) => {
+  try {
+    if (req.user.rol !== 'manager') {
+      return res.status(403).json({ msg: 'Acceso denegado. Solo gerentes pueden exportar reportes.' });
+    }
+
+    const { vendedor_id, inicio, fin } = req.query;
+
+    let query = `
+      SELECT 
+        ca.created_at as fecha,
+        ua.alias as vendedor,
+        ca.cliente_rut as rut_cliente,
+        c.nombre as nombre_cliente,
+        at.nombre as tipo,
+        ca.comentario
+      FROM cliente_actividad ca
+      JOIN usuario_alias ua ON ca.usuario_alias_id = ua.id
+      JOIN cliente c ON ca.cliente_rut = c.rut
+      LEFT JOIN activity_types at ON ca.activity_type_id = at.id
+      WHERE 1=1
+    `;
+    const params = [];
+    let pIdx = 1;
+
+    if (vendedor_id) {
+      query += ` AND ca.usuario_alias_id = $${pIdx++}`;
+      params.push(vendedor_id);
+    }
+    if (inicio) {
+      query += ` AND ca.created_at >= $${pIdx++}`;
+      params.push(inicio);
+    }
+    if (fin) {
+      query += ` AND ca.created_at <= $${pIdx++}`;
+      params.push(fin);
+    }
+
+    query += ` ORDER BY ca.created_at DESC`;
+
+    const result = await pool.query(query, params);
+
+    // Generar CSV manualmente para evitar dependencias bloqueadas
+    const headers = ['Fecha', 'Vendedor', 'RUT Cliente', 'Nombre Cliente', 'Tipo', 'Comentario'];
+    const rows = result.rows.map(r => [
+      new Date(r.fecha).toLocaleString('es-CL'),
+      r.vendedor,
+      r.rut_cliente,
+      r.nombre_cliente,
+      r.tipo || 'NOTA',
+      `"${(r.comentario || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=reporte_actividades_${new Date().toISOString().split('T')[0]}.csv`);
+    res.send(csvContent);
+
+  } catch (err) {
+    console.error('Error generando reporte:', err.message);
+    res.status(500).send('Server Error generating report');
   }
 });
 

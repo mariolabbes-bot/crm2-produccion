@@ -374,10 +374,25 @@ export const getClientDeuda = (rut) => apiFetch(`${API_URL}/client-detail/${rut}
 export const getClientVentasMensual = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/ventas-mensual`);
 export const getClientProductos6m = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/productos-6m`);
 export const getClientActividades = (rut) => apiFetch(`${API_URL}/client-detail/${rut}/actividades`);
-export const createClientActividad = (rut, comentario) =>
+
+// VISITAS
+export const getActiveVisit = () => apiFetch(`${API_URL}/visits/active`);
+export const checkIn = (cliente_rut, latitud, longitud, activity_type = 'VISITA') =>
+  apiFetch(`${API_URL}/visits/check-in`, {
+    method: 'POST',
+    body: JSON.stringify({ cliente_rut, latitud, longitud, activity_type })
+  });
+export const checkOut = (visita_id, latitud, longitud, resultado, notas) =>
+  apiFetch(`${API_URL}/visits/check-out`, {
+    method: 'POST',
+    body: JSON.stringify({ visita_id, latitud, longitud, resultado, notas })
+  });
+
+// ACTIVIDADES (Soporte para tipos)
+export const createClientActividad = (rut, comentario, activity_type = 'MENSAJE') =>
   apiFetch(`${API_URL}/client-detail/${rut}/actividades`, {
     method: 'POST',
-    body: JSON.stringify({ comentario })
+    body: JSON.stringify({ comentario, activity_type })
   });
 
 // VISITS & MAP
@@ -386,8 +401,6 @@ export const getHeatmapData = (vendedorId) => {
   return apiFetch(url);
 };
 
-export const checkInVisita = (data) => apiFetch(`${API_URL}/visits/check-in`, { method: 'POST', body: JSON.stringify(data) });
-export const checkOutVisita = (data) => apiFetch(`${API_URL}/visits/check-out`, { method: 'POST', body: JSON.stringify(data) });
 export const getMyVisitsToday = () => apiFetch(`${API_URL}/visits/my-today`);
 export const getVisitSuggestions = () => apiFetch(`${API_URL}/visits/suggestions`);
 export const getHotCircuits = (vendedorId) => {
