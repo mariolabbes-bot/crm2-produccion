@@ -81,7 +81,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    database: process.env.DATABASE_URL ? 'configured' : 'not configured'
+    database: process.env.DATABASE_URL ? 'configured' : 'not configured',
+    version: 'v4.1-enhanced-workflow'
   });
 });
 
