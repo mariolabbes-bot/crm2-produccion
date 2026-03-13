@@ -33,14 +33,14 @@ function ClientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tabValue, setTabValue] = useState(0);
-  
+
   // Estado para cada tab
   const [cliente, setCliente] = useState(null);
   const [deuda, setDeuda] = useState(null);
   const [ventas, setVentas] = useState(null);
   const [productos, setProductos] = useState(null);
   const [actividades, setActividades] = useState(null);
-  
+
   // Loading por tab
   const [loadingTabs, setLoadingTabs] = useState({
     deuda: false,
@@ -49,22 +49,23 @@ function ClientDetailPage() {
     actividades: false,
   });
 
+  // Cargar cliente info
+  const loadCliente = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await api.getClientDetail(rut);
+      setCliente(result.data);
+    } catch (err) {
+      console.error('Error cargando cliente:', err);
+      setError(err.message || 'Error al cargar información del cliente');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Cargar cliente info al montar
   useEffect(() => {
-    const loadCliente = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const result = await api.getClientDetail(rut);
-        setCliente(result.data);
-      } catch (err) {
-        console.error('Error cargando cliente:', err);
-        setError(err.message || 'Error al cargar información del cliente');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     loadCliente();
   }, [rut]);
 
@@ -142,7 +143,7 @@ function ClientDetailPage() {
       setActividades(result.data);
     } catch (err) {
       console.error('Error cargando actividades:', err);
-      setError(err.message);
+      setError(err.message || 'Error al cargar actividades');
     } finally {
       setLoadingTabs(prev => ({ ...prev, actividades: false }));
     }
@@ -208,10 +209,10 @@ function ClientDetailPage() {
       </Button>
 
       {/* Header cliente */}
-      <ClientHeader cliente={cliente} />
+      <ClientHeader cliente={cliente} onUpdate={loadCliente} />
 
-  {/* Card con tabs */}
-  <Card className="card-unified" sx={{ mt: 3, boxShadow: 2 }}>
+      {/* Card con tabs */}
+      <Card className="card-unified" sx={{ mt: 3, boxShadow: 2 }}>
         <Tabs
           value={tabValue}
           onChange={handleTabChange}

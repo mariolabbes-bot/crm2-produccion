@@ -277,6 +277,17 @@ class ClientModel {
     return result.rows;
   }
 
+  static async updateCoordinates(rut, { latitud, longitud }) {
+    const query = `
+      UPDATE cliente 
+      SET latitud = $1, longitud = $2, es_terreno = true 
+      WHERE rut = $3 
+      RETURNING *
+    `;
+    const result = await pool.query(query, [latitud, longitud, rut]);
+    return result.rows[0];
+  }
+
   static async bulkAssignCircuit(ruts, circuito) {
     const query = `
       UPDATE cliente 

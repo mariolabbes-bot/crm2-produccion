@@ -147,6 +147,10 @@ class ClientService {
         return await ClientModel.findIncomplete();
     }
 
+    static async updateClientCoordinates(rut, data) {
+        return await ClientModel.updateCoordinates(rut, data);
+    }
+
     static async bulkAssignCircuit(ruts, circuito, user) {
         // We could add permissions check here if not manager, but for now allow updating owned clients.
         // Assuming bulkAssignCircuit updates regardless for simplicity, or we can restrict.

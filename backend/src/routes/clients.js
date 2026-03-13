@@ -160,6 +160,22 @@ router.patch('/bulk-circuit', auth(), async (req, res) => {
   }
 });
 
+// PATCH /:rut/coordinates - Update coordinates and set es_terreno = true
+router.patch('/:rut/coordinates', auth(), async (req, res) => {
+  try {
+    const { latitud, longitud } = req.body;
+    if (latitud === undefined || longitud === undefined) {
+      return res.status(400).json({ msg: 'Debe proveer latitud y longitud' });
+    }
+    const updated = await ClientService.updateClientCoordinates(req.params.rut, { latitud, longitud });
+    if (!updated) return res.status(404).json({ msg: 'Client not found' });
+    res.json(updated);
+  } catch (err) {
+    console.error('Error updating coordinates:', err.message);
+    res.status(500).json({ msg: 'Error al actualizar coordenadas', error: err.message });
+  }
+});
+
 // GET single client by RUT (last to avoid route conflict)
 router.get('/:id', auth(), async (req, res) => {
   try {

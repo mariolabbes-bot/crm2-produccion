@@ -71,7 +71,7 @@ app.use('/api/circuits', require('./routes/circuits')); // Maestro de Circuitos
 app.get('/', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'CRM2 Backend API v2.1',
+    message: 'CRM2 Backend API v4.2 (Normalización & GPS)',
     environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString()
   });
@@ -82,7 +82,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     database: process.env.DATABASE_URL ? 'configured' : 'not configured',
-    version: 'v4.1-enhanced-workflow'
+    version: 'v4.2-data-normalization'
   });
 });
 
