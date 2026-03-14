@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Paper, Button, List, ListItem, ListItemText, ListItemAvatar, Avatar, Chip, IconButton } from '@mui/material';
-import { getKpisMesActual, getMyVisitsToday, getSaldoCreditoTotal } from '../api';
+import { getKpisMesActual, getMyVisitsToday, getSaldoCreditoTotal, getActiveVisit, checkOut } from '../api';
 import MobileKPICard from '../components/MobileKPICard';
-import { ShoppingCart, Payment, AccountBalanceWallet, Map, AltRoute, ExitToApp, MoreHoriz, ArrowForwardIos, LocationOn, CheckCircle, DirectionsCar } from '@mui/icons-material';
+import { ShoppingCart, Payment, AccountBalanceWallet, Map, AltRoute, ExitToApp, MoreHoriz, ArrowForwardIos, LocationOn, CheckCircle, DirectionsCar, Schedule } from '@mui/icons-material';
+import { Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -22,6 +23,9 @@ const MobileHomePage = () => {
     });
     const [timeline, setTimeline] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeVisit, setActiveVisit] = useState(null);
+    const [checkOutDialogOpen, setCheckOutDialogOpen] = useState(false);
+    const [checkOutData, setCheckOutData] = useState({ resultado: 'venta', notas: '' });
 
     useEffect(() => {
         const fetchMobileData = async () => {
@@ -46,6 +50,16 @@ const MobileHomePage = () => {
                     setTimeline(visitsData);
                 }
 
+                // 3. Obtener Visita Activa
+                try {
+                    const activeRes = await getActiveVisit();
+                    if (activeRes && activeRes.id) {
+                        setActiveVisit(activeRes);
+                    }
+                } catch (e) {
+                    console.log('Sin visita activa');
+                }
+
             } catch (error) {
                 console.error('Error mobile data:', error);
             } finally {
@@ -55,6 +69,28 @@ const MobileHomePage = () => {
 
         fetchMobileData();
     }, []);
+
+    const handleCheckOut = async () => {
+        if (!activeVisit) return;
+        try {
+            await checkOut(
+                activeVisit.id,
+                0, // latitud (opcional si no hay gps a mano aquí)
+                0, // longitud
+                checkOutData.resultado,
+                checkOutData.notas
+            );
+            setActiveVisit(null);
+            setCheckOutDialogOpen(false);
+            alert('🏁 Visita finalizada exitosamente');
+            // Opcional: recargar timeline
+            const visitsData = await getMyVisitsToday();
+            if (Array.isArray(visitsData)) setTimeline(visitsData);
+        } catch (error) {
+            console.error('Error check-out:', error);
+            alert('Error al finalizar visita');
+        }
+    };
 
     const nextStop = timeline.find(v => v.estado === 'pendiente' || v.estado === 'en_progreso');
     const completedCount = timeline.filter(v => v.estado === 'completada').length;
@@ -233,6 +269,54 @@ const MobileHomePage = () => {
                 </div>
 
             </Box>
+
+            {/* Indicador Visita Activa (Floating Sticky) */}
+            {activeVisit && (
+                <Paper sx={{ position: 'fixed', bottom: 70, left: 16, right: 16, bgcolor: '#2e7d32', color: 'white', p: 1.5, borderRadius: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 100, boxShadow: 3 }}>
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <Schedule fontSize="small" />
+                        <Box>
+                            <Typography variant="body2" fontWeight="bold">Visita en curso</Typography>
+                            <Typography variant="caption">{activeVisit.cliente_nombre || 'Cliente'}</Typography>
+                        </Box>
+                    </Box>
+                    <Button size="small" variant="contained" color="warning" onClick={() => setCheckOutDialogOpen(true)}>
+                        TERMINAR
+                    </Button>
+                </Paper>
+            )}
+
+            {/* Dialog Check-out */}
+            <Dialog open={checkOutDialogOpen} onClose={() => setCheckOutDialogOpen(false)} fullWidth>
+                <DialogTitle>Finalizar Visita</DialogTitle>
+                <DialogContent>
+                    <Typography variant="subtitle1" gutterBottom>Resultado:</Typography>
+                    <Box display="flex" gap={1} mb={2}>
+                        {['venta', 'no_venta', 'cobranza'].map((res) => (
+                            <Chip
+                                key={res}
+                                label={res.replace('_', ' ').toUpperCase()}
+                                onClick={() => setCheckOutData({ ...checkOutData, resultado: res })}
+                                color={checkOutData.resultado === res ? "primary" : "default"}
+                                variant={checkOutData.resultado === res ? "filled" : "outlined"}
+                            />
+                        ))}
+                    </Box>
+                    <TextField
+                        fullWidth
+                        multiline
+                        rows={3}
+                        label="Notas de la visita"
+                        value={checkOutData.notas}
+                        onChange={(e) => setCheckOutData({ ...checkOutData, notas: e.target.value })}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setCheckOutDialogOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleCheckOut} variant="contained" color="primary">Confirmar cierre</Button>
+                </DialogActions>
+            </Dialog>
+
         </Box>
     );
 };

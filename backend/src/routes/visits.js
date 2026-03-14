@@ -224,6 +224,23 @@ router.post('/check-in', auth(), async (req, res) => {
         const vendedorId = req.user.rut; // Usamos RUT para consistencia
         const { cliente_rut, latitud, longitud, activity_type = 'VISITA' } = req.body;
 
+        // 0. AUTO-CIERRE FALLBACK: Cerrar visitas > 120 mins del usuario preventivamente
+        try {
+            const autoCloseQuery = `
+                UPDATE visitas_registro 
+                SET hora_fin = CURRENT_TIME, 
+                    estado = 'completada', 
+                    resultado = 'Auto-cierre', 
+                    notas = 'Cerrado automáticamente (Fallback > 120min).'
+                WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2) 
+                  AND estado = 'en_progreso'
+                  AND EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - (fecha + hora_inicio))) / 60 >= 120
+            `;
+            await pool.query(autoCloseQuery, [vendedorId, req.user.id]);
+        } catch (autoErr) {
+            console.error('⚠️ Error auto-cierre fallback:', autoErr.message);
+        }
+
         // 1. Verificar si ya tiene una visita activa
         const activeCheck = await pool.query(
             'SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2) AND estado = \'en_progreso\'',
@@ -448,6 +465,22 @@ router.post('/check-out', auth(), async (req, res) => {
 router.get('/active', auth(), async (req, res) => {
     try {
         const vendedorId = req.user.rut;
+
+        // 0. AUTO-CIERRE FALLBACK: Cerrar preventivamente
+        try {
+            const autoCloseQuery = `
+                UPDATE visitas_registro 
+                SET hora_fin = CURRENT_TIME, 
+                    estado = 'completada', 
+                    resultado = 'Auto-cierre', 
+                    notas = 'Cerrado automáticamente (Fallback > 120min).'
+                WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2) 
+                  AND estado = 'en_progreso'
+                  AND EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - (fecha + hora_inicio))) / 60 >= 120
+            `;
+            await pool.query(autoCloseQuery, [vendedorId, req.user.id]);
+        } catch (autoErr) { console.error('⚠️ Error auto-cierre fallback:', autoErr.message); }
+
         const query = `
             SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion
             FROM visitas_registro v

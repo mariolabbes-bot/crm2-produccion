@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { Box, Typography, Paper, CircularProgress, Chip, Stack, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions, IconButton } from '@mui/material';
 import { LocationOn, CheckCircle, DirectionsCar, Schedule, Flag, FilterList, Close } from '@mui/icons-material';
-import { getHeatmapData, checkInVisita, checkOutVisita, getCircuits, getVendedores } from '../api';
+import { getHeatmapData, checkIn, checkOut, getCircuits, getVendedores } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import { getEnv } from '../utils/env';
 import { getDistance, formatDistance } from '../utils/geoUtils';
@@ -148,11 +148,11 @@ const MobileVisitsPage = () => {
 
         try {
             const location = userLocation || { lat: 0, lng: 0 }; // Fallback
-            const res = await checkInVisita({
-                cliente_rut: client.rut,
-                latitud: location.lat,
-                longitud: location.lng
-            });
+            const res = await checkIn(
+                client.rut,
+                location.lat,
+                location.lng
+            );
             setActiveVisit(res); // Guardar visita activa
             setSelectedClient(null); // Cerrar info window
             alert(`✅ Visita iniciada con ${client.nombre}`);
@@ -166,13 +166,13 @@ const MobileVisitsPage = () => {
         if (!activeVisit) return;
         try {
             const location = userLocation || { lat: 0, lng: 0 };
-            await checkOutVisita({
-                visita_id: activeVisit.id,
-                latitud: location.lat,
-                longitud: location.lng,
-                resultado: checkOutData.resultado,
-                notas: checkOutData.notas
-            });
+            await checkOut(
+                activeVisit.id,
+                location.lat,
+                location.lng,
+                checkOutData.resultado,
+                checkOutData.notas
+            );
             setActiveVisit(null);
             setCheckOutDialogOpen(false);
             alert('🏁 Visita finalizada exitosamente');
