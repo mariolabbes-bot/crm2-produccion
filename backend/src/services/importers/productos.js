@@ -21,7 +21,7 @@ async function processProductosFileAsync(jobId, filePath, originalname) {
         const findCol = (patterns) => headers.find(h => patterns.some(p => p.test(h))) || null;
 
         const colSku = findCol([/^SKU$/i, /^Codigo$/i, /^Código$/i]);
-        const colDesc = findCol([/^Descripcion$/i, /^Descripción$/i, /^Nombre$/i]);
+        const colDesc = findCol([/^Descripcion$/i, /^Descripción$/i, /^Nombre$/i, /^Art.*culo$/i, /^Articulo$/i]);
         const colMarca = findCol([/^Marca$/i, /^Brand$/i]);
         const colFamilia = findCol([/^Familia$/i, /^Family$/i, /^Categor[ií]a$/i]);
         const colSubfamilia = findCol([/^Subfamilia$/i, /^Sub-Familia$/i]);
