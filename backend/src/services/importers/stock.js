@@ -17,7 +17,7 @@ async function processStockFileAsync(jobId, filePath, originalname) {
         const headers = Object.keys(data[0] || {});
 
         // Find SKU column
-        const colSku = headers.find(h => /^ART[IÍ]CULO$/i.test(h) || /^SKU$/i.test(h) || /^C[OÓ]DIGO$/i.test(h));
+        const colSku = headers.find(h => /^ART.*CULO$/i.test(h) || /^SKU$/i.test(h) || /^C.*DIGO$/i.test(h));
         if (!colSku) throw new Error('Falta columna ARTICULO, SKU o CÓDIGO');
 
         // Identify branch columns (numeric or specific patterns like '001', '003', etc.)
