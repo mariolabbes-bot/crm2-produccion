@@ -125,7 +125,11 @@ export const getProductKpis = (params = {}) => {
 };
 
 export const getTop20Products = () => apiFetch(`${API_URL}/products/top-20`);
-export const searchProducts = (q) => apiFetch(`${API_URL}/products/search?q=${encodeURIComponent(q)}`);
+export const getProductMetadata = () => apiFetch(`${API_URL}/products/metadata`);
+export const searchProducts = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/products/search?${qs}`);
+};
 export const getProductDetail = (sku) => apiFetch(`${API_URL}/products/${encodeURIComponent(sku)}/detail`);
 
 // SALES REPORT

@@ -90,18 +90,35 @@ router.get('/top-20', auth(), async (req, res) => {
 // GET /search
 router.get('/search', auth(), async (req, res) => {
     try {
-        const { q } = req.query;
-        if (!q) return res.json({ success: true, data: [] });
+        const { q, marca, familia } = req.query;
 
-        const searchTerm = `%${q}%`;
-        const result = await pool.query(`
-            SELECT sku, descripcion, marca, familia, subfamilia, stock_por_sucursal
-            FROM producto
-            WHERE sku ILIKE $1 OR descripcion ILIKE $1
-            ORDER BY descripcion
-            LIMIT 50
-            `, [searchTerm]);
+        let query = "SELECT sku, descripcion, marca, familia, subfamilia, stock_por_sucursal FROM producto WHERE 1=1";
+        const values = [];
+        let paramIndex = 1;
 
+        if (q && q.trim().length > 0) {
+            query += ` AND (sku ILIKE $${paramIndex} OR descripcion ILIKE $${paramIndex})`;
+            values.push(`%${q}%`);
+            paramIndex++;
+        }
+        if (marca) {
+            query += ` AND marca = $${paramIndex}`;
+            values.push(marca);
+            paramIndex++;
+        }
+        if (familia) {
+            query += ` AND familia = $${paramIndex}`;
+            values.push(familia);
+            paramIndex++;
+        }
+
+        query += " ORDER BY descripcion LIMIT 50";
+
+        if (values.length === 0) {
+            return res.json({ success: true, data: [] });
+        }
+
+        const result = await pool.query(query, values);
         res.json({ success: true, data: result.rows });
     } catch (err) {
         console.error('Error in /search:', err);

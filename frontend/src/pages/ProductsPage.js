@@ -2,44 +2,57 @@ import React, { useState, useEffect } from 'react';
 import {
     Box, Typography, Container, TextField, InputAdornment,
     Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    CircularProgress, Chip
+    CircularProgress, Chip, FormControl, InputLabel, Select, MenuItem, Grid
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import ProductAnalyticsWidget from '../components/ProductAnalyticsWidget';
 import ProductDetailModal from '../components/products/ProductDetailModal';
-import { getTop20Products, searchProducts } from '../api';
+import { getTop20Products, searchProducts, getProductMetadata } from '../api';
 
 const ProductsPage = () => {
+    // Search & Filter States
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedMarca, setSelectedMarca] = useState('');
+    const [selectedFamilia, setSelectedFamilia] = useState('');
+
+    // Data States
+    const [metadata, setMetadata] = useState({ marcas: [], familias: [] });
     const [products, setProducts] = useState([]);
     const [topProducts, setTopProducts] = useState([]);
-    const [loading, setLoading] = useState(false);
 
+    // UI States
+    const [loading, setLoading] = useState(false);
     const [selectedSku, setSelectedSku] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
 
-    // Initial load: Fetch top 20
+    // 1. Initial Load: Top 20 & Metadata
     useEffect(() => {
-        const fetchTop20 = async () => {
+        const fetchInitialData = async () => {
             setLoading(true);
             try {
-                const res = await getTop20Products();
-                if (res.success) {
-                    setTopProducts(res.data);
-                }
+                const [topRes, metaRes] = await Promise.all([
+                    getTop20Products(),
+                    getProductMetadata()
+                ]);
+                if (topRes.success) setTopProducts(topRes.data);
+                if (metaRes.marcas) setMetadata({ marcas: metaRes.marcas, familias: metaRes.familias });
             } catch (err) {
-                console.error('Error fetching top 20:', err);
+                console.error('Error fetching initial data:', err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchTop20();
+        fetchInitialData();
     }, []);
 
-    // Search effect with debounce
+    // 2. Search Effect (Triggered on text, marca, or familia change)
     useEffect(() => {
-        if (!searchTerm.trim() || searchTerm.trim().length < 3) {
+        const isTextValid = searchTerm.trim().length >= 3;
+        const hasFilters = selectedMarca !== '' || selectedFamilia !== '';
+
+        if (!isTextValid && !hasFilters) {
             setProducts([]);
             return;
         }
@@ -47,7 +60,12 @@ const ProductsPage = () => {
         const delayFn = setTimeout(async () => {
             setLoading(true);
             try {
-                const res = await searchProducts(searchTerm);
+                const params = {};
+                if (isTextValid) params.q = searchTerm.trim();
+                if (selectedMarca) params.marca = selectedMarca;
+                if (selectedFamilia) params.familia = selectedFamilia;
+
+                const res = await searchProducts(params);
                 if (res.success) {
                     setProducts(res.data);
                 }
@@ -59,8 +77,9 @@ const ProductsPage = () => {
         }, 500);
 
         return () => clearTimeout(delayFn);
-    }, [searchTerm]);
+    }, [searchTerm, selectedMarca, selectedFamilia]);
 
+    // Modal Handlers
     const handleProductClick = (sku) => {
         setSelectedSku(sku);
         setModalOpen(true);
@@ -71,13 +90,13 @@ const ProductsPage = () => {
         setTimeout(() => setSelectedSku(null), 300); // clear after animation
     };
 
-    const isSearching = searchTerm.trim().length >= 3;
-    const currentList = isSearching ? products : topProducts;
-    const title = isSearching ? `Resultados de búsqueda (${products.length})` : 'Top 20 Productos Más Vendidos';
+    // Derived State
+    const isSearchingActive = searchTerm.trim().length >= 3 || selectedMarca !== '' || selectedFamilia !== '';
+    const currentList = isSearchingActive ? products : topProducts;
+    const title = isSearchingActive ? `Resultados de búsqueda (${products.length})` : 'Top 20 Productos Más Vendidos';
 
     return (
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-            {/* Título de la Sección */}
             <Box sx={{ mb: 4 }}>
                 <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2B4F6F', mb: 1 }}>
                     Buscador de Productos e Inventario
@@ -87,27 +106,65 @@ const ProductsPage = () => {
                 </Typography>
             </Box>
 
-            {/* Panel de Análisis (KPIs temporales si aplican) */}
             <ProductAnalyticsWidget />
 
-            <Box sx={{ mt: 4, mb: 3 }}>
-                <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Buscar por SKU, descripción o marca..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon color="primary" />
-                            </InputAdornment>
-                        ),
-                        sx: { bgcolor: 'white', borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }
-                    }}
-                />
-            </Box>
+            {/* Filter Section */}
+            <Paper sx={{ mt: 4, mb: 3, p: 3, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                <Box display="flex" alignItems="center" gap={1} mb={2}>
+                    <FilterListIcon color="primary" />
+                    <Typography variant="h6" fontWeight="bold">Filtros de Búsqueda</Typography>
+                </Box>
 
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
+                            placeholder="Buscar por SKU, descripción..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon color="primary" />
+                                    </InputAdornment>
+                                ),
+                                sx: { bgcolor: 'white' }
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth variant="outlined">
+                            <InputLabel>Marca</InputLabel>
+                            <Select
+                                value={selectedMarca}
+                                onChange={(e) => setSelectedMarca(e.target.value)}
+                                label="Marca"
+                                sx={{ bgcolor: 'white' }}
+                            >
+                                <MenuItem value=""><em>Todas las Marcas</em></MenuItem>
+                                {metadata.marcas.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth variant="outlined">
+                            <InputLabel>Familia</InputLabel>
+                            <Select
+                                value={selectedFamilia}
+                                onChange={(e) => setSelectedFamilia(e.target.value)}
+                                label="Familia"
+                                sx={{ bgcolor: 'white' }}
+                            >
+                                <MenuItem value=""><em>Todas las Familias</em></MenuItem>
+                                {metadata.familias.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                </Grid>
+            </Paper>
+
+            {/* Results Table */}
             <Paper sx={{ p: 3, borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Typography variant="h6" fontWeight="bold" color="primary.dark">
@@ -124,7 +181,7 @@ const ProductsPage = () => {
                                 <TableCell><strong>Descripción</strong></TableCell>
                                 <TableCell><strong>Marca</strong></TableCell>
                                 <TableCell><strong>Familia</strong></TableCell>
-                                {!isSearching && <TableCell align="right"><strong>Total Vendido</strong></TableCell>}
+                                {!isSearchingActive && <TableCell align="right"><strong>Total Vendido</strong></TableCell>}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -146,7 +203,7 @@ const ProductsPage = () => {
                                         <TableCell>
                                             {prod.familia && <Chip label={prod.familia} size="small" variant="outlined" />}
                                         </TableCell>
-                                        {!isSearching && (
+                                        {!isSearchingActive && (
                                             <TableCell align="right" sx={{ fontWeight: 'bold' }}>
                                                 <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
                                                     <ShoppingCartIcon fontSize="small" color="success" />
