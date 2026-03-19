@@ -30,37 +30,48 @@ async function processStockFileAsync(jobId, filePath, originalname) {
 
         let updated = 0;
         let notFound = 0;
+        let processed = 0;
+        const totalRows = data.length;
 
         await client.query('BEGIN');
 
-        for (const row of data) {
-            const sku = row[colSku] ? String(row[colSku]).trim() : null;
-            if (!sku) continue;
+        const chunkSize = 50;
+        for (let i = 0; i < totalRows; i += chunkSize) {
+            const chunk = data.slice(i, i + chunkSize);
 
-            const stockObj = {};
+            const promises = chunk.map(async (row) => {
+                const sku = row[colSku] ? String(row[colSku]).trim() : null;
+                if (!sku) return null;
 
-            // Build stock map for this product
-            const colsToUse = branchColumns.length > 0 ? branchColumns : headers.filter(h => h !== colSku && !/[A-Za-z]/.test(h));
+                const stockObj = {};
+                const colsToUse = branchColumns.length > 0 ? branchColumns : headers.filter(h => h !== colSku && !/[A-Za-z]/.test(h));
 
-            for (const branchCol of colsToUse) {
-                const stockVal = parseFloat(row[branchCol]);
-                if (!isNaN(stockVal)) {
-                    stockObj[branchCol] = stockVal;
+                for (const branchCol of colsToUse) {
+                    const stockVal = parseFloat(row[branchCol]);
+                    if (!isNaN(stockVal)) {
+                        stockObj[branchCol] = stockVal;
+                    }
+                }
+
+                return client.query(`
+                    UPDATE producto 
+                    SET stock_por_sucursal = $1
+                    WHERE sku = $2
+                    RETURNING sku;
+                `, [stockObj, sku]);
+            });
+
+            const results = await Promise.all(promises);
+            for (const res of results) {
+                if (res) {
+                    if (res.rowCount > 0) updated++;
+                    else notFound++;
                 }
             }
 
-            // Update database
-            const res = await client.query(`
-                UPDATE producto 
-                SET stock_por_sucursal = $1
-                WHERE sku = $2
-                RETURNING sku;
-            `, [stockObj, sku]);
-
-            if (res.rowCount > 0) {
-                updated++;
-            } else {
-                notFound++;
+            processed += chunk.length;
+            if (processed % 500 === 0 || processed === totalRows) {
+                console.log(`📊 [Job ${jobId}] Progreso Stock: ${processed}/${totalRows}`);
             }
         }
 
