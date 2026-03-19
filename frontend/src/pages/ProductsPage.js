@@ -73,7 +73,7 @@ const ProductsPage = () => {
 
     const isSearching = searchTerm.trim().length >= 3;
     const currentList = isSearching ? products : topProducts;
-    const title = isSearching ?\`Resultados de búsqueda (\${products.length})\` : 'Top 20 Productos Más Vendidos';
+    const title = isSearching ? `Resultados de búsqueda (${products.length})` : 'Top 20 Productos Más Vendidos';
 
     return (
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
@@ -130,9 +130,9 @@ const ProductsPage = () => {
                         <TableBody>
                             {currentList.length > 0 ? (
                                 currentList.map((prod) => (
-                                    <TableRow 
-                                        key={prod.sku} 
-                                        hover 
+                                    <TableRow
+                                        key={prod.sku}
+                                        hover
                                         onClick={() => handleProductClick(prod.sku)}
                                         sx={{ cursor: 'pointer', transition: '0.2s', '&:hover': { bgcolor: '#f0f7ff' } }}
                                     >
@@ -168,10 +168,10 @@ const ProductsPage = () => {
                 </TableContainer>
             </Paper>
 
-            <ProductDetailModal 
-                open={modalOpen} 
-                onClose={handleCloseModal} 
-                sku={selectedSku} 
+            <ProductDetailModal
+                open={modalOpen}
+                onClose={handleCloseModal}
+                sku={selectedSku}
             />
 
         </Container>

@@ -54,7 +54,7 @@ const ProductDetailModal = ({ open, onClose, sku }) => {
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle sx={{ bgcolor: '#f5f5f5', pb: 2 }}>
-                {loading ? 'Cargando...' : productData ?\`SKU: \${productData.sku}\` : 'Detalle de Producto'}
+                {loading ? 'Cargando...' : productData ? `SKU: ${productData.sku}` : 'Detalle de Producto'}
             </DialogTitle>
 
             <DialogContent sx={{ mt: 2 }}>
@@ -77,8 +77,8 @@ const ProductDetailModal = ({ open, onClose, sku }) => {
                                 {productData.descripcion}
                             </Typography>
                             <Box display="flex" gap={1} mt={1}>
-                                {productData.marca && <Chip label={\`Marca: \${productData.marca}\`} size="small" />}
-                                {productData.familia && <Chip label={\`Familia: \${productData.familia}\`} size="small" variant="outlined" />}
+                                {productData.marca && <Chip label={`Marca: ${productData.marca}`} size="small" />}
+                                {productData.familia && <Chip label={`Familia: ${productData.familia}`} size="small" variant="outlined" />}
                             </Box>
                         </Box>
 
