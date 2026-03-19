@@ -93,7 +93,7 @@ router.get('/search', auth(), async (req, res) => {
         const { q } = req.query;
         if (!q) return res.json({ success: true, data: [] });
 
-        const searchTerm = \`%\${q}%\`;
+        const searchTerm = `%${q}%`;
         const result = await pool.query(`
             SELECT sku, descripcion, marca, familia, subfamilia, stock_por_sucursal
             FROM producto
@@ -101,7 +101,7 @@ router.get('/search', auth(), async (req, res) => {
             ORDER BY descripcion
             LIMIT 50
             `, [searchTerm]);
-        
+
         res.json({ success: true, data: result.rows });
     } catch (err) {
         console.error('Error in /search:', err);
@@ -113,7 +113,7 @@ router.get('/search', auth(), async (req, res) => {
 router.get('/:sku/detail', auth(), async (req, res) => {
     try {
         const { sku } = req.params;
-        
+
         // 1. Get stock from producto
         const pResult = await pool.query('SELECT stock_por_sucursal, descripcion, marca, familia FROM producto WHERE sku = $1', [sku]);
         if (pResult.rows.length === 0) {
@@ -129,16 +129,16 @@ router.get('/:sku/detail', auth(), async (req, res) => {
             WHERE sku = $1 AND fecha_emision >= CURRENT_DATE - INTERVAL '6 months'
             GROUP BY COALESCE(sucursal, 'Central')
             `, [sku]);
-        
+
         const branchSales = vResult.rows;
-        
+
         // 3. Merge stock and sales
         const allBranches = new Set([...Object.keys(stockObj), ...branchSales.map(s => s.sucursal)]);
         const combined = Array.from(allBranches).map(branch => {
             const sale = branchSales.find(s => s.sucursal === branch);
             const total6m = sale ? parseFloat(sale.total_6m) : 0;
             const avg6m = total6m / 6;
-            
+
             return {
                 sucursal: branch || 'Desconocida',
                 venta_promedio: Number(avg6m.toFixed(2)),
@@ -146,15 +146,15 @@ router.get('/:sku/detail', auth(), async (req, res) => {
             };
         });
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             data: {
                 sku,
                 descripcion: product.descripcion,
                 marca: product.marca,
                 familia: product.familia,
-                sucursales: combined.sort((a,b) => b.venta_promedio - a.venta_promedio)
-            } 
+                sucursales: combined.sort((a, b) => b.venta_promedio - a.venta_promedio)
+            }
         });
 
     } catch (err) {

@@ -117,7 +117,7 @@ const ProductsPage = () => {
                 </Box>
 
                 <TableContainer>
-                    <Table hover="true">
+                    <Table>
                         <TableHead sx={{ bgcolor: '#f4f6f8' }}>
                             <TableRow>
                                 <TableCell><strong>SKU</strong></TableCell>
