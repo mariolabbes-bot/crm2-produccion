@@ -16,7 +16,14 @@ const TEMP_DIR = path.join(__dirname, '../../uploads/temp_drive');
 
 if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
 
+let isRunning = false;
+
 async function runDriveImportCycle() {
+    if (isRunning) {
+        console.log('🤖 [DriveBot] Ciclo anterior en progreso. Omitiendo escaneo...');
+        return;
+    }
+    isRunning = true;
     console.log('🤖 [DriveBot] Iniciando ciclo de escaneo en Google Drive...');
 
     try {
@@ -113,6 +120,8 @@ async function runDriveImportCycle() {
         }
     } catch (error) {
         console.error('🔥 [DriveBot] Error Crítico en el ciclo:', error);
+    } finally {
+        isRunning = false;
     }
 }
 
