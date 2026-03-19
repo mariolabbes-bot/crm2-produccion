@@ -21,6 +21,9 @@ module.exports = async function (job) {
             await processClientesFileAsync(jobId, filePath, originalName, options);
         } else if (type === 'saldo_credito') {
             await processSaldoCreditoFileAsync(jobId, filePath, originalName, options);
+        } else if (type === 'stock') {
+            const { processStockFileAsync } = require('../services/importJobs');
+            await processStockFileAsync(jobId, filePath, originalName);
         } else {
             throw new Error(`Tipo de importación desconocido: ${type}`);
         }

@@ -317,10 +317,12 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
           END, 2
         ) as relacion_venta,
         ROUND(pc.precio_promedio, 2) as precio_promedio,
-        pc.ultima_compra
+        pc.ultima_compra,
+        p.stock_por_sucursal
       FROM productos_cliente pc
       LEFT JOIN ventas_mes_actual vma ON pc.sku = vma.sku
       LEFT JOIN ventas_12m v12 ON pc.sku = v12.sku
+      LEFT JOIN producto p ON pc.sku = p.sku
       WHERE pc.cantidad_total > 0
       ORDER BY COALESCE(v12.cantidad_promedio_12m, 0) DESC
       LIMIT 15
@@ -334,7 +336,8 @@ router.get('/:rut/productos-6m', auth(), async (req, res) => {
       venta_mes_actual: parseFloat(producto.venta_mes_actual) || 0,
       venta_promedio_12m: parseFloat(producto.venta_promedio_12m) || 0,
       relacion_venta: parseFloat(producto.relacion_venta) || 0,
-      precio_promedio: parseFloat(producto.precio_promedio) || 0
+      precio_promedio: parseFloat(producto.precio_promedio) || 0,
+      stock_por_sucursal: producto.stock_por_sucursal || {}
     }));
 
     res.json({

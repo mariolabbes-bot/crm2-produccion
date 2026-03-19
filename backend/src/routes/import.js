@@ -179,6 +179,39 @@ router.post('/saldo-credito', auth(['manager']), upload.single('file'), async (r
   }
 });
 
+// POST /stock (Async Queue Only)
+router.post('/stock', auth(['manager']), upload.single('file'), async (req, res) => {
+  console.log('🟠 [Request] /stock recibido:', req.file?.originalname);
+  try {
+    if (!req.file) return res.status(400).json({ success: false, msg: 'No se proporcionó archivo' });
+
+    const userRut = req.user?.rut || 'unknown';
+
+    const jobId = await createJob('stock', req.file.originalname, userRut);
+    const permanentPath = moveToPending(req, jobId);
+
+    await enqueueImport({
+      jobId,
+      type: 'stock',
+      filePath: permanentPath,
+      originalName: req.file.originalname,
+      userRut
+    });
+
+    res.status(202).json({
+      success: true,
+      jobId,
+      msg: 'Archivo de Stock recibido. Procesando en segundo plano...',
+      statusUrl: `/api/import/status/${jobId}`
+    });
+
+  } catch (error) {
+    console.error('❌ Error /stock:', error);
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    res.status(500).json({ success: false, msg: 'Error al iniciar importación de stock', error: error.message });
+  }
+});
+
 // GET Reports
 router.get('/download-report/:filename', auth(['manager']), (req, res) => {
   const filePath = path.join(REPORTS_DIR, req.params.filename);

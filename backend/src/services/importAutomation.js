@@ -6,6 +6,7 @@ const { processClientesFileAsync } = require('./importers/clientes');
 const { processVentasFileAsync } = require('./importers/ventas');
 const { processAbonosFileAsync } = require('./importers/abonos');
 const { processSaldoCreditoFileAsync } = require('./importers/saldo_credito');
+const { processStockFileAsync } = require('./importers/stock');
 const { createJob } = require('./jobManager');
 const { createNotification } = require('./notificationService'); // Added Notification Service
 
@@ -49,6 +50,7 @@ async function runDriveImportCycle() {
             else if (name.includes('VENTA')) { type = 'import-ventas'; importer = processVentasFileAsync; }
             else if (name.includes('ABONO') || name.includes('RECAUDACION')) { type = 'import-abonos'; importer = processAbonosFileAsync; }
             else if (name.includes('SALDO') && name.includes('CREDITO')) { type = 'import-saldo'; importer = processSaldoCreditoFileAsync; }
+            else if (name.includes('STOCK')) { type = 'import-stock'; importer = processStockFileAsync; }
 
             if (!importer) {
                 console.log(`⚠️ [DriveBot] Archivo ignorado (Formato desconocido): ${file.name}`);

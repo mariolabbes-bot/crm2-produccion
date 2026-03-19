@@ -68,4 +68,99 @@ router.put('/:sku', auth(), async (req, res) => {
     }
 });
 
+// GET /top-20
+router.get('/top-20', auth(), async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT p.sku, p.descripcion, p.marca, p.familia, 
+                   SUM(v.cantidad) as total_vendido
+            FROM producto p
+            JOIN venta v ON p.sku = COALESCE(v.sku, '')
+            GROUP BY p.sku, p.descripcion, p.marca, p.familia
+            ORDER BY total_vendido DESC
+            LIMIT 20
+        `);
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        console.error('Error in /top-20:', err);
+        res.status(500).json({ success: false, msg: 'Error al obtener top 20' });
+    }
+});
+
+// GET /search
+router.get('/search', auth(), async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q) return res.json({ success: true, data: [] });
+
+        const searchTerm = \`%\${q}%\`;
+        const result = await pool.query(`
+            SELECT sku, descripcion, marca, familia, subfamilia, stock_por_sucursal
+            FROM producto
+            WHERE sku ILIKE $1 OR descripcion ILIKE $1
+            ORDER BY descripcion
+            LIMIT 50
+            `, [searchTerm]);
+        
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        console.error('Error in /search:', err);
+        res.status(500).json({ success: false, msg: 'Error al buscar productos' });
+    }
+});
+
+// GET /:sku/detail
+router.get('/:sku/detail', auth(), async (req, res) => {
+    try {
+        const { sku } = req.params;
+        
+        // 1. Get stock from producto
+        const pResult = await pool.query('SELECT stock_por_sucursal, descripcion, marca, familia FROM producto WHERE sku = $1', [sku]);
+        if (pResult.rows.length === 0) {
+            return res.status(404).json({ success: false, msg: 'Producto no encontrado' });
+        }
+        const product = pResult.rows[0];
+        const stockObj = product.stock_por_sucursal || {};
+
+        // 2. Get 6 months sales grouped by branch
+        const vResult = await pool.query(`
+            SELECT COALESCE(sucursal, 'Central') as sucursal, SUM(cantidad) as total_6m
+            FROM venta
+            WHERE sku = $1 AND fecha_emision >= CURRENT_DATE - INTERVAL '6 months'
+            GROUP BY COALESCE(sucursal, 'Central')
+            `, [sku]);
+        
+        const branchSales = vResult.rows;
+        
+        // 3. Merge stock and sales
+        const allBranches = new Set([...Object.keys(stockObj), ...branchSales.map(s => s.sucursal)]);
+        const combined = Array.from(allBranches).map(branch => {
+            const sale = branchSales.find(s => s.sucursal === branch);
+            const total6m = sale ? parseFloat(sale.total_6m) : 0;
+            const avg6m = total6m / 6;
+            
+            return {
+                sucursal: branch || 'Desconocida',
+                venta_promedio: Number(avg6m.toFixed(2)),
+                stock: stockObj[branch] || 0
+            };
+        });
+
+        res.json({ 
+            success: true, 
+            data: {
+                sku,
+                descripcion: product.descripcion,
+                marca: product.marca,
+                familia: product.familia,
+                sucursales: combined.sort((a,b) => b.venta_promedio - a.venta_promedio)
+            } 
+        });
+
+    } catch (err) {
+        console.error('Error in /:sku/detail:', err);
+        res.status(500).json({ success: false, msg: 'Error al obtener detalle del producto' });
+    }
+});
+
 module.exports = router;

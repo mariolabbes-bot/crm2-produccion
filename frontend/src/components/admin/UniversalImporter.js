@@ -86,6 +86,7 @@ const UniversalImporter = () => {
                 case 'abonos': endpoint = '/import/abonos?updateMissing=1&forceSync=true'; break;
                 case 'clientes': endpoint = '/import/clientes?forceSync=true'; break;
                 case 'saldo_credito': endpoint = '/import/saldo-credito?forceSync=true'; break;
+                case 'stock': endpoint = '/import/stock?forceSync=true'; break;
                 default: endpoint = '/import/ventas?forceSync=true';
             }
 
@@ -159,6 +160,7 @@ const UniversalImporter = () => {
                         <MenuItem value="abonos">Abonos (Pagos)</MenuItem>
                         <MenuItem value="clientes">Clientes (Maestro)</MenuItem>
                         <MenuItem value="saldo_credito">Saldo Crédito (Snapshot)</MenuItem>
+                        <MenuItem value="stock">Stock por Sucursal</MenuItem>
                     </Select>
                 </FormControl>
 

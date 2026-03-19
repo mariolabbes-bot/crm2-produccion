@@ -124,6 +124,10 @@ export const getProductKpis = (params = {}) => {
   return apiFetch(`${API_URL}/product-analytics/kpis${qs ? `?${qs}` : ''}`);
 };
 
+export const getTop20Products = () => apiFetch(`${API_URL}/products/top-20`);
+export const searchProducts = (q) => apiFetch(`${API_URL}/products/search?q=${encodeURIComponent(q)}`);
+export const getProductDetail = (sku) => apiFetch(`${API_URL}/products/${encodeURIComponent(sku)}/detail`);
+
 // SALES REPORT
 export const getVentasReport = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
@@ -359,6 +363,47 @@ export const uploadSaldoCreditoFile = async (file) => {
 
   } catch (error) {
     console.error('❌ Error en import saldo crédito:', error);
+    throw error;
+  }
+};
+
+export const uploadStockFile = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const token = getToken();
+  console.log('📤 Iniciando upload de stock:', file.name, 'Tamaño:', (file.size / 1024).toFixed(2), 'KB');
+
+  try {
+    const response = await fetch(`${API_URL}/import/stock`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ Error response:', response.status, errorData);
+      const err = new Error(errorData.msg || 'Error al subir archivo');
+      err.status = response.status;
+      err.data = errorData;
+      throw err;
+    }
+
+    const result = await response.json();
+
+    if (response.status === 202 && result.jobId) {
+      console.log('⏳ Importación de stock iniciada (job:', result.jobId, ') - Polling status...');
+      return await pollJobStatus(result.jobId, 60);
+    }
+
+    console.log('✅ Upload stock exitoso:', result);
+    return result;
+
+  } catch (error) {
+    console.error('❌ Error en import stock:', error);
     throw error;
   }
 };
