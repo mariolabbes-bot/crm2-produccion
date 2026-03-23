@@ -38,6 +38,20 @@ async function processStockFileAsync(jobId, filePath, originalname) {
 
         await client.query('BEGIN');
 
+        // SELF-HEALING: Crear la tabla si no existe
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS stock (
+                id SERIAL PRIMARY KEY,
+                sku VARCHAR(150) NOT NULL,
+                sucursal VARCHAR(150) NOT NULL,
+                cantidad DECIMAL(12, 2) DEFAULT 0,
+                ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(sku, sucursal)
+            );
+        `);
+        await client.query(`CREATE INDEX IF NOT EXISTS idx_stock_sku ON stock(sku);`);
+        await client.query(`CREATE INDEX IF NOT EXISTS idx_stock_sucursal ON stock(sucursal);`);
+
         for (const row of data) {
             const sku = row[colSku] ? String(row[colSku]).trim() : null;
             if (!sku) {
@@ -45,29 +59,26 @@ async function processStockFileAsync(jobId, filePath, originalname) {
                 continue;
             }
 
-            const stockObj = {};
             const colsToUse = branchColumns.length > 0 ? branchColumns : headers.filter(h => h !== colSku && !/[A-Za-z]/.test(h));
 
             for (const branchCol of colsToUse) {
                 const stockVal = parseFloat(row[branchCol]);
                 if (!isNaN(stockVal)) {
                     const realBranch = resolveBranch(branchCol);
-                    stockObj[realBranch] = (stockObj[realBranch] || 0) + stockVal;
+                    
+                    const res = await client.query(`
+                        INSERT INTO stock (sku, sucursal, cantidad, ultima_actualizacion)
+                        VALUES ($1, $2, $3, NOW())
+                        ON CONFLICT (sku, sucursal) 
+                        DO UPDATE SET cantidad = EXCLUDED.cantidad, ultima_actualizacion = NOW()
+                        RETURNING id;
+                    `, [sku, realBranch, stockVal]);
+
+                    if (res.rowCount > 0) updated++;
                 }
             }
 
-            const res = await client.query(`
-                UPDATE producto 
-                SET stock_por_sucursal = $1
-                WHERE sku = $2
-                RETURNING sku;
-            `, [stockObj, sku]);
 
-            if (res.rowCount > 0) {
-                updated++;
-            } else {
-                notFound++;
-            }
 
             processed++;
             if (processed % 500 === 0 || processed === totalRows) {

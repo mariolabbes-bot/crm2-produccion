@@ -180,7 +180,7 @@ router.get('/report', auth(), async (req, res) => {
                     cp.descripcion as cp_desc,
                     p.descripcion as p_desc,
                     cp.litros,
-                    p.stock_por_sucursal,
+                    st.stock_total,
                     SUM(CASE WHEN v.fecha_emision BETWEEN $1 AND $2 THEN v.cantidad ELSE 0 END) as qty_actual,
                     SUM(CASE WHEN v.fecha_emision BETWEEN $1 AND $2 THEN v.valor_total ELSE 0 END) as monto_actual,
                     SUM(CASE WHEN v.fecha_emision BETWEEN $3 AND $4 THEN v.cantidad ELSE 0 END) as qty_anio_ant,
@@ -188,18 +188,23 @@ router.get('/report', auth(), async (req, res) => {
                 FROM venta v
                 JOIN clasificacion_productos cp ON UPPER(TRIM(v.sku)) = UPPER(TRIM(cp.sku))
                 LEFT JOIN producto p ON UPPER(TRIM(v.sku)) = UPPER(TRIM(p.sku))
+                LEFT JOIN (
+                    SELECT sku, SUM(cantidad) as stock_total 
+                    FROM stock 
+                    GROUP BY sku
+                ) st ON UPPER(TRIM(v.sku)) = UPPER(TRIM(st.sku))
                 ${vendorJoin}
                 WHERE (v.fecha_emision BETWEEN $1 AND $2 
                    OR v.fecha_emision BETWEEN $3 AND $4 
                    OR v.fecha_emision BETWEEN $5 AND $6)
                 ${whereSql}
-                GROUP BY cp.sku, p.sku, cp.descripcion, p.descripcion, cp.litros, p.stock_por_sucursal
+                GROUP BY cp.sku, p.sku, cp.descripcion, p.descripcion, cp.litros, st.stock_total
             )
             SELECT 
                 COALESCE(p_desc, cp_desc) as descripcion,
                 qty_actual as cantidad_mes_actual,
                 qty_anio_ant as cantidad_mes_anterior,
-                stock_por_sucursal,
+                COALESCE(stock_total, 0) as stock_disponible,
                 (qty_actual * litros) as litros_mes_actual,
                 monto_actual as volumen_dinero_mes_actual,
                 CASE WHEN qty_anio_ant > 0 THEN ROUND(((qty_actual - qty_anio_ant) / qty_anio_ant * 100), 1) ELSE 0 END as perc_vs_anio_ant,
@@ -211,28 +216,8 @@ router.get('/report', auth(), async (req, res) => {
         `;
 
     const result = await pool.query(query, params);
-
-    // Sumar el stock contenido en el JSONB
-    const processedData = result.rows.map(row => {
-        let stock_total = 0;
-        let stockObj = row.stock_por_sucursal;
-        
-        if (typeof stockObj === 'string') {
-            try { stockObj = JSON.parse(stockObj); } catch(e) { stockObj = null; }
-        }
-
-        if (stockObj && typeof stockObj === 'object') {
-            for (const key in stockObj) {
-                stock_total += parseFloat(stockObj[key]) || 0;
-            }
-        }
-        return {
-            ...row,
-            stock_disponible: stock_total
-        };
-    });
-
-    res.json({ success: true, data: processedData });
+    
+    res.json({ success: true, data: result.rows });
 
   } catch (error) {
     console.error('❌ Error Reporte Ventas:', error);
