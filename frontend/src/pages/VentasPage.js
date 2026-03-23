@@ -136,7 +136,7 @@ const VentasPage = () => {
                             >
                                 <MenuItem value="">Todos los Vendedores</MenuItem>
                                 {vendedores.map(v => (
-                                    <MenuItem key={v.id} value={v.id}>{v.nombre || v.nombre_completo}</MenuItem>
+                                    <MenuItem key={v.id} value={v.rut}>{v.nombre || v.nombre_completo}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
