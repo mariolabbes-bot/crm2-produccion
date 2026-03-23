@@ -175,8 +175,10 @@ router.get('/report', auth(), async (req, res) => {
     const query = `
             WITH ventas_agrupadas AS (
                 SELECT 
-                    cp.sku,
-                    cp.descripcion,
+                    cp.sku as cp_sku,
+                    p.sku as p_sku,
+                    cp.descripcion as cp_desc,
+                    p.descripcion as p_desc,
                     cp.litros,
                     p.stock_por_sucursal,
                     SUM(CASE WHEN v.fecha_emision BETWEEN $1 AND $2 THEN v.cantidad ELSE 0 END) as qty_actual,
@@ -184,17 +186,17 @@ router.get('/report', auth(), async (req, res) => {
                     SUM(CASE WHEN v.fecha_emision BETWEEN $3 AND $4 THEN v.cantidad ELSE 0 END) as qty_anio_ant,
                     SUM(CASE WHEN v.fecha_emision BETWEEN $5 AND $6 THEN v.cantidad ELSE 0 END) as qty_6m
                 FROM venta v
-                JOIN clasificacion_productos cp ON v.sku = cp.sku
-                LEFT JOIN producto p ON v.sku = p.sku
+                JOIN clasificacion_productos cp ON UPPER(TRIM(v.sku)) = UPPER(TRIM(cp.sku))
+                LEFT JOIN producto p ON UPPER(TRIM(v.sku)) = UPPER(TRIM(p.sku))
                 ${vendorJoin}
                 WHERE (v.fecha_emision BETWEEN $1 AND $2 
                    OR v.fecha_emision BETWEEN $3 AND $4 
                    OR v.fecha_emision BETWEEN $5 AND $6)
                 ${whereSql}
-                GROUP BY cp.sku, cp.descripcion, cp.litros, p.stock_por_sucursal
+                GROUP BY cp.sku, p.sku, cp.descripcion, p.descripcion, cp.litros, p.stock_por_sucursal
             )
             SELECT 
-                descripcion,
+                COALESCE(p_desc, cp_desc) as descripcion,
                 qty_actual as cantidad_mes_actual,
                 qty_anio_ant as cantidad_mes_anterior,
                 stock_por_sucursal,
