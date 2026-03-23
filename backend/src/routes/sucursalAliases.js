@@ -7,6 +7,16 @@ const { refreshSucursalAliasCache } = require('../services/sucursalAliasService'
 // GET /api/sucursal-aliases
 router.get('/', auth(), async (req, res) => {
     try {
+        // Ejecución en la nube para asegurar que la tabla exista (Self-Healing)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS sucursal_alias (
+                id SERIAL PRIMARY KEY,
+                valor_excel VARCHAR(255) UNIQUE NOT NULL,
+                sucursal_real VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        
         const result = await pool.query('SELECT * FROM sucursal_alias ORDER BY created_at DESC');
         res.json({ success: true, data: result.rows });
     } catch (err) {
