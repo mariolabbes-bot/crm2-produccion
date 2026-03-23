@@ -5,6 +5,7 @@ const path = require('path');
 const { updateJobStatus } = require('../jobManager');
 const { norm, parseExcelDate, parseNumeric } = require('./utils');
 const { resolveVendorName } = require('../../utils/vendorAlias');
+const { resolveBranch } = require('../sucursalAliasService');
 
 async function processVentasFileAsync(jobId, filePath, originalname) {
     const client = await pool.connect();
@@ -141,7 +142,8 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
             const precio = colPrecio ? parseNumeric(row[colPrecio]) : 0;
             let valorTotal = (colValorTotal && row[colValorTotal]) ? parseNumeric(row[colValorTotal]) : (cantidad * precio);
 
-            const sucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
+            const rawSucursal = colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null;
+            const sucursal = resolveBranch(rawSucursal);
             const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null; // RUT
             const clienteNombre = colCliente && row[colCliente] ? String(row[colCliente]).trim() : null;
 

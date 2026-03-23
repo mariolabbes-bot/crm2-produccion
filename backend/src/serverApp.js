@@ -61,6 +61,7 @@ app.use('/api/import-stats', require('./routes/importStats'));
 app.use('/api/diagnostico', require('./routes/diagnostico'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/vendor-aliases', require('./routes/vendorAliases'));
+app.use('/api/sucursal-aliases', require('./routes/sucursalAliases'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/product-analytics', require('./routes/productAnalytics')); // Analítica de productos
 app.use('/api/mobile', require('./routes/mobile')); // Dashboard Móvil

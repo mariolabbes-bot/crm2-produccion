@@ -5,6 +5,7 @@ const path = require('path');
 const { updateJobStatus } = require('../jobManager');
 const { norm, parseExcelDate, parseNumeric } = require('./utils');
 const { resolveVendorName } = require('../../utils/vendorAlias');
+const { resolveBranch } = require('../sucursalAliasService');
 
 async function processAbonosFileAsync(jobId, filePath, originalname, options = {}) {
     const client = await pool.connect();
@@ -72,7 +73,7 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             if (rawVendor) vendedorNombre = await resolveVendorName(rawVendor);
 
             toImport.push({
-                sucursal: colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null,
+                sucursal: colSucursal && row[colSucursal] ? resolveBranch(row[colSucursal]) : resolveBranch(null),
                 folio,
                 fecha,
                 identificador, // RUT

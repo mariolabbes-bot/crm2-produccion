@@ -1,6 +1,7 @@
 const pool = require('../../db');
 const XLSX = require('xlsx');
 const { updateJobStatus } = require('../jobManager');
+const { resolveBranch } = require('../sucursalAliasService');
 
 async function processStockFileAsync(jobId, filePath, originalname) {
     const client = await pool.connect();
@@ -50,7 +51,8 @@ async function processStockFileAsync(jobId, filePath, originalname) {
             for (const branchCol of colsToUse) {
                 const stockVal = parseFloat(row[branchCol]);
                 if (!isNaN(stockVal)) {
-                    stockObj[branchCol] = stockVal;
+                    const realBranch = resolveBranch(branchCol);
+                    stockObj[realBranch] = (stockObj[realBranch] || 0) + stockVal;
                 }
             }
 

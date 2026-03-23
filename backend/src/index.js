@@ -67,6 +67,14 @@ try {
   console.error('❌ [Main] Error al iniciar Workers:', err);
 }
 
+// Cargar diccionarios en memoria
+try {
+  const { refreshSucursalAliasCache } = require('./services/sucursalAliasService');
+  refreshSucursalAliasCache();
+} catch (e) {
+  console.error('❌ Error cargando sucursalAliasCache:', e);
+}
+
 // Iniciar servidor
 app.listen(PORT, HOST, () => {
   console.log(`Servidor backend escuchando en puerto ${PORT}`);
