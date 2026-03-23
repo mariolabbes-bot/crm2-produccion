@@ -34,7 +34,21 @@ function resolveBranch(rawVal) {
     return normalized;
 }
 
+/**
+ * Checks if a string is a known branch alias or official branch.
+ */
+function isKnownBranchOrAlias(rawVal) {
+    if (!rawVal) return false;
+    const normalized = String(rawVal).trim().toUpperCase();
+    if (aliasCache.has(normalized)) return true;
+    for (const realVal of aliasCache.values()) {
+        if (realVal === normalized) return true;
+    }
+    return false;
+}
+
 module.exports = {
     refreshSucursalAliasCache,
-    resolveBranch
+    resolveBranch,
+    isKnownBranchOrAlias
 };

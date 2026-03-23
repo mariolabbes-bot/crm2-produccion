@@ -1,7 +1,7 @@
 const pool = require('../../db');
 const XLSX = require('xlsx');
 const { updateJobStatus } = require('../jobManager');
-const { resolveBranch } = require('../sucursalAliasService');
+const { resolveBranch, isKnownBranchOrAlias } = require('../sucursalAliasService');
 
 async function processStockFileAsync(jobId, filePath, originalname) {
     const client = await pool.connect();
@@ -23,7 +23,7 @@ async function processStockFileAsync(jobId, filePath, originalname) {
 
         // Identify branch columns (numeric or specific patterns like '001', '003', etc.)
         // Usually they are numbers like 001, 002, or "Sucursal 001"
-        const branchColumns = headers.filter(h => /^\d{3}$/.test(String(h).trim()) || /^Sucursal/i.test(h));
+        const branchColumns = headers.filter(h => isKnownBranchOrAlias(h) || /^\d{3}$/.test(String(h).trim()) || /^Sucursal/i.test(h));
 
         if (branchColumns.length === 0) {
             console.warn(`⚠️ [Job ${jobId}] No se detectaron columnas de sucursal obvias. Usaremos todas las numéricas.`);
