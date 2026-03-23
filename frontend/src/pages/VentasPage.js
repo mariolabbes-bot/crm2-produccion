@@ -17,8 +17,11 @@ import {
     TableRow,
     CircularProgress,
     Alert,
-    Chip
+    Chip,
+    TextField,
+    InputAdornment
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import { getVendedores, getVentasReport } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import ProductAnalyticsWidget from '../components/ProductAnalyticsWidget';
@@ -31,6 +34,9 @@ const VentasPage = () => {
     const [selectedVendedor, setSelectedVendedor] = useState('');
     const [categoria, setCategoria] = useState('TODOS LOS PRODUCTOS');
     const [sortBy, setSortBy] = useState('monto');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -44,6 +50,14 @@ const VentasPage = () => {
         }
     }, [isManager]);
 
+    // Timer logic to decouple keystrokes from backend search hits
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
     useEffect(() => {
         const loadReport = async () => {
             setLoading(true);
@@ -52,7 +66,8 @@ const VentasPage = () => {
                 const res = await getVentasReport({
                     vendedor_id: selectedVendedor,
                     categoria: categoria,
-                    sort_by: sortBy
+                    sort_by: sortBy,
+                    q: debouncedSearchTerm
                 });
                 if (res.success) {
                     setData(res.data);
@@ -67,7 +82,7 @@ const VentasPage = () => {
             }
         };
         loadReport();
-    }, [selectedVendedor, categoria, sortBy]);
+    }, [selectedVendedor, categoria, sortBy, debouncedSearchTerm]);
 
     const formatMoney = (val) => {
         return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val);
@@ -85,14 +100,31 @@ const VentasPage = () => {
             <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
                 <Box>
                     <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2B4F6F', mb: 1 }}>
-                        Módulo de Ventas
+                        Módulo de Ventas e Inventario
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                        Análisis detallado de rendimiento por producto y comparativas.
+                        Análisis detallado de rendimiento por producto, ventas históricas y stock global disponible.
                     </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <TextField
+                        size="small"
+                        placeholder="Buscar producto..."
+                        variant="outlined"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                            sx: { bgcolor: '#fff' }
+                        }}
+                        sx={{ minWidth: 220 }}
+                    />
+
                     {isManager && (
                         <FormControl sx={{ minWidth: 200 }} size="small">
                             <InputLabel>Vendedor</InputLabel>
@@ -100,6 +132,7 @@ const VentasPage = () => {
                                 value={selectedVendedor}
                                 label="Vendedor"
                                 onChange={(e) => setSelectedVendedor(e.target.value)}
+                                sx={{ bgcolor: '#fff' }}
                             >
                                 <MenuItem value="">Todos los Vendedores</MenuItem>
                                 {vendedores.map(v => (
@@ -115,6 +148,7 @@ const VentasPage = () => {
                             value={categoria}
                             label="Categoría"
                             onChange={(e) => setCategoria(e.target.value)}
+                            sx={{ bgcolor: '#fff' }}
                         >
                             <MenuItem value="TODOS LOS PRODUCTOS">Todos los Productos</MenuItem>
                             <MenuItem value="APLUS TBR">APLUS TBR</MenuItem>
@@ -130,6 +164,7 @@ const VentasPage = () => {
                             value={sortBy}
                             label="Orden por"
                             onChange={(e) => setSortBy(e.target.value)}
+                            sx={{ bgcolor: '#fff' }}
                         >
                             <MenuItem value="monto">Monto ($)</MenuItem>
                             <MenuItem value="cantidad">Cantidad</MenuItem>
@@ -143,10 +178,15 @@ const VentasPage = () => {
 
             {/* Tabla Detallada */}
             <Paper sx={{ p: 0, overflow: 'hidden', borderRadius: 2, boxShadow: 3 }}>
-                <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2B4F6F' }}>
                         Top 20 Productos por {sortBy === 'monto' ? 'Volumen de Venta ($)' : 'Cantidad Vendida'}
                     </Typography>
+                    {debouncedSearchTerm && (
+                        <Typography variant="body2" color="primary" sx={{ fontWeight: 'bold' }}>
+                            Filtrando resultados por: "{debouncedSearchTerm}"
+                        </Typography>
+                    )}
                 </Box>
 
                 {loading ? (
@@ -157,12 +197,14 @@ const VentasPage = () => {
                     <Box sx={{ p: 4 }}><Alert severity="error">{error}</Alert></Box>
                 ) : (
                     <TableContainer>
-                        <Table sx={{ minWidth: 800 }}>
+                        <Table sx={{ minWidth: 900 }}>
                             <TableHead sx={{ bgcolor: '#f1f5f9' }}>
                                 <TableRow>
                                     <TableCell sx={{ fontWeight: 'bold' }}>Descripción de Producto</TableCell>
-                                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Cant. Mes Actual</TableCell>
-                                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Litros Mes Actual</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Stock Disp.</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Mes Anterior</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 'bold', bgcolor: '#e2e8f0' }}>Mes Actual</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Litros (Act.)</TableCell>
                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>% vs Año Ant.</TableCell>
                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>% vs Prom. 6m</TableCell>
                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Volumen Dinero</TableCell>
@@ -171,7 +213,7 @@ const VentasPage = () => {
                             <TableBody>
                                 {data.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                                        <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                                             No se encontraron ventas para los filtros seleccionados.
                                         </TableCell>
                                     </TableRow>
@@ -179,7 +221,18 @@ const VentasPage = () => {
                                     data.map((row, index) => (
                                         <TableRow key={index} hover>
                                             <TableCell sx={{ fontWeight: 500 }}>{row.descripcion}</TableCell>
-                                            <TableCell align="right">{row.cantidad_mes_actual}</TableCell>
+                                            <TableCell align="right">
+                                                <Chip 
+                                                    size="small" 
+                                                    label={row.stock_disponible || 0} 
+                                                    color={row.stock_disponible > 0 ? 'success' : 'error'} 
+                                                    variant={row.stock_disponible > 0 ? 'filled' : 'outlined'} 
+                                                />
+                                            </TableCell>
+                                            <TableCell align="right">{row.cantidad_mes_anterior || 0}</TableCell>
+                                            <TableCell align="right" sx={{ fontWeight: 'bold', bgcolor: '#f8fafc' }}>
+                                                {row.cantidad_mes_actual}
+                                            </TableCell>
                                             <TableCell align="right">{row.litros_mes_actual > 0 ? row.litros_mes_actual.toLocaleString('es-CL') : '-'}</TableCell>
                                             <TableCell align="right">
                                                 <Box sx={{ color: getVariationColor(row.perc_vs_anio_ant), fontWeight: 'bold' }}>

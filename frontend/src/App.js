@@ -23,7 +23,7 @@ import VisitMapPoC from './components/VisitMapPoC';
 // Pages
 import DashboardPage from './pages/DashboardPage';
 import ClientesPage from './pages/ClientesPage';
-import ProductsPage from './pages/ProductsPage';
+
 import ClientDetailPage from './pages/ClientDetailPage';
 import AssistantPage from './pages/AssistantPage';
 import VentasPage from './pages/VentasPage';
@@ -63,7 +63,7 @@ const App = () => {
                                 <Route index element={<DashboardPage />} />
                                 <Route path="clientes" element={<ClientesPage />} />
                                 <Route path="ventas" element={<VentasPage />} />
-                                <Route path="productos" element={<ProductsPage />} />
+
                                 <Route path="cliente/:rut" element={<ClientDetailPage />} />
                                 <Route path="mapa-visitas" element={<MapRoute />} />
                                 <Route path="planificar" element={<PlannerPage />} />

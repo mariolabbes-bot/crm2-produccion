@@ -112,7 +112,7 @@ router.post('/bulk', auth(), upload.single('file'), async (req, res) => {
 // @access  Private
 router.get('/report', auth(), async (req, res) => {
   try {
-    const { vendedor_id, categoria, sort_by = 'monto' } = req.query;
+    const { vendedor_id, categoria, sort_by = 'monto', q } = req.query;
     const isManager = req.user.rol.toUpperCase() === 'MANAGER';
 
     // 2. Filtro Vendedor (RUT)
@@ -152,6 +152,11 @@ router.get('/report', auth(), async (req, res) => {
       } else if (categoria === 'REENCAUCHE') {
         whereClauses.push("UPPER(cp.familia) LIKE '%REENCAUCHE%'");
       }
+    }
+
+    if (q) {
+      params.push(`%${q.trim()}%`);
+      whereClauses.push(`(cp.sku ILIKE $${params.length} OR cp.descripcion ILIKE $${params.length} OR p.descripcion ILIKE $${params.length})`);
     }
 
     // Optimización: Resolver nombres de vendedor ANTES de la query principal
@@ -214,15 +219,18 @@ router.get('/report', auth(), async (req, res) => {
                     SUM(CASE WHEN v.fecha_emision BETWEEN $5 AND $6 THEN v.cantidad ELSE 0 END) as qty_6m
                 FROM venta v
                 JOIN clasificacion_productos cp ON v.sku = cp.sku
+                LEFT JOIN producto p ON v.sku = p.sku
                 WHERE (v.fecha_emision BETWEEN $1 AND $2 
                    OR v.fecha_emision BETWEEN $3 AND $4 
                    OR v.fecha_emision BETWEEN $5 AND $6)
                 ${whereSql}
-                GROUP BY cp.sku, cp.descripcion, cp.litros
+                GROUP BY cp.sku, cp.descripcion, cp.litros, p.stock_por_sucursal
             )
             SELECT 
                 descripcion,
                 qty_actual as cantidad_mes_actual,
+                qty_anio_ant as cantidad_mes_anterior,
+                p.stock_por_sucursal,
                 (qty_actual * litros) as litros_mes_actual,
                 monto_actual as volumen_dinero_mes_actual,
                 CASE WHEN qty_anio_ant > 0 THEN ROUND(((qty_actual - qty_anio_ant) / qty_anio_ant * 100), 1) ELSE 0 END as perc_vs_anio_ant,
@@ -234,7 +242,22 @@ router.get('/report', auth(), async (req, res) => {
         `;
 
     const result = await pool.query(query, params);
-    res.json({ success: true, data: result.rows });
+
+    // Sumar el stock contenido en el JSONB
+    const processedData = result.rows.map(row => {
+        let stock_total = 0;
+        if (row.stock_por_sucursal && typeof row.stock_por_sucursal === 'object') {
+            for (const key in row.stock_por_sucursal) {
+                stock_total += parseFloat(row.stock_por_sucursal[key]) || 0;
+            }
+        }
+        return {
+            ...row,
+            stock_disponible: stock_total
+        };
+    });
+
+    res.json({ success: true, data: processedData });
 
   } catch (error) {
     console.error('❌ Error Reporte Ventas:', error);

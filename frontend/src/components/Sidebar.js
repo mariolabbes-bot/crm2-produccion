@@ -66,12 +66,6 @@ const Sidebar = () => {
       color: '#A855F7' // Púrpura
     },
     {
-      title: 'Productos',
-      icon: <ProductosIcon />,
-      path: '/productos',
-      color: '#E57A2D' // Naranja Lubricar
-    },
-    {
       title: 'Reportes',
       icon: <ReportesIcon />,
       path: '/reportes',
