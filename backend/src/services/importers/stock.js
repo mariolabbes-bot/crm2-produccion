@@ -105,7 +105,11 @@ async function processStockFileAsync(jobId, filePath, originalname) {
             
             const q = `
                 INSERT INTO stock (sku, sucursal, cantidad, ultima_actualizacion)
-                VALUES ${values.join(', ')}
+                SELECT sku_in::VARCHAR, sucursal_in::VARCHAR, SUM(cantidad_in::NUMERIC), NOW()
+                FROM (
+                    VALUES ${values.join(', ')}
+                ) AS val(sku_in, sucursal_in, cantidad_in)
+                GROUP BY sku_in, sucursal_in
                 ON CONFLICT (sku, sucursal) 
                 DO UPDATE SET cantidad = EXCLUDED.cantidad, ultima_actualizacion = NOW()
             `;
