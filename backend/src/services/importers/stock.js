@@ -52,6 +52,9 @@ async function processStockFileAsync(jobId, filePath, originalname) {
         await client.query(`CREATE INDEX IF NOT EXISTS idx_stock_sku ON stock(sku);`);
         await client.query(`CREATE INDEX IF NOT EXISTS idx_stock_sucursal ON stock(sucursal);`);
 
+        await client.query(`TRUNCATE TABLE stock RESTART IDENTITY;`);
+        console.log(`🧹 [Job ${jobId}] Tabla 'stock' purgada (TRUNCATE) exitosamente para nueva importación.`);
+
         const entriesMap = new Map();
         for (const row of data) {
             const skuRaw = row[colSku];
