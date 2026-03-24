@@ -76,21 +76,17 @@ async function processStockFileAsync(jobId, filePath, originalname) {
                 const stockVal = parseFloat(row[branchCol]);
                 if (!isNaN(stockVal)) {
                     const sucursal = resolveBranch(branchCol);
-                    const key = `${sku}|${sucursal}`;
+                    const key = `${sku}::::${sucursal}`;
                     if (entriesMap.has(key)) {
-                        entriesMap.set(key, entriesMap.get(key) + stockVal);
+                        entriesMap.get(key).cantidad += stockVal;
                     } else {
-                        entriesMap.set(key, stockVal);
+                        entriesMap.set(key, { sku, sucursal, cantidad: stockVal });
                     }
                 }
             }
         }
 
-        const entries = [];
-        for (const [key, cantidad] of entriesMap.entries()) {
-            const [sku, sucursal] = key.split('|');
-            entries.push({ sku, sucursal, cantidad });
-        }
+        const entries = Array.from(entriesMap.values());
 
         const BATCH_SIZE = 5000;
 
