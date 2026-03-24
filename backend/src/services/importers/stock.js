@@ -57,7 +57,14 @@ async function processStockFileAsync(jobId, filePath, originalname) {
             const sku = row[colSku] ? String(row[colSku]).trim() : null;
             if (!sku) continue;
 
-            const colsToUse = branchColumns.length > 0 ? branchColumns : headers.filter(h => h !== colSku && !/[A-Za-z]/.test(h));
+            const excludedCols = ['ARTICULO', 'ARTÍCULO', 'SKU', 'CODIGO', 'CÓDIGO', 'DESCRIPCION', 'DESCRIPCIÓN', 'FAMILIA', 'MARCA', 'SUBFAMILIA', 'TOTAL', 'GENERAL', 'STOCK TOTAL', 'TOTAL STOCK', 'CANTIDAD'];
+            let colsToUse = headers.filter(h => {
+                if (h === colSku) return false;
+                const upper = String(h).trim().toUpperCase();
+                if (excludedCols.includes(upper)) return false;
+                if (/TOTAL/i.test(upper)) return false;
+                return true;
+            });
 
             for (const branchCol of colsToUse) {
                 const stockVal = parseFloat(row[branchCol]);

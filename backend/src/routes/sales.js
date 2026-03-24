@@ -189,8 +189,11 @@ router.get('/report', auth(), async (req, res) => {
                 JOIN clasificacion_productos cp ON UPPER(TRIM(v.sku)) = UPPER(TRIM(cp.sku))
                 LEFT JOIN producto p ON UPPER(TRIM(v.sku)) = UPPER(TRIM(p.sku))
                 LEFT JOIN (
-                    SELECT UPPER(TRIM(sku)) as sku_clean, SUM(cantidad) as stock_total 
+                    SELECT UPPER(TRIM(sku)) as sku_clean, 
+                           SUM(cantidad) as stock_total,
+                           json_object_agg(sucursal, cantidad) as stock_desglose
                     FROM stock 
+                    WHERE cantidad > 0
                     GROUP BY UPPER(TRIM(sku))
                 ) st ON UPPER(TRIM(v.sku)) = st.sku_clean
                 ${vendorJoin}
@@ -198,13 +201,14 @@ router.get('/report', auth(), async (req, res) => {
                    OR v.fecha_emision BETWEEN $3 AND $4 
                    OR v.fecha_emision BETWEEN $5 AND $6)
                 ${whereSql}
-                GROUP BY cp.sku, p.sku, cp.descripcion, p.descripcion, cp.litros, st.stock_total
+                GROUP BY cp.sku, p.sku, cp.descripcion, p.descripcion, cp.litros, st.stock_total, st.stock_desglose
             )
             SELECT 
                 COALESCE(p_desc, cp_desc) as descripcion,
                 qty_actual as cantidad_mes_actual,
                 qty_anio_ant as cantidad_mes_anterior,
                 COALESCE(stock_total, 0) as stock_disponible,
+                stock_desglose as stock_desglose,
                 (qty_actual * litros) as litros_mes_actual,
                 monto_actual as volumen_dinero_mes_actual,
                 CASE WHEN qty_anio_ant > 0 THEN ROUND(((qty_actual - qty_anio_ant) / qty_anio_ant * 100), 1) ELSE 0 END as perc_vs_anio_ant,

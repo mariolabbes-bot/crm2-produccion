@@ -19,7 +19,8 @@ import {
     Alert,
     Chip,
     TextField,
-    InputAdornment
+    InputAdornment,
+    Tooltip
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { getVendedores, getVentasReport } from '../api';
@@ -222,12 +223,23 @@ const VentasPage = () => {
                                         <TableRow key={index} hover>
                                             <TableCell sx={{ fontWeight: 500 }}>{row.descripcion}</TableCell>
                                             <TableCell align="right">
-                                                <Chip 
-                                                    size="small" 
-                                                    label={row.stock_disponible || 0} 
-                                                    color={row.stock_disponible > 0 ? 'success' : 'error'} 
-                                                    variant={row.stock_disponible > 0 ? 'filled' : 'outlined'} 
-                                                />
+                                                <Tooltip 
+                                                    title={
+                                                        row.stock_desglose 
+                                                        ? <Box sx={{ p: 0.5 }}>{Object.entries(row.stock_desglose).map(([k,v]) => <Typography key={k} variant="body2" sx={{ fontSize: '0.8rem' }}>{k}: <strong>{v}</strong></Typography>)}</Box> 
+                                                        : 'Sin stock en sucursales'
+                                                    }
+                                                    arrow
+                                                    placement="top"
+                                                >
+                                                    <Chip 
+                                                        size="small" 
+                                                        label={row.stock_disponible || 0} 
+                                                        color={row.stock_disponible > 0 ? 'success' : 'error'} 
+                                                        variant={row.stock_disponible > 0 ? 'filled' : 'outlined'} 
+                                                        sx={{ cursor: 'help' }}
+                                                    />
+                                                </Tooltip>
                                             </TableCell>
                                             <TableCell align="right">{row.cantidad_mes_anterior || 0}</TableCell>
                                             <TableCell align="right" sx={{ fontWeight: 'bold', bgcolor: '#f8fafc' }}>
