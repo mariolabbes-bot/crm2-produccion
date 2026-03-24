@@ -63,6 +63,7 @@ const VentasPageContent = () => {
     const [sortBy, setSortBy] = useState('monto');
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [searchOptions, setSearchOptions] = useState([]);
     
     // Popup Ficha de Producto
     const [selectedProduct, setSelectedProduct] = useState(null);
