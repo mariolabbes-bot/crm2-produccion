@@ -37,8 +37,23 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import { getVendedores, getVentasReport, searchProducts } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import ProductAnalyticsWidget from '../components/ProductAnalyticsWidget';
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(error, info) { console.error('Error Boundary Caught:', error, info); }
+  render() {
+    if (this.state.hasError) return (
+      <Box sx={{ p: 4, bgcolor: '#fee2e2', color: '#991b1b', borderRadius: 2 }}>
+        <Typography variant="h4">🚨 React Frontend Crash</Typography>
+        <Typography variant="body1" sx={{ mt: 2, fontFamily: 'monospace' }}>{this.state.error?.toString()}</Typography>
+        <Typography variant="body2" sx={{ mt: 2 }}>Por favor copia este error y envíaselo al desarrollador.</Typography>
+      </Box>
+    );
+    return this.props.children;
+  }
+}
 
-const VentasPage = () => {
+const VentasPageContent = () => {
     const { user } = useAuth();
     const isManager = user?.rol?.toUpperCase() === 'MANAGER';
 
@@ -386,5 +401,11 @@ const VentasPage = () => {
         </Container>
     );
 };
+
+const VentasPage = (props) => (
+  <ErrorBoundary>
+    <VentasPageContent {...props} />
+  </ErrorBoundary>
+);
 
 export default VentasPage;
