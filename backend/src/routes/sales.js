@@ -181,6 +181,7 @@ router.get('/report', auth(), async (req, res) => {
                     p.descripcion as p_desc,
                     cp.litros,
                     st.stock_total,
+                    st.stock_desglose,
                     SUM(CASE WHEN v.fecha_emision BETWEEN $1 AND $2 THEN v.cantidad ELSE 0 END) as qty_actual,
                     SUM(CASE WHEN v.fecha_emision BETWEEN $1 AND $2 THEN v.valor_total ELSE 0 END) as monto_actual,
                     SUM(CASE WHEN v.fecha_emision BETWEEN $3 AND $4 THEN v.cantidad ELSE 0 END) as qty_anio_ant,
