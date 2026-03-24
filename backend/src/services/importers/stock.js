@@ -52,9 +52,12 @@ async function processStockFileAsync(jobId, filePath, originalname) {
         await client.query(`CREATE INDEX IF NOT EXISTS idx_stock_sku ON stock(sku);`);
         await client.query(`CREATE INDEX IF NOT EXISTS idx_stock_sucursal ON stock(sucursal);`);
 
-        const entries = [];
+        const entriesMap = new Map();
         for (const row of data) {
-            const sku = row[colSku] ? String(row[colSku]).trim() : null;
+            const skuRaw = row[colSku];
+            if (!skuRaw) continue;
+            // Clean the SKU here to ensure consistency
+            const sku = String(skuRaw).trim().toUpperCase();
             if (!sku) continue;
 
             const excludedCols = ['ARTICULO', 'ARTÍCULO', 'SKU', 'CODIGO', 'CÓDIGO', 'DESCRIPCION', 'DESCRIPCIÓN', 'FAMILIA', 'MARCA', 'SUBFAMILIA', 'TOTAL', 'GENERAL', 'STOCK TOTAL', 'TOTAL STOCK', 'CANTIDAD'];
@@ -69,9 +72,21 @@ async function processStockFileAsync(jobId, filePath, originalname) {
             for (const branchCol of colsToUse) {
                 const stockVal = parseFloat(row[branchCol]);
                 if (!isNaN(stockVal)) {
-                    entries.push({ sku, sucursal: resolveBranch(branchCol), cantidad: stockVal });
+                    const sucursal = resolveBranch(branchCol);
+                    const key = `${sku}|${sucursal}`;
+                    if (entriesMap.has(key)) {
+                        entriesMap.set(key, entriesMap.get(key) + stockVal);
+                    } else {
+                        entriesMap.set(key, stockVal);
+                    }
                 }
             }
+        }
+
+        const entries = [];
+        for (const [key, cantidad] of entriesMap.entries()) {
+            const [sku, sucursal] = key.split('|');
+            entries.push({ sku, sucursal, cantidad });
         }
 
         const BATCH_SIZE = 5000;
