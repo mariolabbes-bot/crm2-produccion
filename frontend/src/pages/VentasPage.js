@@ -133,21 +133,51 @@ const VentasPage = () => {
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <TextField
+                    <Autocomplete
+                        freeSolo
+                        options={searchOptions}
+                        getOptionLabel={(option) => typeof option === 'string' ? option : `${option.sku} - ${option.descripcion}`}
                         size="small"
-                        placeholder="Buscar producto..."
-                        variant="outlined"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon />
-                                </InputAdornment>
-                            ),
-                            sx: { bgcolor: '#fff' }
+                        sx={{ minWidth: 350, bgcolor: '#fff' }}
+                        inputValue={searchTerm}
+                        onInputChange={(event, newInputValue) => {
+                            setSearchTerm(newInputValue);
+                            if (newInputValue && newInputValue.length > 2) {
+                                searchProducts({ q: newInputValue }).then(res => {
+                                    if (res && res.success) setSearchOptions(res.data);
+                                }).catch(err => console.error("Error global search", err));
+                            } else {
+                                setSearchOptions([]);
+                            }
                         }}
-                        sx={{ minWidth: 220 }}
+                        onChange={(event, newValue) => {
+                            if (newValue && typeof newValue === 'object') {
+                                handleRowClick({
+                                    descripcion: newValue.descripcion,
+                                    cantidad_mes_actual: 'N/A (Búsqueda Directa)',
+                                    volumen_dinero_mes_actual: null,
+                                    stock_disponible: newValue.stock_disponible,
+                                    stock_desglose: newValue.stock_desglose
+                                });
+                            }
+                        }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                placeholder="Buscar en toda la base de datos..."
+                                InputProps={{
+                                    ...params.InputProps,
+                                    startAdornment: (
+                                        <>
+                                            <InputAdornment position="start" sx={{ ml: 1 }}>
+                                                <SearchIcon />
+                                            </InputAdornment>
+                                            {params.InputProps.startAdornment}
+                                        </>
+                                    ),
+                                }}
+                            />
+                        )}
                     />
 
                     {isManager && (
