@@ -68,8 +68,6 @@ async function processStockFileAsync(jobId, filePath, originalname) {
         }
 
         const BATCH_SIZE = 5000;
-        let updated = 0;
-        let notFound = 0; // Not applicable for bulk UPSERT natively, but kept for interface
 
         console.log(`📊 [Job ${jobId}] Iniciando volcado bulk de ${entries.length} registros...`);
 
