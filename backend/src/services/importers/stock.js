@@ -52,38 +52,48 @@ async function processStockFileAsync(jobId, filePath, originalname) {
         await client.query(`CREATE INDEX IF NOT EXISTS idx_stock_sku ON stock(sku);`);
         await client.query(`CREATE INDEX IF NOT EXISTS idx_stock_sucursal ON stock(sucursal);`);
 
+        const entries = [];
         for (const row of data) {
             const sku = row[colSku] ? String(row[colSku]).trim() : null;
-            if (!sku) {
-                processed++;
-                continue;
-            }
+            if (!sku) continue;
 
             const colsToUse = branchColumns.length > 0 ? branchColumns : headers.filter(h => h !== colSku && !/[A-Za-z]/.test(h));
 
             for (const branchCol of colsToUse) {
                 const stockVal = parseFloat(row[branchCol]);
                 if (!isNaN(stockVal)) {
-                    const realBranch = resolveBranch(branchCol);
-                    
-                    const res = await client.query(`
-                        INSERT INTO stock (sku, sucursal, cantidad, ultima_actualizacion)
-                        VALUES ($1, $2, $3, NOW())
-                        ON CONFLICT (sku, sucursal) 
-                        DO UPDATE SET cantidad = EXCLUDED.cantidad, ultima_actualizacion = NOW()
-                        RETURNING id;
-                    `, [sku, realBranch, stockVal]);
-
-                    if (res.rowCount > 0) updated++;
+                    entries.push({ sku, sucursal: resolveBranch(branchCol), cantidad: stockVal });
                 }
             }
+        }
 
+        const BATCH_SIZE = 5000;
+        let updated = 0;
+        let notFound = 0; // Not applicable for bulk UPSERT natively, but kept for interface
 
+        console.log(`📊 [Job ${jobId}] Iniciando volcado bulk de ${entries.length} registros...`);
 
-            processed++;
-            if (processed % 500 === 0 || processed === totalRows) {
-                console.log(`📊 [Job ${jobId}] Progreso Stock: ${processed}/${totalRows}`);
+        for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+            const batch = entries.slice(i, i + BATCH_SIZE);
+            const values = [];
+            const params = [];
+            let pIdx = 1;
+            
+            for (const entry of batch) {
+                values.push(`($${pIdx++}, $${pIdx++}, $${pIdx++}, NOW())`);
+                params.push(entry.sku, entry.sucursal, entry.cantidad);
             }
+            
+            const q = `
+                INSERT INTO stock (sku, sucursal, cantidad, ultima_actualizacion)
+                VALUES ${values.join(', ')}
+                ON CONFLICT (sku, sucursal) 
+                DO UPDATE SET cantidad = EXCLUDED.cantidad, ultima_actualizacion = NOW()
+            `;
+            await client.query(q, params);
+            
+            updated += batch.length;
+            console.log(`📊 [Job ${jobId}] Progreso Bulk Insert Stock: ${updated}/${entries.length}`);
         }
 
         await client.query('COMMIT');

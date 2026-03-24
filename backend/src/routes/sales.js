@@ -189,10 +189,10 @@ router.get('/report', auth(), async (req, res) => {
                 JOIN clasificacion_productos cp ON UPPER(TRIM(v.sku)) = UPPER(TRIM(cp.sku))
                 LEFT JOIN producto p ON UPPER(TRIM(v.sku)) = UPPER(TRIM(p.sku))
                 LEFT JOIN (
-                    SELECT sku, SUM(cantidad) as stock_total 
+                    SELECT UPPER(TRIM(sku)) as sku_clean, SUM(cantidad) as stock_total 
                     FROM stock 
-                    GROUP BY sku
-                ) st ON UPPER(TRIM(v.sku)) = UPPER(TRIM(st.sku))
+                    GROUP BY UPPER(TRIM(sku))
+                ) st ON UPPER(TRIM(v.sku)) = st.sku_clean
                 ${vendorJoin}
                 WHERE (v.fecha_emision BETWEEN $1 AND $2 
                    OR v.fecha_emision BETWEEN $3 AND $4 
