@@ -191,7 +191,7 @@ router.get('/report', auth(), async (req, res) => {
                 LEFT JOIN (
                     SELECT UPPER(TRIM(sku)) as sku_clean, 
                            SUM(cantidad) as stock_total,
-                           json_object_agg(sucursal, cantidad) as stock_desglose
+                           jsonb_object_agg(sucursal, cantidad) as stock_desglose
                     FROM stock 
                     WHERE cantidad > 0
                     GROUP BY UPPER(TRIM(sku))
