@@ -29,11 +29,12 @@ import {
     Divider,
     List,
     ListItem,
-    ListItemText
+    ListItemText,
+    Autocomplete
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import { getVendedores, getVentasReport } from '../api';
+import { getVendedores, getVentasReport, searchProducts } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import ProductAnalyticsWidget from '../components/ProductAnalyticsWidget';
 
