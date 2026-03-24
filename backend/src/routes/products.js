@@ -92,27 +92,37 @@ router.get('/search', auth(), async (req, res) => {
     try {
         const { q, marca, familia } = req.query;
 
-        let query = "SELECT sku, descripcion, marca, familia, subfamilia, stock_por_sucursal FROM producto WHERE 1=1";
+        let query = `
+            SELECT p.sku, p.descripcion, p.marca, p.familia, p.subfamilia, 
+                   COALESCE(st.stock_total, 0) as stock_disponible, 
+                   st.stock_desglose
+            FROM producto p
+            LEFT JOIN (
+                SELECT sku, SUM(cantidad) as stock_total, jsonb_object_agg(sucursal, cantidad) as stock_desglose
+                FROM stock WHERE cantidad > 0 GROUP BY sku
+            ) st ON p.sku = st.sku
+            WHERE 1=1
+        `;
         const values = [];
         let paramIndex = 1;
 
         if (q && q.trim().length > 0) {
-            query += ` AND (sku ILIKE $${paramIndex} OR descripcion ILIKE $${paramIndex})`;
+            query += ` AND (p.sku ILIKE $${paramIndex} OR p.descripcion ILIKE $${paramIndex})`;
             values.push(`%${q}%`);
             paramIndex++;
         }
         if (marca) {
-            query += ` AND marca = $${paramIndex}`;
+            query += ` AND p.marca = $${paramIndex}`;
             values.push(marca);
             paramIndex++;
         }
         if (familia) {
-            query += ` AND familia = $${paramIndex}`;
+            query += ` AND p.familia = $${paramIndex}`;
             values.push(familia);
             paramIndex++;
         }
 
-        query += " ORDER BY descripcion LIMIT 50";
+        query += " ORDER BY p.descripcion LIMIT 50";
 
         if (values.length === 0) {
             return res.json({ success: true, data: [] });
