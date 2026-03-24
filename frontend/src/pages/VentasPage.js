@@ -20,9 +20,19 @@ import {
     Chip,
     TextField,
     InputAdornment,
-    Tooltip
+    Tooltip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    Divider,
+    List,
+    ListItem,
+    ListItemText
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import InventoryIcon from '@mui/icons-material/Inventory';
 import { getVendedores, getVentasReport } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import ProductAnalyticsWidget from '../components/ProductAnalyticsWidget';
@@ -38,6 +48,20 @@ const VentasPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     
+    // Popup Ficha de Producto
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [openDialog, setOpenDialog] = useState(false);
+
+    const handleRowClick = (product) => {
+        setSelectedProduct(product);
+        setOpenDialog(true);
+    };
+
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setTimeout(() => setSelectedProduct(null), 300); // clear after animation
+    };
+
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -220,7 +244,12 @@ const VentasPage = () => {
                                     </TableRow>
                                 ) : (
                                     data.map((row, index) => (
-                                        <TableRow key={index} hover>
+                                        <TableRow 
+                                            key={index} 
+                                            hover 
+                                            onClick={() => handleRowClick(row)}
+                                            sx={{ cursor: 'pointer' }}
+                                        >
                                             <TableCell sx={{ fontWeight: 500 }}>{row.descripcion}</TableCell>
                                             <TableCell align="right">
                                                 <Tooltip 
@@ -267,6 +296,62 @@ const VentasPage = () => {
                     </TableContainer>
                 )}
             </Paper>
+
+            {/* Modal de Ficha de Producto */}
+            <Dialog 
+                open={openDialog} 
+                onClose={handleCloseDialog}
+                maxWidth="sm"
+                fullWidth
+            >
+                {selectedProduct && (
+                    <>
+                        <DialogTitle sx={{ bgcolor: '#2B4F6F', color: '#fff', fontWeight: 'bold' }}>
+                            Ficha de Producto
+                        </DialogTitle>
+                        <DialogContent dividers>
+                            <Box sx={{ mb: 3, mt: 1 }}>
+                                <Typography variant="h6" gutterBottom>{selectedProduct.descripcion}</Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Ventas Mes Actual: {selectedProduct.cantidad_mes_actual} | Volumen: {selectedProduct.volumen_dinero_mes_actual != null ? '$' + selectedProduct.volumen_dinero_mes_actual.toLocaleString('es-CL') : '$0'}
+                                </Typography>
+                            </Box>
+                            
+                            <Divider sx={{ my: 2 }} />
+                            
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <InventoryIcon color="primary" /> Desglose de Stock en Bodegas
+                            </Typography>
+                            
+                            {selectedProduct.stock_desglose ? (
+                                <List dense sx={{ bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                                    {Object.entries(selectedProduct.stock_desglose).map(([sucursal, cantidad], idx) => (
+                                        <ListItem key={idx} divider={idx !== Object.keys(selectedProduct.stock_desglose).length - 1}>
+                                            <ListItemText 
+                                                primary={<Typography sx={{ fontWeight: 'bold' }}>{sucursal}</Typography>} 
+                                            />
+                                            <Chip label={`${cantidad} und`} size="small" color={cantidad > 0 ? "success" : "default"} variant={cantidad > 0 ? "filled" : "outlined"} />
+                                        </ListItem>
+                                    ))}
+                                </List>
+                            ) : (
+                                <Alert severity="info" sx={{ mt: 2 }}>No hay inventario registrado en las bodegas para este producto.</Alert>
+                            )}
+                            
+                            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', px: 2, py: 1, bgcolor: '#e2e8f0', borderRadius: 2 }}>
+                                    Stock Total Disponible: {selectedProduct.stock_disponible || 0}
+                                </Typography>
+                            </Box>
+                        </DialogContent>
+                        <DialogActions sx={{ px: 3, py: 2 }}>
+                            <Button onClick={handleCloseDialog} color="primary" variant="contained" disableElevation>
+                                Cerrar
+                            </Button>
+                        </DialogActions>
+                    </>
+                )}
+            </Dialog>
         </Container>
     );
 };
