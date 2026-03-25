@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   getActivityTypes, addActivityType, updateActivityType, deleteActivityType,
-  getGoalTypes, addGoalType, updateGoalType, deleteGoalType,
-  resetDatabase
+  getGoalTypes, addGoalType, updateGoalType, deleteGoalType
 } from '../api';
 import {
   Container, Typography, Box, Button, TextField, List, ListItem, ListItemText, IconButton, Paper, Grid, Tabs, Tab
@@ -13,7 +12,7 @@ import SaveIcon from '@mui/icons-material/Save';
 
 
 import DataManagement from './admin/DataManagement';
-import UniversalImporter from './admin/UniversalImporter';
+import CircuitManagement from './admin/CircuitManagement';
 
 // ... (TypeManager component remains same)
 
@@ -137,26 +136,20 @@ const AdminManager = () => {
             indicatorColor="primary"
             textColor="primary"
           >
-            <Tab label="Dashboard & Carga" />
-            <Tab label="Gestión de Datos (Limpieza)" />
-            <Tab label="Configuración" />
-            <Tab label="Zona de Peligro" sx={{ color: 'error.main' }} />
+            <Tab label="Gestor de Rutas y Vendedores" />
+            <Tab label="Mantenimiento de Datos" />
+            <Tab label="Tipos de Calendario CRM" />
           </Tabs>
         </Paper>
 
-        {/* TAB 0: DASHBOARD & CARGA */}
+        {/* TAB 0: Gestión de Rutas y Rutinas */}
         <Box role="tabpanel" hidden={tabIndex !== 0}>
           {tabIndex === 0 && (
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <UniversalImporter />
-              </Grid>
-              {/* Add more dashboard widgets here later if needed */}
-            </Grid>
+            <CircuitManagement />
           )}
         </Box>
 
-        {/* TAB 1: GESTIÓN DE DATOS */}
+        {/* TAB 1: GESTIÓN DE DATOS (Mantenimiento Clínico) */}
         <Box role="tabpanel" hidden={tabIndex !== 1}>
           {tabIndex === 1 && (
             <DataManagement />
@@ -165,64 +158,28 @@ const AdminManager = () => {
 
         {/* TAB 2: CONFIGURACIÓN (Tipos) */}
         <Box role="tabpanel" hidden={tabIndex !== 2}>
-          {tabIndex === 2 && (
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <TypeManager
-                  title="Tipos de Actividad"
-                  getTypes={getActivityTypes}
-                  addType={addActivityType}
-                  updateType={updateActivityType}
-                  deleteType={deleteActivityType}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TypeManager
-                  title="Tipos de Objetivo"
-                  getTypes={getGoalTypes}
-                  addType={addGoalType}
-                  updateType={updateGoalType}
-                  deleteType={deleteGoalType}
-                />
-              </Grid>
-            </Grid>
-          )}
-        </Box>
-
-        {/* TAB 3: ZONA DE PELIGRO */}
-        <Box role="tabpanel" hidden={tabIndex !== 3}>
-          {tabIndex === 3 && (
-            <Paper className="card-unified" sx={{ p: 3, border: '2px solid #ef5350', bgcolor: '#ffebee' }}>
-              <Typography variant="h5" color="error" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                ⚠️ Zona de Peligro
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Esta acción eliminará permanentemente todos los datos de <strong>Clientes, Ventas, Abonos, Saldo Crédito y Productos</strong>.
-                Los usuarios (vendedores) y la configuración de tipos se mantendrán.
-              </Typography>
-              <Button
-                variant="contained"
-                color="error"
-                size="large"
-                onClick={async () => {
-                  const confirm = prompt("⚠️ ESTA ACCIÓN ES IRREVERSIBLE ⚠️\n\nPara confirmar el borrado TOTAL de la base de datos, escribe: CONFIRMO_BORRAR_TODO");
-                  if (confirm === 'CONFIRMO_BORRAR_TODO') {
-                    try {
-                      await resetDatabase(confirm);
-                      alert("✅ Base de datos reiniciada correctamente.");
-                      window.location.reload();
-                    } catch (err) {
-                      alert("❌ Error: " + err.message);
-                    }
-                  } else if (confirm) {
-                    alert("❌ Código de confirmación incorrecto.");
-                  }
-                }}
-              >
-                🗑️ BORRAR BASE DE DATOS (RESET COMPLETO)
-              </Button>
-            </Paper>
-          )}
+           {tabIndex === 2 && (
+             <Grid container spacing={3}>
+               <Grid item xs={12} md={6}>
+                 <TypeManager
+                   title="Tipos de Actividad"
+                   getTypes={getActivityTypes}
+                   addType={addActivityType}
+                   updateType={updateActivityType}
+                   deleteType={deleteActivityType}
+                 />
+               </Grid>
+               <Grid item xs={12} md={6}>
+                 <TypeManager
+                   title="Tipos de Objetivo"
+                   getTypes={getGoalTypes}
+                   addType={addGoalType}
+                   updateType={updateGoalType}
+                   deleteType={deleteGoalType}
+                 />
+               </Grid>
+             </Grid>
+           )}
         </Box>
 
       </Box>

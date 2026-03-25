@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Paper, Tabs, Tab, Box } from '@mui/material';
 import ProductCleanup from './ProductCleanup';
 import ClientCleanup from './ClientCleanup';
-import CircuitManagement from './CircuitManagement';
 import BranchCleanup from './BranchCleanup'; // Added Branch Cleanup
 
 const DataManagement = () => {
@@ -18,7 +17,6 @@ const DataManagement = () => {
                 <Tabs value={tabIndex} onChange={handleChange} centered variant="scrollable" scrollButtons="auto">
                     <Tab label="Clasificación de Productos" />
                     <Tab label="Completar Clientes" />
-                    <Tab label="Gestión de Circuitos" />
                     <Tab label="Mapeo de Sucursales" />
                 </Tabs>
             </Paper>
@@ -32,11 +30,7 @@ const DataManagement = () => {
             </Box>
 
             <Box role="tabpanel" hidden={tabIndex !== 2}>
-                {tabIndex === 2 && <CircuitManagement />}
-            </Box>
-
-            <Box role="tabpanel" hidden={tabIndex !== 3}>
-                {tabIndex === 3 && <BranchCleanup />}
+                {tabIndex === 2 && <BranchCleanup />}
             </Box>
         </Box>
     );

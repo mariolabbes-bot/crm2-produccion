@@ -73,13 +73,6 @@ const Sidebar = () => {
       divider: true
     },
     {
-      title: 'Importar Datos',
-      icon: <ImportIcon />,
-      path: '/import-data',
-      color: '#F59E0B', // Amber
-      managerOnly: true
-    },
-    {
       title: 'Mapa de Terreno',
       icon: <MapIcon />,
       path: '/mapa-visitas',
@@ -87,17 +80,11 @@ const Sidebar = () => {
       divider: true
     },
     {
-      title: 'Administración',
-      icon: <AdminIcon />, // Reusing SettingsIcon or could import AdminPanelSettings if available, but Settings is fine for now or I can add another icon import
-      path: '/admin',
-      color: '#EF4444', // Red for danger/admin
-      managerOnly: true
-    },
-    {
-      title: 'Configuración',
+      title: 'Configuraciones',
       icon: <SettingsIcon />,
-      path: '/configuracion',
-      color: '#6B7280' // Gris
+      path: '/admin',
+      color: '#6B7280', // Gris
+      managerOnly: true
     },
   ];
 
