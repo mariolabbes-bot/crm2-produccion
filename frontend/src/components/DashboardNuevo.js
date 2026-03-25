@@ -389,14 +389,22 @@ const DashboardNuevo = () => {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(amount || 0);
   };
 
-  // Dummy data fallback
   const dummyLine = [
-    { periodo: '2025-04', ventas: 10000000, abonos: 8000000 },
-    { periodo: '2025-05', ventas: 12000000, abonos: 9000000 },
-    { periodo: '2025-06', ventas: 11000000, abonos: 9500000 },
-    { periodo: '2025-07', ventas: 13000000, abonos: 11000000 },
-    { periodo: '2025-08', ventas: 14000000, abonos: 12000000 },
-    { periodo: '2025-09', ventas: 13500000, abonos: 12500000 },
+    { mes: '2025-04', ventas: 10000000, abonos: 8000000 },
+    { mes: '2025-05', ventas: 12000000, abonos: 9000000 },
+    { mes: '2025-06', ventas: 11000000, abonos: 9500000 },
+    { mes: '2025-07', ventas: 13000000, abonos: 11000000 },
+    { mes: '2025-08', ventas: 14000000, abonos: 12000000 },
+    { mes: '2025-09', ventas: 13500000, abonos: 12500000 },
+  ];
+
+  const dummyYoy = [
+    { mes_actual_str: '2025-04', ventas_actual: 10000000, ventas_anterior: 8500000 },
+    { mes_actual_str: '2025-05', ventas_actual: 12000000, ventas_anterior: 9500000 },
+    { mes_actual_str: '2025-06', ventas_actual: 11000000, ventas_anterior: 10000000 },
+    { mes_actual_str: '2025-07', ventas_actual: 13000000, ventas_anterior: 11500000 },
+    { mes_actual_str: '2025-08', ventas_actual: 14000000, ventas_anterior: 12000000 },
+    { mes_actual_str: '2025-09', ventas_actual: 13500000, ventas_anterior: 12500000 },
   ];
 
   const dummyPie = [
@@ -666,7 +674,7 @@ const DashboardNuevo = () => {
               <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>Comparativo Ventas (Año Actual vs Año Anterior)</Typography>
                 <ResponsiveContainer width="100%" height={chartHeights.line}>
-                  <LineChart data={evolucionYoy?.length ? evolucionYoy : dummyLine}>
+                  <LineChart data={evolucionYoy?.length ? evolucionYoy : dummyYoy}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="mes_actual_str"
