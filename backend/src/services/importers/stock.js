@@ -69,7 +69,10 @@ async function processStockFileAsync(jobId, filePath, originalname) {
                 const upper = String(h).trim().toUpperCase();
                 if (excludedCols.includes(upper)) return false;
                 if (/TOTAL/i.test(upper)) return false;
-                if (/ART.*CULO/i.test(upper)) return false;
+                
+                // Bulletproof check for corrupted ARTICULO headers
+                if (upper.includes('ART') && upper.includes('CULO')) return false;
+                
                 return true;
             });
 
