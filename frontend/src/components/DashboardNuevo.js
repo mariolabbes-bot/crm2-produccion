@@ -271,21 +271,19 @@ const DashboardNuevo = () => {
       if (!isManager && user?.rut) {
         params.vendedor_id = user.rut;
       }
-      const [vendedoresData, comparativasData, kpisMesData, saldoCreditoData, rankingData, salesSummaryData, yoyData] = await Promise.all([
-        getVendedores().catch(e => []),
-        getEvolucionMensual({ meses: 6 }).catch(e => []),
-        getKPIsMesActual(params).catch(e => ({ success: false })),
-        getSaldoCreditoTotal(params).catch(e => ({ success: false })),
-        isManager ? getRankingVendedores().catch(e => ({ success: false, data: [] })) : Promise.resolve({ success: true, data: [] }),
-        getSalesSummary().catch(e => ({ success: false })),
-        getEvolucionYoy({ meses: 6 }).catch(e => [])
+      const [vendedoresData, comparativasData, kpisMesData, saldoCreditoData, rankingData, yoyData] = await Promise.all([
+        getVendedores().catch(e => { console.warn('⚠️ Falló getVendedores'); return []; }),
+        getEvolucionMensual({ meses: 6 }).catch(e => { console.warn('⚠️ Falló getEvolucionMensual'); return []; }),
+        getKPIsMesActual(params).catch(e => { console.warn('⚠️ Falló getKPIsMesActual'); return { success: false }; }),
+        getSaldoCreditoTotal(params).catch(e => { console.warn('⚠️ Falló getSaldoCreditoTotal'); return { success: false }; }),
+        (isManager ? getRankingVendedores().catch(e => ({ success: false, data: [] })) : Promise.resolve({ success: true, data: [] })),
+        getEvolucionYoy({ meses: 6 }).catch(e => { console.warn('⚠️ Falló getEvolucionYoy'); return []; })
       ]);
 
-      setVendedores(Array.isArray(vendedoresData) ? vendedoresData : []);
+      const validVendedores = Array.isArray(vendedoresData) ? vendedoresData : [];
+      setVendedores(validVendedores);
       setComparativo(Array.isArray(comparativasData) ? comparativasData : []);
       setEvolucionYoy(Array.isArray(yoyData) ? yoyData : []);
-      setStats(salesSummaryData || null);
-      setVentasPorVendedor(salesSummaryData?.ventas_por_vendedor || []);
 
       if (kpisMesData?.success && kpisMesData?.data) {
         setKpisMesActual(kpisMesData.data);
@@ -342,10 +340,10 @@ const DashboardNuevo = () => {
       const vendorRowsBase = (() => {
         if (isManager) {
           if (params.vendedor_id) {
-            const v = listaVendedores.find(x => String(x.id) === String(params.vendedor_id));
+            const v = validVendedores.find(x => String(x.id) === String(params.vendedor_id));
             return v ? [v] : [];
           }
-          return listaVendedores;
+          return validVendedores;
         }
         // rol vendedor: solo el usuario
         return user ? [{ id: user.id, nombre: user.nombre }] : [];
@@ -513,6 +511,7 @@ const DashboardNuevo = () => {
           {/* Métricas principales - KPIs del mes actual en CARRUSEL */}
           <Box sx={{ 
             display: 'flex', 
+            flexWrap: 'nowrap',
             overflowX: 'auto', 
             gap: 3, 
             pb: 2, 
@@ -610,6 +609,7 @@ const DashboardNuevo = () => {
           {/* Gráficos en Carrusel Horizontal */}
           <Box sx={{ 
             display: 'flex', 
+            flexWrap: 'nowrap',
             overflowX: 'auto', 
             gap: 3, 
             pb: 2, 
