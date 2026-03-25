@@ -2,9 +2,10 @@ import React from 'react';
 import { Card, CardContent, Typography, Box } from '@mui/material';
 
 const gradients = {
-  primary: 'linear-gradient(135deg, #5E72E4 0%, #825EE4 100%)',
-  success: 'linear-gradient(135deg, #2DCE89 0%, #11CDEF 100%)',
-  warning: 'linear-gradient(135deg, #FB6340 0%, #F5365C 100%)',
+  primary: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', // Ventas (Verde)
+  success: 'linear-gradient(135deg, #3478C3 0%, #1E40AF 100%)', // Abonos (Azul)
+  warning: 'linear-gradient(135deg, #A855F7 0%, #7E22CE 100%)', // Promedio (Púrpura)
+  info: 'linear-gradient(135deg, #E57A2D 0%, #C2410C 100%)',    // Saldo (Naranja)
   neutral: 'linear-gradient(135deg, #f8f9fe 0%, #ffffff 100%)',
 };
 

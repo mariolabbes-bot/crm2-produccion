@@ -618,37 +618,10 @@ const DashboardNuevo = () => {
             '&::-webkit-scrollbar': { height: 8 },
             '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,.2)', borderRadius: 4 }
           }}>
-            {/* Gráfico 0: Ventas y Abonos por Vendedor (Mes Actual) - ADMIN ONLY */}
-            {isManager && (
-              <Box sx={{ flex: '0 0 auto', width: { xs: '90vw', md: '600px', lg: '800px' }, scrollSnapAlign: 'start' }}>
-                <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
-                  <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos por Vendedor</Typography>
-                  <ResponsiveContainer width="100%" height={chartHeights.bar}>
-                    <BarChart data={ventasPorVendedor}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="vendedor_nombre"
-                        tick={{ fontSize: 10 }}
-                        interval={0}
-                        angle={-25}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis tick={{ fontSize: 10 }} width={40} />
-                      <Tooltip formatter={formatMoney} />
-                      <Legend />
-                      <Bar dataKey="total_ventas" fill="#667eea" name="Ventas" />
-                      <Bar dataKey="total_abonos" fill="#43e97b" name="Abonos" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Paper>
-              </Box>
-            )}
-
             {/* Gráfico 1: Ventas vs Abonos */}
             <Box sx={{ flex: '0 0 auto', width: { xs: '90vw', md: '600px', lg: '800px' }, scrollSnapAlign: 'start' }}>
               <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos (últimos 6 meses)</Typography>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Evolución Mensual (Últimos 6 meses)</Typography>
                 <ResponsiveContainer width="100%" height={chartHeights.line}>
                   <LineChart data={comparativo?.length ? comparativo : dummyLine}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -662,8 +635,8 @@ const DashboardNuevo = () => {
                     <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
                     <Tooltip formatter={formatMoney} />
                     {isMdUp && <Legend />}
-                    <Line type="monotone" dataKey="ventas" stroke="#667eea" strokeWidth={3} name="Ventas" />
-                    <Line type="monotone" dataKey="abonos" stroke="#43e97b" strokeWidth={3} name="Abonos" />
+                    <Line type="monotone" dataKey="ventas" stroke="#10B981" strokeWidth={3} name="Ventas" dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="abonos" stroke="#3478C3" strokeWidth={3} name="Abonos" dot={{ r: 4 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </Paper>
@@ -672,9 +645,9 @@ const DashboardNuevo = () => {
             {/* Gráfico 2: Evolución Ventas YoY */}
             <Box sx={{ flex: '0 0 auto', width: { xs: '90vw', md: '600px', lg: '800px' }, scrollSnapAlign: 'start' }}>
               <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Comparativo Ventas (Año Actual vs Año Anterior)</Typography>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Comparativo Ventas (Este Año vs Año Anterior)</Typography>
                 <ResponsiveContainer width="100%" height={chartHeights.line}>
-                  <LineChart data={evolucionYoy?.length ? evolucionYoy : dummyYoy}>
+                  <LineChart data={(evolucionYoy && evolucionYoy.length > 0) ? evolucionYoy : dummyYoy}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="mes_actual_str"
@@ -686,34 +659,9 @@ const DashboardNuevo = () => {
                     <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
                     <Tooltip formatter={formatMoney} />
                     {isMdUp && <Legend />}
-                    <Line type="monotone" dataKey="ventas_actual" stroke="#2B4F6F" strokeWidth={3} name="Ventas Este Año" />
-                    <Line type="monotone" dataKey="ventas_anterior" stroke="#A0AEC0" strokeDasharray="5 5" strokeWidth={2} name="Ventas Año Pasado" />
+                    <Line type="monotone" dataKey="ventas_actual" stroke="#10B981" strokeWidth={3} name="Ventas Este Año" dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="ventas_anterior" stroke="#A0AEC0" strokeDasharray="5 5" strokeWidth={2} name="Ventas Año Pasado" dot={{ r: 3 }} />
                   </LineChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Box>
-
-            {/* Gráfico 3: Tipo de Pago */}
-            <Box sx={{ flex: '0 0 auto', width: { xs: '90vw', md: '400px' }, scrollSnapAlign: 'start' }}>
-              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Distribución por Tipo de Pago</Typography>
-                <ResponsiveContainer width="100%" height={chartHeights.pie}>
-                  <PieChart margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
-                    <Pie
-                      data={stats?.por_tipo_pago?.length ? stats.por_tipo_pago.map(tp => ({ name: tp.tipo_pago, value: tp.monto_total })) : dummyPie}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={isMdUp ? 80 : 68}
-                      label={isMdUp}
-                    >
-                      {(stats?.por_tipo_pago?.length ? stats.por_tipo_pago : dummyPie).map((entry, idx) => (
-                        <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    {isMdUp && <Legend />}
-                  </PieChart>
                 </ResponsiveContainer>
               </Paper>
             </Box>
