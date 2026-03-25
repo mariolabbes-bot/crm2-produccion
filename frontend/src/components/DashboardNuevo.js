@@ -558,7 +558,7 @@ const DashboardNuevo = () => {
                 icon="📊"
                 gradient="success"
               />
-            </Grid>
+            </Box>
 
             {/* VisionCard #3: Promedio Ventas Trimestre Anterior */}
             <Box sx={{ flex: 1, minWidth: { xs: '280px', lg: '300px' }, scrollSnapAlign: 'start', flexShrink: 0 }}>
@@ -599,12 +599,21 @@ const DashboardNuevo = () => {
             </Box>
           </Box>
 
-          {/* Gráficos Admin (Row Principal) */}
-          {isManager ? (
-            <Grid container spacing={3} sx={{ mb: 3 }}>
-              {/* Gráfico 1: Ventas y Abonos por Vendedor (Mes Actual) */}
-              <Grid item xs={12} md={6}>
-                <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 } }}>
+          {/* Gráficos en Carrusel Horizontal */}
+          <Box sx={{ 
+            display: 'flex', 
+            overflowX: 'auto', 
+            gap: 3, 
+            pb: 2, 
+            mb: 3,
+            scrollSnapType: 'x mandatory',
+            '&::-webkit-scrollbar': { height: 8 },
+            '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,.2)', borderRadius: 4 }
+          }}>
+            {/* Gráfico 0: Ventas y Abonos por Vendedor (Mes Actual) - ADMIN ONLY */}
+            {isManager && (
+              <Box sx={{ flex: '0 0 auto', width: { xs: '90vw', md: '600px', lg: '800px' }, scrollSnapAlign: 'start' }}>
+                <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
                   <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos por Vendedor</Typography>
                   <ResponsiveContainer width="100%" height={chartHeights.bar}>
                     <BarChart data={ventasPorVendedor}>
@@ -625,17 +634,9 @@ const DashboardNuevo = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 </Paper>
-          {/* Gráficos en Carrusel Horizontal */}
-          <Box sx={{ 
-            display: 'flex', 
-            overflowX: 'auto', 
-            gap: 3, 
-            pb: 2, 
-            mb: 3,
-            scrollSnapType: 'x mandatory',
-            '&::-webkit-scrollbar': { height: 8 },
-            '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,.2)', borderRadius: 4 }
-          }}>
+              </Box>
+            )}
+
             {/* Gráfico 1: Ventas vs Abonos */}
             <Box sx={{ flex: '0 0 auto', width: { xs: '90vw', md: '600px', lg: '800px' }, scrollSnapAlign: 'start' }}>
               <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
