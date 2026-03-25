@@ -110,6 +110,10 @@ export const getKpisMesActual = (params = {}) => {
   const url = queryString ? `${API_URL}/kpis/dashboard-current?${queryString}` : `${API_URL}/kpis/dashboard-current`;
   return apiFetch(url);
 };
+export const getEvolucionYoy = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/kpis/evolucion-yoy${qs ? `?${qs}` : ''}`);
+};
 export const getEvolucionMensual = () => apiFetch(`${API_URL}/kpis/evolucion-mensual`);
 export const getVentasPorFamilia = () => apiFetch(`${API_URL}/kpis/ventas-por-familia`);
 export const getSaldoCreditoTotal = (params = {}) => {

@@ -329,4 +329,48 @@ router.get('/ventas-por-familia', auth(), async (req, res) => {
   } catch (err) { res.json([]); }
 });
 
+router.get('/evolucion-yoy', auth(), async (req, res) => {
+  try {
+    const user = req.user;
+    const isManager = user.rol === 'MANAGER';
+    const mesesAtras = parseInt(req.query.meses) || 6;
+
+    // Primero obtenemos los meses actuales y los espejos del año anterior
+    const query = `
+      WITH RECURSIVE meses AS (
+        SELECT date_trunc('month', CURRENT_DATE) as mes
+        UNION ALL
+        SELECT mes - interval '1 month'
+        FROM meses
+        LIMIT ${mesesAtras}
+      ),
+      ventas_agrupadas AS (
+        SELECT 
+          TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') as periodo,
+          SUM(s.${SALES_AMOUNT_COL}) as total_ventas
+        FROM ${SALES_TABLE} s
+        LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
+        LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento))
+        WHERE 1=1 ${!isManager ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
+        GROUP BY 1
+      )
+      SELECT 
+        TO_CHAR(m.mes, 'YYYY-MM') as mes_actual_str,
+        TO_CHAR(m.mes - interval '1 year', 'YYYY-MM') as mes_anterior_str,
+        COALESCE(va_actual.total_ventas, 0) as ventas_actual,
+        COALESCE(va_ant.total_ventas, 0) as ventas_anterior
+      FROM meses m
+      LEFT JOIN ventas_agrupadas va_actual ON TO_CHAR(m.mes, 'YYYY-MM') = va_actual.periodo
+      LEFT JOIN ventas_agrupadas va_ant ON TO_CHAR(m.mes - interval '1 year', 'YYYY-MM') = va_ant.periodo
+      ORDER BY m.mes ASC;
+    `;
+    
+    const result = isManager ? await pool.query(query) : await pool.query(query, [user.rut]);
+    res.json(result.rows);
+  } catch (err) { 
+    console.error('Error in /evolucion-yoy:', err);
+    res.status(500).send('Server Error'); 
+  }
+});
+
 module.exports = router;

@@ -15,7 +15,7 @@ const MainLayout = ({ pageTitle = 'Dashboard', pageSubtitle = null }) => {
   const { sidebarCollapsed } = useUI();
   const isMobile = useIsMobile();
 
-  const currentSidebarWidth = isMobile ? 0 : (sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH);
+  const currentSidebarWidth = isMobile ? 0 : SIDEBAR_WIDTH;
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F9FAFB', flexDirection: 'column' }}>

@@ -116,88 +116,57 @@ const ImportStatsWidget = () => {
 
   if (error && !stats) {
     return (
-      <Card sx={{ mb: 2, backgroundColor: '#fff3e0' }}>
-        <CardContent>
-          <Alert severity="warning" sx={{ margin: 0 }}>
-            {error}
-          </Alert>
-        </CardContent>
-      </Card>
+      <Box sx={{ width: '100%', bgcolor: '#fff3e0', color: '#e65100', px: 2, py: 0.5, fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, borderRadius: 1 }}>
+        <ErrorIcon sx={{ fontSize: 14, mr: 1 }} />
+        {error}
+      </Box>
     );
   }
 
   return (
-    <Card sx={{ 
+    <Box sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'space-between',
+      bgcolor: '#e3f2fd', 
+      color: '#1565c0', 
+      px: 2, 
+      py: 0.5, 
       mb: 2, 
-      backgroundColor: '#fafafa',
-      borderLeft: '4px solid #1976d2'
+      borderRadius: 1,
+      fontSize: '0.75rem',
+      fontWeight: 600,
+      width: '100%',
+      boxSizing: 'border-box',
+      overflowX: 'auto',
+      whiteSpace: 'nowrap'
     }}>
-      <CardContent sx={{ pb: 1.5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-          <Typography 
-            variant="subtitle2" 
-            sx={{ 
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              fontSize: '12px',
-              letterSpacing: '0.5px',
-              color: '#1976d2'
-            }}
-          >
-            📊 Última Importación de Datos
-          </Typography>
-          {loading ? (
-            <CircularProgress size={20} />
-          ) : (
-            <CheckCircleIcon sx={{ fontSize: 18, color: '#4caf50' }} />
-          )}
-        </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 2 }}>
+        {loading ? <CircularProgress size={12} color="inherit" /> : <CheckCircleIcon sx={{ fontSize: 14, color: '#2e7d32' }} />}
+        <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', mr: 2, color: '#1976d2' }}>
+          ÚLTIMA SINCRONIZACIÓN:
+        </Typography>
+      </Box>
 
-        {stats ? (
-          <Grid container spacing={1.5} sx={{ mt: 0 }}>
-            {/* Ventas */}
-            <Grid item xs={12} sm={6} md={3}>
-              <StatItem 
-                label="Ventas" 
-                date={stats.ventas?.ultima_fecha}
-                registros={stats.ventas?.total_registros}
-              />
-            </Grid>
-
-            {/* Abonos */}
-            <Grid item xs={12} sm={6} md={3}>
-              <StatItem 
-                label="Abonos" 
-                date={stats.abonos?.ultima_fecha}
-                registros={stats.abonos?.total_registros}
-              />
-            </Grid>
-
-            {/* Clientes */}
-            <Grid item xs={12} sm={6} md={3}>
-              <StatItem 
-                label="Clientes" 
-                date={stats.clientes?.ultima_fecha}
-                registros={stats.clientes?.total_registros}
-              />
-            </Grid>
-
-            {/* Saldo Crédito */}
-            <Grid item xs={12} sm={6} md={3}>
-              <StatItem 
-                label="Saldo Crédito" 
-                date={stats.credito?.ultima_fecha}
-                registros={stats.credito?.total_registros}
-              />
-            </Grid>
-          </Grid>
-        ) : (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-            <CircularProgress size={30} />
+      {stats ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexGrow: 1 }}>
+          <Box>
+            <span style={{ color: '#555' }}>Ventas:</span> <strong>{formatDateTime(stats.ventas?.ultima_fecha)}</strong> <span style={{ color: '#888', fontWeight: 'normal' }}>({(stats.ventas?.total_registros || 0).toLocaleString('es-CL')})</span>
           </Box>
-        )}
-      </CardContent>
-    </Card>
+          <Box>
+            <span style={{ color: '#555' }}>Abonos:</span> <strong>{formatDateTime(stats.abonos?.ultima_fecha)}</strong> <span style={{ color: '#888', fontWeight: 'normal' }}>({(stats.abonos?.total_registros || 0).toLocaleString('es-CL')})</span>
+          </Box>
+          <Box>
+            <span style={{ color: '#555' }}>Clientes:</span> <strong>{formatDateTime(stats.clientes?.ultima_fecha)}</strong> <span style={{ color: '#888', fontWeight: 'normal' }}>({(stats.clientes?.total_registros || 0).toLocaleString('es-CL')})</span>
+          </Box>
+          <Box>
+            <span style={{ color: '#555' }}>Saldos:</span> <strong>{formatDateTime(stats.credito?.ultima_fecha)}</strong> <span style={{ color: '#888', fontWeight: 'normal' }}>({(stats.credito?.total_registros || 0).toLocaleString('es-CL')})</span>
+          </Box>
+        </Box>
+      ) : (
+        <Typography variant="caption" sx={{ color: '#555' }}>Cargando datos de sincronización...</Typography>
+      )}
+    </Box>
   );
 };
 

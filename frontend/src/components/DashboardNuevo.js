@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress, Avatar, Paper, Button, TextField, MenuItem, FormControl, InputLabel, Select, useTheme, useMediaQuery, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import VisionCard from './ui/VisionCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { getVendedores, getSalesSummary, getComparativasMensuales, getClientsInactivosMesActual, getKPIsMesActual, getSaldoCreditoTotal, getRankingVendedores } from '../api';
+import { getVendedores, getSalesSummary, getEvolucionMensual, getEvolucionYoy, getClientsInactivosMesActual, getKPIsMesActual, getSaldoCreditoTotal, getRankingVendedores } from '../api';
 import { removeToken, getUser } from '../utils/auth';
 import './DashboardNuevo.css';
 import Papa from 'papaparse';
@@ -63,7 +63,8 @@ const DashboardNuevo = () => {
   }, [fetchInactivos]);
 
   const [stats, setStats] = useState(null);
-  const [comparativo, setComparativo] = useState(null);
+  const [comparativo, setComparativo] = useState([]);
+  const [evolucionYoy, setEvolucionYoy] = useState([]);
   const [vendedores, setVendedores] = useState([]);
   const [comparativasMensuales, setComparativasMensuales] = useState(null);
   const [kpisMesActual, setKpisMesActual] = useState(null); // KPIs personalizados del mes actual
@@ -270,103 +271,42 @@ const DashboardNuevo = () => {
       if (!isManager && user?.rut) {
         params.vendedor_id = user.rut;
       }
-      const [vendedoresData, comparativasData, kpisMesData, saldoCreditoData, rankingData] = await Promise.all([
-        getVendedores().catch(e => {
-          console.error('[loadData] Error en getVendedores:', e);
-          return [];
-        }),
-        getComparativasMensuales().catch(e => {
-          console.error('[loadData] Error en getComparativasMensuales:', e);
-          return { success: false, error: e.message, status: e.status };
-        }),
-        getKPIsMesActual(params).catch(e => {
-          console.error('[loadData] Error en getKPIsMesActual:', e);
-          return { success: false, error: e.message, status: e.status };
-        }),
-        getSaldoCreditoTotal(params).catch(e => {
-          console.error('[loadData] Error en getSaldoCreditoTotal:', e);
-          return { success: false, error: e.message, status: e.status };
-        }),
-        isManager ? getRankingVendedores().catch(e => {
-          console.error('[loadData] Error en getRankingVendedores:', e);
-          return { success: false, data: [] };
-        }) : Promise.resolve({ success: true, data: [] })
+      const [vendedoresData, comparativasData, kpisMesData, saldoCreditoData, rankingData, salesSummaryData, yoyData] = await Promise.all([
+        getVendedores().catch(e => []),
+        getEvolucionMensual({ meses: 6 }).catch(e => []),
+        getKPIsMesActual(params).catch(e => ({ success: false })),
+        getSaldoCreditoTotal(params).catch(e => ({ success: false })),
+        isManager ? getRankingVendedores().catch(e => ({ success: false, data: [] })) : Promise.resolve({ success: true, data: [] }),
+        getSalesSummary().catch(e => ({ success: false })),
+        getEvolucionYoy({ meses: 6 }).catch(e => [])
       ]);
 
-      // Validar estructura y mostrar errores específicos
-      if (!vendedoresData) {
-        if (kpisMesData?.status === 401 || kpisMesData?.status === 403) {
-          setError('Tu sesión expiró. Ingresa nuevamente.');
-          navigate('/login');
-          return;
-        }
-        setError('No se pudieron cargar las estadísticas de abonos. ' + (abonosStats?.error || ''));
-        setStats(null);
-      } else {
-        setStats(abonosStats.data);
-      }
+      setVendedores(Array.isArray(vendedoresData) ? vendedoresData : []);
+      setComparativo(Array.isArray(comparativasData) ? comparativasData : []);
+      setEvolucionYoy(Array.isArray(yoyData) ? yoyData : []);
+      setStats(salesSummaryData || null);
+      setVentasPorVendedor(salesSummaryData?.ventas_por_vendedor || []);
 
-      if (!comparativoData || comparativoData.success === false || !comparativoData.data) {
-        if (comparativoData?.status === 401 || comparativoData?.status === 403) {
-          setError('Tu sesión expiró. Ingresa nuevamente.');
-          navigate('/login');
-          return;
-        }
-        setError('No se pudo cargar el comparativo de ventas vs abonos. ' + (comparativoData?.error || ''));
-        setComparativo(null);
-      } else {
-        setComparativo(comparativoData.data);
-      }
-
-      // Lista de vendedores para filas (según rol)
-      const listaVendedores = Array.isArray(vendedoresData) ? vendedoresData : [];
-      setVendedores(listaVendedores);
-
-      // Cargar comparativas mensuales
-      if (comparativasData && comparativasData.success && comparativasData.data) {
-        setComparativasMensuales(comparativasData.data);
-      } else {
-        setComparativasMensuales(null);
-      }
-
-      // Cargar KPIs del mes actual
-      if (kpisMesData && kpisMesData.success && kpisMesData.data) {
-        console.log('[KPIs Mes Actual] Datos recibidos:', kpisMesData.data);
-        console.log('[KPIs Mes Actual] monto_ventas_mes:', kpisMesData.data.monto_ventas_mes);
-        console.log('[KPIs Mes Actual] monto_abonos_mes:', kpisMesData.data.monto_abonos_mes);
-        console.log('[KPIs Mes Actual] variacion_vs_anio_anterior_pct:', kpisMesData.data.variacion_vs_anio_anterior_pct);
-        console.log('[KPIs Mes Actual] numero_clientes_con_venta_mes:', kpisMesData.data.numero_clientes_con_venta_mes);
+      if (kpisMesData?.success && kpisMesData?.data) {
         setKpisMesActual(kpisMesData.data);
       } else {
-        console.warn('[KPIs Mes Actual] No se recibieron datos o respuesta inválida:', kpisMesData);
         setKpisMesActual(null);
       }
 
-      // Cargar Saldo Crédito Total
-      if (saldoCreditoData && saldoCreditoData.success && saldoCreditoData.data) {
+      if (saldoCreditoData?.success && saldoCreditoData?.data) {
         setSaldoCreditoTotal(parseFloat(saldoCreditoData.data.total_saldo_credito || 0));
       } else {
         setSaldoCreditoTotal(0);
       }
 
-      // Cargar Ventas por Vendedor (Admin Graph)
-      if (ventasPorVendedorData && ventasPorVendedorData.success && ventasPorVendedorData.data) {
-        setVentasPorVendedor(ventasPorVendedorData.data);
-      } else {
-        setVentasPorVendedor([]);
-      }
-
-      // Cargar Ranking
-      if (rankingData && rankingData.success && rankingData.data) {
+      if (rankingData?.success && rankingData?.data) {
         setRankingVendedores(rankingData.data);
       } else {
         setRankingVendedores([]);
       }
 
       // Construir pivote: filas = vendedores, columnas = meses en rango, celdas = total_ventas
-      const detalleComparativo = (comparativoData && comparativoData.data && Array.isArray(comparativoData.data.detalle))
-        ? comparativoData.data.detalle
-        : [];
+      const detalleComparativo = Array.isArray(comparativasData) ? comparativasData : [];
 
       // Generar lista de meses desde el rango seleccionado (YYYY-MM)
       const genMonthsInRange = (desdeStr, hastaStr) => {
@@ -562,10 +502,19 @@ const DashboardNuevo = () => {
           {console.log('[RENDER VisionCards] kpisMesActual es null?:', kpisMesActual === null)}
           {console.log('[RENDER VisionCards] kpisMesActual es undefined?:', kpisMesActual === undefined)}
 
-          {/* Métricas principales - KPIs del mes actual */}
-          <Grid container spacing={3} sx={{ mb: 3 }}>
+          {/* Métricas principales - KPIs del mes actual en CARRUSEL */}
+          <Box sx={{ 
+            display: 'flex', 
+            overflowX: 'auto', 
+            gap: 3, 
+            pb: 2, 
+            mb: 1,
+            scrollSnapType: 'x mandatory',
+            '&::-webkit-scrollbar': { height: 6 },
+            '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,.2)', borderRadius: 3 }
+          }}>
             {/* VisionCard #1: Venta Actual con % vs Año Anterior */}
-            <Grid item xs={12} sm={6} md={3}>
+            <Box sx={{ flex: 1, minWidth: { xs: '280px', lg: '300px' }, scrollSnapAlign: 'start', flexShrink: 0 }}>
               <VisionCard
                 title="Venta Mes Actual"
                 value={kpisMesActual ? formatMoney(kpisMesActual.monto_ventas_mes) : '—'}
@@ -583,10 +532,10 @@ const DashboardNuevo = () => {
                 icon="💰"
                 gradient="primary"
               />
-            </Grid>
+            </Box>
 
             {/* VisionCard #2: Abonos con % vs Ventas del Mes */}
-            <Grid item xs={12} sm={6} md={3}>
+            <Box sx={{ flex: 1, minWidth: { xs: '280px', lg: '300px' }, scrollSnapAlign: 'start', flexShrink: 0 }}>
               {console.log('[DEBUG Abonos]', {
                 kpisMesActual,
                 ventas: kpisMesActual?.monto_ventas_mes,
@@ -612,31 +561,33 @@ const DashboardNuevo = () => {
             </Grid>
 
             {/* VisionCard #3: Promedio Ventas Trimestre Anterior */}
-            <Grid item xs={12} sm={6} md={3}>
-              title="Promedio Ventas Trimestre"
-              value={kpisMesActual ? formatMoney(kpisMesActual.promedio_ventas_trimestre_anterior) : '—'}
-              subtitle={kpisMesActual && kpisMesActual.promedio_ventas_trimestre_anterior > 0 ? (
-                (() => {
-                  const avg = kpisMesActual.promedio_ventas_trimestre_anterior;
-                  const current = kpisMesActual.monto_ventas_mes || 0;
-                  const diffPct = ((current - avg) / avg) * 100;
-                  return (
-                    <span style={{
-                      color: diffPct >= 0 ? '#27ae60' : '#e74c3c',
-                      fontWeight: 600
-                    }}>
-                      {diffPct >= 0 ? '↑' : '↓'} {Math.abs(diffPct).toFixed(1)}% vs mes actual
-                    </span>
-                  );
-                })()
-              ) : '3 meses anteriores'}
-              trend={kpisMesActual && (kpisMesActual.monto_ventas_mes || 0) >= kpisMesActual.promedio_ventas_trimestre_anterior ? 'up' : 'down'}
-              icon="📈"
-              gradient="warning"
-            </Grid>
+            <Box sx={{ flex: 1, minWidth: { xs: '280px', lg: '300px' }, scrollSnapAlign: 'start', flexShrink: 0 }}>
+              <VisionCard
+                title="Promedio Ventas Trimestre"
+                value={kpisMesActual ? formatMoney(kpisMesActual.promedio_ventas_trimestre_anterior) : '—'}
+                subtitle={kpisMesActual && kpisMesActual.promedio_ventas_trimestre_anterior > 0 ? (
+                  (() => {
+                    const avg = kpisMesActual.promedio_ventas_trimestre_anterior;
+                    const current = kpisMesActual.monto_ventas_mes || 0;
+                    const diffPct = ((current - avg) / avg) * 100;
+                    return (
+                      <span style={{
+                        color: diffPct >= 0 ? '#27ae60' : '#e74c3c',
+                        fontWeight: 600
+                      }}>
+                        {diffPct >= 0 ? '↑' : '↓'} {Math.abs(diffPct).toFixed(1)}% vs mes actual
+                      </span>
+                    );
+                  })()
+                ) : '3 meses anteriores'}
+                trend={kpisMesActual && (kpisMesActual.monto_ventas_mes || 0) >= kpisMesActual.promedio_ventas_trimestre_anterior ? 'up' : 'down'}
+                icon="📈"
+                gradient="warning"
+              />
+            </Box>
 
             {/* VisionCard #4: Saldos (Saldo Crédito Total) */}
-            <Grid item xs={12} sm={6} md={3}>
+            <Box sx={{ flex: 1, minWidth: { xs: '280px', lg: '300px' }, scrollSnapAlign: 'start', flexShrink: 0 }}>
               <VisionCard
                 title="Saldo Crédito Total"
                 value={saldoCreditoTotal != null ? formatMoney(saldoCreditoTotal) : '—'}
@@ -645,8 +596,8 @@ const DashboardNuevo = () => {
                 icon="💳"
                 gradient="info"
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
 
           {/* Gráficos Admin (Row Principal) */}
           {isManager ? (
@@ -674,82 +625,90 @@ const DashboardNuevo = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 </Paper>
-              </Grid>
+          {/* Gráficos en Carrusel Horizontal */}
+          <Box sx={{ 
+            display: 'flex', 
+            overflowX: 'auto', 
+            gap: 3, 
+            pb: 2, 
+            mb: 3,
+            scrollSnapType: 'x mandatory',
+            '&::-webkit-scrollbar': { height: 8 },
+            '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,.2)', borderRadius: 4 }
+          }}>
+            {/* Gráfico 1: Ventas vs Abonos */}
+            <Box sx={{ flex: '0 0 auto', width: { xs: '90vw', md: '600px', lg: '800px' }, scrollSnapAlign: 'start' }}>
+              <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos (últimos 6 meses)</Typography>
+                <ResponsiveContainer width="100%" height={chartHeights.line}>
+                  <LineChart data={comparativo?.length ? comparativo : dummyLine}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="mes"
+                      tick={{ fontSize: isMdUp ? 12 : 10 }}
+                      interval={isMdUp ? 0 : 'preserveStartEnd'}
+                      angle={isMdUp ? 0 : -25}
+                      dy={isMdUp ? 0 : 10}
+                    />
+                    <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
+                    <Tooltip formatter={formatMoney} />
+                    {isMdUp && <Legend />}
+                    <Line type="monotone" dataKey="ventas" stroke="#667eea" strokeWidth={3} name="Ventas" />
+                    <Line type="monotone" dataKey="abonos" stroke="#43e97b" strokeWidth={3} name="Abonos" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Box>
 
-              {/* Gráfico 2: Evolución Semestral */}
-              <Grid item xs={12} md={6}>
-                <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 } }}>
-                  <Typography variant="h6" sx={{ mb: 2 }}>Evolución Ventas vs Abonos (6 Meses)</Typography>
-                  <ResponsiveContainer width="100%" height={chartHeights.line}>
-                    <LineChart data={comparativo?.detalle?.length ? comparativo.detalle.map(row => ({ periodo: row.periodo, ventas: row.total_ventas, abonos: row.total_abonos })) : dummyLine}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="periodo"
-                        tick={{ fontSize: isMdUp ? 12 : 10 }}
-                        interval={isMdUp ? 0 : 'preserveStartEnd'}
-                        angle={isMdUp ? 0 : -25}
-                        dy={isMdUp ? 0 : 10}
-                      />
-                      <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
-                      <Tooltip formatter={formatMoney} />
-                      <Legend />
-                      <Line type="monotone" dataKey="ventas" stroke="#667eea" strokeWidth={3} name="Ventas" />
-                      <Line type="monotone" dataKey="abonos" stroke="#43e97b" strokeWidth={3} name="Abonos" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </Paper>
-              </Grid>
-            </Grid>
-          ) : (
-            // Layout Normal para Vendedores
-            <Grid container spacing={3} sx={{ mb: 3 }}>
-              <Grid item xs={12} md={8}>
-                <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 2 }}>Ventas vs Abonos (últimos 6 meses)</Typography>
-                  <ResponsiveContainer width="100%" height={chartHeights.line}>
-                    <LineChart data={comparativo?.detalle?.length ? comparativo.detalle.map(row => ({ periodo: row.periodo, ventas: row.total_ventas, abonos: row.total_abonos })) : dummyLine}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="periodo"
-                        tick={{ fontSize: isMdUp ? 12 : 10 }}
-                        interval={isMdUp ? 0 : 'preserveStartEnd'}
-                        angle={isMdUp ? 0 : -25}
-                        dy={isMdUp ? 0 : 10}
-                      />
-                      <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
-                      <Tooltip formatter={formatMoney} />
-                      {isMdUp && <Legend />}
-                      <Line type="monotone" dataKey="ventas" stroke="#667eea" strokeWidth={3} name="Ventas" />
-                      <Line type="monotone" dataKey="abonos" stroke="#43e97b" strokeWidth={3} name="Abonos" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </Paper>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 2 }}>Distribución por Tipo de Pago</Typography>
-                  <ResponsiveContainer width="100%" height={chartHeights.pie}>
-                    <PieChart margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
-                      <Pie
-                        data={stats?.por_tipo_pago?.length ? stats.por_tipo_pago.map(tp => ({ name: tp.tipo_pago, value: tp.monto_total })) : dummyPie}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={isMdUp ? 80 : 68}
-                        label={isMdUp}
-                      >
-                        {(stats?.por_tipo_pago?.length ? stats.por_tipo_pago : dummyPie).map((entry, idx) => (
-                          <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      {isMdUp && <Legend />}
-                    </PieChart>
-                  </ResponsiveContainer>
-                </Paper>
-              </Grid>
-            </Grid>
-          )}
+            {/* Gráfico 2: Evolución Ventas YoY */}
+            <Box sx={{ flex: '0 0 auto', width: { xs: '90vw', md: '600px', lg: '800px' }, scrollSnapAlign: 'start' }}>
+              <Paper className="card-unified chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>Comparativo Ventas (Año Actual vs Año Anterior)</Typography>
+                <ResponsiveContainer width="100%" height={chartHeights.line}>
+                  <LineChart data={evolucionYoy?.length ? evolucionYoy : dummyLine}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="mes_actual_str"
+                      tick={{ fontSize: isMdUp ? 12 : 10 }}
+                      interval={isMdUp ? 0 : 'preserveStartEnd'}
+                      angle={isMdUp ? 0 : -25}
+                      dy={isMdUp ? 0 : 10}
+                    />
+                    <YAxis tick={{ fontSize: isMdUp ? 12 : 10 }} width={isMdUp ? 44 : 34} />
+                    <Tooltip formatter={formatMoney} />
+                    {isMdUp && <Legend />}
+                    <Line type="monotone" dataKey="ventas_actual" stroke="#2B4F6F" strokeWidth={3} name="Ventas Este Año" />
+                    <Line type="monotone" dataKey="ventas_anterior" stroke="#A0AEC0" strokeDasharray="5 5" strokeWidth={2} name="Ventas Año Pasado" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Box>
+
+            {/* Gráfico 3: Tipo de Pago */}
+            <Box sx={{ flex: '0 0 auto', width: { xs: '90vw', md: '400px' }, scrollSnapAlign: 'start' }}>
+              <Paper className="chart-card" sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>Distribución por Tipo de Pago</Typography>
+                <ResponsiveContainer width="100%" height={chartHeights.pie}>
+                  <PieChart margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
+                    <Pie
+                      data={stats?.por_tipo_pago?.length ? stats.por_tipo_pago.map(tp => ({ name: tp.tipo_pago, value: tp.monto_total })) : dummyPie}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={isMdUp ? 80 : 68}
+                      label={isMdUp}
+                    >
+                      {(stats?.por_tipo_pago?.length ? stats.por_tipo_pago : dummyPie).map((entry, idx) => (
+                        <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    {isMdUp && <Legend />}
+                  </PieChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Box>
+          </Box>
 
           {/* Top Vendedores (dummy) */}
           <Grid container spacing={3} sx={{ mt: 1 }}>

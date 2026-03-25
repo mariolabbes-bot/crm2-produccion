@@ -37,7 +37,6 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { sidebarCollapsed, toggleSidebar } = useUI();
 
   const menuItems = [
     {
@@ -108,10 +107,10 @@ const Sidebar = () => {
     <Drawer
       variant="permanent"
       sx={{
-        width: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
+        width: SIDEBAR_WIDTH,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
+          width: SIDEBAR_WIDTH,
           boxSizing: 'border-box',
           background: 'linear-gradient(180deg, #2B4F6F 0%, #1E3A52 100%)',
           borderRight: 'none',
@@ -121,9 +120,8 @@ const Sidebar = () => {
       }}
     >
       {/* Logo y Título */}
-      <Box sx={{ p: sidebarCollapsed ? 1.5 : 3, textAlign: 'center' }}>
+      <Box sx={{ p: 3, textAlign: 'center' }}>
         {/* Logo como texto estilizado */}
-        {!sidebarCollapsed && (
           <>
             <Typography
               variant="h5"
@@ -162,13 +160,12 @@ const Sidebar = () => {
               CRM Dashboard
             </Typography>
           </>
-        )}
       </Box>
 
       <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
 
       {/* Usuario Actual */}
-      <Box sx={{ p: sidebarCollapsed ? 1 : 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Avatar
           sx={{
             bgcolor: '#E57A2D',
@@ -179,7 +176,6 @@ const Sidebar = () => {
         >
           {user?.nombre_completo?.charAt(0) || 'U'}
         </Avatar>
-        {!sidebarCollapsed && (
           <Box sx={{ flex: 1, overflow: 'hidden' }}>
             <Typography
               variant="body2"
@@ -203,13 +199,12 @@ const Sidebar = () => {
               {user?.rol?.toLowerCase() || 'vendedor'}
             </Typography>
           </Box>
-        )}
       </Box>
 
       <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', mb: 1 }} />
 
       {/* Menú Principal */}
-      <List sx={{ px: sidebarCollapsed ? 0.5 : 1, flex: 1 }}>
+      <List sx={{ px: 1, flex: 1 }}>
         {menuItems.map((item) => {
           // Ocultar "Importar Datos" si no es manager
           if (item.managerOnly && user?.rol?.toUpperCase() !== 'MANAGER') {
@@ -222,7 +217,7 @@ const Sidebar = () => {
                 <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 1 }} />
               )}
               <ListItem disablePadding sx={{ mb: 0.5 }}>
-                <Tooltip title={sidebarCollapsed ? item.title : ""} placement="right" arrow>
+                <Tooltip title="" placement="right" arrow>
                   <ListItemButton
                     onClick={() => handleNavigation(item.path)}
                     sx={{
@@ -244,16 +239,15 @@ const Sidebar = () => {
                     <ListItemIcon
                       sx={{
                         color: '#FFFFFF', // ICONOS BLANCOS SIEMPRE para mejor contraste
-                        minWidth: sidebarCollapsed ? 0 : 40,
+                        minWidth: 40,
                         transition: 'color 0.2s ease',
                         opacity: isActive(item.path) ? 1 : 0.85,
                         justifyContent: 'center', // Center icon when collapsed
-                        mx: sidebarCollapsed ? 'auto' : 0 // Force center
+                        mx: 0 // Force center
                       }}
                     >
                       {item.icon}
                     </ListItemIcon>
-                    {!sidebarCollapsed && (
                       <ListItemText
                         primary={item.title}
                         primaryTypographyProps={{
@@ -262,7 +256,6 @@ const Sidebar = () => {
                           color: '#FFFFFF', // TEXTO BLANCO
                         }}
                       />
-                    )}
                   </ListItemButton>
                 </Tooltip>
               </ListItem>
