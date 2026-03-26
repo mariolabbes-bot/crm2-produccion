@@ -150,11 +150,11 @@ class ClientModel {
           MODE() WITHIN GROUP (ORDER BY v.vendedor_id) as vendedor_id_principal,
           MIN(LOWER(v.vendedor_cliente)) as vendedor_cliente_lower
         FROM cliente c
-        INNER JOIN venta v ON v.cliente = c.nombre
+        INNER JOIN venta v ON REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
           AND v.fecha_emision >= $1 AND v.fecha_emision < $2
         WHERE NOT EXISTS (
           SELECT 1 FROM venta v2
-          WHERE v2.cliente = c.nombre
+          WHERE REGEXP_REPLACE(v2.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
             AND v2.fecha_emision >= $2 AND v2.fecha_emision <= $3
         )
         GROUP BY c.rut, c.nombre, c.email, c.telefono, c.vendedor_alias, c.ciudad, c.comuna
@@ -175,8 +175,7 @@ class ClientModel {
     return result.rows;
   }
 
-  static async findTopVentas({ nombreVendedor, isManager }) {
-    // Si nombreVendedor viene, filtramos.
+  static async findTopVentas({ nombreVendedor }) {
     let query = `
       SELECT 
         c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal AS telefono, c.email,
@@ -184,7 +183,7 @@ class ClientModel {
         COALESCE(SUM(CASE WHEN v.fecha_emision >= DATE_TRUNC('month', NOW() - INTERVAL '6 months') AND v.fecha_emision < DATE_TRUNC('month', NOW()) THEN v.valor_total ELSE 0 END) / 6.0, 0) AS venta_promedio_6m,
         COALESCE(SUM(v.valor_total), 0) AS total_ventas
       FROM cliente c
-      INNER JOIN venta v ON UPPER(TRIM(c.nombre)) = UPPER(TRIM(v.cliente))
+      INNER JOIN venta v ON REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
       WHERE v.fecha_emision >= DATE_TRUNC('month', NOW() - INTERVAL '6 months')
     `;
 
@@ -206,20 +205,20 @@ class ClientModel {
 
   static async findFacturasImpagas({ nombreVendedor }) {
     let query = `
-      SELECT 
+      SELECT
         c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal as telefono, c.email, c.nombre_vendedor,
         COUNT(DISTINCT sc.folio) as cantidad_facturas_impagas,
         SUM(sc.saldo_factura) as monto_total_impago,
         MIN(sc.fecha_emision) as factura_mas_antigua,
         EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision))::INTEGER as dias_mora
       FROM cliente c
-      INNER JOIN saldo_credito sc ON 
-        REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(sc.rut::text || sc.dv::text, '[^a-zA-Z0-9]', '', 'g')
+      INNER JOIN saldo_credito sc ON
+        REGEXP_REPLACE(COALESCE(c.rut, ''), '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(sc.rut::text || COALESCE(sc.dv::text, ''), '[^a-zA-Z0-9]', '', 'g')
       WHERE sc.saldo_factura > 0
       -- Filtro: Solo clientes con ventas en los últimos 3 meses
       AND EXISTS (
-        SELECT 1 FROM venta v 
-        WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+        SELECT 1 FROM venta v
+        WHERE REGEXP_REPLACE(COALESCE(v.identificador, ''), '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(COALESCE(c.rut, ''), '[^a-zA-Z0-9]', '', 'g')
         AND v.fecha_emision >= NOW() - INTERVAL '3 months'
       )
     `;
@@ -254,7 +253,7 @@ class ClientModel {
         (
           SELECT COALESCE(SUM(v.valor_total), 0)
           FROM venta v
-          WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM(c.nombre))
+          WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
           AND v.fecha_emision >= NOW() - INTERVAL '12 months'
         ) as ventas_12m
       FROM cliente c
@@ -265,7 +264,7 @@ class ClientModel {
       query += `
         AND EXISTS (
           SELECT 1 FROM venta v 
-          WHERE UPPER(TRIM(v.cliente)) = UPPER(TRIM(c.nombre))
+          WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
           AND (UPPER(v.vendedor_cliente) = UPPER($3) OR v.vendedor_cliente LIKE $3)
         )
       `;
