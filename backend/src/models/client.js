@@ -213,12 +213,13 @@ class ClientModel {
         MIN(sc.fecha_emision) as factura_mas_antigua,
         EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision))::INTEGER as dias_mora
       FROM cliente c
-      INNER JOIN saldo_credito sc ON c.rut = sc.rut
+      INNER JOIN saldo_credito sc ON 
+        REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(sc.rut::text || sc.dv::text, '[^a-zA-Z0-9]', '', 'g')
       WHERE sc.saldo_factura > 0
       -- Filtro: Solo clientes con ventas en los últimos 3 meses
       AND EXISTS (
         SELECT 1 FROM venta v 
-        WHERE v.identificador = c.rut 
+        WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
         AND v.fecha_emision >= NOW() - INTERVAL '3 months'
       )
     `;

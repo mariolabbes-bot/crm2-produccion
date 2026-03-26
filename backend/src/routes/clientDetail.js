@@ -113,7 +113,8 @@ router.get('/:rut/deuda', auth(), async (req, res) => {
         COUNT(*) as cantidad_facturas,
         MAX(fecha_emision) as fecha_ultima
       FROM saldo_credito
-      WHERE rut = $1 AND saldo_factura > 0
+      WHERE REGEXP_REPLACE(rut::text || dv::text, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE($1, '[^a-zA-Z0-9]', '', 'g')
+      AND saldo_factura > 0
       GROUP BY rut, cliente
     `, [rut]);
 
@@ -128,7 +129,8 @@ router.get('/:rut/deuda', auth(), async (req, res) => {
         deuda_cancelada,
         saldo_factura as deuda_documento
       FROM saldo_credito
-      WHERE rut = $1 AND saldo_factura > 0
+      WHERE REGEXP_REPLACE(rut::text || dv::text, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE($1, '[^a-zA-Z0-9]', '', 'g')
+      AND saldo_factura > 0
       ORDER BY fecha_emision ASC
     `, [rut]);
 
