@@ -37,7 +37,15 @@ const ImportStatsWidget = () => {
 
   const formatDate = (date) => {
     if (!date) return 'Sin datos';
-    const d = new Date(date);
+    let d;
+    // Si es YYYY-MM-DD, parsear como local para evitar shift de zona horaria
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      const [year, month, day] = date.split('-').map(Number);
+      d = new Date(year, month - 1, day);
+    } else {
+      d = new Date(date);
+    }
+    
     if (isNaN(d)) return 'Fecha inválida';
     return d.toLocaleDateString('es-CL', { 
       year: 'numeric', 
@@ -48,8 +56,9 @@ const ImportStatsWidget = () => {
 
   const formatDateTime = (date) => {
     if (!date) return 'Sin datos';
-    const d = new Date(date);
+    let d = new Date(date);
     if (isNaN(d)) return 'Fecha inválida';
+
     return d.toLocaleDateString('es-CL', { 
       year: 'numeric', 
       month: 'short', 
