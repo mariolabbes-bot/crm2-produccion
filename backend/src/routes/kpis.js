@@ -287,28 +287,36 @@ router.get('/top-clients', auth(), async (req, res) => {
 router.get('/evolucion-mensual', auth(), async (req, res) => {
   try {
     const user = req.user;
-    const isManager = user.rol === 'MANAGER';
+    const isManager = (user.rol || '').toUpperCase() === 'MANAGER';
     const mesesAtras = parseInt(req.query.meses) || 12;
+
+    // Filtro Vendedor (RUT)
+    let targetRut = null;
+    if (isManager && req.query.vendedor_id) {
+      targetRut = req.query.vendedor_id;
+    } else if (!isManager) {
+      targetRut = user.rut;
+    }
 
     const queryVentas = `
         SELECT TO_CHAR(${SALES_DATE_COL}, 'YYYY-MM') AS mes, SUM(${SALES_AMOUNT_COL}) AS ventas
         FROM ${SALES_TABLE} s
         LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
         LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento))
-        WHERE 1=1 ${!isManager ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
+        WHERE 1=1 ${targetRut ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
         GROUP BY 1 ORDER BY mes DESC LIMIT ${mesesAtras}
       `;
-    const vRes = isManager ? await pool.query(queryVentas) : await pool.query(queryVentas, [user.rut]);
+    const vRes = targetRut ? await pool.query(queryVentas, [targetRut]) : await pool.query(queryVentas);
 
     const queryAbonos = `
         SELECT TO_CHAR(a.fecha, 'YYYY-MM') AS mes, SUM(COALESCE(a.monto_neto, a.monto/1.19)) AS abonos
         FROM ${ABONOS_TABLE} a
         LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(a.vendedor_cliente))
         LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(a.vendedor_cliente))
-        WHERE 1=1 ${!isManager ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
+        WHERE 1=1 ${targetRut ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
         GROUP BY 1 ORDER BY mes DESC LIMIT ${mesesAtras}
       `;
-    const aRes = isManager ? await pool.query(queryAbonos) : await pool.query(queryAbonos, [user.rut]);
+    const aRes = targetRut ? await pool.query(queryAbonos, [targetRut]) : await pool.query(queryAbonos);
 
     const abonosMap = {}; aRes.rows.forEach(r => abonosMap[r.mes] = parseFloat(r.abonos));
     const resData = vRes.rows.map(r => ({ mes: r.mes, ventas: parseFloat(r.ventas), abonos: abonosMap[r.mes] || 0 })).reverse();
@@ -332,17 +340,24 @@ router.get('/ventas-por-familia', auth(), async (req, res) => {
 router.get('/evolucion-yoy', auth(), async (req, res) => {
   try {
     const user = req.user;
-    const isManager = user.rol === 'MANAGER';
+    const isManager = (user.rol || '').toUpperCase() === 'MANAGER';
     const mesesAtras = parseInt(req.query.meses) || 6;
 
-    // Primero obtenemos los meses actuales y los espejos del año anterior
+    // Filtro Vendedor (RUT)
+    let targetRut = null;
+    if (isManager && req.query.vendedor_id) {
+      targetRut = req.query.vendedor_id;
+    } else if (!isManager) {
+      targetRut = user.rut;
+    }
+
     const query = `
-      WITH RECURSIVE meses AS (
-        SELECT date_trunc('month', CURRENT_DATE) as mes
-        UNION ALL
-        SELECT mes - interval '1 month'
-        FROM meses
-        LIMIT ${mesesAtras}
+      WITH meses AS (
+        SELECT mes FROM generate_series(
+          date_trunc('month', CURRENT_DATE) - interval '${mesesAtras} months',
+          date_trunc('month', CURRENT_DATE) - interval '1 month',
+          interval '1 month'
+        ) as mes
       ),
       ventas_agrupadas AS (
         SELECT 
@@ -351,7 +366,7 @@ router.get('/evolucion-yoy', auth(), async (req, res) => {
         FROM ${SALES_TABLE} s
         LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
         LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento))
-        WHERE 1=1 ${!isManager ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
+        WHERE 1=1 ${targetRut ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
         GROUP BY 1
       )
       SELECT 
@@ -365,7 +380,7 @@ router.get('/evolucion-yoy', auth(), async (req, res) => {
       ORDER BY m.mes ASC;
     `;
     
-    const result = isManager ? await pool.query(query) : await pool.query(query, [user.rut]);
+    const result = targetRut ? await pool.query(query, [targetRut]) : await pool.query(query);
     res.json(result.rows);
   } catch (err) { 
     console.error('Error in /evolucion-yoy:', err);

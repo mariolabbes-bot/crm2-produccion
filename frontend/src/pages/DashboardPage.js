@@ -97,7 +97,7 @@ const DashboardPage = () => {
         });
 
         // 3. Evolución mensual (Últimos 6 meses)
-        const evolucion = await getEvolucionMensual();
+        const evolucion = await getEvolucionMensual(params);
         if (evolucion && Array.isArray(evolucion)) {
           const now = new Date();
           const currentMonthStr = now.toISOString().slice(0, 7);
@@ -106,7 +106,7 @@ const DashboardPage = () => {
         }
 
         // 4. Evolución YoY
-        const yoyResponse = await getEvolucionYoy({ meses: 6 }).catch(() => []);
+        const yoyResponse = await getEvolucionYoy({ ...params, meses: 6 }).catch(() => []);
         setEvolucionYoy(Array.isArray(yoyResponse) ? yoyResponse : []);
 
         // 5. Ranking (Admin)
