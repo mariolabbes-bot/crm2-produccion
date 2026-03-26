@@ -209,14 +209,18 @@ class ClientModel {
       SELECT 
         c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal as telefono, c.email, c.nombre_vendedor,
         COUNT(DISTINCT sc.folio) as cantidad_facturas_impagas,
-        SUM(sc.total_factura) as monto_total_facturado,
         SUM(sc.saldo_factura) as monto_total_impago,
-        COALESCE(SUM(sc.saldo_favor_disponible), 0) as saldo_favor_disponible,
         MIN(sc.fecha_emision) as factura_mas_antigua,
         EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision))::INTEGER as dias_mora
       FROM cliente c
       INNER JOIN saldo_credito sc ON c.rut = sc.rut
       WHERE sc.saldo_factura > 0
+      -- Filtro: Solo clientes con ventas en los últimos 3 meses
+      AND EXISTS (
+        SELECT 1 FROM venta v 
+        WHERE v.identificador = c.rut 
+        AND v.fecha_emision >= NOW() - INTERVAL '3 months'
+      )
     `;
 
     const params = [];
@@ -227,7 +231,8 @@ class ClientModel {
 
     query += `
       GROUP BY c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal, c.email, c.nombre_vendedor
-      HAVING COUNT(DISTINCT sc.folio) > 0
+      -- Filtro: Solo deudas con más de 30 días de antigüedad
+      HAVING EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision)) > 30
       ORDER BY monto_total_impago DESC
       LIMIT 20
     `;

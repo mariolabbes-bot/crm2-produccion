@@ -233,9 +233,16 @@ const ClientesPage = () => {
   ];
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+    <Box sx={{ 
+      height: 'calc(100vh - 110px)', // Ajuste para el TopBar y margin/padding
+      display: 'flex', 
+      flexDirection: 'column',
+      overflow: 'hidden', // Bloquear scroll de página completo
+      backgroundColor: '#f8fafc',
+      p: 1
+    }}>
       {/* Buscador */}
-      <Paper className="card-unified" sx={{ mb: 3 }}>
+      <Paper elevation={0} sx={{ p: 2, mb: 3, borderRadius: 2, border: '1px solid #e2e8f0' }}>
         <Autocomplete
           freeSolo
           fullWidth
@@ -257,149 +264,128 @@ const ClientesPage = () => {
                 ...params.InputProps,
                 startAdornment: (
                   <InputAdornment position="start">
-                    {searchLoading ? <CircularProgress size={20} /> : <SearchIcon />}
+                    {searchLoading ? <CircularProgress size={20} /> : <SearchIcon color="primary" />}
                   </InputAdornment>
                 ),
               }}
               variant="outlined"
+              size="small"
             />
           )}
         />
-
-        {/* Resultados de búsqueda (tabla) */}
-        {searchResults.length > 0 && (
-          <Box className="table-unified" sx={{ mt: 2, height: 400 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              {searchResults.length} resultado(s) encontrado(s)
-            </Typography>
-            <DataGrid
-              rows={searchResults}
-              columns={searchColumns}
-              getRowId={(row) => row.rut}
-              pageSizeOptions={[5, 10]}
-              initialState={{
-                pagination: {
-                  paginationModel: { pageSize: 5 },
-                },
-              }}
-              onRowClick={(params) => navigate(`/cliente/${params.row.rut}`)}
-              sx={{
-                cursor: 'pointer',
-                '& .data-grid-header': {
-                  backgroundColor: '#f5f5f5',
-                  fontWeight: 600,
-                },
-                '& .MuiDataGrid-row': {
-                  cursor: 'pointer',
-                  '&:hover': {
-                    backgroundColor: '#f5f5f5',
-                  },
-                },
-              }}
-            />
-          </Box>
-        )}
       </Paper>
 
-      {/* Grillas principales */}
-      <Grid container spacing={3}>
+      {/* Contenedor Carrusel (Horizontal) */}
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 3, 
+        flex: 1, 
+        overflowX: 'auto', 
+        pb: 2,
+        '&::-webkit-scrollbar': { height: 8 },
+        '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 4 }
+      }}>
         {/* Top 20 Clientes por Ventas */}
-        <Grid item xs={12} lg={6}>
-          <Paper className="card-unified" sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <TrendingUpIcon sx={{ color: '#1976d2', mr: 1 }} />
-              <Typography variant="h6" component="h2">
+        <Paper elevation={0} sx={{ 
+          minWidth: { xs: '100%', lg: 'calc(50% - 12px)' },
+          display: 'flex', 
+          flexDirection: 'column',
+          borderRadius: 2,
+          border: '1px solid #e2e8f0',
+          overflow: 'hidden'
+        }}>
+          <Box sx={{ p: 2, borderBottom: '1px solid #f1f5f9', bgcolor: '#fff' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+              <TrendingUpIcon sx={{ color: '#1976d2', mr: 1, fontSize: 20 }} />
+              <Typography variant="subtitle1" fontWeight={700}>
                 Top 20 Clientes por Ventas
               </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="caption" color="text.secondary">
               Últimos 12 meses
             </Typography>
+          </Box>
+          <Box sx={{ flex: 1, width: '100%' }}>
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-                <CircularProgress />
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <CircularProgress size={30} />
               </Box>
             ) : (
-              <Box className="table-unified" sx={{ height: 600, width: '100%' }}>
-                <DataGrid
-                  rows={topClientes}
-                  columns={topClientesColumns}
-                  getRowId={(row) => row.rut}
-                  pageSizeOptions={[20]}
-                  initialState={{
-                    pagination: {
-                      paginationModel: { pageSize: 20 },
-                    },
-                  }}
-                  onRowClick={(params) => navigate(`/cliente/${params.row.rut}`)}
-                  sx={{
-                    cursor: 'pointer',
-                    '& .data-grid-header': {
-                      backgroundColor: '#f5f5f5',
-                      fontWeight: 600,
-                    },
-                    '& .MuiDataGrid-row': {
-                      cursor: 'pointer',
-                      '&:hover': {
-                        backgroundColor: '#f5f5f5',
-                      },
-                    },
-                  }}
-                />
-              </Box>
+              <DataGrid
+                rows={topClientes}
+                columns={topClientesColumns}
+                getRowId={(row) => row.rut}
+                hideFooter
+                onRowClick={(params) => navigate(`/cliente/${params.row.rut}`)}
+                sx={{
+                  border: 'none',
+                  '& .data-grid-header': {
+                    backgroundColor: '#f8fafc',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    color: '#64748b',
+                    textTransform: 'uppercase'
+                  },
+                  '& .MuiDataGrid-cell': {
+                    fontSize: '0.875rem'
+                  }
+                }}
+              />
             )}
-          </Paper>
-        </Grid>
+          </Box>
+        </Paper>
 
         {/* Clientes con Facturas Impagas */}
-        <Grid item xs={12} lg={6}>
-          <Paper className="card-unified" sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <WarningIcon sx={{ color: '#d32f2f', mr: 1 }} />
-              <Typography variant="h6" component="h2">
+        <Paper elevation={0} sx={{ 
+          minWidth: { xs: '100%', lg: 'calc(50% - 12px)' },
+          display: 'flex', 
+          flexDirection: 'column',
+          borderRadius: 2,
+          border: '1px solid #e2e8f0',
+          overflow: 'hidden'
+        }}>
+          <Box sx={{ p: 2, borderBottom: '1px solid #f1f5f9', bgcolor: '#fff' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+              <WarningIcon sx={{ color: '#d32f2f', mr: 1, fontSize: 20 }} />
+              <Typography variant="subtitle1" fontWeight={700}>
                 Clientes con Facturas Impagas
               </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Con ventas en últimos 3 meses y facturas pendientes &gt;30 días
+            <Typography variant="caption" color="text.secondary">
+              Ventas últimos 3 meses | Mora &gt; 30 días
             </Typography>
+          </Box>
+          <Box sx={{ flex: 1, width: '100%' }}>
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-                <CircularProgress />
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <CircularProgress size={30} />
               </Box>
             ) : (
-              <Box className="table-unified" sx={{ height: 600, width: '100%' }}>
-                <DataGrid
-                  rows={facturasImpagas}
-                  columns={facturasImpagasColumns}
-                  getRowId={(row) => row.rut}
-                  pageSizeOptions={[20]}
-                  initialState={{
-                    pagination: {
-                      paginationModel: { pageSize: 20 },
-                    },
-                  }}
-                  onRowClick={(params) => navigate(`/cliente/${params.row.rut}`)}
-                  sx={{
-                    cursor: 'pointer',
-                    '& .data-grid-header': {
-                      backgroundColor: '#f5f5f5',
-                      fontWeight: 600,
-                    },
-                    '& .MuiDataGrid-row': {
-                      cursor: 'pointer',
-                      '&:hover': {
-                        backgroundColor: '#f5f5f5',
-                      },
-                    },
-                  }}
-                />
-              </Box>
+              <DataGrid
+                rows={facturasImpagas}
+                columns={facturasImpagasColumns}
+                getRowId={(row) => row.rut}
+                hideFooter
+                onRowClick={(params) => navigate(`/cliente/${params.row.rut}`)}
+                sx={{
+                  border: 'none',
+                  '& .data-grid-header': {
+                    backgroundColor: '#f8fafc',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    color: '#64748b',
+                    textTransform: 'uppercase'
+                  },
+                  '& .MuiDataGrid-cell': {
+                    fontSize: '0.875rem'
+                  }
+                }}
+              />
             )}
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
   );
 };
 
