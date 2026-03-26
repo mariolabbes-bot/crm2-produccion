@@ -3,7 +3,7 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const { updateJobStatus } = require('../jobManager');
-const { norm, parseNumeric } = require('./utils');
+const { norm, parseNumeric, formatRut } = require('./utils');
 const { resolveVendorName } = require('../../utils/vendorAlias');
 
 async function processClientesFileAsync(jobId, filePath, originalname) {
@@ -135,7 +135,7 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
             }
 
             toImport.push({
-                rut, nombre,
+                rut: formatRut(rut), nombre,
                 email: colEmail && row[colEmail] ? String(row[colEmail]).trim() : null,
                 telefono: colTelefono && row[colTelefono] ? String(row[colTelefono]).trim() : null,
                 sucursal: colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null,

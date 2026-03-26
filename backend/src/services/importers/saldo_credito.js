@@ -2,7 +2,7 @@
 const XLSX = require('xlsx');
 const pool = require('../../db');
 const { updateJobStatus } = require('../jobManager');
-const { norm, parseExcelDate, parseNumeric } = require('./utils');
+const { norm, parseExcelDate, parseNumeric, formatRut } = require('./utils');
 
 async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
     const client = await pool.connect();
@@ -75,7 +75,7 @@ async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
             // Extract Values
             const rawRut = row[colRut];
             const dv = colDv ? row[colDv] : '';
-            const rut = rawRut ? String(rawRut).trim() + (dv ? `-${dv}` : '') : null;
+            const rut = formatRut(rawRut ? String(rawRut).trim() + (dv ? `-${dv}` : '') : null);
 
             const folio = row[colFolio] ? parseInt(row[colFolio]) : null;
             if (!folio || !rut) continue;

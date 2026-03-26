@@ -165,7 +165,12 @@ class ClientModel {
     `;
 
     if (vendedorAlias) {
-      query += ` WHERE EXISTS (SELECT 1 FROM venta v WHERE v.cliente = vc.nombre AND LOWER(v.vendedor_cliente) = LOWER($4) AND v.fecha_emision >= $1 AND v.fecha_emision < $2)`;
+      query += ` WHERE EXISTS (
+        SELECT 1 FROM venta v 
+        WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(vc.rut, '[^a-zA-Z0-9]', '', 'g')
+        AND LOWER(v.vendedor_cliente) = LOWER($4) 
+        AND v.fecha_emision >= $1 AND v.fecha_emision < $2
+      )`;
       params.push(vendedorAlias);
     }
 
@@ -212,13 +217,14 @@ class ClientModel {
         MIN(sc.fecha_emision) as factura_mas_antigua,
         EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision))::INTEGER as dias_mora
       FROM cliente c
-      INNER JOIN saldo_credito sc ON
-        REGEXP_REPLACE(COALESCE(c.rut, ''), '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(sc.rut::text || COALESCE(sc.dv::text, ''), '[^a-zA-Z0-9]', '', 'g')
+      INNER JOIN saldo_credito sc ON 
+        REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = 
+        REGEXP_REPLACE(CASE WHEN sc.rut LIKE '%-%' THEN sc.rut ELSE sc.rut || COALESCE(sc.dv, '') END, '[^a-zA-Z0-9]', '', 'g')
       WHERE sc.saldo_factura > 0
       -- Filtro: Solo clientes con ventas en los últimos 3 meses
       AND EXISTS (
-        SELECT 1 FROM venta v
-        WHERE REGEXP_REPLACE(COALESCE(v.identificador, ''), '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(COALESCE(c.rut, ''), '[^a-zA-Z0-9]', '', 'g')
+        SELECT 1 FROM venta v 
+        WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
         AND v.fecha_emision >= NOW() - INTERVAL '3 months'
       )
     `;

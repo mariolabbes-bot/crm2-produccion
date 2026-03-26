@@ -3,7 +3,7 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const { updateJobStatus } = require('../jobManager');
-const { norm, parseExcelDate, parseNumeric } = require('./utils');
+const { norm, parseExcelDate, parseNumeric, formatRut } = require('./utils');
 const { resolveVendorName } = require('../../utils/vendorAlias');
 const { resolveBranch } = require('../sucursalAliasService');
 
@@ -64,7 +64,7 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
 
             const idAbonoRaw = colIdentificadorAbono && row[colIdentificadorAbono] ? String(row[colIdentificadorAbono]).trim() : '';
             const montoNetoCalc = Math.round(montoExcel / 1.19);
-            const identificador = colIdentificador && row[colIdentificador] ? String(row[colIdentificador]).trim() : null;
+            const identificador = colIdentificador && row[colIdentificador] ? formatRut(row[colIdentificador]) : null;
             const clienteNombre = colCliente && row[colCliente] ? String(row[colCliente]).trim() : null;
 
             // Resolve Vendor

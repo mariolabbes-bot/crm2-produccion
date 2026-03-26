@@ -3,7 +3,7 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const { updateJobStatus } = require('../jobManager');
-const { norm, parseExcelDate, parseNumeric } = require('./utils');
+const { norm, parseExcelDate, parseNumeric, formatRut } = require('./utils');
 const { resolveVendorName } = require('../../utils/vendorAlias');
 const { resolveBranch } = require('../sucursalAliasService');
 
@@ -177,20 +177,20 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
             const descripcion = colDescripcion && row[colDescripcion] ? String(row[colDescripcion]).trim() : null;
 
             // STUB CLIENT
-            let clienteRut = null;
             if (identificador) {
-                const rutNorm = norm(identificador);
+                const rutFormatted = formatRut(identificador);
+                const rutNorm = norm(rutFormatted);
                 if (clientsByRut.has(rutNorm)) {
                     clienteRut = clientsByRut.get(rutNorm);
                 } else {
                     // Create Stub
                     if (!missingClients.has(rutNorm)) { // Check if we already tried and failed
                         try {
-                            await client.query("INSERT INTO cliente (rut, nombre) VALUES ($1, $2) ON CONFLICT (rut) DO NOTHING", [identificador, clienteNombre || 'Unknown']);
-                            clientsByRut.set(rutNorm, identificador);
+                            await client.query("INSERT INTO cliente (rut, nombre) VALUES ($1, $2) ON CONFLICT (rut) DO NOTHING", [rutFormatted, clienteNombre || 'Unknown']);
+                            clientsByRut.set(rutNorm, rutFormatted);
                             // Log as observation/info but NOT as missing blocking
-                            observations.push({ fila: excelRow, campo: 'cliente', detalle: `Cliente Nuevo Creado (Stub): ${identificador}` });
-                            clienteRut = identificador;
+                            observations.push({ fila: excelRow, campo: 'cliente', detalle: `Cliente Nuevo Creado (Stub): ${rutFormatted}` });
+                            clienteRut = rutFormatted;
                         } catch (e) {
                             console.error(e);
                             missingClients.add(rutNorm); // Only add to missing if failed

@@ -52,10 +52,13 @@ function parseExcelDate(value) {
     return null;
 }
 
-function parseNumeric(value) {
-    if (value == null || value === '') return null;
-    const num = parseFloat(value);
-    return isNaN(num) ? null : num;
+function formatRut(rut) {
+    if (!rut) return null;
+    let clean = String(rut).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (clean.length < 2) return clean;
+    const dv = clean.slice(-1);
+    const body = clean.slice(0, -1);
+    return `${body}-${dv}`;
 }
 
-module.exports = { norm, parseExcelDate, parseNumeric };
+module.exports = { norm, parseExcelDate, parseNumeric, formatRut };
