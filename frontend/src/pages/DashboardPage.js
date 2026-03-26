@@ -150,7 +150,8 @@ const DashboardPage = () => {
       <Box sx={{ 
         display: 'flex', 
         flexWrap: 'nowrap',
-        overflowX: 'auto', 
+        overflowX: 'auto',
+        overflowY: 'hidden',
         gap: 2, 
         mb: 3,
         pb: 1,
@@ -225,7 +226,8 @@ const DashboardPage = () => {
       <Box sx={{ 
         display: 'flex', 
         flexWrap: 'nowrap',
-        overflowX: 'auto', 
+        overflowX: 'auto',
+        overflowY: 'hidden',
         gap: 3, 
         mb: 3,
         pb: 2,

@@ -64,7 +64,7 @@ router.get('/stats', auth(), async (req, res) => {
       stats.clientes = { ultima_fecha: null, total_registros: 0, error: err.message };
     }
 
-    // 4. Saldo Crédito - Fecha de creación más reciente
+    // 4. Saldo Crédito - Fecha de creación más reciente (Importación)
     try {
       const creditoRes = await pool.query(`
         SELECT MAX(created_at) as ultima_fecha, COUNT(*) as total
@@ -79,6 +79,23 @@ router.get('/stats', auth(), async (req, res) => {
     } catch (err) {
       console.warn('  ⚠️  Error Crédito:', err.message);
       stats.credito = { ultima_fecha: null, total_registros: 0, error: err.message };
+    }
+
+    // 5. Stock - Fecha de última actualización (Importación)
+    try {
+      const stockRes = await pool.query(`
+        SELECT MAX(ultima_actualizacion) as ultima_fecha, COUNT(*) as total
+        FROM stock
+      `);
+      stats.stock = {
+        ultima_fecha: stockRes.rows[0]?.ultima_fecha || null,
+        total_registros: parseInt(stockRes.rows[0]?.total || 0),
+        tipo: 'Stock'
+      };
+      console.log('  ✅ Stock:', stats.stock.ultima_fecha);
+    } catch (err) {
+      console.warn('  ⚠️  Error Stock:', err.message);
+      stats.stock = { ultima_fecha: null, total_registros: 0, error: err.message };
     }
 
     res.json({

@@ -149,22 +149,32 @@ const ImportStatsWidget = () => {
       </Box>
 
       {stats ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexGrow: 1 }}>
-          <Box>
-            <span style={{ color: '#555' }}>Ventas:</span> <strong>{formatDateTime(stats.ventas?.ultima_fecha)}</strong> <span style={{ color: '#888', fontWeight: 'normal' }}>({(stats.ventas?.total_registros || 0).toLocaleString('es-CL')})</span>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: { xs: 2, md: 4 }, 
+          flexGrow: 1,
+          justifyContent: 'center',
+          fontSize: '0.7rem' 
+        }}>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <span style={{ color: '#666' }}>Ventas:</span> <strong>{formatDate(stats.ventas?.ultima_fecha)}</strong>
           </Box>
-          <Box>
-            <span style={{ color: '#555' }}>Abonos:</span> <strong>{formatDateTime(stats.abonos?.ultima_fecha)}</strong> <span style={{ color: '#888', fontWeight: 'normal' }}>({(stats.abonos?.total_registros || 0).toLocaleString('es-CL')})</span>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <span style={{ color: '#666' }}>Abonos:</span> <strong>{formatDate(stats.abonos?.ultima_fecha)}</strong>
           </Box>
-          <Box>
-            <span style={{ color: '#555' }}>Clientes:</span> <strong>{formatDateTime(stats.clientes?.ultima_fecha)}</strong> <span style={{ color: '#888', fontWeight: 'normal' }}>({(stats.clientes?.total_registros || 0).toLocaleString('es-CL')})</span>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <span style={{ color: '#666' }}>Clientes:</span> <strong>{formatDate(stats.clientes?.ultima_fecha)}</strong>
           </Box>
-          <Box>
-            <span style={{ color: '#555' }}>Saldos:</span> <strong>{formatDateTime(stats.credito?.ultima_fecha)}</strong> <span style={{ color: '#888', fontWeight: 'normal' }}>({(stats.credito?.total_registros || 0).toLocaleString('es-CL')})</span>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <span style={{ color: '#666' }}>Saldos:</span> <strong>{formatDate(stats.credito?.ultima_fecha)}</strong>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <span style={{ color: '#666' }}>Stock:</span> <strong>{formatDate(stats.stock?.ultima_fecha)}</strong>
           </Box>
         </Box>
       ) : (
-        <Typography variant="caption" sx={{ color: '#555' }}>Cargando datos de sincronización...</Typography>
+        <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>Cargando sincronización...</Typography>
       )}
     </Box>
   );
