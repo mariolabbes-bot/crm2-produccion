@@ -52,6 +52,17 @@ function parseExcelDate(value) {
     return null;
 }
 
+function parseNumeric(value) {
+    if (value == null || value === '') return 0;
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+        const cleaned = value.replace(/[^0-9.,-]/g, '').replace(',', '.');
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? 0 : num;
+    }
+    return 0;
+}
+
 function formatRut(rut) {
     if (!rut) return null;
     let clean = String(rut).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
