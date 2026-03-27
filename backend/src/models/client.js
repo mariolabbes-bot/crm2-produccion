@@ -218,8 +218,7 @@ class ClientModel {
         EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision))::INTEGER as dias_mora
       FROM cliente c
       INNER JOIN saldo_credito sc ON 
-        REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = 
-        REGEXP_REPLACE(CASE WHEN sc.rut LIKE '%-%' THEN sc.rut ELSE sc.rut || COALESCE(sc.dv, '') END, '[^a-zA-Z0-9]', '', 'g')
+        REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(sc.rut, '[^a-zA-Z0-9]', '', 'g')
       WHERE sc.saldo_factura > 0
       -- Filtro: Solo clientes con ventas en los últimos 3 meses
       AND EXISTS (
