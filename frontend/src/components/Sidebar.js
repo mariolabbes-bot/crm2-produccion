@@ -25,6 +25,7 @@ import {
   UploadFile as ImportIcon,
   Security as AdminIcon,
   Map as MapIcon,
+  CalendarMonth as PlannerIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -76,6 +77,12 @@ const Sidebar = () => {
       icon: <MapIcon />,
       path: '/mapa-visitas',
       color: '#3B82F6',
+    },
+    {
+      title: 'Planificar Ruta',
+      icon: <PlannerIcon />,
+      path: '/planificar',
+      color: '#8B5CF6',
       divider: true
     },
     {
