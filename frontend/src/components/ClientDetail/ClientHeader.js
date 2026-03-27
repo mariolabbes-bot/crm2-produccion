@@ -12,7 +12,9 @@ import {
   DialogActions,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  TextField,
+  MenuItem as MuiMenuItem
 } from '@mui/material';
 import PersonNameIcon from '@mui/icons-material/Badge';
 import EmailIcon from '@mui/icons-material/Email';
@@ -44,6 +46,8 @@ function ClientHeader({ cliente, onUpdate }) {
   const [visitaActiva, setVisitaActiva] = React.useState(null);
   const [loadingAction, setLoadingAction] = React.useState(false);
   const [openGPSDialog, setOpenGPSDialog] = React.useState(false);
+  const [openCheckOutDialog, setOpenCheckOutDialog] = React.useState(false);
+  const [checkOutResultado, setCheckOutResultado] = React.useState('');
   const [pendingCoords, setPendingCoords] = React.useState(null);
   const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' });
 
@@ -108,14 +112,8 @@ function ClientHeader({ cliente, onUpdate }) {
         await checkActiveVisit();
         setSnackbar({ open: true, message: 'Check-in realizado con éxito', severity: 'success' });
       } else if (type === 'CHECK_OUT') {
-        const resultado = window.prompt('Resultado de la visita (ej: Venta Realizada, Cliente no estaba):');
-        if (resultado === null) return;
-        const pos = await new Promise((resolve) => {
-          navigator.geolocation.getCurrentPosition(resolve, () => resolve({ coords: { latitude: 0, longitude: 0 } }));
-        });
-        await api.checkOut(visitaActiva.id, pos.coords.latitude, pos.coords.longitude, resultado, '');
-        setVisitaActiva(null);
-        setSnackbar({ open: true, message: 'Visita finalizada correctamente', severity: 'success' });
+        setOpenCheckOutDialog(true);
+        return; // El envío real se hace desde handleConfirmCheckOut
       } else {
         const note = window.prompt(`Registrar nota para ${type.toLowerCase()}:`);
         if (note === null) return;
@@ -351,6 +349,67 @@ function ClientHeader({ cliente, onUpdate }) {
           </Grid>
         </Grid>
       </Grid>
+
+      {/* Check-Out Dialog */}
+      <Dialog open={openCheckOutDialog} onClose={() => setOpenCheckOutDialog(false)} PaperProps={{ sx: { borderRadius: '16px', minWidth: 320 } }}>
+        <DialogTitle sx={{ fontWeight: 800 }}>🏁 Finalizar Visita</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Selecciona o escribe el resultado de la visita a <strong>{cliente.nombre}</strong>.
+          </Typography>
+          <TextField
+            select
+            fullWidth
+            label="Resultado"
+            value={checkOutResultado}
+            onChange={e => setCheckOutResultado(e.target.value)}
+            size="small"
+          >
+            {['Venta realizada', 'Cliente no estaba', 'Sin pedido', 'Cobranza realizada', 'Solo visita', 'Otro'].map(opt => (
+              <MuiMenuItem key={opt} value={opt}>{opt}</MuiMenuItem>
+            ))}
+          </TextField>
+          <TextField
+            fullWidth
+            label="Notas adicionales (opcional)"
+            multiline
+            rows={2}
+            placeholder="Ej: Dejé muestra, acordamos llamar la próxima semana..."
+            sx={{ mt: 2 }}
+            onChange={e => setCheckOutResultado(prev => prev.split('|')[0] + '|' + e.target.value)}
+            size="small"
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button onClick={() => { setOpenCheckOutDialog(false); setCheckOutResultado(''); }} color="inherit">Cancelar</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!checkOutResultado || loadingAction}
+            startIcon={loadingAction ? <CircularProgress size={16} color="inherit" /> : <LogoutIcon />}
+            onClick={async () => {
+              try {
+                setLoadingAction(true);
+                const [resultado, notas = ''] = checkOutResultado.split('|');
+                const pos = await new Promise(resolve => {
+                  navigator.geolocation.getCurrentPosition(resolve, () => resolve({ coords: { latitude: 0, longitude: 0 } }));
+                });
+                await api.checkOut(visitaActiva.id, pos.coords.latitude, pos.coords.longitude, resultado, notas);
+                setVisitaActiva(null);
+                setOpenCheckOutDialog(false);
+                setCheckOutResultado('');
+                setSnackbar({ open: true, message: 'Visita finalizada correctamente', severity: 'success' });
+              } catch (err) {
+                setSnackbar({ open: true, message: 'Error al finalizar la visita', severity: 'error' });
+              } finally {
+                setLoadingAction(false);
+              }
+            }}
+          >
+            Confirmar y Finalizar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* GPS Dialog */}
       <Dialog open={openGPSDialog} onClose={() => setOpenGPSDialog(false)} PaperProps={{ sx: { borderRadius: '16px' } }}>
