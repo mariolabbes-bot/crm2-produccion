@@ -353,33 +353,44 @@ router.get('/suggestions', auth(), async (req, res) => {
     }
 });
 
-// POST /api/visits/plan - Guardar planificación del día
+// POST /api/visits/plan - Guardar planificación para una fecha (hoy o futura)
 router.post('/plan', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.rut; // Usamos RUT
-        const { clientes } = req.body; // Array de RUTs
+        const vendedorId = req.user.rut;
+        const { clientes, fecha } = req.body; // fecha opcional: 'YYYY-MM-DD'
 
         if (!clientes || !Array.isArray(clientes)) {
             return res.status(400).json({ msg: 'Lista de clientes inválida' });
         }
+
+        // Usar fecha recibida o CURRENT_DATE
+        const fechaTarget = fecha || null;
+        const fechaSQL = fechaTarget ? `$3::date` : `CURRENT_DATE`;
 
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
 
             for (const rut of clientes) {
-                // Verificar si ya existe para no duplicar
-                const check = await client.query(
-                    'SELECT id FROM visitas_registro WHERE vendedor_id = $1 AND cliente_rut = $2 AND fecha = CURRENT_DATE',
-                    [vendedorId, rut]
-                );
+                const checkParams = fechaTarget
+                    ? [vendedorId, rut, fechaTarget]
+                    : [vendedorId, rut];
+                const checkQ = fechaTarget
+                    ? `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1) AND cliente_rut = $2 AND fecha = $3::date`
+                    : `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1) AND cliente_rut = $2 AND fecha = CURRENT_DATE`;
+
+                const check = await client.query(checkQ, checkParams);
 
                 if (check.rows.length === 0) {
-                    await client.query(
-                        `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida)
-                         VALUES ($1, $2, CURRENT_DATE, 'pendiente', TRUE, 1)`,
-                        [vendedorId, rut]
-                    );
+                    const insertParams = fechaTarget
+                        ? [vendedorId, rut, fechaTarget]
+                        : [vendedorId, rut];
+                    const insertQ = fechaTarget
+                        ? `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida)
+                           VALUES ($1, $2, $3::date, 'pendiente', TRUE, 1)`
+                        : `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida)
+                           VALUES ($1, $2, CURRENT_DATE, 'pendiente', TRUE, 1)`;
+                    await client.query(insertQ, insertParams);
                 }
             }
 
@@ -395,6 +406,30 @@ router.post('/plan', auth(), async (req, res) => {
     } catch (err) {
         console.error('Error planning:', err.message);
         res.status(500).send('Server Error planning');
+    }
+});
+
+// GET /api/visits/by-date?fecha=YYYY-MM-DD - Obtener visitas planificadas de una fecha específica
+router.get('/by-date', auth(), async (req, res) => {
+    try {
+        const vendedorId = req.user.rut;
+        const { fecha } = req.query;
+
+        if (!fecha) return res.status(400).json({ msg: 'Parámetro fecha requerido (YYYY-MM-DD)' });
+
+        const query = `
+            SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion, c.circuito
+            FROM visitas_registro v
+            JOIN cliente c ON v.cliente_rut = c.rut
+            WHERE (v.vendedor_id::text = $1)
+            AND v.fecha = $2::date
+            ORDER BY v.planificada DESC, v.id ASC
+        `;
+        const result = await pool.query(query, [vendedorId, fecha]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error by-date:', err.message);
+        res.status(500).send('Server Error by-date');
     }
 });
 
