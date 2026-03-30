@@ -6,10 +6,14 @@ import {
     DialogActions, Alert, CircularProgress
 } from '@mui/material';
 import { Edit, Delete, Add, ColorLens, GroupAdd } from '@mui/icons-material';
-import { getCircuits, createCircuit, updateCircuit, deleteCircuit, bulkAssignCircuit } from '../../api';
+import { getAllCircuits, createCircuit, updateCircuit, deleteCircuit, bulkAssignCircuit } from '../../api';
 import { Divider } from '@mui/material';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CircuitManagement = () => {
+    const { user } = useAuth();
+    const isManager = user?.rol?.toUpperCase() === 'MANAGER';
+
     const [circuits, setCircuits] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -24,7 +28,7 @@ const CircuitManagement = () => {
     const fetchCircuits = async () => {
         try {
             setLoading(true);
-            const data = await getCircuits();
+            const data = await getAllCircuits(); // Todos los circuitos para poder asignar
             setCircuits(data);
         } catch (err) {
             setError('Error al cargar circuitos');
@@ -105,12 +109,20 @@ const CircuitManagement = () => {
         <Box>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                 <Typography variant="h6" fontWeight="bold">Gestión de Circuitos</Typography>
-                <Button variant="contained" startIcon={<Add />} onClick={() => handleOpen()}>
-                    Nuevo Circuito
-                </Button>
+                {isManager && (
+                    <Button variant="contained" startIcon={<Add />} onClick={() => handleOpen()}>
+                        Nuevo Circuito
+                    </Button>
+                )}
             </Box>
 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+            {!isManager && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                    Aquí puedes ver los circuitos disponibles y usar la herramienta de asignación masiva al final de la página para reasignar a tus clientes.
+                </Alert>
+            )}
 
             <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
                 <Table>
@@ -119,7 +131,7 @@ const CircuitManagement = () => {
                             <TableCell>Nombre</TableCell>
                             <TableCell>Color</TableCell>
                             <TableCell>Descripción</TableCell>
-                            <TableCell align="right">Acciones</TableCell>
+                            {isManager && <TableCell align="right">Acciones</TableCell>}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -133,14 +145,16 @@ const CircuitManagement = () => {
                                     </Box>
                                 </TableCell>
                                 <TableCell>{c.descripcion}</TableCell>
-                                <TableCell align="right">
-                                    <IconButton size="small" color="primary" onClick={() => handleOpen(c)}>
-                                        <Edit fontSize="small" />
-                                    </IconButton>
-                                    <IconButton size="small" color="error" onClick={() => handleDelete(c.id)}>
-                                        <Delete fontSize="small" />
-                                    </IconButton>
-                                </TableCell>
+                                {isManager && (
+                                    <TableCell align="right">
+                                        <IconButton size="small" color="primary" onClick={() => handleOpen(c)}>
+                                            <Edit fontSize="small" />
+                                        </IconButton>
+                                        <IconButton size="small" color="error" onClick={() => handleDelete(c.id)}>
+                                            <Delete fontSize="small" />
+                                        </IconButton>
+                                    </TableCell>
+                                )}
                             </TableRow>
                         ))}
                     </TableBody>

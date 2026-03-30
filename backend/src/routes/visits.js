@@ -356,7 +356,8 @@ router.get('/suggestions', auth(), async (req, res) => {
 // POST /api/visits/plan - Guardar planificación para una fecha (hoy o futura)
 router.post('/plan', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.rut;
+        const vendedorIdNum = req.user.id; // visitas_registro usa INTEGER
+        const vendedorIdRut = req.user.rut;
         const { clientes, fecha } = req.body; // fecha opcional: 'YYYY-MM-DD'
 
         if (!clientes || !Array.isArray(clientes)) {
@@ -373,18 +374,18 @@ router.post('/plan', auth(), async (req, res) => {
 
             for (const rut of clientes) {
                 const checkParams = fechaTarget
-                    ? [vendedorId, rut, fechaTarget]
-                    : [vendedorId, rut];
+                    ? [vendedorIdRut, vendedorIdNum, rut, fechaTarget]
+                    : [vendedorIdRut, vendedorIdNum, rut];
                 const checkQ = fechaTarget
-                    ? `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1) AND cliente_rut = $2 AND fecha = $3::date`
-                    : `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1) AND cliente_rut = $2 AND fecha = CURRENT_DATE`;
+                    ? `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2) AND cliente_rut = $3 AND fecha = $4::date`
+                    : `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2) AND cliente_rut = $3 AND fecha = CURRENT_DATE`;
 
                 const check = await client.query(checkQ, checkParams);
 
                 if (check.rows.length === 0) {
                     const insertParams = fechaTarget
-                        ? [vendedorId, rut, fechaTarget]
-                        : [vendedorId, rut];
+                        ? [vendedorIdNum, rut, fechaTarget]
+                        : [vendedorIdNum, rut];
                     const insertQ = fechaTarget
                         ? `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida)
                            VALUES ($1, $2, $3::date, 'pendiente', TRUE, 1)`

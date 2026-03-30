@@ -298,14 +298,30 @@ class ClientModel {
     return result.rows[0];
   }
 
-  static async bulkAssignCircuit(ruts, circuito) {
-    const query = `
-      UPDATE cliente 
-      SET circuito = $1 
-      WHERE rut = ANY($2::varchar[])
-      RETURNING rut, circuito
-    `;
-    const result = await pool.query(query, [circuito, ruts]);
+  static async bulkAssignCircuit(ruts, circuito, user) {
+    const isManager = user && user.rol && user.rol.toUpperCase() === 'MANAGER';
+    let query;
+    let params = [circuito, ruts];
+
+    if (isManager || !user) {
+        query = `
+          UPDATE cliente 
+          SET circuito = $1 
+          WHERE rut = ANY($2::varchar[])
+          RETURNING rut, circuito
+        `;
+    } else {
+        query = `
+          UPDATE cliente 
+          SET circuito = $1 
+          WHERE rut = ANY($2::varchar[])
+          AND (vendedor_id::text = $3 OR vendedor_id::text = $4)
+          RETURNING rut, circuito
+        `;
+        params.push(user.rut, user.id);
+    }
+
+    const result = await pool.query(query, params);
     return result.rows;
   }
 }

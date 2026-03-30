@@ -8,7 +8,7 @@ import {
 import { 
     AddTask, ArrowForward, AccessTime, Search as SearchIcon, 
     CalendarMonth as CalendarIcon, CheckCircleOutline,
-    PlaylistAddCheck as BulkIcon
+    PlaylistAddCheck as BulkIcon, DeleteOutline, PersonPinCircle
 } from '@mui/icons-material';
 import { 
     getVisitSuggestions, submitVisitPlan, getCircuits, getVisitsByDate 
@@ -145,7 +145,7 @@ const PlannerPage = () => {
                     <Paper sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', flex: 1, borderRadius: 3, border: '1px solid #eee', elevation: 0 }}>
                         <InputBase
                             sx={{ ml: 1, flex: 1 }}
-                            placeholder="Buscar cliente..."
+                            placeholder="Buscar cliente recomendados..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -168,11 +168,14 @@ const PlannerPage = () => {
             {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
 
             <Box p={2}>
-                {/* Filtros de Circuito */}
-                <Box sx={{ mb: 3, display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
-                    <Chip
-                        label="TODOS"
-                        onClick={() => setFilterCircuit('ALL')}
+                <Grid container spacing={3}>
+                    {/* COLUMNA IZQUIERDA: CATALOGO */}
+                    <Grid item xs={12} md={8}>
+                        {/* Filtros de Circuito */}
+                        <Box sx={{ mb: 3, display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
+                            <Chip
+                                label="TODOS"
+                                onClick={() => setFilterCircuit('ALL')}
                         color={filterCircuit === 'ALL' ? 'primary' : 'default'}
                         variant={filterCircuit === 'ALL' ? 'filled' : 'outlined'}
                         sx={{ fontWeight: 'bold' }}
@@ -284,6 +287,61 @@ const PlannerPage = () => {
                         </Paper>
                     );
                 })}
+                    </Grid>
+
+                    {/* COLUMNA DERECHA: SELECCIONADOS */}
+                    <Grid item xs={12} md={4}>
+                        <Paper sx={{ p: 2, borderRadius: 4, position: 'sticky', top: 120, border: '1px solid #eee', bgcolor: 'white', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                <Typography variant="subtitle1" fontWeight="bold">
+                                    <PersonPinCircle color="primary" sx={{ verticalAlign: 'middle', mr: 1 }}/>
+                                    Ruta Seleccionada ({selected.length})
+                                </Typography>
+                                {selected.length > 0 && (
+                                    <Button size="small" color="error" onClick={() => setSelected([])}>Limpiar</Button>
+                                )}
+                            </Box>
+                            
+                            <Divider sx={{ mb: 2 }} />
+
+                            {selected.length === 0 ? (
+                                <Box textAlign="center" p={3} opacity={0.5}>
+                                    <Typography variant="body2">No has seleccionado nuevos clientes para esta ruta.</Typography>
+                                </Box>
+                            ) : (
+                                suggestions.filter(c => selected.includes(c.rut)).map(client => (
+                                    <Paper key={`sel-${client.rut}`} sx={{ p: 1.5, mb: 1, bgcolor: '#F9FAFB', borderRadius: 2, border: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Box>
+                                            <Typography variant="subtitle2" fontWeight="bold" noWrap sx={{ maxWidth: 200 }}>{client.nombre}</Typography>
+                                            <Typography variant="caption" color="text.secondary" display="block">{client.circuito || 'Sin circuito'}</Typography>
+                                        </Box>
+                                        <IconButton size="small" color="error" onClick={() => toggleSelect(client.rut)}>
+                                            <DeleteOutline fontSize="small" />
+                                        </IconButton>
+                                    </Paper>
+                                ))
+                            )}
+
+                            {existingPlan.length > 0 && (
+                                <Box mt={3}>
+                                    <Typography variant="caption" fontWeight="bold" color="text.secondary">
+                                        YA PLANIFICADOS EN ESTE DÍA ({existingPlan.length})
+                                    </Typography>
+                                    <Box mt={1}>
+                                    {existingPlan.map((rut, idx) => {
+                                        const c = suggestions.find(s => s.rut === rut);
+                                        return (
+                                            <Typography key={`ext-${rut}`} variant="caption" display="block" color="success.main" sx={{ mb: 0.5 }}>
+                                                ✓ {c ? c.nombre : rut}
+                                            </Typography>
+                                        );
+                                    })}
+                                    </Box>
+                                </Box>
+                            )}
+                        </Paper>
+                    </Grid>
+                </Grid>
             </Box>
 
             {/* BARRA DE ACCIÓN FLOTANTE */}

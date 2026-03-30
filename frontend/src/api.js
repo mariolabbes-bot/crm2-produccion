@@ -476,6 +476,7 @@ export const getVisitsByDate = (fecha) => apiFetch(`${API_URL}/visits/by-date?fe
 
 // CIRCUITS
 export const getCircuits = () => apiFetch(`${API_URL}/circuits`);
+export const getAllCircuits = () => apiFetch(`${API_URL}/circuits?all=true`);
 export const createCircuit = (circuitData) => apiFetch(`${API_URL}/circuits`, { method: 'POST', body: JSON.stringify(circuitData) });
 export const updateCircuit = (id, circuitData) => apiFetch(`${API_URL}/circuits/${id}`, { method: 'PUT', body: JSON.stringify(circuitData) });
 export const deleteCircuit = (id) => apiFetch(`${API_URL}/circuits/${id}`, { method: 'DELETE' });

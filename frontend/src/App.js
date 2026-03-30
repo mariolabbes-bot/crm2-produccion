@@ -33,6 +33,7 @@ import MobileVisitsPage from './pages/MobileVisitsPage';
 import './styles/layout.css';
 
 import PlannerPage from './pages/PlannerPage';
+import MisCircuitosPage from './pages/MisCircuitosPage';
 
 import AssistantFloatingButton from './components/ai/AssistantFloatingButton';
 import useIsMobile from './hooks/useIsMobile';
@@ -67,6 +68,7 @@ const App = () => {
                                 <Route path="cliente/:rut" element={<ClientDetailPage />} />
                                 <Route path="mapa-visitas" element={<MapRoute />} />
                                 <Route path="planificar" element={<PlannerPage />} />
+                                <Route path="mis-circuitos" element={<MisCircuitosPage />} />
                                 <Route path="assistant" element={<AssistantPage />} />
                             </Route>
 

@@ -26,6 +26,7 @@ import {
   Security as AdminIcon,
   Map as MapIcon,
   CalendarMonth as PlannerIcon,
+  AltRoute as RouteIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -83,6 +84,13 @@ const Sidebar = () => {
       icon: <PlannerIcon />,
       path: '/planificar',
       color: '#8B5CF6',
+    },
+    {
+      title: 'Mis Circuitos',
+      icon: <RouteIcon />,
+      path: '/mis-circuitos',
+      color: '#F59E0B',
+      sellerOnly: true,
       divider: true
     },
     {
@@ -90,7 +98,8 @@ const Sidebar = () => {
       icon: <SettingsIcon />,
       path: '/admin',
       color: '#6B7280', // Gris
-      managerOnly: true
+      managerOnly: true,
+      divider: true
     },
   ];
 
@@ -213,8 +222,10 @@ const Sidebar = () => {
       {/* Menú Principal */}
       <List sx={{ px: 1, flex: 1 }}>
         {menuItems.map((item) => {
-          // Ocultar "Importar Datos" si no es manager
           if (item.managerOnly && user?.rol?.toUpperCase() !== 'MANAGER') {
+            return null;
+          }
+          if (item.sellerOnly && user?.rol?.toUpperCase() === 'MANAGER') {
             return null;
           }
 

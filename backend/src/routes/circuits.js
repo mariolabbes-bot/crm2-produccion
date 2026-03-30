@@ -4,10 +4,35 @@ const pool = require('../db');
 const auth = require('../middleware/auth');
 
 // GET /api/circuits - Listar todos los circuitos operativos
+// Si all=true se traen todos siempre (útil para dropdown de asignación)
 router.get('/', auth(), async (req, res) => {
     try {
-        const query = 'SELECT * FROM maestro_circuitos ORDER BY nombre ASC';
-        const result = await pool.query(query);
+        const isManager = req.user.rol && req.user.rol.toUpperCase() === 'MANAGER';
+        const showAll = req.query.all === 'true' || isManager;
+        
+        let query;
+        let params = [];
+
+        if (showAll) {
+            query = 'SELECT * FROM maestro_circuitos ORDER BY nombre ASC';
+        } else {
+            // Filtrar circuitos que tengan al menos 1 cliente asociado al vendedor actual
+            const vendedorIdRut = req.user.rut;
+            const vendedorIdNum = req.user.id;
+            query = `
+                SELECT mc.* 
+                FROM maestro_circuitos mc 
+                WHERE EXISTS (
+                    SELECT 1 FROM cliente c 
+                    WHERE c.circuito = mc.nombre 
+                    AND (c.vendedor_id::text = $1 OR c.vendedor_id::text = $2)
+                )
+                ORDER BY mc.nombre ASC
+            `;
+            params = [vendedorIdRut, vendedorIdNum];
+        }
+
+        const result = await pool.query(query, params);
         res.json(result.rows);
     } catch (error) {
         console.error('Error fetching circuits:', error);
