@@ -47,13 +47,28 @@ const ProductAnalyticsWidget = ({ vendedorId }) => {
                 Análisis de Productos (Mes Actual vs Año Anterior)
             </Typography>
 
-            <Grid container spacing={3}>
+            <Box sx={{
+                display: 'flex',
+                gap: 2,
+                overflowX: 'auto',
+                pb: 2,
+                px: 1,
+                mx: -1,
+                scrollSnapType: 'x mandatory',
+                '&::-webkit-scrollbar': { height: 8 },
+                '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 4 },
+                scrollbarWidth: 'thin'
+            }}>
                 {data.kpis.map((kpi) => (
-                    <Grid item xs={12} sm={6} md={3} key={kpi.id}>
+                    <Box key={kpi.id} sx={{ 
+                        minWidth: { xs: '85%', sm: '45%', md: '23%' }, 
+                        scrollSnapAlign: 'start',
+                        flexShrink: 0
+                    }}>
                         <Card sx={{
                             height: '100%',
                             position: 'relative',
-                            transition: 'transfrom 0.2s',
+                            transition: 'transform 0.2s',
                             '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 }
                         }}>
                             <CardContent>
@@ -91,9 +106,9 @@ const ProductAnalyticsWidget = ({ vendedorId }) => {
                                 </Box>
                             </CardContent>
                         </Card>
-                    </Grid>
+                    </Box>
                 ))}
-            </Grid>
+            </Box>
         </Box>
     );
 };

@@ -278,16 +278,20 @@ const ClientesPage = () => {
       {/* Contenedor Carrusel (Horizontal) */}
       <Box sx={{ 
         display: 'flex', 
-        gap: 3, 
+        gap: { xs: 2, lg: 3 }, 
         flex: 1, 
         overflowX: 'auto', 
         pb: 2,
+        scrollSnapType: 'x mandatory',
         '&::-webkit-scrollbar': { height: 8 },
-        '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 4 }
+        '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 4 },
+        scrollbarWidth: 'thin'
       }}>
         {/* Top 20 Clientes por Ventas */}
         <Paper elevation={0} sx={{ 
-          minWidth: { xs: '100%', lg: 'calc(50% - 12px)' },
+          minWidth: { xs: '90%', sm: '80%', lg: 'calc(50% - 12px)' },
+          scrollSnapAlign: 'center',
+          flexShrink: 0,
           display: 'flex', 
           flexDirection: 'column',
           borderRadius: 2,
@@ -337,7 +341,9 @@ const ClientesPage = () => {
 
         {/* Clientes con Facturas Impagas */}
         <Paper elevation={0} sx={{ 
-          minWidth: { xs: '100%', lg: 'calc(50% - 12px)' },
+          minWidth: { xs: '90%', sm: '80%', lg: 'calc(50% - 12px)' },
+          scrollSnapAlign: 'center',
+          flexShrink: 0,
           display: 'flex', 
           flexDirection: 'column',
           borderRadius: 2,

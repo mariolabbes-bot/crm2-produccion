@@ -30,10 +30,15 @@ import {
     List,
     ListItem,
     ListItemText,
-    Autocomplete
+    Autocomplete,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { getVendedores, getVentasReport, searchProducts } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import ProductAnalyticsWidget from '../components/ProductAnalyticsWidget';
@@ -139,7 +144,7 @@ const VentasPageContent = () => {
     return (
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
             {/* Header y Filtros */}
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
                     <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2B4F6F', mb: 1 }}>
                         Módulo de Ventas e Inventario
@@ -149,13 +154,20 @@ const VentasPageContent = () => {
                     </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Accordion defaultExpanded sx={{ bgcolor: 'transparent', boxShadow: 'none', '&:before': { display: 'none' }, borderBottom: '1px solid #e2e8f0' }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0, '& .MuiAccordionSummary-content': { my: 0 } }}>
+                        <Typography variant="subtitle1" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <FilterListIcon fontSize="small" /> Filtros y Búsqueda
+                        </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ px: 0, py: 1 }}>
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
                     <Autocomplete
                         freeSolo
                         options={searchOptions}
                         getOptionLabel={(option) => typeof option === 'string' ? option : `${option.sku} - ${option.descripcion}`}
                         size="small"
-                        sx={{ minWidth: 350, bgcolor: '#fff' }}
+                        sx={{ flexGrow: 1, minWidth: { xs: '100%', sm: 350 }, bgcolor: '#fff' }}
                         inputValue={searchTerm}
                         onInputChange={(event, newInputValue) => {
                             setSearchTerm(newInputValue);
@@ -242,7 +254,9 @@ const VentasPageContent = () => {
                             <MenuItem value="cantidad">Cantidad</MenuItem>
                         </Select>
                     </FormControl>
-                </Box>
+                        </Box>
+                    </AccordionDetails>
+                </Accordion>
             </Box>
 
             {/* KPIs Cards */}

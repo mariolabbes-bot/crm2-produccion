@@ -113,35 +113,54 @@ const MobileHomePage = () => {
                 </IconButton>
             </Box>
 
-            {/* KPIs en tarjetas uniformes */}
-            <MobileKPICard
-                title="Mi Venta del Mes"
-                value={formatCLP(kpis.ventasMes)}
-                progress={(kpis.ventasMes / 25000000) * 100}
-                subtitle="Meta Individual: 25M"
-                trend={kpis.trendVentas}
-                color="#2563EB"
-                icon={<ShoppingCart />}
-                loading={loading}
-            />
+            {/* KPIs en tarjetas horizontales con efecto carrusel */}
+            <Box sx={{ 
+                display: 'flex', 
+                gap: 2, 
+                overflowX: 'auto', 
+                pb: 2, 
+                px: 1,
+                mx: -1,
+                scrollSnapType: 'x mandatory',
+                '&::-webkit-scrollbar': { display: 'none' },
+                msOverflowStyle: 'none',
+                scrollbarWidth: 'none'
+            }}>
+                <Box sx={{ minWidth: '85%', scrollSnapAlign: 'center' }}>
+                    <MobileKPICard
+                        title="Mi Venta del Mes"
+                        value={formatCLP(kpis.ventasMes)}
+                        progress={(kpis.ventasMes / 25000000) * 100}
+                        subtitle="Meta Individual: 25M"
+                        trend={kpis.trendVentas}
+                        color="#2563EB"
+                        icon={<ShoppingCart />}
+                        loading={loading}
+                    />
+                </Box>
 
-            <MobileKPICard
-                title="Mis Cobros"
-                value={formatCLP(kpis.abonosMes)}
-                subtitle={`${((kpis.abonosMes / (kpis.ventasMes || 1)) * 100).toFixed(1)}% de mis ventas`}
-                color="#10B981"
-                icon={<Payment />}
-                loading={loading}
-            />
+                <Box sx={{ minWidth: '85%', scrollSnapAlign: 'center' }}>
+                    <MobileKPICard
+                        title="Mis Cobros"
+                        value={formatCLP(kpis.abonosMes)}
+                        subtitle={`${((kpis.abonosMes / (kpis.ventasMes || 1)) * 100).toFixed(1)}% de mis ventas`}
+                        color="#10B981"
+                        icon={<Payment />}
+                        loading={loading}
+                    />
+                </Box>
 
-            <MobileKPICard
-                title="Deuda de mi Cartera"
-                value={formatCLP(kpis.saldoTotal)}
-                subtitle="Pendiente por cobrar"
-                color="#E57A2D"
-                icon={<AccountBalanceWallet />}
-                loading={loading}
-            />
+                <Box sx={{ minWidth: '85%', scrollSnapAlign: 'center' }}>
+                    <MobileKPICard
+                        title="Deuda de mi Cartera"
+                        value={formatCLP(kpis.saldoTotal)}
+                        subtitle="Pendiente por cobrar"
+                        color="#E57A2D"
+                        icon={<AccountBalanceWallet />}
+                        loading={loading}
+                    />
+                </Box>
+            </Box>
 
             {/* SECCIÓN ESTRATEGIA DE RUTA */}
             <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, textTransform: 'uppercase', color: '#6B7280', fontWeight: 'bold' }}>Estrategia de Ruta</Typography>
