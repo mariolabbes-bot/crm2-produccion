@@ -92,44 +92,65 @@ const MobileManagerDashboard = () => {
             </Paper>
 
             {/* Grid de KPIs Uniformes */}
-            <MobileKPICard
-                title="Ventas del Mes"
-                value={formatCLP(kpis.ventasMes)}
-                progress={(kpis.ventasMes / 150000000) * 100}
-                subtitle="vs Meta Global"
-                trend={kpis.trendVentas}
-                color="#2563EB"
-                icon={<ShoppingCart />}
-                loading={loading}
-            />
+            <Box sx={{ 
+                display: 'flex', 
+                gap: 2, 
+                overflowX: 'auto', 
+                pb: 2, 
+                px: 1,
+                mx: -1,
+                scrollSnapType: 'x mandatory',
+                '&::-webkit-scrollbar': { display: 'none' },
+                msOverflowStyle: 'none',
+                scrollbarWidth: 'none'
+            }}>
+                <Box sx={{ minWidth: '85%', scrollSnapAlign: 'center' }}>
+                    <MobileKPICard
+                        title="Ventas del Mes"
+                        value={formatCLP(kpis.ventasMes)}
+                        progress={(kpis.ventasMes / 150000000) * 100}
+                        subtitle="vs Meta Global"
+                        trend={kpis.trendVentas}
+                        color="#2563EB"
+                        icon={<ShoppingCart />}
+                        loading={loading}
+                    />
+                </Box>
 
-            <MobileKPICard
-                title="Recaudación / Abonos"
-                value={formatCLP(kpis.abonosMes)}
-                subtitle={`${((kpis.abonosMes / (kpis.ventasMes || 1)) * 100).toFixed(1)}% de la venta`}
-                color="#10B981"
-                icon={<Payment />}
-                loading={loading}
-            />
+                <Box sx={{ minWidth: '85%', scrollSnapAlign: 'center' }}>
+                    <MobileKPICard
+                        title="Recaudación / Abonos"
+                        value={formatCLP(kpis.abonosMes)}
+                        subtitle={`${((kpis.abonosMes / (kpis.ventasMes || 1)) * 100).toFixed(1)}% de la venta`}
+                        color="#10B981"
+                        icon={<Payment />}
+                        loading={loading}
+                    />
+                </Box>
 
-            <MobileKPICard
-                title="Cartera de Deuda"
-                value={formatCLP(kpis.saldoTotal)}
-                subtitle="Monto total pendiente"
-                color="#E57A2D"
-                icon={<AccountBalanceWallet />}
-                loading={loading}
-            />
+                <Box sx={{ minWidth: '85%', scrollSnapAlign: 'center' }}>
+                    <MobileKPICard
+                        title="Cartera de Deuda"
+                        value={formatCLP(kpis.saldoTotal)}
+                        subtitle="Monto total pendiente"
+                        color="#E57A2D"
+                        icon={<AccountBalanceWallet />}
+                        loading={loading}
+                    />
+                </Box>
 
-            <MobileKPICard
-                title="Cobertura Clientes"
-                value={kpis.clientesActivos}
-                suffix="Clientes con venta"
-                subtitle="Mes actual"
-                color="#8B5CF6"
-                icon={<People />}
-                loading={loading}
-            />
+                <Box sx={{ minWidth: '85%', scrollSnapAlign: 'center' }}>
+                    <MobileKPICard
+                        title="Cobertura Clientes"
+                        value={kpis.clientesActivos}
+                        suffix="Clientes con venta"
+                        subtitle="Mes actual"
+                        color="#8B5CF6"
+                        icon={<People />}
+                        loading={loading}
+                    />
+                </Box>
+            </Box>
 
             {/* Sección de Alertas */}
             {alertas.length > 0 && (
