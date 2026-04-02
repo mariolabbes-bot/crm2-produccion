@@ -177,6 +177,7 @@ router.get('/report', auth(), async (req, res) => {
                 SELECT 
                     cp.sku as cp_sku,
                     p.sku as p_sku,
+                    v.sku as v_sku,
                     cp.descripcion as cp_desc,
                     p.descripcion as p_desc,
                     cp.litros,
@@ -187,7 +188,7 @@ router.get('/report', auth(), async (req, res) => {
                     SUM(CASE WHEN v.fecha_emision BETWEEN $3 AND $4 THEN v.cantidad ELSE 0 END) as qty_anio_ant,
                     SUM(CASE WHEN v.fecha_emision BETWEEN $5 AND $6 THEN v.cantidad ELSE 0 END) as qty_6m
                 FROM venta v
-                JOIN clasificacion_productos cp ON UPPER(TRIM(v.sku)) = UPPER(TRIM(cp.sku))
+                LEFT JOIN clasificacion_productos cp ON UPPER(TRIM(v.sku)) = UPPER(TRIM(cp.sku))
                 LEFT JOIN producto p ON UPPER(TRIM(v.sku)) = UPPER(TRIM(p.sku))
                 LEFT JOIN (
                     SELECT UPPER(TRIM(sku)) as sku_clean, 
@@ -202,10 +203,10 @@ router.get('/report', auth(), async (req, res) => {
                    OR v.fecha_emision BETWEEN $3 AND $4 
                    OR v.fecha_emision BETWEEN $5 AND $6)
                 ${whereSql}
-                GROUP BY cp.sku, p.sku, cp.descripcion, p.descripcion, cp.litros, st.stock_total, st.stock_desglose
+                GROUP BY cp.sku, p.sku, v.sku, cp.descripcion, p.descripcion, cp.litros, st.stock_total, st.stock_desglose
             )
             SELECT 
-                COALESCE(p_desc, cp_desc) as descripcion,
+                COALESCE(p_desc, cp_desc, v_sku) as descripcion,
                 qty_actual as cantidad_mes_actual,
                 qty_anio_ant as cantidad_mes_anterior,
                 COALESCE(stock_total, 0) as stock_disponible,
