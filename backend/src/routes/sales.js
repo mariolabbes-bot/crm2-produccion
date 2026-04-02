@@ -163,10 +163,10 @@ router.get('/report', auth(), async (req, res) => {
     if (targetRut) {
       params.push(targetRut);
       vendorJoin = `
-          LEFT JOIN usuario u_filt ON UPPER(TRIM(u_filt.nombre_vendedor)) = UPPER(TRIM(v.vendedor_cliente))
-          LEFT JOIN usuario u2_filt ON UPPER(TRIM(u2_filt.alias)) = UPPER(TRIM(v.vendedor_documento))
+          INNER JOIN cliente c_filt ON REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c_filt.rut, '[^a-zA-Z0-9]', '', 'g')
+          JOIN usuario u_filt ON (c_filt.vendedor_id::text = u_filt.id::text OR c_filt.vendedor_id::text = u_filt.rut)
       `;
-      whereClauses.push(`COALESCE(u_filt.rut, u2_filt.rut) = $${params.length}`);
+      whereClauses.push(`u_filt.rut = $${params.length}`);
     }
 
     const whereSql = whereClauses.length > 0 ? 'AND ' + whereClauses.join(' AND ') : '';

@@ -180,7 +180,7 @@ class ClientModel {
     return result.rows;
   }
 
-  static async findTopVentas({ nombreVendedor }) {
+  static async findTopVentas({ targetRut }) {
     let query = `
       SELECT 
         c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal AS telefono, c.email,
@@ -193,9 +193,9 @@ class ClientModel {
     `;
 
     const params = [];
-    if (nombreVendedor) {
-      query += ` AND UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM($1))`;
-      params.push(nombreVendedor);
+    if (targetRut) {
+      query += ` AND (c.vendedor_id::text = $1 OR c.vendedor_id::text = (SELECT id::text FROM usuario WHERE rut = $1))`;
+      params.push(targetRut);
     }
 
     query += `
@@ -208,15 +208,17 @@ class ClientModel {
     return result.rows;
   }
 
-  static async findFacturasImpagas({ nombreVendedor }) {
+  static async findFacturasImpagas({ targetRut }) {
     let query = `
       SELECT
-        c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal as telefono, c.email, c.nombre_vendedor,
+        c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal as telefono, c.email,
+        u.nombre_vendedor as nombre_vendedor,
         COUNT(DISTINCT sc.folio) as cantidad_facturas_impagas,
         SUM(sc.saldo_factura) as monto_total_impago,
         MIN(sc.fecha_emision) as factura_mas_antigua,
         EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision))::INTEGER as dias_mora
       FROM cliente c
+      LEFT JOIN usuario u ON c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut
       INNER JOIN saldo_credito sc ON 
         REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(sc.rut, '[^a-zA-Z0-9]', '', 'g')
       WHERE sc.saldo_factura > 0
@@ -229,13 +231,13 @@ class ClientModel {
     `;
 
     const params = [];
-    if (nombreVendedor) {
-      query += ` AND UPPER(TRIM(c.nombre_vendedor)) = UPPER(TRIM($1))`;
-      params.push(nombreVendedor);
+    if (targetRut) {
+      query += ` AND u.rut = $1`;
+      params.push(targetRut);
     }
 
     query += `
-      GROUP BY c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal, c.email, c.nombre_vendedor
+      GROUP BY c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal, c.email, u.nombre_vendedor
       -- Filtro: Solo deudas con más de 30 días de antigüedad
       HAVING EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision)) > 30
       ORDER BY monto_total_impago DESC
@@ -246,10 +248,7 @@ class ClientModel {
     return result.rows;
   }
 
-  static async search({ term, nombreVendedor }) {
-    // term tendrá %...% ya o se agrega aquí? Mejor que venga limpio y lo agregamos.
-    // En la ruta actual viene de query q, y se le agregan %.
-
+  static async search({ term, targetRut }) {
     const searchTerm = `%${term}%`;
     const params = [searchTerm, searchTerm];
     let query = `
@@ -265,15 +264,9 @@ class ClientModel {
       WHERE (UPPER(c.nombre) LIKE UPPER($1) OR UPPER(c.rut) LIKE UPPER($2))
     `;
 
-    if (nombreVendedor) {
-      query += `
-        AND EXISTS (
-          SELECT 1 FROM venta v 
-          WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
-          AND (UPPER(v.vendedor_cliente) = UPPER($3) OR v.vendedor_cliente LIKE $3)
-        )
-      `;
-      params.push(nombreVendedor);
+    if (targetRut) {
+      query += ` AND (c.vendedor_id::text = $3 OR c.vendedor_id::text = (SELECT id::text FROM usuario WHERE rut = $3))`;
+      params.push(targetRut);
     }
 
     query += `

@@ -79,15 +79,15 @@ router.get('/dashboard-current', auth(), async (req, res) => {
 
       let sql;
       if (rut) {
-        // Si hay RUT, necesitamos el JOIN con usuario para filtrar por alias o nombre
+        // Enfoque Relacional: La venta se asocia a un cliente, y el cliente tiene un DUEÑO (vendedor_id)
         qParams.push(rut);
         const rutParam = `$${qParams.length}`;
         sql = `
                 SELECT COALESCE(SUM(${amountExpr}), 0) as total
                 FROM ${table} t
-                LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(t.vendedor_cliente))
-                LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(t.${table === 'venta' ? 'vendedor_documento' : 'vendedor_cliente'}))
-                ${where} AND COALESCE(u.rut, u2.rut) = ${rutParam}
+                INNER JOIN cliente c ON REGEXP_REPLACE(t.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+                LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
+                ${where} AND u.rut = ${rutParam}
             `;
       } else {
         // Vista Global: Consulta Directa (Mucho más rápida y segura)
@@ -118,9 +118,9 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         sql = `
                 SELECT COUNT(DISTINCT t.identificador) as count
                 FROM ${SALES_TABLE} t
-                LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(t.vendedor_cliente))
-                LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(t.vendedor_documento))
-                ${where} AND COALESCE(u.rut, u2.rut) = ${rutParam}
+                INNER JOIN cliente c ON REGEXP_REPLACE(t.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+                LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
+                ${where} AND u.rut = ${rutParam}
             `;
       } else {
         sql = `SELECT COUNT(DISTINCT t.identificador) as count FROM ${SALES_TABLE} t ${where}`;
@@ -180,22 +180,22 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
     const query = `
         WITH sales_stats AS (
           SELECT 
-            COALESCE(u.rut, u2.rut) as rut,
+            u.rut,
             SUM(CASE WHEN TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') = $1 THEN s.${SALES_AMOUNT_COL} ELSE 0 END) as ventas_mes_actual,
             SUM(CASE WHEN TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') = $2 THEN s.${SALES_AMOUNT_COL} ELSE 0 END) as ventas_anio_anterior,
             SUM(CASE WHEN TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') IN ($3, $4, $5) THEN s.${SALES_AMOUNT_COL} ELSE 0 END) as ventas_trimestre_ant
           FROM ${SALES_TABLE} s
-          LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
-          LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento))
+          INNER JOIN cliente c ON REGEXP_REPLACE(s.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+          JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
           GROUP BY 1
         ),
         abono_stats AS (
           SELECT 
-            COALESCE(u.rut, u2.rut) as rut,
+            u.rut,
             SUM(CASE WHEN TO_CHAR(a.fecha, 'YYYY-MM') = $1 THEN COALESCE(a.monto_neto, a.monto / 1.19) ELSE 0 END) as abonos_mes_actual
           FROM ${ABONOS_TABLE} a
-          LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(a.vendedor_cliente))
-          LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(a.vendedor_cliente))
+          INNER JOIN cliente c ON REGEXP_REPLACE(a.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+          JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
           GROUP BY 1
         )
         SELECT 
@@ -245,15 +245,20 @@ router.get('/saldo-credito-total', auth(), async (req, res) => {
     const qParams = [];
 
     if (isManager && req.query.vendedor_id) {
-      const uRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [req.query.vendedor_id]);
-      if (uRes.rows[0]?.nombre_vendedor) {
-        sql += ' WHERE UPPER(TRIM(s.nombre_vendedor)) = UPPER(TRIM($1))';
-        qParams.push(uRes.rows[0].nombre_vendedor);
-      }
+      targetRut = req.query.vendedor_id;
     } else if (!isManager) {
-      const name = user.nombre_vendedor || '';
-      sql += ' WHERE UPPER(TRIM(s.nombre_vendedor)) = UPPER(TRIM($1))';
-      qParams.push(name);
+      targetRut = user.rut;
+    }
+
+    if (targetRut) {
+      sql = `
+        SELECT COALESCE(SUM(sc.saldo_factura), 0) AS total 
+        FROM saldo_credito sc
+        INNER JOIN cliente c ON REGEXP_REPLACE(sc.rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+        LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
+        WHERE u.rut = $1
+      `;
+      qParams.push(targetRut);
     }
 
     const result = await pool.query(sql, qParams);
@@ -299,11 +304,10 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
     }
 
     const queryVentas = `
-        SELECT TO_CHAR(${SALES_DATE_COL}, 'YYYY-MM') AS mes, SUM(${SALES_AMOUNT_COL}) AS ventas
+        SELECT TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') AS mes, SUM(s.${SALES_AMOUNT_COL}) AS ventas
         FROM ${SALES_TABLE} s
-        LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
-        LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento))
-        WHERE 1=1 ${targetRut ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
+        ${targetRut ? `INNER JOIN cliente c ON REGEXP_REPLACE(s.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+        JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut) AND u.rut = $1` : ''}
         GROUP BY 1 ORDER BY mes DESC LIMIT ${mesesAtras}
       `;
     const vRes = targetRut ? await pool.query(queryVentas, [targetRut]) : await pool.query(queryVentas);
@@ -311,9 +315,8 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
     const queryAbonos = `
         SELECT TO_CHAR(a.fecha, 'YYYY-MM') AS mes, SUM(COALESCE(a.monto_neto, a.monto/1.19)) AS abonos
         FROM ${ABONOS_TABLE} a
-        LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(a.vendedor_cliente))
-        LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(a.vendedor_cliente))
-        WHERE 1=1 ${targetRut ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
+        ${targetRut ? `INNER JOIN cliente c ON REGEXP_REPLACE(a.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+        JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut) AND u.rut = $1` : ''}
         GROUP BY 1 ORDER BY mes DESC LIMIT ${mesesAtras}
       `;
     const aRes = targetRut ? await pool.query(queryAbonos, [targetRut]) : await pool.query(queryAbonos);
@@ -364,9 +367,11 @@ router.get('/evolucion-yoy', auth(), async (req, res) => {
           TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') as periodo,
           SUM(s.${SALES_AMOUNT_COL}) as total_ventas
         FROM ${SALES_TABLE} s
-        LEFT JOIN usuario u ON UPPER(TRIM(u.nombre_vendedor)) = UPPER(TRIM(s.vendedor_cliente))
-        LEFT JOIN usuario u2 ON UPPER(TRIM(u2.alias)) = UPPER(TRIM(s.vendedor_documento))
-        WHERE 1=1 ${targetRut ? 'AND COALESCE(u.rut, u2.rut) = $1' : ''}
+        ${targetRut ? `
+        INNER JOIN cliente c ON REGEXP_REPLACE(s.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+        JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
+        WHERE u.rut = $1
+        ` : ''}
         GROUP BY 1
       )
       SELECT 

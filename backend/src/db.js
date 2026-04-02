@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+const { Pool } = require('@neondatabase/serverless');
 require('dotenv').config();
 
 const connStr = process.env.DATABASE_URL;

@@ -63,7 +63,7 @@ const VentasPageContent = () => {
     const isManager = user?.rol?.toUpperCase() === 'MANAGER';
 
     const [vendedores, setVendedores] = useState([]);
-    const [selectedVendedor, setSelectedVendedor] = useState('');
+    const [selectedVendedor, setSelectedVendedor] = useState(isManager ? '' : (user?.rut || ''));
     const [categoria, setCategoria] = useState('TODOS LOS PRODUCTOS');
     const [sortBy, setSortBy] = useState('monto');
     const [searchTerm, setSearchTerm] = useState('');

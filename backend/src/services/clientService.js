@@ -102,46 +102,43 @@ class ClientService {
 
     static async getTopVentas(user, queryVendedorId) {
         const isManager = user.rol?.toLowerCase() === 'manager';
-        let nombreVendedor = null;
+        let targetRut = null;
 
-        if (!isManager && user.nombre_vendedor) {
-            nombreVendedor = user.nombre_vendedor;
+        if (!isManager) {
+            targetRut = user.rut;
         } else if (queryVendedorId) {
-            const vRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [queryVendedorId]);
-            nombreVendedor = vRes.rows[0]?.nombre_vendedor;
+            targetRut = queryVendedorId;
         }
 
-        return await ClientModel.findTopVentas({ nombreVendedor, isManager });
+        return await ClientModel.findTopVentas({ targetRut });
     }
 
     static async getFacturasImpagas(user, queryVendedorId) {
         const isManager = user.rol?.toLowerCase() === 'manager';
-        let nombreVendedor = null;
+        let targetRut = null;
 
         if (!isManager) {
-            nombreVendedor = user.nombre_vendedor || user.alias;
+            targetRut = user.rut;
         } else if (queryVendedorId) {
-            const vRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [queryVendedorId]);
-            nombreVendedor = vRes.rows[0]?.nombre_vendedor;
+            targetRut = queryVendedorId;
         }
 
-        return await ClientModel.findFacturasImpagas({ nombreVendedor });
+        return await ClientModel.findFacturasImpagas({ targetRut });
     }
 
     static async searchClients(q, user, queryVendedorId) {
         if (!q || q.trim().length < 2) return [];
 
         const isManager = user.rol?.toLowerCase() === 'manager';
-        let nombreVendedor = null;
+        let targetRut = null;
 
         if (!isManager) {
-            nombreVendedor = user.nombre_vendedor || user.alias;
+            targetRut = user.rut;
         } else if (queryVendedorId) {
-            const vRes = await pool.query('SELECT nombre_vendedor FROM usuario WHERE rut = $1', [queryVendedorId]);
-            nombreVendedor = vRes.rows[0]?.nombre_vendedor;
+            targetRut = queryVendedorId;
         }
 
-        return await ClientModel.search({ term: q.trim(), nombreVendedor });
+        return await ClientModel.search({ term: q.trim(), targetRut });
     }
     static async getIncompleteClients() {
         return await ClientModel.findIncomplete();
