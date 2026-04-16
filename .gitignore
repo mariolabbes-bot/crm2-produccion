@@ -71,4 +71,4 @@ coverage/
 .vercel
 
 # Sistema operativo
-Thumbs.db
+Thumbs.db\n# NPM Cache\nbackend/npm-cache/

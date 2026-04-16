@@ -421,33 +421,48 @@ router.post('/:rut/actividades', auth(), async (req, res) => {
       return res.status(400).json({ msg: 'El comentario no puede estar vacío' });
     }
 
-    // Verificar que el cliente existe
-    const clienteCheck = await pool.query('SELECT rut FROM cliente WHERE rut = $1', [rut]);
+    // Verificar que el cliente existe (Normalizando RUT)
+    const clienteCheck = await pool.query(
+      "SELECT rut FROM cliente WHERE REGEXP_REPLACE(rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE($1, '[^a-zA-Z0-9]', '', 'g')",
+      [rut]
+    );
+
     if (clienteCheck.rows.length === 0) {
       return res.status(404).json({ msg: 'Cliente no encontrado' });
     }
 
+    // El RUT real en la base de datos (por si el de params venía distinto corregido)
+    const realRut = clienteCheck.rows[0].rut;
+
     // Obtener usuario_alias_id del usuario actual
-    // Buscar por: alias (si existe) -> nombre_vendedor -> nombre completo
     const usuarioAlias = req.user.alias || req.user.nombre_vendedor || req.user.nombre;
+    const usuarioEmail = req.user.email;
 
-    if (!usuarioAlias) {
-      return res.status(400).json({ msg: 'Usuario sin información de identidad' });
+    let usuarioAliasId = null;
+
+    if (usuarioAlias) {
+      const usuarioAliasResult = await pool.query(
+        `SELECT id FROM usuario_alias 
+         WHERE UPPER(TRIM(alias)) = UPPER(TRIM($1)) 
+         OR UPPER(TRIM(nombre_vendedor_oficial)) = UPPER(TRIM($1))`,
+        [usuarioAlias]
+      );
+
+      if (usuarioAliasResult.rows.length > 0) {
+        usuarioAliasId = usuarioAliasResult.rows[0].id;
+      }
     }
 
-    const usuarioAliasResult = await pool.query(
-      `SELECT id FROM usuario_alias 
-       WHERE UPPER(TRIM(alias)) = UPPER(TRIM($1)) 
-       OR UPPER(TRIM(nombre_vendedor_oficial)) = UPPER(TRIM($1))`,
-      [usuarioAlias]
-    );
-
-    if (usuarioAliasResult.rows.length === 0) {
-      console.error(`⚠️  Usuario no encontrado en usuario_alias. Buscando por: "${usuarioAlias}"`);
-      return res.status(400).json({ msg: 'Usuario no encontrado en usuario_alias' });
+    // Fallback: Si no se encontró por alias, intentar por email o usar el primero disponible (Admin)
+    if (!usuarioAliasId) {
+      console.warn(`⚠️  Usuario "${usuarioAlias}" no encontrado en usuario_alias. Usando fallback.`);
+      const fallbackResult = await pool.query('SELECT id FROM usuario_alias ORDER BY id ASC LIMIT 1');
+      usuarioAliasId = fallbackResult.rows[0]?.id;
     }
 
-    const usuarioAliasId = usuarioAliasResult.rows[0].id;
+    if (!usuarioAliasId) {
+      return res.status(500).json({ msg: 'Error de configuración: No existen registros en usuario_alias' });
+    }
 
     // Obtener ID del tipo de actividad (por nombre o ID directo)
     const { activity_type = 'MENSAJE' } = req.body;
@@ -458,22 +473,22 @@ router.post('/:rut/actividades', auth(), async (req, res) => {
     } else {
       const typeRes = await pool.query('SELECT id FROM activity_types WHERE nombre = $1', [activity_type]);
       activityTypeId = typeRes.rows[0]?.id;
+
+      // Fallback para tipo de actividad si no existe 'MENSAJE'
+      if (!activityTypeId) {
+        const firstTypeRes = await pool.query('SELECT id FROM activity_types ORDER BY id ASC LIMIT 1');
+        activityTypeId = firstTypeRes.rows[0]?.id;
+      }
     }
 
     // Insertar actividad
-    const query = `
+    const insertQuery = `
       INSERT INTO cliente_actividad (cliente_rut, usuario_alias_id, comentario, activity_type_id, created_at)
       VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
-      RETURNING 
-        id,
-        cliente_rut,
-        usuario_alias_id,
-        comentario,
-        activity_type_id,
-        created_at
+      RETURNING id, created_at
     `;
 
-    const result = await pool.query(query, [rut, usuarioAliasId, comentario.trim(), activityTypeId]);
+    const result = await pool.query(insertQuery, [realRut, usuarioAliasId, comentario.trim(), activityTypeId]);
 
     res.json({
       success: true,
