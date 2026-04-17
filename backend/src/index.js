@@ -21,17 +21,8 @@ const runEmergencyMigration = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    await client.query(`
-      INSERT INTO activity_types (nombre, descripcion, icon)
-      VALUES 
-        ('VISITA', 'Visita presencial a local de cliente', 'directions_walk'),
-        ('LLAMADA', 'Contacto telefónico comercial', 'phone'),
-        ('COTIZACION', 'Generación o revisión de cotización', 'request_quote'),
-        ('MENSAJE', 'Contacto vía WhatsApp o Mensajería', 'message')
-      ON CONFLICT (nombre) DO UPDATE SET 
-        descripcion = EXCLUDED.descripcion,
-        icon = EXCLUDED.icon
-    `);
+    // Se eliminó la inserción automática de tipos de actividad antiguos para evitar duplicados.
+    // La estandarización se maneja por script de base de datos manual.
     await client.query(`
       DO $$ 
       BEGIN 

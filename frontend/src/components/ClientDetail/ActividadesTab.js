@@ -50,7 +50,7 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
   const [activityTypes, setActivityTypes] = useState([]);
   const [goalTypes, setGoalTypes] = useState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchTypes = async () => {
       try {
         const [aTypes, gTypes] = await Promise.all([
@@ -59,6 +59,10 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
         ]);
         setActivityTypes(aTypes || []);
         setGoalTypes(gTypes || []);
+        
+        // Establecer valores por defecto si hay datos
+        if (aTypes?.length > 0) setPlanAccion(aTypes[0].id);
+        if (gTypes?.length > 0) setPlanObjetivo(gTypes[0].id);
       } catch (err) {
         console.error('Error cargando catálogos:', err);
       }
@@ -99,8 +103,11 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
       setSubmitError(null);
       setSubmitSuccess(false);
 
-      // 1. Registrar actividad inmediata (ahora como 'CONTACTO' por defecto)
-      await api.createClientActividad(rut, comentario, 'CONTACTO');
+      // Usar comentario por defecto si está vacío pero hay programación
+      const finalComentario = comentario.trim() || (programarAccion ? 'Seguimiento programado' : '');
+
+      // 1. Registrar actividad inmediata
+      await api.createClientActividad(rut, finalComentario, 'CONTACTO');
 
       // 2. Programar acción futura si está activo
       if (programarAccion) {
@@ -174,9 +181,9 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
 
           {programarAccion && (
             <Paper sx={{ p: 2, mb: 3, bgcolor: '#ffffff', border: '1px solid #e3f2fd', borderRadius: 2 }}>
-              <Grid container spacing={2}>
+              <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
+                  <FormControl fullWidth>
                     <InputLabel>Acción (Tarea)</InputLabel>
                     <Select
                       value={planAccion}
@@ -190,7 +197,7 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth size="small">
+                  <FormControl fullWidth>
                     <InputLabel>Objetivo</InputLabel>
                     <Select
                       value={planObjetivo}
@@ -245,12 +252,13 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
             variant="contained"
             fullWidth={programarAccion}
             startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-            disabled={submitting || !comentario.trim()}
+            disabled={submitting || (!comentario.trim() && !programarAccion)}
             sx={{ 
                 borderRadius: 2,
-                py: 1,
+                py: 1.5,
                 fontWeight: 'bold',
-                boxShadow: 'none'
+                boxShadow: 'none',
+                mt: 1
             }}
           >
             {submitting ? 'Guardando...' : programarAccion ? 'Registrar y Programar' : 'Registrar Actividad'}
