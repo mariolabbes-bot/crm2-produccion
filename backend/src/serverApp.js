@@ -68,6 +68,7 @@ app.use('/api/mobile', require('./routes/mobile')); // Dashboard Móvil
 app.use('/api/ai', require('./routes/ai')); // Módulo IA
 app.use('/api/notifications', require('./routes/notifications')); // Notificaciones Internas
 app.use('/api/circuits', require('./routes/circuits')); // Maestro de Circuitos
+app.use('/api/reports', require('./routes/reports')); // Reportes de Inteligencia Comercial
 
 app.get('/', (req, res) => {
   res.json({

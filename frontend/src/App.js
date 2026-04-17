@@ -34,6 +34,7 @@ import './styles/layout.css';
 
 import PlannerPage from './pages/PlannerPage';
 import MisCircuitosPage from './pages/MisCircuitosPage';
+import ReportsPage from './pages/ReportsPage';
 
 import AssistantFloatingButton from './components/ai/AssistantFloatingButton';
 import useIsMobile from './hooks/useIsMobile';
@@ -70,6 +71,7 @@ const App = () => {
                                 <Route path="planificar" element={<PlannerPage />} />
                                 <Route path="mis-circuitos" element={<MisCircuitosPage />} />
                                 <Route path="assistant" element={<AssistantPage />} />
+                                <Route path="reportes" element={<ReportsPage />} />
                             </Route>
 
 

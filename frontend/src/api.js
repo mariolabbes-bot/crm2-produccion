@@ -490,6 +490,21 @@ export const bulkAssignCircuit = (ruts, circuito) => apiFetch(`${API_URL}/client
   body: JSON.stringify({ ruts, circuito })
 });
 
+// REPORTS
+export const getPortfolioHealth = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/reports/portfolio-health${qs ? `?${qs}` : ''}`);
+};
+
+export const getManagementEffectiveness = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/reports/management-effectiveness${qs ? `?${qs}` : ''}`);
+};
+
+export const getCollectionPriority = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return apiFetch(`${API_URL}/reports/collection-priority${qs ? `?${qs}` : ''}`);
+};
 
 // ADMIN - Reset Database
 export const resetDatabase = (confirmString) => apiFetch(`${API_URL}/admin/reset-database`, {
