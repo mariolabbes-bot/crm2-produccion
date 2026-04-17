@@ -34,7 +34,7 @@ router.get('/portfolio-health', auth(), async (req, res) => {
                     u.rut as vendedor_rut
                 FROM cliente c
                 LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
-                WHERE ($1::text IS NULL OR u.rut = $1)
+                WHERE ($1::text IS NULL OR REGEXP_REPLACE(u.rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE($1, '[^a-zA-Z0-9]', '', 'g'))
             ),
             ventas_actual AS (
                 SELECT 
@@ -108,7 +108,7 @@ router.get('/management-effectiveness', auth(), async (req, res) => {
                 SUM(CASE WHEN vr.planificada = TRUE AND vr.estado = 'completada' THEN 1 ELSE 0 END) as efectividad_plan
             FROM visitas_registro vr
             JOIN usuario u ON (vr.vendedor_id::text = u.id::text OR vr.vendedor_id::text = u.rut)
-            WHERE ($1::text IS NULL OR u.rut = $1)
+            WHERE ($1::text IS NULL OR REGEXP_REPLACE(u.rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE($1, '[^a-zA-Z0-9]', '', 'g'))
             AND vr.fecha >= CURRENT_DATE - INTERVAL '30 days'
             GROUP BY 1
         `;
@@ -165,7 +165,7 @@ router.get('/collection-priority', auth(), async (req, res) => {
             JOIN client_debt cd ON REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = cd.norm_rut
             LEFT JOIN client_sales cs ON REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = cs.norm_rut
             LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
-            WHERE ($1::text IS NULL OR u.rut = $1)
+            WHERE ($1::text IS NULL OR REGEXP_REPLACE(u.rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE($1, '[^a-zA-Z0-9]', '', 'g'))
             ORDER BY cd.deuda_total DESC
             LIMIT 50
         `;

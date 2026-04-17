@@ -55,6 +55,9 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       targetRut = user.rut;
     }
 
+    // Normalizar targetRut para comparaciones robustas (eliminar puntos y guión)
+    const cleanTargetRut = targetRut ? targetRut.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : null;
+
     // 3. Ejecutar Consultas con Gestión de Parámetros Limpia
 
     // Función local para simplificar la obtención de SUM de una tabla
@@ -81,7 +84,6 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       if (rut) {
         // Enfoque Relacional: La venta se asocia a un cliente, y el cliente tiene un DUEÑO (vendedor_id)
         qParams.push(rut);
-        const rutParam = `$${qParams.length}`;
         sql = `
                 SELECT COALESCE(SUM(${amountExpr}), 0) as total
                 FROM ${table} t
@@ -90,7 +92,7 @@ router.get('/dashboard-current', auth(), async (req, res) => {
                   OR (t.identificador IS NULL AND UPPER(TRIM(t.cliente)) = UPPER(TRIM(c.nombre)))
                 )
                 LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
-                ${where} AND u.rut = ${rutParam}
+                ${where} AND REGEXP_REPLACE(u.rut, '[^a-zA-Z0-9]', '', 'g') = $${qParams.length}
             `;
       } else {
         // Vista Global: Consulta Directa (Mucho más rápida y segura)
@@ -103,11 +105,11 @@ router.get('/dashboard-current', auth(), async (req, res) => {
 
     const hoy = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
-    const montoVentasMes = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', mesActual, targetRut);
-    const montoVentasAnioAnt = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', mesAnioAnterior, targetRut);
-    const montoAbonosMes = await getSum(ABONOS_TABLE, 'fecha', 'COALESCE(t.monto_neto, t.monto / 1.19)', mesActual, targetRut);
-    const montoVentasTrimestre = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', mesesTrimestre, targetRut);
-    const montoVentasHoy = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', hoy, targetRut);
+    const montoVentasMes = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', mesActual, cleanTargetRut);
+    const montoVentasAnioAnt = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', mesAnioAnterior, cleanTargetRut);
+    const montoAbonosMes = await getSum(ABONOS_TABLE, 'fecha', 'COALESCE(t.monto_neto, t.monto / 1.19)', mesActual, cleanTargetRut);
+    const montoVentasTrimestre = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', mesesTrimestre, cleanTargetRut);
+    const montoVentasHoy = await getSum(SALES_TABLE, SALES_DATE_COL, 't.valor_total', hoy, cleanTargetRut);
 
     // Clientes con Venta (Lógica aparte por ser COUNT DISTINCT)
     const getClientCount = async (monthVal, rut) => {
@@ -117,7 +119,6 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       let sql;
       if (rut) {
         qParams.push(rut);
-        const rutParam = `$${qParams.length}`;
         sql = `
                 SELECT COUNT(DISTINCT CASE WHEN t.identificador IS NOT NULL THEN t.identificador ELSE t.cliente END) as count
                 FROM ${SALES_TABLE} t
@@ -126,7 +127,7 @@ router.get('/dashboard-current', auth(), async (req, res) => {
                   OR (t.identificador IS NULL AND UPPER(TRIM(t.cliente)) = UPPER(TRIM(c.nombre)))
                 )
                 LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
-                ${where} AND u.rut = ${rutParam}
+                ${where} AND REGEXP_REPLACE(u.rut, '[^a-zA-Z0-9]', '', 'g') = $2
             `;
       } else {
         sql = `SELECT COUNT(DISTINCT t.identificador) as count FROM ${SALES_TABLE} t ${where}`;
@@ -135,7 +136,7 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       const result = await pool.query(sql, qParams);
       return parseInt(result.rows[0]?.count || 0);
     };
-    const numClientes = await getClientCount(mesActual, targetRut);
+    const numClientes = await getClientCount(mesActual, cleanTargetRut);
 
     // Variación
     let variacionPct = 0;
@@ -385,7 +386,7 @@ router.get('/evolucion-yoy', auth(), async (req, res) => {
           OR (s.identificador IS NULL AND UPPER(TRIM(s.cliente)) = UPPER(TRIM(c.nombre)))
         )
         JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
-        WHERE u.rut = $1
+        WHERE REGEXP_REPLACE(u.rut, '[^a-zA-Z0-9]', '', 'g') = $1
         ` : ''}
         GROUP BY 1
       )
