@@ -483,19 +483,48 @@ const MobileVisitsPage = () => {
                             onClick={() => setSelectedClient(client)}
                         >
                             <Box display="flex" gap={2} alignItems="center">
-                                <Box sx={{ bgcolor: '#eee', p: 1, borderRadius: '50%', color: isRuta ? statusColor : 'action.active' }}>
-                                    <LocationOn />
+                                <Box sx={{ bgcolor: '#eee', p: 1, borderRadius: '50%', color: isRuta ? statusColor : 'action.active', display: 'flex' }}>
+                                    {isRuta && visitaInfo?.fecha && new Date(visitaInfo.fecha) < new Date(new Date().setHours(0,0,0,0)) ? <Flag sx={{ color: '#EF4444' }} /> : <LocationOn />}
                                 </Box>
                                 <Box flexGrow={1} minWidth={0}>
-                                    <Typography variant="subtitle2" fontWeight="bold" noWrap>
-                                        {isRuta && `${idx + 1}. `}{client.nombre}
-                                    </Typography>
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                        <Typography variant="subtitle2" fontWeight="bold" noWrap>
+                                            {isRuta && `${idx + 1}. `}{client.nombre}
+                                        </Typography>
+                                        {isRuta && visitaInfo?.fecha && new Date(visitaInfo.fecha) < new Date(new Date().setHours(0,0,0,0)) && visitaInfo.estado === 'pendiente' && (
+                                            <Chip label="ATRASADA" size="small" sx={{ height: 16, fontSize: '0.6rem', bgcolor: '#FEE2E2', color: '#EF4444', fontWeight: 'bold' }} />
+                                        )}
+                                    </Box>
+                                    
+                                    {isRuta && visitaInfo && (
+                                        <Typography variant="caption" color="primary.main" fontWeight="bold" display="block">
+                                            {visitaInfo.objetivo_nombre || 'Sin objetivo'} • {visitaInfo.accion_nombre || 'Visita'}
+                                        </Typography>
+                                    )}
+
                                     <Box display="flex" alignItems="center" gap={0.5}>
                                         <DirectionsCar sx={{ fontSize: '0.9rem', color: '#6B7280' }} />
                                         <Typography variant="caption" color="text.secondary">
                                             {formatDistance(client.distance)}
                                         </Typography>
                                     </Box>
+
+                                    {isRuta && visitaInfo?.comentario_plan && (
+                                        <Typography 
+                                            variant="caption" 
+                                            sx={{ 
+                                                display: 'block', 
+                                                mt: 0.5, 
+                                                p: 0.5, 
+                                                bgcolor: '#f0f4f8', 
+                                                borderRadius: 1, 
+                                                fontStyle: 'italic',
+                                                border: '1px solid #d1d9e6'
+                                            }}
+                                        >
+                                            "{visitaInfo.comentario_plan}"
+                                        </Typography>
+                                    )}
                                 </Box>
                                 {isRuta && visitaInfo && (
                                     <Chip 

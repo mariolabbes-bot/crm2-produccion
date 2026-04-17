@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -12,6 +11,13 @@ import {
   Divider,
   Paper,
   Chip,
+  Switch,
+  FormControlLabel,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import EditNoteIcon from '@mui/icons-material/EditNote';
@@ -19,18 +25,45 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import MessageIcon from '@mui/icons-material/Message';
 import * as api from '../../api';
 
 /**
  * ActividadesTab
- * Muestra block de notas + últimas 3 actividades
  */
 function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
   const [comentario, setComentario] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // --- Estado para Planificación Futura ---
+  const [programarAccion, setProgramarAccion] = useState(false);
+  const [planAccion, setPlanAccion] = useState('');
+  const [planObjetivo, setPlanObjetivo] = useState('');
+  const [planFecha, setPlanFecha] = useState(new Date().toISOString().split('T')[0]);
+  const [planComentario, setPlanComentario] = useState('');
+
+  // Catálogos de tipos
+  const [activityTypes, setActivityTypes] = useState([]);
+  const [goalTypes, setGoalTypes] = useState([]);
+
+  React.useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const [aTypes, gTypes] = await Promise.all([
+          api.getActivityTypes(),
+          api.getGoalTypes()
+        ]);
+        setActivityTypes(aTypes || []);
+        setGoalTypes(gTypes || []);
+      } catch (err) {
+        console.error('Error cargando catálogos:', err);
+      }
+    };
+    fetchTypes();
+  }, []);
 
   const formatDateTime = (dateString) => {
     if (!dateString) return '-';
@@ -67,13 +100,28 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
       setSubmitError(null);
       setSubmitSuccess(false);
 
+      // 1. Registrar actividad inmediata
       await api.createClientActividad(rut, comentario, 'MENSAJE');
 
+      // 2. Programar acción futura si está activo
+      if (programarAccion) {
+        if (!planAccion || !planObjetivo || !planFecha) {
+          throw new Error('Debes completar la acción, el objetivo y la fecha para programar');
+        }
+        await api.submitVisitPlan([rut], {
+          fecha: planFecha,
+          activity_type_id: planAccion,
+          goal_type_id: planObjetivo,
+          comentario_plan: planComentario
+        });
+      }
+
       setComentario('');
+      setPlanComentario('');
+      setProgramarAccion(false);
       setSubmitSuccess(true);
       setTimeout(() => setSubmitSuccess(false), 3000);
 
-      // Notificar al padre para recargar actividades
       if (onActivityAdded) {
         onActivityAdded();
       }
@@ -87,8 +135,7 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
 
   return (
     <Box>
-      {/* Formulario para agregar actividad */}
-      <Paper sx={{ p: 3, mb: 3, backgroundColor: '#f9f9f9' }}>
+      <Paper sx={{ p: 3, mb: 3, backgroundColor: '#f9f9f9', borderRadius: 3, border: '1px solid #eee' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <EditNoteIcon color="primary" />
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -100,14 +147,87 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
           <TextField
             fullWidth
             multiline
-            rows={3}
+            rows={2}
             placeholder="Escribe tu observación, nota o actividad aquí..."
             value={comentario}
             onChange={(e) => setComentario(e.target.value)}
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, bgcolor: 'white' }}
             disabled={submitting}
           />
+
+          {/* Toggle para Programar Acción Futura */}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={programarAccion}
+                onChange={(e) => setProgramarAccion(e.target.checked)}
+                color="primary"
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ fontWeight: 'bold', color: programarAccion ? 'primary.main' : 'text.secondary' }}>
+                Programar Próxima Acción (Seguimiento)
+              </Typography>
+            }
+            sx={{ mb: programarAccion ? 1 : 2 }}
+          />
+
+          {programarAccion && (
+            <Paper sx={{ p: 2, mb: 3, bgcolor: '#ffffff', border: '1px solid #e3f2fd', borderRadius: 2 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Acción (Tarea)</InputLabel>
+                    <Select
+                      value={planAccion}
+                      label="Acción (Tarea)"
+                      onChange={(e) => setPlanAccion(e.target.value)}
+                    >
+                      {activityTypes.map(t => (
+                        <MenuItem key={t.id} value={t.id}>{t.nombre}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Objetivo</InputLabel>
+                    <Select
+                      value={planObjetivo}
+                      label="Objetivo"
+                      onChange={(e) => setPlanObjetivo(e.target.value)}
+                    >
+                      {goalTypes.map(t => (
+                        <MenuItem key={t.id} value={t.id}>{t.nombre}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    type="date"
+                    fullWidth
+                    size="small"
+                    label="Fecha Programada"
+                    value={planFecha}
+                    onChange={(e) => setPlanFecha(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Nota específica para la próxima tarea..."
+                    label="Comentario de Planificación"
+                    value={planComentario}
+                    onChange={(e) => setPlanComentario(e.target.value)}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+          )}
 
           {submitError && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -117,18 +237,24 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
 
           {submitSuccess && (
             <Alert severity="success" sx={{ mb: 2 }}>
-              ✅ Actividad registrada correctamente
+              ✅ Actividad {programarAccion ? 'y Plan' : ''} registrados correctamente
             </Alert>
           )}
 
           <Button
             type="submit"
             variant="contained"
-            startIcon={<SendIcon />}
+            fullWidth={programarAccion}
+            startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
             disabled={submitting || !comentario.trim()}
-            sx={{ mt: 1 }}
+            sx={{ 
+                borderRadius: 2,
+                py: 1,
+                fontWeight: 'bold',
+                boxShadow: 'none'
+            }}
           >
-            {submitting ? 'Guardando...' : 'Registrar Actividad'}
+            {submitting ? 'Guardando...' : programarAccion ? 'Registrar y Programar' : 'Registrar Actividad'}
           </Button>
         </form>
       </Paper>

@@ -468,9 +468,12 @@ export const getHotCircuits = (vendedorId) => {
   const url = vendedorId ? `${API_URL}/visits/hot-circuits?vendedor_id=${vendedorId}` : `${API_URL}/visits/hot-circuits`;
   return apiFetch(url);
 };
-export const submitVisitPlan = (clientes, fecha = null) => apiFetch(`${API_URL}/visits/plan`, {
+export const submitVisitPlan = (clientes, data = {}) => apiFetch(`${API_URL}/visits/plan`, {
   method: 'POST',
-  body: JSON.stringify({ clientes, ...(fecha ? { fecha } : {}) })
+  body: JSON.stringify({ 
+    clientes, 
+    ...data 
+  })
 });
 export const getVisitsByDate = (fecha) => apiFetch(`${API_URL}/visits/by-date?fecha=${fecha}`);
 

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, Button, List, ListItem, ListItemText, ListItemAvatar, Avatar, Chip, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Paper, Button, List, ListItem, ListItemText, ListItemAvatar, Avatar, Chip, IconButton, Stack } from '@mui/material';
 import { getKpisMesActual, getMyVisitsToday, getSaldoCreditoTotal, getActiveVisit, checkOut } from '../api';
 import MobileKPICard from '../components/MobileKPICard';
 import { ShoppingCart, Payment, AccountBalanceWallet, Map, AltRoute, ExitToApp, MoreHoriz, ArrowForwardIos, LocationOn, CheckCircle, DirectionsCar, Schedule } from '@mui/icons-material';
@@ -161,6 +161,57 @@ const MobileHomePage = () => {
                     />
                 </Box>
             </Box>
+
+            {/* SECCIÓN TAREAS PENDIENTES / ATRASADAS */}
+            {timeline.filter(v => v.estado === 'pendiente').length > 0 && (
+                <Box sx={{ px: 1, mt: 1 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                        <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', color: '#6B7280', fontWeight: 'bold' }}>
+                            Tareas Pendientes ({timeline.filter(v => v.estado === 'pendiente').length})
+                        </Typography>
+                        <Button size="small" onClick={() => navigate('/mapa-visitas')}>Ver todas</Button>
+                    </Box>
+                    <Stack spacing={1.5}>
+                        {timeline.filter(v => v.estado === 'pendiente').slice(0, 3).map((visita) => {
+                            const isOverdue = new Date(visita.fecha) < new Date(new Date().setHours(0,0,0,0));
+                            return (
+                                <Paper 
+                                    key={visita.id} 
+                                    sx={{ 
+                                        p: 1.5, 
+                                        borderRadius: 3, 
+                                        borderLeft: `5px solid ${isOverdue ? '#EF4444' : '#2563EB'}`,
+                                        bgcolor: 'white',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                                    }}
+                                    onClick={() => navigate('/mapa-visitas')}
+                                >
+                                    <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+                                        <Box>
+                                            <Typography variant="subtitle2" fontWeight="800">{visita.cliente_nombre}</Typography>
+                                            <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                                                {visita.objetivo_nombre || 'Sin objetivo'} • {visita.accion_nombre || 'Visita'}
+                                            </Typography>
+                                            {visita.comentario_plan && (
+                                                <Typography variant="caption" sx={{ fontStyle: 'italic', bgcolor: '#F3F4F6', px: 1, py: 0.5, borderRadius: 1 }}>
+                                                    "{visita.comentario_plan}"
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                        {isOverdue && (
+                                            <Chip 
+                                                label="ATRASADA" 
+                                                size="small" 
+                                                sx={{ bgcolor: '#FEE2E2', color: '#EF4444', fontWeight: 'bold', fontSize: '0.6rem', height: 20 }} 
+                                            />
+                                        )}
+                                    </Box>
+                                </Paper>
+                            );
+                        })}
+                    </Stack>
+                </Box>
+            )}
 
             {/* SECCIÓN ESTRATEGIA DE RUTA */}
             <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, textTransform: 'uppercase', color: '#6B7280', fontWeight: 'bold' }}>Estrategia de Ruta</Typography>

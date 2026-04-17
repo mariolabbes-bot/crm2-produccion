@@ -358,13 +358,12 @@ router.post('/plan', auth(), async (req, res) => {
     try {
         const vendedorIdNum = req.user.id; // visitas_registro usa INTEGER
         const vendedorIdRut = req.user.rut;
-        const { clientes, fecha } = req.body; // fecha opcional: 'YYYY-MM-DD'
+        const { clientes, fecha, activity_type_id, goal_type_id, comentario_plan } = req.body; 
 
         if (!clientes || !Array.isArray(clientes)) {
             return res.status(400).json({ msg: 'Lista de clientes inválida' });
         }
 
-        // Usar fecha recibida o CURRENT_DATE
         const fechaTarget = fecha || null;
         const fechaSQL = fechaTarget ? `$3::date` : `CURRENT_DATE`;
 
@@ -384,13 +383,13 @@ router.post('/plan', auth(), async (req, res) => {
 
                 if (check.rows.length === 0) {
                     const insertParams = fechaTarget
-                        ? [vendedorIdNum, rut, fechaTarget]
-                        : [vendedorIdNum, rut];
+                        ? [vendedorIdNum, rut, fechaTarget, activity_type_id, goal_type_id, comentario_plan]
+                        : [vendedorIdNum, rut, activity_type_id, goal_type_id, comentario_plan];
                     const insertQ = fechaTarget
-                        ? `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida)
-                           VALUES ($1, $2, $3::date, 'pendiente', TRUE, 1)`
-                        : `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida)
-                           VALUES ($1, $2, CURRENT_DATE, 'pendiente', TRUE, 1)`;
+                        ? `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida, activity_type_id, goal_type_id, comentario_plan)
+                           VALUES ($1, $2, $3::date, 'pendiente', TRUE, 1, $4, $5, $6)`
+                        : `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida, activity_type_id, goal_type_id, comentario_plan)
+                           VALUES ($1, $2, CURRENT_DATE, 'pendiente', TRUE, 1, $3, $4, $5)`;
                     await client.query(insertQ, insertParams);
                 }
             }
@@ -538,19 +537,23 @@ router.get('/my-today', auth(), async (req, res) => {
     try {
         const vendedorId = req.user.rut; // Usamos RUT
         const query = `
-            SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion
+            SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion,
+                   at.nombre as accion_nombre, gt.nombre as objetivo_nombre
             FROM visitas_registro v
             JOIN cliente c ON v.cliente_rut = c.rut
-            WHERE (v.vendedor_id::text = $1) 
-            AND v.fecha = CURRENT_DATE
+            LEFT JOIN activity_types at ON v.activity_type_id = at.id
+            LEFT JOIN goal_types gt ON v.goal_type_id = gt.id
+            WHERE (v.vendedor_id::text = $1 OR v.vendedor_id::text = $2) 
+            AND (v.fecha <= CURRENT_DATE AND v.estado = 'pendiente' OR v.fecha = CURRENT_DATE)
             ORDER BY 
                 CASE WHEN v.estado = 'en_progreso' THEN 0
                      WHEN v.estado = 'pendiente' THEN 1
                      ELSE 2 END,
+                v.fecha ASC,
                 v.planificada DESC, 
                 v.id ASC
         `;
-        const result = await pool.query(query, [vendedorId]);
+        const result = await pool.query(query, [vendedorId, req.user.id]);
         res.json(result.rows);
     } catch (err) {
         console.error('Error my-today:', err.message);
