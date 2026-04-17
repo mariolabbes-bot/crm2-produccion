@@ -85,7 +85,10 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         sql = `
                 SELECT COALESCE(SUM(${amountExpr}), 0) as total
                 FROM ${table} t
-                INNER JOIN cliente c ON REGEXP_REPLACE(t.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+                INNER JOIN cliente c ON (
+                  REGEXP_REPLACE(t.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+                  OR (t.identificador IS NULL AND UPPER(TRIM(t.cliente)) = UPPER(TRIM(c.nombre)))
+                )
                 LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
                 ${where} AND u.rut = ${rutParam}
             `;
@@ -116,9 +119,12 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         qParams.push(rut);
         const rutParam = `$${qParams.length}`;
         sql = `
-                SELECT COUNT(DISTINCT t.identificador) as count
+                SELECT COUNT(DISTINCT CASE WHEN t.identificador IS NOT NULL THEN t.identificador ELSE t.cliente END) as count
                 FROM ${SALES_TABLE} t
-                INNER JOIN cliente c ON REGEXP_REPLACE(t.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+                INNER JOIN cliente c ON (
+                  REGEXP_REPLACE(t.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+                  OR (t.identificador IS NULL AND UPPER(TRIM(t.cliente)) = UPPER(TRIM(c.nombre)))
+                )
                 LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
                 ${where} AND u.rut = ${rutParam}
             `;
@@ -185,7 +191,10 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
             SUM(CASE WHEN TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') = $2 THEN s.${SALES_AMOUNT_COL} ELSE 0 END) as ventas_anio_anterior,
             SUM(CASE WHEN TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') IN ($3, $4, $5) THEN s.${SALES_AMOUNT_COL} ELSE 0 END) as ventas_trimestre_ant
           FROM ${SALES_TABLE} s
-          INNER JOIN cliente c ON REGEXP_REPLACE(s.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+          INNER JOIN cliente c ON (
+            REGEXP_REPLACE(s.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+            OR (s.identificador IS NULL AND UPPER(TRIM(s.cliente)) = UPPER(TRIM(c.nombre)))
+          )
           JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
           GROUP BY 1
         ),
@@ -194,7 +203,10 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
             u.rut,
             SUM(CASE WHEN TO_CHAR(a.fecha, 'YYYY-MM') = $1 THEN COALESCE(a.monto_neto, a.monto / 1.19) ELSE 0 END) as abonos_mes_actual
           FROM ${ABONOS_TABLE} a
-          INNER JOIN cliente c ON REGEXP_REPLACE(a.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+          INNER JOIN cliente c ON (
+            REGEXP_REPLACE(a.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+            OR (a.identificador IS NULL AND UPPER(TRIM(a.cliente)) = UPPER(TRIM(c.nombre)))
+          )
           JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
           GROUP BY 1
         )
@@ -368,7 +380,10 @@ router.get('/evolucion-yoy', auth(), async (req, res) => {
           SUM(s.${SALES_AMOUNT_COL}) as total_ventas
         FROM ${SALES_TABLE} s
         ${targetRut ? `
-        INNER JOIN cliente c ON REGEXP_REPLACE(s.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+        INNER JOIN cliente c ON (
+          REGEXP_REPLACE(s.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+          OR (s.identificador IS NULL AND UPPER(TRIM(s.cliente)) = UPPER(TRIM(c.nombre)))
+        )
         JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
         WHERE u.rut = $1
         ` : ''}

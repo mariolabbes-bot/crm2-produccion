@@ -163,7 +163,10 @@ router.get('/report', auth(), async (req, res) => {
     if (targetRut) {
       params.push(targetRut);
       vendorJoin = `
-          INNER JOIN cliente c_filt ON REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c_filt.rut, '[^a-zA-Z0-9]', '', 'g')
+          INNER JOIN cliente c_filt ON (
+            REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c_filt.rut, '[^a-zA-Z0-9]', '', 'g')
+            OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(c_filt.nombre)))
+          )
           JOIN usuario u_filt ON (c_filt.vendedor_id::text = u_filt.id::text OR c_filt.vendedor_id::text = u_filt.rut)
       `;
       whereClauses.push(`u_filt.rut = $${params.length}`);

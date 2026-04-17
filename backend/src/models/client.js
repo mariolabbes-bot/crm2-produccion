@@ -150,12 +150,18 @@ class ClientModel {
           MODE() WITHIN GROUP (ORDER BY v.vendedor_id) as vendedor_id_principal,
           MIN(LOWER(v.vendedor_cliente)) as vendedor_cliente_lower
         FROM cliente c
-        INNER JOIN venta v ON REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
-          AND v.fecha_emision >= $1 AND v.fecha_emision < $2
+        INNER JOIN venta v ON (
+          REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+          OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(c.nombre)))
+        )
+        AND v.fecha_emision >= $1 AND v.fecha_emision < $2
         WHERE NOT EXISTS (
           SELECT 1 FROM venta v2
-          WHERE REGEXP_REPLACE(v2.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
-            AND v2.fecha_emision >= $2 AND v2.fecha_emision <= $3
+          WHERE (
+            REGEXP_REPLACE(v2.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+            OR (v2.identificador IS NULL AND UPPER(TRIM(v2.cliente)) = UPPER(TRIM(c.nombre)))
+          )
+          AND v2.fecha_emision >= $2 AND v2.fecha_emision <= $3
         )
         GROUP BY c.rut, c.nombre, c.email, c.telefono, c.vendedor_alias, c.ciudad, c.comuna
       )
@@ -167,7 +173,10 @@ class ClientModel {
     if (vendedorAlias) {
       query += ` WHERE EXISTS (
         SELECT 1 FROM venta v 
-        WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(vc.rut, '[^a-zA-Z0-9]', '', 'g')
+        WHERE (
+          REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(vc.rut, '[^a-zA-Z0-9]', '', 'g')
+          OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(vc.nombre)))
+        )
         AND LOWER(v.vendedor_cliente) = LOWER($4) 
         AND v.fecha_emision >= $1 AND v.fecha_emision < $2
       )`;
@@ -188,7 +197,10 @@ class ClientModel {
         COALESCE(SUM(CASE WHEN v.fecha_emision >= DATE_TRUNC('month', NOW() - INTERVAL '6 months') AND v.fecha_emision < DATE_TRUNC('month', NOW()) THEN v.valor_total ELSE 0 END) / 6.0, 0) AS venta_promedio_6m,
         COALESCE(SUM(v.valor_total), 0) AS total_ventas
       FROM cliente c
-      INNER JOIN venta v ON REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+      INNER JOIN venta v ON (
+        REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+        OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(c.nombre)))
+      )
       WHERE v.fecha_emision >= DATE_TRUNC('month', NOW() - INTERVAL '6 months')
     `;
 
@@ -257,7 +269,10 @@ class ClientModel {
         (
           SELECT COALESCE(SUM(v.valor_total), 0)
           FROM venta v
-          WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+          WHERE (
+            REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+            OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(c.nombre)))
+          )
           AND v.fecha_emision >= NOW() - INTERVAL '12 months'
         ) as ventas_12m
       FROM cliente c
