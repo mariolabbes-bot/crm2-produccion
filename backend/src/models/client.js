@@ -37,18 +37,18 @@ class ClientModel {
   static async create(clientData) {
     const {
       rut, nombre, direccion, ciudad, estado, codigo_postal,
-      pais, latitud, longitud, telefono, email, vendedor_id
+      pais, latitud, longitud, telefono, email, vendedor_id, contexto
     } = clientData;
 
     const query = `
       INSERT INTO cliente 
-      (rut, nombre, direccion, ciudad, estado, codigo_postal, pais, latitud, longitud, telefono, email, vendedor_id) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
+      (rut, nombre, direccion, ciudad, estado, codigo_postal, pais, latitud, longitud, telefono, email, vendedor_id, contexto) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
       RETURNING *
     `;
     const values = [
       rut, nombre, direccion, ciudad, estado, codigo_postal,
-      pais, latitud, longitud, telefono, email, vendedor_id
+      pais, latitud, longitud, telefono, email, vendedor_id, contexto
     ];
 
     const result = await pool.query(query, values);
@@ -104,15 +104,15 @@ class ClientModel {
   }
 
   static async update(id, clientData, { isManager, userId }) {
-    const { nombre, direccion, telefono, email } = clientData; // id aquí es el ID numérico de la tabla, según ruta PUT /:id
+    const { nombre, direccion, telefono, email, contexto } = clientData; // id aquí es el ID numérico de la tabla, según ruta PUT /:id
 
     let query = '';
-    let params = [nombre, direccion, telefono, email, id];
+    let params = [nombre, direccion, telefono, email, contexto, id];
 
     if (isManager) {
-      query = `UPDATE cliente SET nombre = $1, direccion = $2, telefono = $3, email = $4 WHERE id = $5 RETURNING *`;
+      query = `UPDATE cliente SET nombre = $1, direccion = $2, telefono = $3, email = $4, contexto = $5 WHERE id = $6 RETURNING *`;
     } else {
-      query = `UPDATE cliente SET nombre = $1, direccion = $2, telefono = $3, email = $4 WHERE id = $5 AND vendedor_id = $6 RETURNING *`;
+      query = `UPDATE cliente SET nombre = $1, direccion = $2, telefono = $3, email = $4, contexto = $5 WHERE id = $6 AND vendedor_id = $7 RETURNING *`;
       params.push(userId);
     }
 

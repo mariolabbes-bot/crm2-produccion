@@ -22,6 +22,7 @@ import DeudaTab from '../components/ClientDetail/DeudaTab';
 import VentasTab from '../components/ClientDetail/VentasTab';
 import ProductosTab from '../components/ClientDetail/ProductosTab';
 import ActividadesTab from '../components/ClientDetail/ActividadesTab';
+import ContextoTab from '../components/ClientDetail/ContextoTab';
 
 /**
  * ClientDetailPage
@@ -229,6 +230,7 @@ function ClientDetailPage() {
           <Tab label="Ventas" />
           <Tab label="Productos" />
           <Tab label="Actividades" />
+          <Tab label="Contexto" />
         </Tabs>
 
         <Box sx={{ p: 3 }}>
@@ -267,6 +269,15 @@ function ClientDetailPage() {
               loading={loadingTabs.actividades}
               error={error}
               onActivityAdded={handleActivityAdded}
+            />
+          )}
+
+          {/* Tab 4: Contexto */}
+          {tabValue === 4 && (
+            <ContextoTab
+              clientId={cliente?.id}
+              data={cliente?.contexto}
+              onUpdate={loadCliente}
             />
           )}
         </Box>

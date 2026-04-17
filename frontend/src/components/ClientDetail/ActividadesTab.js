@@ -94,7 +94,12 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
     e.preventDefault();
 
     if (!comentario.trim()) {
-      setSubmitError('El comentario no puede estar vacío');
+      setSubmitError('Debes ingresar un comentario sobre la actividad realizada');
+      return;
+    }
+
+    if (!planAccion || !planObjetivo || !planFecha) {
+      setSubmitError('Debes seleccionar la próxima acción, el objetivo y la fecha');
       return;
     }
 
@@ -103,28 +108,20 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
       setSubmitError(null);
       setSubmitSuccess(false);
 
-      // Usar comentario por defecto si está vacío pero hay programación
-      const finalComentario = comentario.trim() || (programarAccion ? 'Seguimiento programado' : '');
+      // 1. Registrar actividad inmediata (lo que se hizo)
+      // Usamos el tipo basado en la acción planeada o un genérico 'CONTACTO' 
+      // pero el usuario quiere unificar, así que registramos el comentario.
+      await api.createClientActividad(rut, comentario.trim(), 'CONTACTO');
 
-      // 1. Registrar actividad inmediata
-      await api.createClientActividad(rut, finalComentario, 'CONTACTO');
-
-      // 2. Programar acción futura si está activo
-      if (programarAccion) {
-        if (!planAccion || !planObjetivo || !planFecha) {
-          throw new Error('Debes completar la acción, el objetivo y la fecha para programar');
-        }
-        await api.submitVisitPlan([rut], {
-          fecha: planFecha,
-          activity_type_id: planAccion,
-          goal_type_id: planObjetivo,
-          comentario_plan: planComentario
-        });
-      }
+      // 2. Programar acción futura (el plan)
+      await api.submitVisitPlan([rut], {
+        fecha: planFecha,
+        activity_type_id: planAccion,
+        goal_type_id: planObjetivo,
+        comentario_plan: comentario.trim() // Usamos el mismo comentario como base o nota de plan
+      });
 
       setComentario('');
-      setPlanComentario('');
-      setProgramarAccion(false);
       setSubmitSuccess(true);
       setTimeout(() => setSubmitSuccess(false), 3000);
 
@@ -145,95 +142,76 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <EditNoteIcon color="primary" />
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Registrar Actividad / Observación
+            Registrar Gestión y Programar Seguimiento
           </Typography>
         </Box>
 
         <form onSubmit={handleSubmit}>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold', color: 'text.secondary' }}>
+            1. ¿Qué se gestionó hoy? (Observaciones)
+          </Typography>
           <TextField
             fullWidth
             multiline
-            rows={2}
-            placeholder="Escribe tu observación, nota o actividad aquí..."
+            rows={3}
+            placeholder="Escribe aquí el resumen de la gestión realizada..."
             value={comentario}
             onChange={(e) => setComentario(e.target.value)}
             variant="outlined"
-            sx={{ mb: 2, bgcolor: 'white' }}
+            sx={{ mb: 3, bgcolor: 'white' }}
             disabled={submitting}
           />
 
-          {/* Toggle para Programar Acción Futura */}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={programarAccion}
-                onChange={(e) => setProgramarAccion(e.target.checked)}
-                color="primary"
-              />
-            }
-            label={
-              <Typography variant="body2" sx={{ fontWeight: 'bold', color: programarAccion ? 'primary.main' : 'text.secondary' }}>
-                Programar Próxima Acción (Seguimiento)
-              </Typography>
-            }
-            sx={{ mb: programarAccion ? 1 : 2 }}
-          />
-
-          {programarAccion && (
-            <Paper sx={{ p: 2, mb: 3, bgcolor: '#ffffff', border: '1px solid #e3f2fd', borderRadius: 2 }}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Acción (Tarea)</InputLabel>
-                    <Select
-                      value={planAccion}
-                      label="Acción (Tarea)"
-                      onChange={(e) => setPlanAccion(e.target.value)}
-                    >
-                      {activityTypes.map(t => (
-                        <MenuItem key={t.id} value={t.id}>{t.nombre}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Objetivo</InputLabel>
-                    <Select
-                      value={planObjetivo}
-                      label="Objetivo"
-                      onChange={(e) => setPlanObjetivo(e.target.value)}
-                    >
-                      {goalTypes.map(t => (
-                        <MenuItem key={t.id} value={t.id}>{t.nombre}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    type="date"
-                    fullWidth
-                    size="small"
-                    label="Fecha Programada"
-                    value={planFecha}
-                    onChange={(e) => setPlanFecha(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    placeholder="Nota específica para la próxima tarea..."
-                    label="Comentario de Planificación"
-                    value={planComentario}
-                    onChange={(e) => setPlanComentario(e.target.value)}
-                  />
-                </Grid>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold', color: 'text.secondary' }}>
+            2. Próximo Paso (Programación)
+          </Typography>
+          
+          <Paper sx={{ p: 2, mb: 3, bgcolor: '#ffffff', border: '1px solid #e3f2fd', borderRadius: 2 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Próxima Tarea</InputLabel>
+                  <Select
+                    value={planAccion}
+                    label="Próxima Tarea"
+                    onChange={(e) => setPlanAccion(e.target.value)}
+                    disabled={submitting}
+                  >
+                    {activityTypes.map(t => (
+                      <MenuItem key={t.id} value={t.id}>{t.nombre}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
-            </Paper>
-          )}
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Objetivo</InputLabel>
+                  <Select
+                    value={planObjetivo}
+                    label="Objetivo"
+                    onChange={(e) => setPlanObjetivo(e.target.value)}
+                    disabled={submitting}
+                  >
+                    {goalTypes.map(t => (
+                      <MenuItem key={t.id} value={t.id}>{t.nombre}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  type="date"
+                  fullWidth
+                  size="small"
+                  label="Fecha de Próxima Gestión"
+                  value={planFecha}
+                  onChange={(e) => setPlanFecha(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  disabled={submitting}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
 
           {submitError && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -243,16 +221,16 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
 
           {submitSuccess && (
             <Alert severity="success" sx={{ mb: 2 }}>
-              ✅ Actividad {programarAccion ? 'y Plan' : ''} registrados correctamente
+              ✅ Gestión registrada y seguimiento programado
             </Alert>
           )}
 
           <Button
             type="submit"
             variant="contained"
-            fullWidth={programarAccion}
+            fullWidth
             startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-            disabled={submitting || (!comentario.trim() && !programarAccion)}
+            disabled={submitting || !comentario.trim()}
             sx={{ 
                 borderRadius: 2,
                 py: 1.5,
@@ -261,7 +239,7 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
                 mt: 1
             }}
           >
-            {submitting ? 'Guardando...' : programarAccion ? 'Registrar y Programar' : 'Registrar Actividad'}
+            {submitting ? 'Guardando...' : 'Finalizar Gestión y Agendar'}
           </Button>
         </form>
       </Paper>
