@@ -26,31 +26,42 @@ router.get('/portfolio-health', auth(), async (req, res) => {
 
         const query = `
             WITH client_base AS (
-                SELECT c.rut, c.nombre, c.vendedor_id, u.nombre_vendedor, u.rut as vendedor_rut
+                SELECT 
+                    c.rut as clean_rut, 
+                    REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') as norm_rut,
+                    c.nombre, 
+                    u.nombre_vendedor, 
+                    u.rut as vendedor_rut
                 FROM cliente c
                 LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
                 WHERE ($1::text IS NULL OR u.rut = $1)
             ),
             ventas_actual AS (
-                SELECT identificador as rut, SUM(valor_total) as total
+                SELECT 
+                    REGEXP_REPLACE(identificador, '[^a-zA-Z0-9]', '', 'g') as norm_rut, 
+                    SUM(valor_total) as total
                 FROM venta
                 WHERE TO_CHAR(fecha_emision, 'YYYY-MM') = $2
                 GROUP BY 1
             ),
             ventas_anio_ant AS (
-                SELECT identificador as rut, SUM(valor_total) as total
+                SELECT 
+                    COALESCE(REGEXP_REPLACE(identificador, '[^a-zA-Z0-9]', '', 'g'), UPPER(TRIM(cliente))) as ref_key, 
+                    SUM(valor_total) as total
                 FROM venta
                 WHERE TO_CHAR(fecha_emision, 'YYYY-MM') = $3
                 GROUP BY 1
             ),
             ventas_3m AS (
-                SELECT identificador as rut, SUM(valor_total) / 3.0 as promedio
+                SELECT 
+                    REGEXP_REPLACE(identificador, '[^a-zA-Z0-9]', '', 'g') as norm_rut, 
+                    SUM(valor_total) / 3.0 as promedio
                 FROM venta
                 WHERE TO_CHAR(fecha_emision, 'YYYY-MM') IN ($4, $5, $6)
                 GROUP BY 1
             )
             SELECT 
-                cb.rut, cb.nombre, cb.nombre_vendedor,
+                cb.clean_rut as rut, cb.nombre, cb.nombre_vendedor,
                 COALESCE(va.total, 0) as venta_actual,
                 COALESCE(vaa.total, 0) as meta_anio_ant,
                 COALESCE(v3.promedio, 0) as promedio_3m,
@@ -61,9 +72,9 @@ router.get('/portfolio-health', auth(), async (req, res) => {
                     ELSE 'estable'
                 END as salud
             FROM client_base cb
-            LEFT JOIN ventas_actual va ON cb.rut = va.rut
-            LEFT JOIN ventas_anio_ant vaa ON cb.rut = vaa.rut
-            LEFT JOIN ventas_3m v3 ON cb.rut = v3.rut
+            LEFT JOIN ventas_actual va ON cb.norm_rut = va.norm_rut
+            LEFT JOIN ventas_anio_ant vaa ON (cb.norm_rut = vaa.ref_key OR UPPER(TRIM(cb.nombre)) = vaa.ref_key)
+            LEFT JOIN ventas_3m v3 ON cb.norm_rut = v3.norm_rut
             WHERE (va.total > 0 OR vaa.total > 0 OR v3.promedio > 0)
             ORDER BY va.total DESC NULLS LAST
             LIMIT 100
@@ -124,7 +135,7 @@ router.get('/collection-priority', auth(), async (req, res) => {
         const query = `
             WITH client_debt AS (
                 SELECT 
-                    rut, 
+                    REGEXP_REPLACE(rut, '[^a-zA-Z0-9]', '', 'g') as norm_rut, 
                     SUM(saldo_factura) as deuda_total,
                     MAX(CURRENT_DATE - fecha_emision) as dias_mora_max
                 FROM saldo_credito
@@ -133,7 +144,7 @@ router.get('/collection-priority', auth(), async (req, res) => {
             ),
             client_sales AS (
                 SELECT 
-                    identificador as rut,
+                    REGEXP_REPLACE(identificador, '[^a-zA-Z0-9]', '', 'g') as norm_rut,
                     SUM(valor_total) / 12.0 as promedio_venta_mensual
                 FROM venta
                 WHERE fecha_emision >= CURRENT_DATE - INTERVAL '12 months'
@@ -151,8 +162,8 @@ router.get('/collection-priority', auth(), async (req, res) => {
                     ELSE 'seguimiento'
                 END as prioridad
             FROM cliente c
-            JOIN client_debt cd ON c.rut = cd.rut
-            LEFT JOIN client_sales cs ON c.rut = cs.rut
+            JOIN client_debt cd ON REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = cd.norm_rut
+            LEFT JOIN client_sales cs ON REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = cs.norm_rut
             LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
             WHERE ($1::text IS NULL OR u.rut = $1)
             ORDER BY cd.deuda_total DESC
