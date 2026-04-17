@@ -79,13 +79,11 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
   };
 
   const getActivityIcon = (tipo) => {
-    switch (tipo?.toUpperCase()) {
-      case 'VISITA': return <DirectionsWalkIcon color="primary" />;
-      case 'LLAMADA': return <PhoneIcon sx={{ color: '#2196f3' }} />;
-      case 'MENSAJE': return <WhatsAppIcon sx={{ color: '#25D366' }} />;
-      case 'COTIZACION': return <ReceiptIcon sx={{ color: '#ff9800' }} />;
-      default: return <MessageIcon color="disabled" />;
-    }
+    const t = tipo?.toUpperCase();
+    if (t?.includes('VISITA')) return <DirectionsWalkIcon color="primary" />;
+    if (t?.includes('LLAMADA')) return <PhoneIcon sx={{ color: '#2196f3' }} />;
+    if (t?.includes('CONTACTO')) return <WhatsAppIcon sx={{ color: '#25D366' }} />;
+    return <MessageIcon color="disabled" />;
   };
 
   const handleSubmit = async (e) => {
@@ -101,8 +99,8 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
       setSubmitError(null);
       setSubmitSuccess(false);
 
-      // 1. Registrar actividad inmediata
-      await api.createClientActividad(rut, comentario, 'MENSAJE');
+      // 1. Registrar actividad inmediata (ahora como 'CONTACTO' por defecto)
+      await api.createClientActividad(rut, comentario, 'CONTACTO');
 
       // 2. Programar acción futura si está activo
       if (programarAccion) {
@@ -284,11 +282,10 @@ function ActividadesTab({ rut, data, loading, error, onActivityAdded }) {
               key={idx}
               sx={{
                 p: 2,
-                borderLeft: `4px solid ${actividad.tipo_actividad === 'VISITA' ? '#4caf50' :
-                    actividad.tipo_actividad === 'LLAMADA' ? '#2196f3' :
-                      actividad.tipo_actividad === 'MENSAJE' ? '#25D366' :
-                        actividad.tipo_actividad === 'COTIZACION' ? '#ff9800' :
-                          '#9e9e9e'
+                borderLeft: `4px solid ${actividad.tipo_actividad?.toUpperCase()?.includes('VISITA') ? '#4caf50' :
+                    actividad.tipo_actividad?.toUpperCase()?.includes('LLAMADA') ? '#2196f3' :
+                    actividad.tipo_actividad?.toUpperCase()?.includes('CONTACTO') ? '#25D366' :
+                    '#9e9e9e'
                   }`,
                 '&:hover': { boxShadow: 2 },
               }}
