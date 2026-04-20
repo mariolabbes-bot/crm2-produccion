@@ -164,8 +164,8 @@ router.get('/report', auth(), async (req, res) => {
       params.push(targetRut);
       vendorJoin = `
           INNER JOIN cliente c_filt ON (
-            REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c_filt.rut, '[^a-zA-Z0-9]', '', 'g')
-            OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(c_filt.nombre)))
+            v.rut_idx = c_filt.rut_idx
+            OR (v.rut_idx IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(c_filt.nombre)))
           )
           JOIN usuario u_filt ON (c_filt.vendedor_id::text = u_filt.id::text OR c_filt.vendedor_id::text = u_filt.rut)
       `;
@@ -173,7 +173,7 @@ router.get('/report', auth(), async (req, res) => {
     }
 
     const whereSql = whereClauses.length > 0 ? 'AND ' + whereClauses.join(' AND ') : '';
-    const sortColumn = sort_by === 'cantidad' ? 'cantidad_mes_actual' : 'volumen_dinero_mes_actual';
+    const sortColumn = sort_by === 'cantidad' ? 'qty_actual' : 'monto_actual';
 
     const query = `
             WITH ventas_agrupadas AS (
@@ -181,8 +181,7 @@ router.get('/report', auth(), async (req, res) => {
                     cp.sku as cp_sku,
                     p.sku as p_sku,
                     v.sku as v_sku,
-                    cp.descripcion as cp_desc,
-                    p.descripcion as p_desc,
+                    COALESCE(p.descripcion, cp.descripcion, v.sku) as clean_desc,
                     cp.litros,
                     st.stock_total,
                     st.stock_desglose,
@@ -194,13 +193,13 @@ router.get('/report', auth(), async (req, res) => {
                 LEFT JOIN clasificacion_productos cp ON UPPER(TRIM(v.sku)) = UPPER(TRIM(cp.sku))
                 LEFT JOIN producto p ON UPPER(TRIM(v.sku)) = UPPER(TRIM(p.sku))
                 LEFT JOIN (
-                    SELECT UPPER(TRIM(sku)) as sku_clean, 
+                    SELECT split_part(sku, ' ', 1) as clean_sku, 
                            SUM(cantidad) as stock_total,
                            jsonb_object_agg(sucursal, cantidad) as stock_desglose
                     FROM stock 
                     WHERE cantidad > 0
-                    GROUP BY UPPER(TRIM(sku))
-                ) st ON UPPER(TRIM(v.sku)) = st.sku_clean
+                    GROUP BY clean_sku
+                ) st ON UPPER(TRIM(v.sku)) = UPPER(st.clean_sku)
                 ${vendorJoin}
                 WHERE (v.fecha_emision BETWEEN $1 AND $2 
                    OR v.fecha_emision BETWEEN $3 AND $4 
@@ -209,7 +208,7 @@ router.get('/report', auth(), async (req, res) => {
                 GROUP BY cp.sku, p.sku, v.sku, cp.descripcion, p.descripcion, cp.litros, st.stock_total, st.stock_desglose
             )
             SELECT 
-                COALESCE(p_desc, cp_desc, v_sku) as descripcion,
+                clean_desc as descripcion,
                 qty_actual as cantidad_mes_actual,
                 qty_anio_ant as cantidad_mes_anterior,
                 COALESCE(stock_total, 0) as stock_disponible,
