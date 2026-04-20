@@ -512,3 +512,8 @@ export const resetDatabase = (confirmString) => apiFetch(`${API_URL}/admin/reset
   body: JSON.stringify({ confirm: confirmString })
 });
 
+export const cleanupData = (isDryRun = false) => apiFetch(`${API_URL}/admin/cleanup`, {
+  method: 'POST',
+  body: JSON.stringify({ dryRun: isDryRun })
+});
+

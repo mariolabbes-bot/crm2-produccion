@@ -260,4 +260,22 @@ router.get('/run-enhanced-migration', async (req, res) => {
   }
 });
 
+// POST /api/admin/cleanup - Ejecución manual de limpieza de datos históricos
+router.post('/cleanup', auth(['manager']), async (req, res) => {
+  try {
+    const { dryRun } = req.body;
+    const MaintenanceService = require('../services/maintenanceService');
+    const results = await MaintenanceService.runRoutineCleanup(dryRun === true);
+    
+    res.json({
+      success: true,
+      message: dryRun ? 'Simulación de limpieza completada' : 'Limpieza de datos completada exitosamente',
+      results
+    });
+  } catch (err) {
+    console.error('Error en cleanup manual:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;

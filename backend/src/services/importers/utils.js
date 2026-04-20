@@ -72,4 +72,14 @@ function formatRut(rut) {
     return `${body}-${dv}`;
 }
 
-module.exports = { norm, parseExcelDate, parseNumeric, formatRut };
+function normalizeRut(rut) {
+    if (!rut) return '';
+    return String(rut).toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function normalizeName(name) {
+    if (!name) return '';
+    return String(name).toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+module.exports = { norm, parseExcelDate, parseNumeric, formatRut, normalizeRut, normalizeName };

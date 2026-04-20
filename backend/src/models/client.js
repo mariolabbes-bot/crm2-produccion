@@ -150,17 +150,11 @@ class ClientModel {
           MODE() WITHIN GROUP (ORDER BY v.vendedor_id) as vendedor_id_principal,
           MIN(LOWER(v.vendedor_cliente)) as vendedor_cliente_lower
         FROM cliente c
-        INNER JOIN venta v ON (
-          REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
-          OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(c.nombre)))
-        )
+        INNER JOIN venta v ON (v.rut_idx = c.rut_idx OR (v.rut_idx IS NULL AND v.nombre_idx = c.nombre_idx))
         AND v.fecha_emision >= $1 AND v.fecha_emision < $2
         WHERE NOT EXISTS (
           SELECT 1 FROM venta v2
-          WHERE (
-            REGEXP_REPLACE(v2.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
-            OR (v2.identificador IS NULL AND UPPER(TRIM(v2.cliente)) = UPPER(TRIM(c.nombre)))
-          )
+          WHERE (v2.rut_idx = c.rut_idx OR (v2.rut_idx IS NULL AND v2.nombre_idx = c.nombre_idx))
           AND v2.fecha_emision >= $2 AND v2.fecha_emision <= $3
         )
         GROUP BY c.rut, c.nombre, c.email, c.telefono, c.vendedor_alias, c.ciudad, c.comuna
@@ -173,10 +167,7 @@ class ClientModel {
     if (vendedorAlias) {
       query += ` WHERE EXISTS (
         SELECT 1 FROM venta v 
-        WHERE (
-          REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(vc.rut, '[^a-zA-Z0-9]', '', 'g')
-          OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(vc.nombre)))
-        )
+        WHERE (v.rut_idx = vc.rut_idx OR (v.rut_idx IS NULL AND v.nombre_idx = vc.nombre_idx))
         AND LOWER(v.vendedor_cliente) = LOWER($4) 
         AND v.fecha_emision >= $1 AND v.fecha_emision < $2
       )`;
@@ -189,7 +180,7 @@ class ClientModel {
     return result.rows;
   }
 
-  static async findTopVentas({ targetRut }) {
+  static async findTopVentas({ targetRut, userId }) {
     let query = `
       SELECT 
         c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal AS telefono, c.email,
@@ -197,17 +188,18 @@ class ClientModel {
         COALESCE(SUM(CASE WHEN v.fecha_emision >= DATE_TRUNC('month', NOW() - INTERVAL '6 months') AND v.fecha_emision < DATE_TRUNC('month', NOW()) THEN v.valor_total ELSE 0 END) / 6.0, 0) AS venta_promedio_6m,
         COALESCE(SUM(v.valor_total), 0) AS total_ventas
       FROM cliente c
-      INNER JOIN venta v ON (
-        REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
-        OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(c.nombre)))
-      )
+      INNER JOIN venta v ON (v.rut_idx = c.rut_idx OR (v.rut_idx IS NULL AND v.nombre_idx = c.nombre_idx))
       WHERE v.fecha_emision >= DATE_TRUNC('month', NOW() - INTERVAL '6 months')
     `;
 
     const params = [];
-    if (targetRut) {
-      query += ` AND (c.vendedor_id::text = $1 OR c.vendedor_id::text = (SELECT id::text FROM usuario WHERE rut = $1))`;
-      params.push(targetRut);
+    if (userId) {
+      query += ` AND c.vendedor_id::text = $1`;
+      params.push(String(userId));
+    } else if (targetRut) {
+      const cleanRut = targetRut.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      query += ` AND (c.vendedor_id::text = $1 OR c.vendedor_id::text = (SELECT id::text FROM usuario WHERE rut_idx = $1))`;
+      params.push(cleanRut);
     }
 
     query += `
@@ -220,7 +212,7 @@ class ClientModel {
     return result.rows;
   }
 
-  static async findFacturasImpagas({ targetRut }) {
+  static async findFacturasImpagas({ targetRut, userId }) {
     let query = `
       SELECT
         c.rut, c.nombre, c.direccion, c.ciudad, c.telefono_principal as telefono, c.email,
@@ -231,21 +223,24 @@ class ClientModel {
         EXTRACT(DAY FROM NOW() - MIN(sc.fecha_emision))::INTEGER as dias_mora
       FROM cliente c
       LEFT JOIN usuario u ON c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut
-      INNER JOIN saldo_credito sc ON 
-        REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(sc.rut, '[^a-zA-Z0-9]', '', 'g')
+      INNER JOIN saldo_credito sc ON (c.rut_idx = sc.rut_idx) 
       WHERE sc.saldo_factura > 0
       -- Filtro: Solo clientes con ventas en los últimos 3 meses
       AND EXISTS (
         SELECT 1 FROM venta v 
-        WHERE REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
+        WHERE (v.rut_idx = c.rut_idx OR (v.rut_idx IS NULL AND v.nombre_idx = c.nombre_idx))
         AND v.fecha_emision >= NOW() - INTERVAL '3 months'
       )
     `;
 
     const params = [];
-    if (targetRut) {
-      query += ` AND u.rut = $1`;
-      params.push(targetRut);
+    if (userId) {
+      query += ` AND u.id::text = $1`;
+      params.push(String(userId));
+    } else if (targetRut) {
+      const cleanRut = targetRut.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      query += ` AND u.rut_idx = $1`;
+      params.push(cleanRut);
     }
 
     query += `
@@ -260,7 +255,7 @@ class ClientModel {
     return result.rows;
   }
 
-  static async search({ term, targetRut }) {
+  static async search({ term, targetRut, userId }) {
     const searchTerm = `%${term}%`;
     const params = [searchTerm, searchTerm];
     let query = `
@@ -269,19 +264,20 @@ class ClientModel {
         (
           SELECT COALESCE(SUM(v.valor_total), 0)
           FROM venta v
-          WHERE (
-            REGEXP_REPLACE(v.identificador, '[^a-zA-Z0-9]', '', 'g') = REGEXP_REPLACE(c.rut, '[^a-zA-Z0-9]', '', 'g')
-            OR (v.identificador IS NULL AND UPPER(TRIM(v.cliente)) = UPPER(TRIM(c.nombre)))
-          )
+          WHERE (v.rut_idx = c.rut_idx OR (v.rut_idx IS NULL AND v.nombre_idx = c.nombre_idx))
           AND v.fecha_emision >= NOW() - INTERVAL '12 months'
         ) as ventas_12m
       FROM cliente c
       WHERE (UPPER(c.nombre) LIKE UPPER($1) OR UPPER(c.rut) LIKE UPPER($2))
     `;
 
-    if (targetRut) {
-      query += ` AND (c.vendedor_id::text = $3 OR c.vendedor_id::text = (SELECT id::text FROM usuario WHERE rut = $3))`;
-      params.push(targetRut);
+    if (userId) {
+      query += ` AND c.vendedor_id::text = $3`;
+      params.push(String(userId));
+    } else if (targetRut) {
+      const cleanRut = targetRut.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      query += ` AND (c.vendedor_id::text = $3 OR c.vendedor_id::text = (SELECT id::text FROM usuario WHERE rut_idx = $3))`;
+      params.push(cleanRut);
     }
 
     query += `

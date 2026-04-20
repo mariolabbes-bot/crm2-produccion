@@ -34,6 +34,16 @@ function parseExcelDate(value) {
   return null;
 }
 
+function normalizeRut(rut) {
+  if (!rut) return '';
+  return rut.toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function normalizeName(name) {
+  if (!name) return '';
+  return name.toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
 async function importData() {
   console.log('=== IMPORT VENTAS (MULTI-FILE BULK) ===');
 
@@ -163,7 +173,9 @@ async function importData() {
 
         const folio = sanitize(r[colFolio]);
         const identificador = colIdentificador && r[colIdentificador] ? sanitize(r[colIdentificador]) : '';
+        const rutIdx = normalizeRut(identificador);
         const cliente = sanitize(r[colCliente]);
+        const nombreIdx = normalizeName(cliente);
 
         // Vendors - Resolve using Map (Aliases)
         // Vendors - Resolve using Centralized Utility
@@ -188,9 +200,9 @@ async function importData() {
 
         const litros = 0; // Logic for liters can be added if needed, or calculated in DB/triggers
 
-        // CSV Order: folio, fecha_emision, identificador, cliente, vendedor_documento, vendedor_cliente, tipo_documento, cantidad, precio, valor_total, sucursal, sku, descripcion
+        // CSV Order: folio, fecha_emision, identificador, cliente, vendedor_documento, vendedor_cliente, tipo_documento, cantidad, precio, valor_total, sucursal, sku, descripcion, rut_idx, nombre_idx
         // TABLE columns in COPY must match this order
-        out.write(`${toCopyVal(folio)}\t${fecha}\t${toCopyVal(identificador)}\t${toCopyVal(cliente)}\t${toCopyVal(vendDoc)}\t${toCopyVal(vendCli)}\t${toCopyVal(tipoDoc)}\t${cant}\t${precio}\t${totalVal}\t${toCopyVal(sucursal)}\t${toCopyVal(sku)}\t${toCopyVal(descripcion)}\n`);
+        out.write(`${toCopyVal(folio)}\t${fecha}\t${toCopyVal(identificador)}\t${toCopyVal(cliente)}\t${toCopyVal(vendDoc)}\t${toCopyVal(vendCli)}\t${toCopyVal(tipoDoc)}\t${cant}\t${precio}\t${totalVal}\t${toCopyVal(sucursal)}\t${toCopyVal(sku)}\t${toCopyVal(descripcion)}\t${toCopyVal(rutIdx)}\t${toCopyVal(nombreIdx)}\n`);
         totalCount++;
       }
     }
@@ -205,7 +217,7 @@ async function importData() {
                 COPY venta (
                     folio, fecha_emision, identificador, cliente, 
                     vendedor_documento, vendedor_cliente, tipo_documento, 
-                    cantidad, precio, valor_total, sucursal, sku, descripcion
+                    cantidad, precio, valor_total, sucursal, sku, descripcion, rut_idx, nombre_idx
                 ) 
                 FROM STDIN WITH (FORMAT text, DELIMITER E'\\t')
             `));

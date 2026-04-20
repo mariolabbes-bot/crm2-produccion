@@ -103,27 +103,37 @@ class ClientService {
     static async getTopVentas(user, queryVendedorId) {
         const isManager = user.rol?.toLowerCase() === 'manager';
         let targetRut = null;
+        let userId = null;
 
         if (!isManager) {
-            targetRut = user.rut;
+            userId = user.id;
         } else if (queryVendedorId) {
-            targetRut = queryVendedorId;
+            if (isNaN(queryVendedorId)) {
+                targetRut = queryVendedorId;
+            } else {
+                userId = queryVendedorId;
+            }
         }
 
-        return await ClientModel.findTopVentas({ targetRut });
+        return await ClientModel.findTopVentas({ targetRut, userId });
     }
 
     static async getFacturasImpagas(user, queryVendedorId) {
         const isManager = user.rol?.toLowerCase() === 'manager';
         let targetRut = null;
+        let userId = null;
 
         if (!isManager) {
-            targetRut = user.rut;
+            userId = user.id;
         } else if (queryVendedorId) {
-            targetRut = queryVendedorId;
+            if (isNaN(queryVendedorId)) {
+                targetRut = queryVendedorId;
+            } else {
+                userId = queryVendedorId;
+            }
         }
 
-        return await ClientModel.findFacturasImpagas({ targetRut });
+        return await ClientModel.findFacturasImpagas({ targetRut, userId });
     }
 
     static async searchClients(q, user, queryVendedorId) {
@@ -131,14 +141,19 @@ class ClientService {
 
         const isManager = user.rol?.toLowerCase() === 'manager';
         let targetRut = null;
+        let userId = null;
 
         if (!isManager) {
-            targetRut = user.rut;
+            userId = user.id;
         } else if (queryVendedorId) {
-            targetRut = queryVendedorId;
+            if (isNaN(queryVendedorId)) {
+                targetRut = queryVendedorId;
+            } else {
+                userId = queryVendedorId;
+            }
         }
 
-        return await ClientModel.search({ term: q.trim(), targetRut });
+        return await ClientModel.search({ term: q.trim(), targetRut, userId });
     }
     static async getIncompleteClients() {
         return await ClientModel.findIncomplete();

@@ -3,6 +3,7 @@ import { Paper, Tabs, Tab, Box } from '@mui/material';
 import ProductCleanup from './ProductCleanup';
 import ClientCleanup from './ClientCleanup';
 import BranchCleanup from './BranchCleanup'; // Added Branch Cleanup
+import HistoricalCleanup from './HistoricalCleanup';
 
 const DataManagement = () => {
     const [tabIndex, setTabIndex] = useState(0);
@@ -18,6 +19,7 @@ const DataManagement = () => {
                     <Tab label="Clasificación de Productos" />
                     <Tab label="Completar Clientes" />
                     <Tab label="Mapeo de Sucursales" />
+                    <Tab label="Limpieza Histórica" />
                 </Tabs>
             </Paper>
 
@@ -31,6 +33,10 @@ const DataManagement = () => {
 
             <Box role="tabpanel" hidden={tabIndex !== 2}>
                 {tabIndex === 2 && <BranchCleanup />}
+            </Box>
+
+            <Box role="tabpanel" hidden={tabIndex !== 3}>
+                {tabIndex === 3 && <HistoricalCleanup />}
             </Box>
         </Box>
     );

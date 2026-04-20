@@ -24,6 +24,16 @@ function norm(s) {
     .trim();
 }
 
+function normalizeRut(rut) {
+  if (!rut) return '';
+  return rut.toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function normalizeName(name) {
+  if (!name) return '';
+  return name.toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
 function parseExcelDate(value) {
   if (!value) return null;
   if (typeof value === 'number' && !isNaN(value)) {
@@ -190,16 +200,18 @@ async function main() {
 
         const folio = r[colFolio] ? String(r[colFolio]).trim() : '';
         const identificador = colIdentificador && r[colIdentificador] ? String(r[colIdentificador]).trim() : '';
+        const rutIdx = normalizeRut(identificador);
         const cliente = (r[colCliente] ? String(r[colCliente]) : '').replace(/\t|\n/g, ' ').trim();
+        const nombreIdx = normalizeName(cliente);
         const vendedor = (colVendedor && r[colVendedor] ? String(r[colVendedor]) : '').replace(/\t|\n/g, ' ').trim();
         const tipo = (colTipoPago && r[colTipoPago] ? String(r[colTipoPago]) : '').replace(/\t|\n/g, ' ').trim();
         const estado = (colEstado && r[colEstado] ? String(r[colEstado]) : '').replace(/\t|\n/g, ' ').trim();
         const sucursal = (colSucursal && r[colSucursal] ? String(r[colSucursal]) : '').replace(/\t|\n/g, ' ').trim();
 
         // Mapeo a columnas DB: 
-        // folio, fecha, identificador, cliente, vendedor_cliente, estado_abono, tipo_pago, monto, monto_total, sucursal
+        // folio, fecha, identificador, cliente, vendedor_cliente, estado_abono, tipo_pago, monto, monto_total, sucursal, rut_idx, nombre_idx
         // NOTA: Usamos tabulador \t como delimitador. Asegurar limpiar \t en strings.
-        out.write(`${folio}\t${fecha}\t${identificador}\t${cliente}\t${vendedor}\t${estado}\t${tipo}\t${monto.toFixed(2)}\t${monto.toFixed(2)}\t${sucursal}\n`);
+        out.write(`${folio}\t${fecha}\t${identificador}\t${cliente}\t${vendedor}\t${estado}\t${tipo}\t${monto.toFixed(2)}\t${monto.toFixed(2)}\t${sucursal}\t${rutIdx}\t${nombreIdx}\n`);
         totalCount++;
       }
     }
@@ -211,7 +223,7 @@ async function main() {
     // --- COPY ---
     if (totalCount > 0) {
       console.log('Ejecutando COPY a base de datos...');
-      const stream = client.query(copyFrom(`COPY ${abonosTable} (folio, fecha, identificador, cliente, vendedor_cliente, estado_abono, tipo_pago, monto, monto_total, sucursal) FROM STDIN WITH (FORMAT text, DELIMITER E'\\t')`));
+      const stream = client.query(copyFrom(`COPY ${abonosTable} (folio, fecha, identificador, cliente, vendedor_cliente, estado_abono, tipo_pago, monto, monto_total, sucursal, rut_idx, nombre_idx) FROM STDIN WITH (FORMAT text, DELIMITER E'\\t')`));
       const fileStream = fs.createReadStream(csvPath);
       await new Promise((resolve, reject) => {
         fileStream.on('error', reject);

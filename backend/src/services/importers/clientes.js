@@ -3,7 +3,7 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const { updateJobStatus } = require('../jobManager');
-const { norm, parseNumeric, formatRut } = require('./utils');
+const { norm, parseNumeric, formatRut, normalizeRut, normalizeName } = require('./utils');
 const { resolveVendorName } = require('../../utils/vendorAlias');
 
 async function processClientesFileAsync(jobId, filePath, originalname) {
@@ -133,9 +133,11 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                 let rawV = String(row[colVendedor]).trim();
                 finalVendedor = await resolveVendorName(rawV);
             }
-
             toImport.push({
-                rut: formatRut(rut), nombre,
+                rut: formatRut(rut), 
+                rut_idx: normalizeRut(rut),
+                nombre,
+                nombre_idx: normalizeName(nombre),
                 email: colEmail && row[colEmail] ? String(row[colEmail]).trim() : null,
                 telefono: colTelefono && row[colTelefono] ? String(row[colTelefono]).trim() : null,
                 sucursal: colSucursal && row[colSucursal] ? String(row[colSucursal]).trim() : null,
@@ -184,10 +186,11 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                     params.push(
                         item.rut, item.nombre, item.email, item.telefono, item.sucursal,
                         item.categoria, item.subcategoria, item.comuna, item.ciudad, item.direccion,
-                        item.numero, item.vendedor, item.cupo, item.cupo_utilizado, item.circuito
+                        item.numero, item.vendedor, item.cupo, item.cupo_utilizado, item.circuito,
+                        item.rut_idx, item.nombre_idx
                     );
 
-                    const rowPlaceholders = Array.from({ length: 15 }, () => `$${paramIndex++}`).join(', ');
+                    const rowPlaceholders = Array.from({ length: 17 }, () => `$${paramIndex++}`).join(', ');
                     values.push(`(${rowPlaceholders})`);
                 });
 
@@ -195,7 +198,8 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                     INSERT INTO cliente (
                         rut, nombre, email, telefono_principal, sucursal,
                         categoria, subcategoria, comuna, ciudad, direccion,
-                        numero, nombre_vendedor, cupo, cupo_utilizado, circuito
+                        numero, nombre_vendedor, cupo, cupo_utilizado, circuito,
+                        rut_idx, nombre_idx
                     ) VALUES ${values.join(', ')}
                     ON CONFLICT (rut) DO UPDATE
                     SET nombre = EXCLUDED.nombre,
@@ -211,7 +215,9 @@ async function processClientesFileAsync(jobId, filePath, originalname) {
                         nombre_vendedor = EXCLUDED.nombre_vendedor,
                         cupo = EXCLUDED.cupo,
                         cupo_utilizado = EXCLUDED.cupo_utilizado,
-                        circuito = COALESCE(EXCLUDED.circuito, cliente.circuito)
+                        circuito = COALESCE(EXCLUDED.circuito, cliente.circuito),
+                        rut_idx = EXCLUDED.rut_idx,
+                        nombre_idx = EXCLUDED.nombre_idx
                     RETURNING (xmax = 0) AS inserted
                 `;
 

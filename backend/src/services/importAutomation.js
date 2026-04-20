@@ -131,9 +131,21 @@ function startScheduler() {
     // Run immediately on boot
     runDriveImportCycle();
 
-    // Schedule
+    // Schedule: Drive Import every 5 minutes
     cron.schedule('*/5 * * * *', () => {
         runDriveImportCycle();
+    });
+
+    // Schedule: Data Cleanup - First day of month at 02:00 AM
+    cron.schedule('0 2 1 * *', async () => {
+        console.log('🧹 [Maintenance] Iniciando limpieza automática mensual...');
+        try {
+            const MaintenanceService = require('./maintenanceService');
+            const results = await MaintenanceService.runRoutineCleanup(false);
+            console.log(`✅ [Maintenance] Limpieza completada. Ventas: ${results.ventasEliminadas}, Abonos: ${results.abonosEliminados}`);
+        } catch (err) {
+            console.error('❌ [Maintenance] Error en limpieza automática:', err.message);
+        }
     });
 }
 
