@@ -73,10 +73,16 @@ router.get('/top-20', auth(), async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT p.sku, p.descripcion, p.marca, p.familia, 
-                   SUM(v.cantidad) as total_vendido
+                   SUM(v.cantidad) as total_vendido,
+                   COALESCE(st.total_stock, 0) as stock_disponible
             FROM producto p
             JOIN venta v ON p.sku = COALESCE(v.sku, '')
-            GROUP BY p.sku, p.descripcion, p.marca, p.familia
+            LEFT JOIN (
+                SELECT split_part(sku, ' ', 1) as clean_sku, SUM(cantidad) as total_stock 
+                FROM stock 
+                GROUP BY clean_sku
+            ) st ON p.sku = st.clean_sku
+            GROUP BY p.sku, p.descripcion, p.marca, p.familia, st.total_stock
             ORDER BY total_vendido DESC
             LIMIT 20
         `);
@@ -98,9 +104,9 @@ router.get('/search', auth(), async (req, res) => {
                    st.stock_desglose
             FROM producto p
             LEFT JOIN (
-                SELECT sku, SUM(cantidad) as stock_total, jsonb_object_agg(sucursal, cantidad) as stock_desglose
-                FROM stock WHERE cantidad > 0 GROUP BY sku
-            ) st ON p.sku = st.sku
+                SELECT split_part(sku, ' ', 1) as clean_sku, SUM(cantidad) as stock_total, jsonb_object_agg(sucursal, cantidad) as stock_desglose
+                FROM stock WHERE cantidad > 0 GROUP BY clean_sku
+            ) st ON p.sku = st.clean_sku
             WHERE 1=1
         `;
         const values = [];
@@ -141,15 +147,23 @@ router.get('/:sku/detail', auth(), async (req, res) => {
     try {
         const { sku } = req.params;
 
-        // 1. Get stock from producto
-        const pResult = await pool.query('SELECT stock_por_sucursal, descripcion, marca, familia FROM producto WHERE sku = $1', [sku]);
+        // 1. Get product info
+        const pResult = await pool.query('SELECT descripcion, marca, familia FROM producto WHERE sku = $1', [sku]);
         if (pResult.rows.length === 0) {
             return res.status(404).json({ success: false, msg: 'Producto no encontrado' });
         }
         const product = pResult.rows[0];
-        const stockObj = product.stock_por_sucursal || {};
 
-        // 2. Get 6 months sales grouped by branch
+        // 2. Get stock from "stock" table (the true source)
+        // Using split_part because SKU in stock table often contains the description
+        const sResult = await pool.query(`
+            SELECT sucursal, cantidad 
+            FROM stock 
+            WHERE split_part(sku, ' ', 1) = $1
+        `, [sku]);
+        const stockList = sResult.rows;
+
+        // 3. Get 6 months sales grouped by branch
         const vResult = await pool.query(`
             SELECT COALESCE(sucursal, 'Central') as sucursal, SUM(cantidad) as total_6m
             FROM venta
@@ -159,17 +173,21 @@ router.get('/:sku/detail', auth(), async (req, res) => {
 
         const branchSales = vResult.rows;
 
-        // 3. Merge stock and sales
-        const allBranches = new Set([...Object.keys(stockObj), ...branchSales.map(s => s.sucursal)]);
+        // 4. Merge stock and sales
+        // Combine all branches mentioned in stock or sales
+        const allBranches = new Set([...stockList.map(s => s.sucursal), ...branchSales.map(s => s.sucursal)]);
+        
         const combined = Array.from(allBranches).map(branch => {
             const sale = branchSales.find(s => s.sucursal === branch);
+            const stockRow = stockList.find(s => s.sucursal === branch);
+            
             const total6m = sale ? parseFloat(sale.total_6m) : 0;
             const avg6m = total6m / 6;
 
             return {
                 sucursal: branch || 'Desconocida',
                 venta_promedio: Number(avg6m.toFixed(2)),
-                stock: stockObj[branch] || 0
+                stock: stockRow ? parseFloat(stockRow.cantidad) : 0
             };
         });
 
