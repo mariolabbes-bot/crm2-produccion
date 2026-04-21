@@ -164,17 +164,6 @@ const Sidebar = () => {
             >
               INSA
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: '#9CA3AF',
-                fontWeight: 500,
-                display: 'block',
-                letterSpacing: '0.5px'
-              }}
-            >
-              CRM Dashboard
-            </Typography>
           </>
       </Box>
 
@@ -190,7 +179,7 @@ const Sidebar = () => {
             fontWeight: 600,
           }}
         >
-          {user?.nombre_completo?.charAt(0) || 'U'}
+          {(user?.nombre || user?.alias || 'U').charAt(0).toUpperCase()}
         </Avatar>
           <Box sx={{ flex: 1, overflow: 'hidden' }}>
             <Typography
@@ -203,7 +192,7 @@ const Sidebar = () => {
                 whiteSpace: 'nowrap'
               }}
             >
-              {user?.nombre_completo || 'Usuario'}
+              {user?.nombre || user?.alias || 'Usuario'}
             </Typography>
             <Typography
               variant="caption"

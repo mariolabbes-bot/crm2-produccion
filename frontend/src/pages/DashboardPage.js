@@ -139,7 +139,6 @@ const DashboardPage = () => {
 
   return (
     <Box className="dashboard-page-container" sx={{ p: 2 }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Dashboard General (v3.1)</Typography>
 
       {/* Ticker de importaciones */}
       <Box sx={{ mb: 3 }}>

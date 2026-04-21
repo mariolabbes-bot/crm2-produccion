@@ -129,7 +129,7 @@ const TopBar = ({ title = 'Dashboard', subtitle = null, isMobile = false }) => {
           )}
 
           {/* Avatar del Usuario */}
-          <Tooltip title={user?.nombre_completo || 'Usuario'}>
+          <Tooltip title={user?.nombre || user?.alias || 'Usuario'}>
             <Avatar
               sx={{
                 bgcolor: '#E57A2D',
@@ -144,7 +144,7 @@ const TopBar = ({ title = 'Dashboard', subtitle = null, isMobile = false }) => {
                 }
               }}
             >
-              {user?.nombre_completo?.charAt(0) || 'U'}
+              {(user?.nombre || user?.alias || 'U').charAt(0).toUpperCase()}
             </Avatar>
           </Tooltip>
         </Box>

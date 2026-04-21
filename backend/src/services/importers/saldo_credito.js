@@ -2,7 +2,7 @@
 const XLSX = require('xlsx');
 const pool = require('../../db');
 const { updateJobStatus } = require('../jobManager');
-const { norm, parseExcelDate, parseNumeric, formatRut } = require('./utils');
+const { norm, parseExcelDate, parseNumeric, formatRut, normalizeRut } = require('./utils');
 
 async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
     const client = await pool.connect();
@@ -76,6 +76,7 @@ async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
             const rawRut = row[colRut];
             const dv = colDv ? row[colDv] : '';
             const rut = formatRut(rawRut ? String(rawRut).trim() + (dv ? `-${dv}` : '') : null);
+            const rut_idx = normalizeRut(rut);
 
             const folio = row[colFolio] ? parseInt(row[colFolio]) : null;
             if (!folio || !rut) continue;
@@ -111,14 +112,15 @@ async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
                 saldoFactura,
                 saldoFavorDisponible,
                 finalVendorName,
+                rut_idx,
                 new Date() // created_at
             ]);
 
             // Execute Batch if full
             if (batchRows.length >= BATCH_SIZE) {
                 const valuesClause = batchRows.map((_, idx) => {
-                    const offset = idx * 10;
-                    return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9}, $${offset + 10})`;
+                    const offset = idx * 11;
+                    return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9}, $${offset + 10}, $${offset + 11})`;
                 }).join(', ');
 
                 const flatParams = batchRows.flat();
@@ -127,7 +129,7 @@ async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
                     `INSERT INTO saldo_credito (
                         rut, tipo_documento, folio, fecha_emision, 
                         total_factura, deuda_cancelada, saldo_factura, 
-                        saldo_favor_disponible, nombre_vendedor, created_at
+                        saldo_favor_disponible, nombre_vendedor, rut_idx, created_at
                     ) VALUES ${valuesClause}`,
                     flatParams
                 );
@@ -140,8 +142,8 @@ async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
         // Insert remaining rows
         if (batchRows.length > 0) {
             const valuesClause = batchRows.map((_, idx) => {
-                const offset = idx * 10;
-                return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9}, $${offset + 10})`;
+                const offset = idx * 11;
+                return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9}, $${offset + 10}, $${offset + 11})`;
             }).join(', ');
 
             const flatParams = batchRows.flat();
@@ -150,7 +152,7 @@ async function processSaldoCreditoFileAsync(jobId, filePath, originalname) {
                 `INSERT INTO saldo_credito (
                     rut, tipo_documento, folio, fecha_emision, 
                     total_factura, deuda_cancelada, saldo_factura, 
-                    saldo_favor_disponible, nombre_vendedor, created_at
+                    saldo_favor_disponible, nombre_vendedor, rut_idx, created_at
                 ) VALUES ${valuesClause}`,
                 flatParams
             );
