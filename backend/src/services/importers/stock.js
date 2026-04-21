@@ -18,9 +18,9 @@ async function processStockFileAsync(jobId, filePath, originalname) {
         const headers = Object.keys(data[0] || {});
 
         // Find SKU column prioritizing CODIGO and SKU over ARTICULO
-        let colSku = headers.find(h => /^C.*DIGO$/i.test(h));
-        if (!colSku) colSku = headers.find(h => /^SKU$/i.test(h));
-        if (!colSku) colSku = headers.find(h => /^ART.*CULO$/i.test(h));
+        let colSku = headers.find(h => /C.*DIGO/i.test(String(h).trim()));
+        if (!colSku) colSku = headers.find(h => /SKU/i.test(String(h).trim()));
+        if (!colSku) colSku = headers.find(h => /ART.*CULO/i.test(String(h).trim()));
         
         if (!colSku) throw new Error('Falta columna ARTICULO, SKU o CÓDIGO');
 
