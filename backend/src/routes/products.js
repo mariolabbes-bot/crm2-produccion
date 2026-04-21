@@ -78,9 +78,9 @@ router.get('/top-20', auth(), async (req, res) => {
             FROM producto p
             JOIN venta v ON p.sku = COALESCE(v.sku, '')
             LEFT JOIN (
-                SELECT split_part(sku, ' ', 1) as clean_sku, SUM(cantidad) as total_stock 
+                SELECT sku as clean_sku, SUM(cantidad) as total_stock 
                 FROM stock 
-                GROUP BY clean_sku
+                GROUP BY sku
             ) st ON p.sku = st.clean_sku
             GROUP BY p.sku, p.descripcion, p.marca, p.familia, st.total_stock
             ORDER BY total_vendido DESC
@@ -104,8 +104,8 @@ router.get('/search', auth(), async (req, res) => {
                    st.stock_desglose
             FROM producto p
             LEFT JOIN (
-                SELECT split_part(sku, ' ', 1) as clean_sku, SUM(cantidad) as stock_total, jsonb_object_agg(sucursal, cantidad) as stock_desglose
-                FROM stock WHERE cantidad > 0 GROUP BY clean_sku
+                SELECT sku as clean_sku, SUM(cantidad) as stock_total, jsonb_object_agg(sucursal, cantidad) as stock_desglose
+                FROM stock WHERE cantidad > 0 GROUP BY sku
             ) st ON p.sku = st.clean_sku
             WHERE 1=1
         `;
@@ -159,7 +159,7 @@ router.get('/:sku/detail', auth(), async (req, res) => {
         const sResult = await pool.query(`
             SELECT sucursal, cantidad 
             FROM stock 
-            WHERE split_part(sku, ' ', 1) = $1
+            WHERE sku = $1
         `, [sku]);
         const stockList = sResult.rows;
 
