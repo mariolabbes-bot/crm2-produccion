@@ -11,7 +11,7 @@ import useIsMobile from '../hooks/useIsMobile';
  * MainLayout - Layout principal del dashboard
  * Adaptativo: Escritorio (Sidebar) vs Móvil (BottomNav)
  */
-const MainLayout = ({ pageTitle = 'Dashboard', pageSubtitle = null }) => {
+const MainLayout = ({ pageTitle = '', pageSubtitle = null }) => {
   const { sidebarCollapsed } = useUI();
   const isMobile = useIsMobile();
 
