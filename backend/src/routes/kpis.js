@@ -70,7 +70,6 @@ router.get('/dashboard-current', auth(), async (req, res) => {
       const qParams = [];
       let where = ' WHERE 1=1';
 
-      // Filtro Meses o Día Exacto
       if (Array.isArray(months)) {
         const placeholders = months.map((m, i) => {
           qParams.push(m);
@@ -91,12 +90,13 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         sql = `
                 SELECT COALESCE(SUM(${amountExpr}), 0) as total
                 FROM ${table} t
-                INNER JOIN cliente c ON (t.rut_idx = c.rut_idx OR (t.rut_idx IS NULL AND t.nombre_idx = c.nombre_idx))
-                LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
+                JOIN usuario u ON (
+                  UPPER(TRIM(t.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor))
+                  OR UPPER(TRIM(t.vendedor_cliente)) = UPPER(TRIM(u.alias))
+                )
                 ${where} AND u.${type} = $${qParams.length}
             `;
       } else {
-        // Vista Global: Consulta Directa (Mucho más rápida y segura)
         sql = `SELECT COALESCE(SUM(${amountExpr}), 0) as total FROM ${table} t ${where}`;
       }
 
@@ -123,8 +123,10 @@ router.get('/dashboard-current', auth(), async (req, res) => {
         sql = `
                 SELECT COUNT(DISTINCT CASE WHEN t.identificador IS NOT NULL THEN t.identificador ELSE t.cliente END) as count
                 FROM ${SALES_TABLE} t
-                INNER JOIN cliente c ON (t.rut_idx = c.rut_idx OR (t.rut_idx IS NULL AND t.nombre_idx = c.nombre_idx))
-                LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
+                JOIN usuario u ON (
+                  UPPER(TRIM(t.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor))
+                  OR UPPER(TRIM(t.vendedor_cliente)) = UPPER(TRIM(u.alias))
+                )
                 ${where} AND u.${type} = $2
             `;
       } else {
@@ -281,8 +283,10 @@ router.get('/saldo-credito-total', auth(), async (req, res) => {
       sql = `
         SELECT COALESCE(SUM(sc.saldo_factura), 0) AS total 
         FROM saldo_credito sc
-        INNER JOIN cliente c ON sc.rut_idx = c.rut_idx
-        LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
+        JOIN usuario u ON (
+          UPPER(TRIM(sc.nombre_vendedor)) = UPPER(TRIM(u.nombre_vendedor))
+          OR UPPER(TRIM(sc.nombre_vendedor)) = UPPER(TRIM(u.alias))
+        )
         WHERE u.${filterType} = $1
       `;
       qParams.push(cleanFilterValue);
@@ -326,7 +330,10 @@ router.get('/top-clients', auth(), async (req, res) => {
             FROM ${SALES_TABLE} s
             INNER JOIN cliente c ON (s.rut_idx = c.rut_idx OR (s.rut_idx IS NULL AND s.nombre_idx = c.nombre_idx))
             ${filterValue ? `
-            LEFT JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
+            JOIN usuario u ON (
+              UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor))
+              OR UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.alias))
+            )
             WHERE u.${filterType} = $1` : ''}
             GROUP BY c.nombre ORDER BY total_sales DESC LIMIT 5
         `;
@@ -360,8 +367,12 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
     const queryVentas = `
         SELECT TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') AS mes, SUM(s.${SALES_AMOUNT_COL}) AS ventas
         FROM ${SALES_TABLE} s
-        ${filterValue ? `INNER JOIN cliente c ON (s.rut_idx = c.rut_idx OR (s.rut_idx IS NULL AND s.nombre_idx = c.nombre_idx))
-        JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut) AND u.${filterType} = $1` : ''}
+        ${filterValue ? `
+        JOIN usuario u ON (
+          UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor))
+          OR UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.alias))
+        )
+        WHERE u.${filterType} = $1` : ''}
         GROUP BY 1 ORDER BY mes DESC LIMIT ${mesesAtras}
       `;
     const vRes = filterValue ? await pool.query(queryVentas, [cleanFilterValue]) : await pool.query(queryVentas);
@@ -369,8 +380,12 @@ router.get('/evolucion-mensual', auth(), async (req, res) => {
     const queryAbonos = `
         SELECT TO_CHAR(a.fecha, 'YYYY-MM') AS mes, SUM(COALESCE(a.monto_neto, a.monto/1.19)) AS abonos
         FROM ${ABONOS_TABLE} a
-        ${filterValue ? `INNER JOIN cliente c ON (a.rut_idx = c.rut_idx OR (a.rut_idx IS NULL AND a.nombre_idx = c.nombre_idx))
-        JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut) AND u.${filterType} = $1` : ''}
+        ${filterValue ? `
+        JOIN usuario u ON (
+          UPPER(TRIM(a.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor))
+          OR UPPER(TRIM(a.vendedor_cliente)) = UPPER(TRIM(u.alias))
+        )
+        WHERE u.${filterType} = $1` : ''}
         GROUP BY 1 ORDER BY mes DESC LIMIT ${mesesAtras}
       `;
     const aRes = filterValue ? await pool.query(queryAbonos, [cleanFilterValue]) : await pool.query(queryAbonos);
@@ -430,8 +445,10 @@ router.get('/evolucion-yoy', auth(), async (req, res) => {
           SUM(s.${SALES_AMOUNT_COL}) as total_ventas
         FROM ${SALES_TABLE} s
         ${filterValue ? `
-        INNER JOIN cliente c ON (s.rut_idx = c.rut_idx OR (s.rut_idx IS NULL AND s.nombre_idx = c.nombre_idx))
-        JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
+        JOIN usuario u ON (
+          UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor))
+          OR UPPER(TRIM(s.vendedor_cliente)) = UPPER(TRIM(u.alias))
+        )
         WHERE u.${filterType} = $1
         ` : ''}
         GROUP BY 1
