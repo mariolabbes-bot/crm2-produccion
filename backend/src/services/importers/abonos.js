@@ -14,11 +14,18 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
         console.log(`🔵 [Job ${jobId}] Procesando Abonos (Transactional Smart Merge): ${originalname}`);
         await updateJobStatus(jobId, 'processing');
 
-        // 1. Read Excel
+        // 1. Read Excel & Load Users for mapping
         const workbook = XLSX.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const data = XLSX.utils.sheet_to_json(sheet, { raw: true });
+
+        const usersRes = await client.query("SELECT id, alias, nombre_vendedor FROM usuario");
+        const userMapByName = new Map();
+        usersRes.rows.forEach(u => {
+            if (u.alias) userMapByName.set(u.alias.toLowerCase().trim(), u.id);
+            if (u.nombre_vendedor) userMapByName.set(u.nombre_vendedor.toLowerCase().trim(), u.id);
+        });
 
         console.log(`📊 Total filas Excel: ${data.length}`);
         if (!Array.isArray(data) || data.length === 0) throw new Error('Excel vacío');
@@ -71,6 +78,18 @@ async function processAbonosFileAsync(jobId, filePath, originalname, options = {
             const rawVendor = colVendedorCliente && row[colVendedorCliente] ? String(row[colVendedorCliente]).trim() : null;
             let vendedorNombre = null;
             if (rawVendor) vendedorNombre = await resolveVendorName(rawVendor);
+
+            // Update Client Vendor Assignment (Consistencia)
+            if (identificador && vendedorNombre) {
+                const targetUserId = userMapByName.get(vendedorNombre.toLowerCase().trim());
+                if (targetUserId) {
+                    try {
+                        await client.query("UPDATE cliente SET vendedor_id = $1 WHERE rut = $2 AND (vendedor_id IS NULL OR vendedor_id != $1)", [targetUserId, identificador]);
+                    } catch (e) {
+                        console.warn(`Could not update vendor for client ${identificador} during abono import: ${e.message}`);
+                    }
+                }
+            }
 
             toImport.push({
                 sucursal: colSucursal && row[colSucursal] ? resolveBranch(row[colSucursal]) : resolveBranch(null),

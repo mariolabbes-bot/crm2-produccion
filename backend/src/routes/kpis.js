@@ -185,39 +185,51 @@ router.get('/ranking-vendedores', auth(), async (req, res) => {
     const query = `
         WITH sales_stats AS (
           SELECT 
-            u.rut,
-            SUM(CASE WHEN TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') = $1 THEN s.${SALES_AMOUNT_COL} ELSE 0 END) as ventas_mes_actual,
-            SUM(CASE WHEN TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') = $2 THEN s.${SALES_AMOUNT_COL} ELSE 0 END) as ventas_anio_anterior,
-            SUM(CASE WHEN TO_CHAR(s.${SALES_DATE_COL}, 'YYYY-MM') IN ($3, $4, $5) THEN s.${SALES_AMOUNT_COL} ELSE 0 END) as ventas_trimestre_ant
-          FROM ${SALES_TABLE} s
-          INNER JOIN cliente c ON (s.rut_idx = c.rut_idx OR (s.rut_idx IS NULL AND s.nombre_idx = c.nombre_idx))
-          JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
-          GROUP BY 1
+            vendedor_cliente,
+            SUM(CASE WHEN TO_CHAR(fecha_emision, 'YYYY-MM') = $1 THEN valor_total ELSE 0 END) as ventas_mes_actual,
+            SUM(CASE WHEN TO_CHAR(fecha_emision, 'YYYY-MM') = $2 THEN valor_total ELSE 0 END) as ventas_anio_anterior,
+            SUM(CASE WHEN TO_CHAR(fecha_emision, 'YYYY-MM') IN ($3, $4, $5) THEN valor_total ELSE 0 END) as ventas_trimestre_ant
+          FROM ${SALES_TABLE}
+          WHERE vendedor_cliente IS NOT NULL
+          GROUP BY vendedor_cliente
         ),
         abono_stats AS (
           SELECT 
-            u.rut,
-            SUM(CASE WHEN TO_CHAR(a.fecha, 'YYYY-MM') = $1 THEN COALESCE(a.monto_neto, a.monto / 1.19) ELSE 0 END) as abonos_mes_actual
-          FROM ${ABONOS_TABLE} a
-          INNER JOIN cliente c ON (a.rut_idx = c.rut_idx OR (a.rut_idx IS NULL AND a.nombre_idx = c.nombre_idx))
-          JOIN usuario u ON (c.vendedor_id::text = u.id::text OR c.vendedor_id::text = u.rut)
-          GROUP BY 1
+            vendedor_cliente,
+            SUM(CASE WHEN TO_CHAR(fecha, 'YYYY-MM') = $1 THEN COALESCE(monto_neto, monto / 1.19) ELSE 0 END) as abonos_mes_actual
+          FROM ${ABONOS_TABLE}
+          WHERE vendedor_cliente IS NOT NULL
+          GROUP BY vendedor_cliente
+        ),
+        combined_stats AS (
+          SELECT 
+            COALESCE(s.vendedor_cliente, a.vendedor_cliente) as vendedor_nombre,
+            COALESCE(s.ventas_mes_actual, 0) as ventas_mes_actual,
+            COALESCE(a.abonos_mes_actual, 0) as abonos_mes_actual,
+            COALESCE(s.ventas_trimestre_ant, 0) as ventas_trimestre_ant,
+            COALESCE(s.ventas_anio_anterior, 0) as ventas_anio_anterior
+          FROM sales_stats s
+          FULL OUTER JOIN abono_stats a ON s.vendedor_cliente = a.vendedor_cliente
         )
         SELECT 
           u.rut,
-          u.nombre_vendedor,
-          COALESCE(s.ventas_mes_actual, 0) as ventas_mes_actual,
-          COALESCE(a.abonos_mes_actual, 0) as abonos_mes_actual,
-          COALESCE(s.ventas_trimestre_ant, 0) / 3 as prom_ventas_trimestre_ant,
-          COALESCE(s.ventas_anio_anterior, 0) as ventas_anio_anterior
-        FROM usuario u
-        LEFT JOIN sales_stats s ON u.rut = s.rut
-        LEFT JOIN abono_stats a ON u.rut = a.rut
-        WHERE LOWER(u.rol_usuario) IN ('vendedor', 'manager')
-        AND (u.alias IS NULL OR (u.alias NOT ILIKE '%_old' AND TRIM(u.alias) != ''))
-        AND u.rut NOT ILIKE 'stub-%'
-        AND TRIM(u.nombre_vendedor) != ''
-        ORDER BY ventas_mes_actual DESC
+          cs.vendedor_nombre as nombre_vendedor,
+          cs.ventas_mes_actual,
+          cs.abonos_mes_actual,
+          cs.ventas_trimestre_ant / 3 as prom_ventas_trimestre_ant,
+          cs.ventas_anio_anterior
+        FROM combined_stats cs
+        LEFT JOIN usuario u ON (
+          UPPER(TRIM(cs.vendedor_nombre)) = UPPER(TRIM(u.nombre_vendedor))
+          OR UPPER(TRIM(cs.vendedor_nombre)) = UPPER(TRIM(u.alias))
+        )
+        WHERE (u.rut IS NULL OR (
+          LOWER(u.rol_usuario) IN ('vendedor', 'manager')
+          AND (u.alias IS NULL OR (u.alias NOT ILIKE '%_old' AND TRIM(u.alias) != ''))
+          AND u.rut NOT ILIKE 'stub-%'
+        ))
+        AND cs.ventas_mes_actual > 0
+        ORDER BY cs.ventas_mes_actual DESC
       `;
 
     const result = await pool.query(query, [periodCurrent, periodPrevYear, ...prevQuarterMonths]);

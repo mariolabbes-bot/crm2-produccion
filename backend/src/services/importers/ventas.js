@@ -56,17 +56,22 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
             throw new Error(`Faltan columnas requeridas: ${faltantes.join(', ')}`);
         }
 
-        // --- 1. Cargar Usuarios/Vendedores (ALIAS -> NOMBRE COMPLETO) ---
-        // We now map everything to the Full Name (nombre_vendedor) to ensure standardisation
-        const usersRes = await client.query("SELECT alias, nombre_vendedor FROM usuario");
+        // --- 1. Cargar Usuarios/Vendedores (ALIAS -> NOMBRE COMPLETO & ID) ---
+        const usersRes = await client.query("SELECT id, alias, nombre_vendedor FROM usuario");
+        const userMapByName = new Map(); // Lowercase -> ID
         const aliasMap = new Map(); // Lowercase -> Alias (Standard for FK)
+        
         usersRes.rows.forEach(u => {
-            const alias = u.alias || u.nombre_vendedor; // Fallback to name if no alias
+            const alias = u.alias || u.nombre_vendedor;
             if (u.alias) {
-                aliasMap.set(u.alias.toLowerCase().trim(), alias);
+                const aL = u.alias.toLowerCase().trim();
+                aliasMap.set(aL, alias);
+                userMapByName.set(aL, u.id);
             }
             if (u.nombre_vendedor) {
-                aliasMap.set(u.nombre_vendedor.toLowerCase().trim(), alias);
+                const nL = u.nombre_vendedor.toLowerCase().trim();
+                aliasMap.set(nL, alias);
+                userMapByName.set(nL, u.id);
             }
         });
 
@@ -176,24 +181,41 @@ async function processVentasFileAsync(jobId, filePath, originalname) {
             const sku = colSKU && row[colSKU] ? String(row[colSKU]).trim() : null;
             const descripcion = colDescripcion && row[colDescripcion] ? String(row[colDescripcion]).trim() : null;
 
-            // STUB CLIENT
+            // STUB CLIENT & UPDATE VENDOR
             if (identificador) {
                 const rutFormatted = formatRut(identificador);
                 const rutNorm = norm(rutFormatted);
+                
+                // Si el cliente existe, nos aseguramos que tenga el vendedor del Excel asignado
                 if (clientsByRut.has(rutNorm)) {
                     clienteRut = clientsByRut.get(rutNorm);
+                    
+                    // Actualizar vendedor si es necesario (Requisito: "vendedor asignado al cliente debe ser el del archivo")
+                    if (vendedorClienteAlias) {
+                        const targetUserId = userMapByName.get(vendedorClienteAlias.toLowerCase().trim());
+                        if (targetUserId) {
+                            try {
+                                await client.query("UPDATE cliente SET vendedor_id = $1 WHERE rut = $2 AND (vendedor_id IS NULL OR vendedor_id != $1)", [targetUserId, clienteRut]);
+                            } catch (e) {
+                                console.warn(`Could not update vendor for client ${clienteRut}: ${e.message}`);
+                            }
+                        }
+                    }
                 } else {
                     // Create Stub
-                    if (!missingClients.has(rutNorm)) { // Check if we already tried and failed
+                    if (!missingClients.has(rutNorm)) {
                         try {
-                            await client.query("INSERT INTO cliente (rut, nombre) VALUES ($1, $2) ON CONFLICT (rut) DO NOTHING", [rutFormatted, clienteNombre || 'Unknown']);
+                            const targetUserId = vendedorClienteAlias ? userMapByName.get(vendedorClienteAlias.toLowerCase().trim()) : null;
+                            await client.query(
+                                "INSERT INTO cliente (rut, nombre, vendedor_id) VALUES ($1, $2, $3) ON CONFLICT (rut) DO NOTHING", 
+                                [rutFormatted, clienteNombre || 'Unknown', targetUserId]
+                            );
                             clientsByRut.set(rutNorm, rutFormatted);
-                            // Log as observation/info but NOT as missing blocking
                             observations.push({ fila: excelRow, campo: 'cliente', detalle: `Cliente Nuevo Creado (Stub): ${rutFormatted}` });
                             clienteRut = rutFormatted;
                         } catch (e) {
                             console.error(e);
-                            missingClients.add(rutNorm); // Only add to missing if failed
+                            missingClients.add(rutNorm);
                             observations.push({ fila: excelRow, campo: 'cliente', detalle: `Error creando cliente: ${e.message}` });
                         }
                     }
