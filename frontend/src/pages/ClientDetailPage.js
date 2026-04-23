@@ -28,8 +28,9 @@ import ContextoTab from '../components/ClientDetail/ContextoTab';
  * ClientDetailPage
  * Ficha de cliente con tabs para deuda, ventas, productos y actividades
  */
-function ClientDetailPage() {
-  const { rut } = useParams();
+function ClientDetailPage({ rutForced = null, isModal = false }) {
+  const { rut: paramRut } = useParams();
+  const rut = rutForced || paramRut;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -171,13 +172,15 @@ function ClientDetailPage() {
   if (error) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(-1)}
-          sx={{ mb: 2 }}
-        >
-          Volver
-        </Button>
+        {!isModal && (
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{ mb: 2 }}
+          >
+            Volver
+          </Button>
+        )}
         <Alert severity="error">{error}</Alert>
       </Container>
     );
@@ -186,13 +189,15 @@ function ClientDetailPage() {
   if (!cliente) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(-1)}
-          sx={{ mb: 2 }}
-        >
-          Volver
-        </Button>
+        {!isModal && (
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{ mb: 2 }}
+          >
+            Volver
+          </Button>
+        )}
         <Alert severity="warning">Cliente no encontrado</Alert>
       </Container>
     );
@@ -201,13 +206,15 @@ function ClientDetailPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Botón volver */}
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(-1)}
-        sx={{ mb: 2 }}
-      >
-        Volver
-      </Button>
+      {!isModal && (
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(-1)}
+          sx={{ mb: 2 }}
+        >
+          Volver
+        </Button>
+      )}
 
       {/* Header cliente */}
       <ClientHeader cliente={cliente} onUpdate={loadCliente} />

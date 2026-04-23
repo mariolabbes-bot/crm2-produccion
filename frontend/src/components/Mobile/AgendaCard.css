@@ -1,0 +1,35 @@
+.agenda-card {
+  margin-bottom: 12px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  transition: transform 0.1s ease;
+}
+
+.agenda-card:active {
+  transform: scale(0.98);
+}
+
+.agenda-card.en_progreso {
+  border-left: 6px solid #f59e0b;
+}
+
+.agenda-card.completada {
+  border-left: 6px solid #22c55e;
+  opacity: 0.8;
+}
+
+.client-name {
+  color: #0f172a;
+}
+
+.client-address {
+  font-size: 0.8rem;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.objective-box {
+  border: 1px solid #f1f5f9;
+}

@@ -476,6 +476,8 @@ export const submitVisitPlan = (clientes, data = {}) => apiFetch(`${API_URL}/vis
   })
 });
 export const getVisitsByDate = (fecha) => apiFetch(`${API_URL}/visits/by-date?fecha=${fecha}`);
+export const getVisitWorkload = (startDate, endDate) => 
+  apiFetch(`${API_URL}/visits/workload?start_date=${startDate}&end_date=${endDate}`);
 
 // CIRCUITS
 export const getCircuits = () => apiFetch(`${API_URL}/circuits`);

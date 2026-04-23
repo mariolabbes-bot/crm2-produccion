@@ -45,6 +45,44 @@ router.post('/plans', auth(), async (req, res) => {
     }
 });
 
+async function syncToClientActivity(pool, data) {
+    const { cliente_rut, vendedor_id, comentario, activity_type_id, status } = data;
+    try {
+        const vId = vendedor_id ? vendedor_id.toString() : '';
+        if (!vId) return;
+
+        // Paso 1: Buscar el nombre completo del usuario usando su RUT o ID
+        const userRes = await pool.query(
+            `SELECT nombre_completo, alias FROM usuario 
+             WHERE rut = $1 OR id::text = $1 LIMIT 1`,
+            [vId]
+        );
+        
+        const userName = userRes.rows[0]?.nombre_completo;
+        const userAlias = userRes.rows[0]?.alias;
+
+        // Paso 2: Buscar el ID de usuario_alias usando el nombre o alias
+        const aliasRes = await pool.query(
+            `SELECT id FROM usuario_alias 
+             WHERE UPPER(TRIM(nombre_vendedor_oficial)) = UPPER(TRIM($1))
+                OR UPPER(TRIM(alias)) = UPPER(TRIM($2))
+             LIMIT 1`,
+            [userName || '', userAlias || '']
+        );
+        
+        const uaId = aliasRes.rows[0]?.id || null;
+        const finalComentario = `[${status.toUpperCase()}] ${comentario}`;
+
+        await pool.query(
+            `INSERT INTO cliente_actividad (cliente_rut, usuario_alias_id, comentario, activity_type_id, created_at)
+             VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`,
+            [cliente_rut, uaId, finalComentario, activity_type_id]
+        );
+    } catch (err) {
+        console.error('⚠️ Error en syncToClientActivity:', err.message);
+    }
+}
+
 // Helper: Obtener clientes con Nota Cliente (HeatScore) calculada en 4 dimensiones
 async function getClientsWithHeatscore(vendedorId) {
     try {
@@ -312,6 +350,15 @@ router.post('/check-in', auth(), async (req, res) => {
             console.error('⚠️ Error al encolar monitoreo de visita:', queueErr.message);
         }
 
+        // Unificación: Registrar inicio de visita
+        await syncToClientActivity(pool, {
+            cliente_rut,
+            vendedor_id: vendedorId,
+            comentario: `Inicia visita en terreno.`,
+            activity_type_id: activityTypeId || 391,
+            status: 'check-in'
+        });
+
         res.status(201).json(responseData);
     } catch (err) {
         console.error('Error check-in:', err.message);
@@ -371,7 +418,8 @@ router.post('/plan', auth(), async (req, res) => {
         try {
             await client.query('BEGIN');
 
-            for (const rut of clientes) {
+            for (const c of clientes) {
+                const { rut, activity_type_id, goal_type_id, comentario_plan } = c;
                 const checkParams = fechaTarget
                     ? [vendedorIdRut, vendedorIdNum, rut, fechaTarget]
                     : [vendedorIdRut, vendedorIdNum, rut];
@@ -382,15 +430,28 @@ router.post('/plan', auth(), async (req, res) => {
                 const check = await client.query(checkQ, checkParams);
 
                 if (check.rows.length === 0) {
-                    const insertParams = fechaTarget
-                        ? [vendedorIdNum, rut, fechaTarget, activity_type_id, goal_type_id, comentario_plan]
-                        : [vendedorIdNum, rut, activity_type_id, goal_type_id, comentario_plan];
-                    const insertQ = fechaTarget
-                        ? `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida, activity_type_id, goal_type_id, comentario_plan)
-                           VALUES ($1, $2, $3::date, 'pendiente', TRUE, 1, $4, $5, $6)`
-                        : `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida, activity_type_id, goal_type_id, comentario_plan)
-                           VALUES ($1, $2, CURRENT_DATE, 'pendiente', TRUE, 1, $3, $4, $5)`;
-                    await client.query(insertQ, insertParams);
+                    if (req.user.rol === 'manager') {
+                        // Manager can plan for specific dates
+                        const insertQ = `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida, activity_type_id, goal_type_id, comentario_plan)
+                               VALUES ((SELECT id FROM usuario WHERE rut = $1 LIMIT 1), $2, $3, 'pendiente', TRUE, 1, $4, $5, $6)`;
+                        const managerParams = [vendedorIdRut, rut, fechaTarget, activity_type_id || 391, goal_type_id || 15, comentario_plan || ''];
+                        await client.query(insertQ, managerParams);
+                    } else {
+                        // Seller plans for today
+                        const insertQ = `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida, activity_type_id, goal_type_id, comentario_plan)
+                               VALUES ($1, $2, CURRENT_DATE, 'pendiente', TRUE, 1, $3, $4, $5)`;
+                        const insertParams = [vendedorIdNum, rut, activity_type_id || 391, goal_type_id || 15, comentario_plan || ''];
+                        await client.query(insertQ, insertParams);
+
+                        // Unificación: Registrar planificación en el historial
+                        await syncToClientActivity(client, {
+                            cliente_rut: rut,
+                            vendedor_id: req.user.rol === 'manager' ? vendedorIdRut : req.user.rut,
+                            comentario: `Planificada para ${fechaTarget || 'hoy'}. ${comentario_plan || ''}`,
+                            activity_type_id: activity_type_id || 391,
+                            status: 'planificada'
+                        });
+                    }
                 }
             }
 
@@ -468,26 +529,14 @@ router.post('/check-out', auth(), async (req, res) => {
             console.error('⚠️ Error al actualizar fecha_ultima_visita en cliente:', updateErr.message);
         }
 
-        // 2. INTEGRACIÓN CON HISTORIAL DE ACTIVIDADES (cliente_actividad)
-        try {
-            // Obtener usuario_alias_id (necesario para la tabla cliente_actividad)
-            const aliasRes = await pool.query(
-                'SELECT id FROM usuario_alias WHERE UPPER(TRIM(nombre_vendedor_oficial)) = UPPER(TRIM($1)) OR UPPER(TRIM(alias)) = UPPER(TRIM($2))',
-                [req.user.nombre_vendedor || '', req.user.alias || '']
-            );
-
-            if (aliasRes.rows.length > 0) {
-                const uaId = aliasRes.rows[0].id;
-                const activityText = `[VISITA COMPLETADA] ${resultado || 'Finalizado'}.${notas ? ' Notas: ' + notas : ''}`;
-
-                await pool.query(
-                    'INSERT INTO cliente_actividad (cliente_rut, usuario_alias_id, comentario, activity_type_id, created_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)',
-                    [visita.cliente_rut, uaId, activityText, visita.activity_type_id]
-                );
-            }
-        } catch (actErr) {
-            console.error('⚠️ Error al crear espejo en cliente_actividad:', actErr.message);
-        }
+        // 2. INTEGRACIÓN UNIFICADA CON HISTORIAL (cliente_actividad)
+        await syncToClientActivity(pool, {
+            cliente_rut: visita.cliente_rut,
+            vendedor_id: req.user.rut,
+            comentario: `${resultado || 'Finalizado'}.${notas ? ' Notas: ' + notas : ''}`,
+            activity_type_id: visita.activity_type_id || 391,
+            status: 'completada'
+        });
 
         res.json(visita);
     } catch (err) {
@@ -529,6 +578,38 @@ router.get('/active', auth(), async (req, res) => {
     } catch (err) {
         console.error('Error fetching active visit:', err.message);
         res.status(500).send('Server Error');
+    }
+});
+
+// GET /api/visits/workload - Obtener carga de visitas por día para un rango de fechas
+router.get('/workload', auth(), async (req, res) => {
+    try {
+        const vendedorId = req.user.rut;
+        const { start_date, end_date } = req.query;
+
+        if (!start_date || !end_date) {
+            return res.status(400).json({ msg: 'Parámetros start_date y end_date requeridos (YYYY-MM-DD)' });
+        }
+
+        const query = `
+            SELECT fecha::text, COUNT(*) as count
+            FROM visitas_registro
+            WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2)
+            AND fecha BETWEEN $3::date AND $4::date
+            GROUP BY fecha
+            ORDER BY fecha ASC
+        `;
+        const result = await pool.query(query, [vendedorId, req.user.id.toString(), start_date, end_date]);
+        
+        const workload = {};
+        result.rows.forEach(row => {
+            workload[row.fecha] = parseInt(row.count);
+        });
+
+        res.json(workload);
+    } catch (err) {
+        console.error('Error workload:', err.message);
+        res.status(500).send('Server Error workload');
     }
 });
 
