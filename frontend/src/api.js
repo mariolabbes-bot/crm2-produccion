@@ -468,16 +468,22 @@ export const getHotCircuits = (vendedorId) => {
   const url = vendedorId ? `${API_URL}/visits/hot-circuits?vendedor_id=${vendedorId}` : `${API_URL}/visits/hot-circuits`;
   return apiFetch(url);
 };
-export const submitVisitPlan = (clientes, data = {}) => apiFetch(`${API_URL}/visits/plan`, {
-  method: 'POST',
-  body: JSON.stringify({ 
-    clientes, 
-    ...data 
-  })
-});
+export const submitVisitPlan = (clientes, data = {}) => {
+  const payload = { clientes };
+  if (typeof data === 'string') {
+    payload.fecha = data;
+  } else {
+    Object.assign(payload, data);
+  }
+  return apiFetch(`${API_URL}/visits/plan`, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+};
 export const getVisitsByDate = (fecha) => apiFetch(`${API_URL}/visits/by-date?fecha=${fecha}`);
 export const getVisitWorkload = (startDate, endDate) => 
   apiFetch(`${API_URL}/visits/workload?start_date=${startDate}&end_date=${endDate}`);
+export const deleteVisit = (id) => apiFetch(`${API_URL}/visits/${id}`, { method: 'DELETE' });
 
 // CIRCUITS
 export const getCircuits = () => apiFetch(`${API_URL}/circuits`);

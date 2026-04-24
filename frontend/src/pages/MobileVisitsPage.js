@@ -9,12 +9,21 @@ import {
   Slide,
   AppBar,
   Toolbar,
-  Button
+  Button,
+  ListItemButton,
+  ListItemText,
+  ListItemSecondaryAction,
+  TextField,
+  InputAdornment,
+  List,
+  ListItem
 } from '@mui/material';
 import { 
   Close as CloseIcon,
   Map as MapIcon,
-  List as ListIcon
+  List as ListIcon,
+  Add as AddIcon,
+  Search as SearchIcon
 } from '@mui/icons-material';
 import { 
   GoogleMap, 
@@ -30,7 +39,10 @@ import {
   getVisitWorkload, 
   checkIn, 
   checkOut, 
-  getActiveVisit 
+  getActiveVisit,
+  deleteVisit,
+  searchClientes,
+  submitVisitPlan
 } from '../api';
 import './MobileAgenda.css';
 
@@ -60,6 +72,12 @@ const MobileVisitsPage = () => {
   const [activeVisit, setActiveVisit] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
   const [clientDetailRut, setClientDetailRut] = useState(null);
+  
+  // Nuevo estado para añadir clientes
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
   // Cargar visitas y carga de trabajo
   const loadData = useCallback(async (date) => {
@@ -89,14 +107,89 @@ const MobileVisitsPage = () => {
     loadData(selectedDate);
   }, [selectedDate, loadData]);
 
+  // Debounce para búsqueda dinámica
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (term.length < 3) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(() => {
+      performSearch(term);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const performSearch = async (term) => {
+    try {
+      setSearching(true);
+      const results = await searchClientes(term);
+      setSearchResults(results || []);
+    } catch (err) {
+      console.error('Search error:', err);
+    } finally {
+      setSearching(false);
+    }
+  };
+
   const handleCheckIn = async (visit) => {
     try {
-      // Geolocalización básica (simplificada para el PoC)
-      const res = await checkIn(visit.cliente_rut, 0, 0);
+      setLoading(true);
+      // Obtener posición real
+      const getPos = () => new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
+      });
+
+      let lat = 0, lng = 0;
+      try {
+        const pos = await getPos();
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+      } catch (gpsErr) {
+        console.warn('GPS failed, using 0,0', gpsErr);
+        if (!window.confirm('No pudimos obtener tu ubicación GPS. ¿Deseas continuar con el check-in de todas formas?')) {
+          setLoading(false);
+          return;
+        }
+      }
+
+      const res = await checkIn(visit.cliente_rut, lat, lng);
+      if (res.warning) alert(res.warning);
+      
       setActiveVisit(res);
+      await loadData(selectedDate);
+    } catch (err) {
+      alert('Error en Check-in: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteVisit = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar esta visita de tu ruta?')) return;
+    try {
+      await deleteVisit(id);
       loadData(selectedDate);
     } catch (err) {
-      alert('Error en Check-in');
+      alert('Error al eliminar visita');
+    }
+  };
+
+  const handleSearch = () => {
+    performSearch(searchTerm.trim());
+  };
+
+  const handleAddClientToRoute = async (rut) => {
+    try {
+      const formattedDate = moment(selectedDate).format('YYYY-MM-DD');
+      await submitVisitPlan([rut], { fecha: formattedDate });
+      setSearchOpen(false);
+      setSearchTerm('');
+      setSearchResults([]);
+      loadData(selectedDate);
+    } catch (err) {
+      alert('Error al añadir cliente: ' + (err.response?.data?.msg || err.message));
     }
   };
 
@@ -135,11 +228,24 @@ const MobileVisitsPage = () => {
         <Typography variant="h6" sx={{ px: 2, pt: 2, fontWeight: 800, color: '#0f172a' }}>
           Agenda Inteligente
         </Typography>
-        <WeekStrip 
+          <WeekStrip 
           selectedDate={selectedDate} 
           onDateSelect={setSelectedDate} 
           workload={workload} 
         />
+        <Box sx={{ px: 2, pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+            {visits.length} VISITAS PLANIFICADAS
+          </Typography>
+          <Button 
+            size="small" 
+            startIcon={<AddIcon />} 
+            onClick={() => setSearchOpen(true)}
+            sx={{ fontWeight: 700, borderRadius: 2 }}
+          >
+            Añadir Cliente
+          </Button>
+        </Box>
       </Box>
 
       {/* Contenido Condicional */}
@@ -158,6 +264,7 @@ const MobileVisitsPage = () => {
                   onCheckIn={handleCheckIn}
                   onCheckOut={handleCheckOut}
                   onViewClient={handleOpenClient}
+                  onDelete={handleDeleteVisit}
                   isAnyActive={!!activeVisit}
                 />
               ))
@@ -227,6 +334,77 @@ const MobileVisitsPage = () => {
         <Box sx={{ p: 0 }}>
           {/* Aquí inyectamos el componente de detalle, pasándole el rut */}
           {clientDetailRut && <ClientDetailPage rutForced={clientDetailRut} isModal={true} />}
+        </Box>
+      </Dialog>
+
+      {/* MODAL AÑADIR CLIENTE */}
+      <Dialog
+        fullScreen
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        TransitionComponent={Transition}
+      >
+        <AppBar sx={{ position: 'relative', bgcolor: '#ffffff', color: '#000', elevation: 0, borderBottom: '1px solid #e2e8f0' }}>
+          <Toolbar>
+            <IconButton edge="start" color="inherit" onClick={() => setSearchOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+            <Typography sx={{ ml: 2, flex: 1, fontWeight: 700 }} variant="h6">
+              Añadir a Ruta
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <Box sx={{ p: 2 }}>
+          <TextField
+            fullWidth
+            placeholder="Buscar por Nombre o RUT..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleSearch} disabled={searching}>
+                    {searching ? <CircularProgress size={24} /> : <SearchIcon />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 3 }
+            }}
+          />
+          
+          <List sx={{ mt: 2 }}>
+            {searchResults.map((client) => (
+              <ListItemButton 
+                key={client.rut} 
+                onClick={() => handleAddClientToRoute(client.rut)}
+                sx={{ 
+                  borderRadius: 2, 
+                  mb: 1, 
+                  border: '1px solid #f1f5f9',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  p: 2
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle1" fontWeight="bold">{client.nombre}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {client.rut} • {client.direccion || 'Sin dirección'}
+                  </Typography>
+                </Box>
+                <IconButton edge="end" color="primary">
+                  <AddIcon />
+                </IconButton>
+              </ListItemButton>
+            ))}
+            {searchTerm && !searching && searchResults.length === 0 && (
+              <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 4 }}>
+                No se encontraron clientes.
+              </Typography>
+            )}
+          </List>
         </Box>
       </Dialog>
     </Box>

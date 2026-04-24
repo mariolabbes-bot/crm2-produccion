@@ -11,7 +11,7 @@ import {
     PlaylistAddCheck as BulkIcon, DeleteOutline, PersonPinCircle
 } from '@mui/icons-material';
 import { 
-    getVisitSuggestions, submitVisitPlan, getCircuits, getVisitsByDate 
+    getVisitSuggestions, submitVisitPlan, getCircuits, getVisitsByDate, searchClientes 
 } from '../api';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,6 +28,8 @@ const PlannerPage = () => {
     const [error, setError] = useState(null);
     const [circuits, setCircuits] = useState([]);
     const [filterCircuit, setFilterCircuit] = useState('ALL');
+    const [searchPool, setSearchPool] = useState([]); // Clientes encontrados vía búsqueda global
+    const [searching, setSearching] = useState(false);
     
     // Fecha por defecto: hoy (formato YYYY-MM-DD)
     const todayStr = new Date().toISOString().split('T')[0];
@@ -64,14 +66,55 @@ const PlannerPage = () => {
             setLoading(false);
         }
     }, []);
+    
+    // Debounce para búsqueda dinámica
+    useEffect(() => {
+        const term = searchTerm.trim();
+        if (term.length < 3) {
+            setSearchPool([]);
+            return;
+        }
+        const timer = setTimeout(() => {
+            performSearch(term);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    const performSearch = async (term) => {
+        try {
+            setSearching(true);
+            const results = await searchClientes(term);
+            setSearchPool(results || []);
+        } catch (err) {
+            console.error('Error in global search:', err);
+        } finally {
+            setSearching(false);
+        }
+    };
 
     useEffect(() => {
         loadData(selectedDate);
     }, [selectedDate, loadData]);
 
-    // --- LÓGICA DE FILTRADO ---
-    const filteredSuggestions = suggestions.filter(c => {
+    // --- LÓGICA DE FILTRADO Y BÚSQUEDA ---
+    const handleSearch = () => {
+        performSearch(searchTerm.trim());
+    };
+
+    const combinedPool = useMemo(() => {
+        // Unir sugerencias con resultados de búsqueda evitando duplicados
+        const pool = [...suggestions];
+        searchPool.forEach(sp => {
+            if (!pool.find(p => p.rut === sp.rut)) {
+                pool.push(sp);
+            }
+        });
+        return pool;
+    }, [suggestions, searchPool]);
+
+    const filteredSuggestions = combinedPool.filter(c => {
         const matchesSearch = c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (c.rut && c.rut.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (c.direccion && c.direccion.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesCircuit = filterCircuit === 'ALL' || c.circuito === filterCircuit;
         return matchesSearch && matchesCircuit;
@@ -145,11 +188,14 @@ const PlannerPage = () => {
                     <Paper sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', flex: 1, borderRadius: 3, border: '1px solid #eee', elevation: 0 }}>
                         <InputBase
                             sx={{ ml: 1, flex: 1 }}
-                            placeholder="Buscar cliente recomendados..."
+                            placeholder="Buscar en cartera (nombre o RUT)..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                         />
-                        <IconButton sx={{ p: '10px' }}><SearchIcon /></IconButton>
+                        <IconButton sx={{ p: '10px' }} onClick={handleSearch}>
+                            {searching ? <CircularProgress size={20} /> : <SearchIcon />}
+                        </IconButton>
                     </Paper>
                     {filterCircuit !== 'ALL' && (
                         <Button 
@@ -197,13 +243,13 @@ const PlannerPage = () => {
                 </Box>
 
                 <Typography variant="subtitle2" sx={{ mb: 2, textTransform: 'uppercase', color: '#6B7280', fontSize: '0.75rem', fontWeight: 800 }}>
-                    Clientes Recomendados ({filteredSuggestions?.length || 0})
+                    {searchTerm && searchPool.length > 0 ? 'Resultados de Búsqueda' : 'Clientes Recomendados'} ({filteredSuggestions?.length || 0})
                 </Typography>
 
                 {(!filteredSuggestions || filteredSuggestions.length === 0) && (
                     <Paper sx={{ p: 4, textAlign: 'center', bgcolor: '#F9FAFB', borderRadius: 4 }}>
                         <Typography variant="body1" color="text.secondary">
-                            {searchTerm ? 'No hay resultados para tu búsqueda.' : 'No encontramos sugerencias automáticas.'}
+                            {searchTerm ? 'No hay resultados. Prueba con Enter para buscar en toda la cartera.' : 'No encontramos sugerencias automáticas.'}
                         </Typography>
                     </Paper>
                 )}
@@ -309,7 +355,7 @@ const PlannerPage = () => {
                                     <Typography variant="body2">No has seleccionado nuevos clientes para esta ruta.</Typography>
                                 </Box>
                             ) : (
-                                suggestions.filter(c => selected.includes(c.rut)).map(client => (
+                                combinedPool.filter(c => selected.includes(c.rut)).map(client => (
                                     <Paper key={`sel-${client.rut}`} sx={{ p: 1.5, mb: 1, bgcolor: '#F9FAFB', borderRadius: 2, border: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <Box>
                                             <Typography variant="subtitle2" fontWeight="bold" noWrap sx={{ maxWidth: 200 }}>{client.nombre}</Typography>
@@ -328,8 +374,8 @@ const PlannerPage = () => {
                                         YA PLANIFICADOS EN ESTE DÍA ({existingPlan.length})
                                     </Typography>
                                     <Box mt={1}>
-                                    {existingPlan.map((rut, idx) => {
-                                        const c = suggestions.find(s => s.rut === rut);
+                                     {existingPlan.map((rut, idx) => {
+                                        const c = combinedPool.find(s => s.rut === rut);
                                         return (
                                             <Typography key={`ext-${rut}`} variant="caption" display="block" color="success.main" sx={{ mb: 0.5 }}>
                                                 ✓ {c ? c.nombre : rut}

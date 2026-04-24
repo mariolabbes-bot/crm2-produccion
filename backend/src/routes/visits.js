@@ -298,7 +298,7 @@ router.post('/check-in', auth(), async (req, res) => {
         const activityTypeId = typeResult.rows[0]?.id;
 
         // 3. Obtener coordenadas del cliente para validar
-        const clienteQuery = 'SELECT latitud, longitud FROM cliente WHERE rut = $1';
+        const clienteQuery = 'SELECT latitud, longitud, es_terreno FROM cliente WHERE rut = $1';
         const clienteRes = await pool.query(clienteQuery, [cliente_rut]);
 
         let distancia = null;
@@ -306,10 +306,27 @@ router.post('/check-in', auth(), async (req, res) => {
 
         if (clienteRes.rows.length > 0) {
             const c = clienteRes.rows[0];
-            distancia = getDistanceFromLatLonInM(latitud, longitud, parseFloat(c.latitud), parseFloat(c.longitud));
+            
+            // Si el cliente no tiene coordenadas o no es de terreno, y recibimos coords válidas, actualizamos
+            const hasCoords = c.latitud !== null && c.longitud !== null && parseFloat(c.latitud) !== 0;
+            const validIncoming = latitud !== 0 && longitud !== 0;
 
-            // Validar Geocerca (ej: 200 metros)
-            if (distancia && distancia > 200) {
+            if ((!hasCoords || c.es_terreno === false) && validIncoming) {
+                try {
+                    await pool.query(
+                        'UPDATE cliente SET latitud = $1, longitud = $2, es_terreno = true WHERE rut = $3',
+                        [latitud, longitud, cliente_rut]
+                    );
+                    console.log(`📍 [Check-in] Georeferenciación automática para: ${cliente_rut}`);
+                } catch (updateErr) {
+                    console.error('⚠️ Error en georeferenciación automática:', updateErr.message);
+                }
+            }
+
+            distancia = getDistanceFromLatLonInM(latitud, longitud, parseFloat(c.latitud || latitud), parseFloat(c.longitud || longitud));
+
+            // Validar Geocerca (ej: 200 metros) si ya tenía coordenadas previas
+            if (hasCoords && distancia && distancia > 200) {
                 warning = `Estás a ${Math.round(distancia)}m del cliente. ¿Seguro que estás en el local?`;
             }
         }
@@ -412,20 +429,34 @@ router.post('/plan', auth(), async (req, res) => {
         }
 
         const fechaTarget = fecha || null;
-        const fechaSQL = fechaTarget ? `$3::date` : `CURRENT_DATE`;
+
+        // Intentar obtener un activity_type_id por defecto si no viene uno válido (FUERA de la transacción)
+        let defaultActId = 391;
+        try {
+            const actRes = await pool.query("SELECT id FROM activity_types WHERE nombre ILIKE '%Visita%' LIMIT 1");
+            if (actRes.rows.length > 0) defaultActId = actRes.rows[0].id;
+        } catch (e) { 
+            console.warn('⚠️ No se pudo obtener defaultActId de activity_types:', e.message); 
+        }
 
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
-
+            let insertCount = 0;
             for (const c of clientes) {
-                const { rut, activity_type_id, goal_type_id, comentario_plan } = c;
+                const rut = typeof c === 'string' ? c : c.rut;
+                const act_id = typeof c === 'string' ? (activity_type_id || defaultActId) : (c.activity_type_id || activity_type_id || defaultActId);
+                const goal_id = typeof c === 'string' ? (goal_type_id || 15) : (c.goal_type_id || goal_type_id || 15);
+                const comment = typeof c === 'string' ? (comentario_plan || '') : (c.comentario_plan || comentario_plan || '');
+
+                if (!rut) continue;
+
                 const checkParams = fechaTarget
                     ? [vendedorIdRut, vendedorIdNum, rut, fechaTarget]
                     : [vendedorIdRut, vendedorIdNum, rut];
                 const checkQ = fechaTarget
-                    ? `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2) AND cliente_rut = $3 AND fecha = $4::date`
-                    : `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2) AND cliente_rut = $3 AND fecha = CURRENT_DATE`;
+                    ? `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2::text) AND cliente_rut = $3 AND fecha::date = $4::date`
+                    : `SELECT id FROM visitas_registro WHERE (vendedor_id::text = $1 OR vendedor_id::text = $2::text) AND cliente_rut = $3 AND fecha::date = CURRENT_DATE`;
 
                 const check = await client.query(checkQ, checkParams);
 
@@ -436,36 +467,38 @@ router.post('/plan', auth(), async (req, res) => {
                                VALUES ((SELECT id FROM usuario WHERE rut = $1 LIMIT 1), $2, $3, 'pendiente', TRUE, 1, $4, $5, $6)`;
                         const managerParams = [vendedorIdRut, rut, fechaTarget, activity_type_id || 391, goal_type_id || 15, comentario_plan || ''];
                         await client.query(insertQ, managerParams);
+                        insertCount++;
                     } else {
-                        // Seller plans for today
+                        // Seller plans
                         const insertQ = `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida, activity_type_id, goal_type_id, comentario_plan)
-                               VALUES ($1, $2, CURRENT_DATE, 'pendiente', TRUE, 1, $3, $4, $5)`;
-                        const insertParams = [vendedorIdNum, rut, activity_type_id || 391, goal_type_id || 15, comentario_plan || ''];
+                               VALUES ($1, $2, COALESCE($3::date, CURRENT_DATE), 'pendiente', TRUE, 1, $4, $5, $6)`;
+                        const insertParams = [vendedorIdNum, rut, fechaTarget, act_id, goal_id, comment];
                         await client.query(insertQ, insertParams);
 
                         // Unificación: Registrar planificación en el historial
                         await syncToClientActivity(client, {
                             cliente_rut: rut,
                             vendedor_id: req.user.rol === 'manager' ? vendedorIdRut : req.user.rut,
-                            comentario: `Planificada para ${fechaTarget || 'hoy'}. ${comentario_plan || ''}`,
-                            activity_type_id: activity_type_id || 391,
+                            comentario: `Planificada para ${fechaTarget || 'hoy'}. ${comment}`,
+                            activity_type_id: act_id,
                             status: 'planificada'
                         });
+                        
+                        insertCount++;
                     }
                 }
             }
 
             await client.query('COMMIT');
-            res.json({ msg: 'Planificación guardada', count: clientes.length });
-        } catch (e) {
+            res.json({ msg: 'Plan guardado correctamente', count: insertCount });
+        } catch (err) {
             await client.query('ROLLBACK');
-            throw e;
+            res.status(500).json({ msg: 'Error al planificar', error: err.message });
         } finally {
             client.release();
         }
 
     } catch (err) {
-        console.error('Error planning:', err.message);
         res.status(500).send('Server Error planning');
     }
 });
@@ -482,11 +515,11 @@ router.get('/by-date', auth(), async (req, res) => {
             SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion, c.circuito
             FROM visitas_registro v
             JOIN cliente c ON v.cliente_rut = c.rut
-            WHERE (v.vendedor_id::text = $1)
-            AND v.fecha = $2::date
+            WHERE (v.vendedor_id::text = $1 OR v.vendedor_id::text = $2)
+            AND v.fecha::date = $3::date
             ORDER BY v.planificada DESC, v.id ASC
         `;
-        const result = await pool.query(query, [vendedorId, fecha]);
+        const result = await pool.query(query, [vendedorId, req.user.id.toString(), fecha]);
         res.json(result.rows);
     } catch (err) {
         console.error('Error by-date:', err.message);
@@ -639,6 +672,32 @@ router.get('/my-today', auth(), async (req, res) => {
     } catch (err) {
         console.error('Error my-today:', err.message);
         res.status(500).send('Server Error my-today');
+    }
+});
+
+// DELETE /api/visits/:id - Eliminar una visita planificada
+router.delete('/:id', auth(), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const vendedorId = req.user.rut;
+
+        // Solo permitir eliminar si es el vendedor dueño o manager
+        // Además, solo si está pendiente (opcional, pero recomendado)
+        const query = `
+            DELETE FROM visitas_registro 
+            WHERE id = $1 AND (vendedor_id::text = $2 OR vendedor_id::text = $3)
+            RETURNING *
+        `;
+        const result = await pool.query(query, [id, vendedorId, req.user.id.toString()]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ msg: 'Visita no encontrada o sin permisos' });
+        }
+
+        res.json({ msg: 'Visita eliminada correctamente', visita: result.rows[0] });
+    } catch (err) {
+        console.error('Error deleting visit:', err.message);
+        res.status(500).send('Server Error deleting visit');
     }
 });
 

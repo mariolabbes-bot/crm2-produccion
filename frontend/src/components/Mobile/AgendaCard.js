@@ -15,7 +15,8 @@ import {
   Stop as CheckOutIcon,
   Person as ClientIcon,
   Directions as MapsIcon,
-  ChevronRight as ArrowIcon
+  ChevronRight as ArrowIcon,
+  DeleteOutline as DeleteIcon
 } from '@mui/icons-material';
 import './AgendaCard.css';
 
@@ -24,6 +25,7 @@ const AgendaCard = ({
   onCheckIn, 
   onCheckOut, 
   onViewClient, 
+  onDelete,
   isAnyActive 
 }) => {
   const {
@@ -122,6 +124,16 @@ const AgendaCard = ({
           >
             <MapsIcon />
           </IconButton>
+          
+          {isPending && (
+            <IconButton 
+              color="error" 
+              sx={{ border: '1px solid #fee2e2', p: 1 }}
+              onClick={() => onDelete(id)}
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
         </Stack>
       </CardContent>
     </Card>
