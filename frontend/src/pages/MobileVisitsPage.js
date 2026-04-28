@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   Box, 
   Typography, 
@@ -16,14 +17,25 @@ import {
   TextField,
   InputAdornment,
   List,
-  ListItem
+  ListItem,
+  MenuItem,
+  Menu,
+  Select,
+  FormControl,
+  InputLabel,
+  Stack,
+  Chip
 } from '@mui/material';
 import { 
   Close as CloseIcon,
   Map as MapIcon,
   List as ListIcon,
   Add as AddIcon,
-  Search as SearchIcon
+  Search as SearchIcon,
+  Event as EventIcon,
+  Business as OfficeIcon,
+  Person as PersonIcon,
+  Group as GroupIcon
 } from '@mui/icons-material';
 import { 
   GoogleMap, 
@@ -42,7 +54,11 @@ import {
   getActiveVisit,
   deleteVisit,
   searchClientes,
-  submitVisitPlan
+  submitVisitPlan,
+  createEvent,
+  createGroupEvent,
+  apiFetch,
+  API_URL
 } from '../api';
 import './MobileAgenda.css';
 
@@ -73,11 +89,26 @@ const MobileVisitsPage = () => {
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
   const [clientDetailRut, setClientDetailRut] = useState(null);
   
-  // Nuevo estado para añadir clientes
+  // Estado para añadir clientes/eventos
+  const [addMenuAnchor, setAddMenuAnchor] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [eventOpen, setEventOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
+
+  // Formulario de evento
+  const [eventForm, setEventForm] = useState({
+    titulo: '',
+    tipo_evento: 'oficina',
+    hora_inicio_plan: '',
+    hora_fin_plan: '',
+    notas: '',
+    participantes: []
+  });
+  const [vendedores, setVendedores] = useState([]);
+  const { isManager, user: currentUser } = useAuth();
+  const managerMode = isManager();
 
   // Cargar visitas y carga de trabajo
   const loadData = useCallback(async (date) => {
@@ -105,7 +136,19 @@ const MobileVisitsPage = () => {
 
   useEffect(() => {
     loadData(selectedDate);
-  }, [selectedDate, loadData]);
+    if (managerMode) {
+      loadVendedores();
+    }
+  }, [selectedDate, loadData, managerMode]);
+
+  const loadVendedores = async () => {
+    try {
+      const res = await apiFetch(`${API_URL}/users/vendedores`);
+      setVendedores(res.data || []);
+    } catch (err) {
+      console.error('Error cargando vendedores:', err);
+    }
+  };
 
   // Debounce para búsqueda dinámica
   useEffect(() => {
@@ -193,15 +236,42 @@ const MobileVisitsPage = () => {
     }
   };
 
-  const handleCheckOut = async (visit) => {
-    const notas = prompt('Notas de la visita:');
-    const resultado = prompt('Resultado (venta/no_venta/cobranza):', 'venta');
+  const handleCheckOut = async (visit, manualResult = null) => {
+    const res = manualResult || prompt('Resultado (venta/no_venta/cobranza):', 'venta');
+    if (!res) return;
+    const notas = manualResult ? '' : prompt('Notas de la visita:');
     try {
-      await checkOut(visit.id, 0, 0, resultado, notas);
+      await checkOut(visit.id, 0, 0, res, notas);
       setActiveVisit(null);
       loadData(selectedDate);
     } catch (err) {
       alert('Error en Check-out');
+    }
+  };
+
+  const handleCreateEvent = async () => {
+    try {
+      const formattedDate = moment(selectedDate).format('YYYY-MM-DD');
+      
+      if (eventForm.participantes.length > 0) {
+        // Modo Grupal
+        await createGroupEvent({
+          ...eventForm,
+          fecha: formattedDate
+        });
+      } else {
+        // Individual
+        await createEvent({
+          ...eventForm,
+          fecha: formattedDate
+        });
+      }
+      
+      setEventOpen(false);
+      setEventForm({ titulo: '', tipo_evento: 'oficina', hora_inicio_plan: '', hora_fin_plan: '', notas: '', participantes: [] });
+      loadData(selectedDate);
+    } catch (err) {
+      alert('Error al crear evento');
     }
   };
 
@@ -240,11 +310,31 @@ const MobileVisitsPage = () => {
           <Button 
             size="small" 
             startIcon={<AddIcon />} 
-            onClick={() => setSearchOpen(true)}
+            onClick={(e) => setAddMenuAnchor(e.currentTarget)}
             sx={{ fontWeight: 700, borderRadius: 2 }}
           >
-            Añadir Cliente
+            Añadir
           </Button>
+
+          <Menu
+            anchorEl={addMenuAnchor}
+            open={Boolean(addMenuAnchor)}
+            onClose={() => setAddMenuAnchor(null)}
+          >
+            <MenuItem onClick={() => { setAddMenuAnchor(null); setSearchOpen(true); }}>
+              <PersonIcon sx={{ mr: 1 }} /> Ruta a Cliente
+            </MenuItem>
+            <MenuItem onClick={() => { setAddMenuAnchor(null); setEventOpen(true); setEventForm({...eventForm, participantes: []}); }}>
+              <EventIcon sx={{ mr: 1 }} /> Actividad Mi Agenda
+            </MenuItem>
+              <MenuItem onClick={() => { 
+                setAddMenuAnchor(null); 
+                setEventOpen(true); 
+                setEventForm({...eventForm, tipo_evento: 'reunion', participantes: [currentUser.id]}); 
+              }}>
+                <GroupIcon sx={{ mr: 1 }} /> Agendar para Equipo
+              </MenuItem>
+          </Menu>
         </Box>
       </Box>
 
@@ -405,6 +495,99 @@ const MobileVisitsPage = () => {
               </Typography>
             )}
           </List>
+        </Box>
+      </Dialog>
+
+      {/* Diálogo de Nuevo Evento */}
+      <Dialog open={eventOpen} onClose={() => setEventOpen(false)} fullWidth maxWidth="xs">
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>Nuevo Evento / Actividad</Typography>
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            <TextField 
+              label="Título / Asunto" 
+              fullWidth 
+              value={eventForm.titulo}
+              onChange={(e) => setEventForm({...eventForm, titulo: e.target.value})}
+              placeholder="Ej: Reunión de ventas, Almuerzo..."
+            />
+            <FormControl fullWidth>
+              <InputLabel>Tipo de Actividad</InputLabel>
+              <Select
+                value={eventForm.tipo_evento}
+                label="Tipo de Actividad"
+                onChange={(e) => setEventForm({...eventForm, tipo_evento: e.target.value})}
+              >
+                <MenuItem value="oficina">Oficina / Administrativo</MenuItem>
+                <MenuItem value="personal">Personal / Almuerzo</MenuItem>
+                <MenuItem value="reunion">Reunión de Equipo</MenuItem>
+              </Select>
+            </FormControl>
+
+            {managerMode && (
+              <FormControl fullWidth>
+                <InputLabel>Participantes (Equipo)</InputLabel>
+                <Select
+                  multiple
+                  value={eventForm.participantes}
+                  label="Participantes (Equipo)"
+                  onChange={(e) => setEventForm({...eventForm, participantes: e.target.value})}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((value) => {
+                         const v = vendedores.find(v => v.id === value);
+                         return <Chip key={value} label={v?.nombre || value} size="small" />;
+                      })}
+                    </Box>
+                  )}
+                >
+                  {vendedores.map((v) => (
+                    <MenuItem key={v.id} value={v.id}>
+                      {v.nombre} ({v.rol})
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Si dejas vacío, solo aparecerá en tu agenda personal.
+                </Typography>
+              </FormControl>
+            )}
+
+            <Box display="flex" gap={2}>
+              <TextField
+                label="Hora Inicio"
+                type="time"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={eventForm.hora_inicio_plan}
+                onChange={(e) => setEventForm({...eventForm, hora_inicio_plan: e.target.value})}
+              />
+              <TextField
+                label="Hora Fin"
+                type="time"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={eventForm.hora_fin_plan}
+                onChange={(e) => setEventForm({...eventForm, hora_fin_plan: e.target.value})}
+              />
+            </Box>
+            <TextField 
+              label="Notas adicionales" 
+              multiline 
+              rows={2} 
+              fullWidth
+              value={eventForm.notas}
+              onChange={(e) => setEventForm({...eventForm, notas: e.target.value})}
+            />
+            <Button 
+              variant="contained" 
+              fullWidth 
+              onClick={handleCreateEvent}
+              disabled={!eventForm.titulo}
+              sx={{ py: 1.5, borderRadius: 3, fontWeight: 'bold' }}
+            >
+              Agendar Actividad
+            </Button>
+          </Stack>
         </Box>
       </Dialog>
     </Box>

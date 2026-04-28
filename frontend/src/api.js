@@ -2,7 +2,11 @@ import { getToken } from './utils/auth';
 import { getEnv } from './utils/env';
 
 // API URL con fallback para desarrollo y producción
-const API_URL = getEnv('REACT_APP_API_URL', 'http://localhost:3001/api');
+// Detección inteligente de entorno para la API
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_URL = isLocal 
+  ? 'http://localhost:3001/api' 
+  : getEnv('REACT_APP_API_URL', 'https://crm2-backend.onrender.com/api');
 
 // Exportar API_URL para uso en componentes
 export { API_URL };
@@ -12,7 +16,7 @@ const getAuthHeaders = () => {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
-const apiFetch = async (url, options = {}) => {
+export const apiFetch = async (url, options = {}) => {
   const headers = {
     'Content-Type': 'application/json',
     ...getAuthHeaders(),
@@ -480,6 +484,14 @@ export const submitVisitPlan = (clientes, data = {}) => {
     body: JSON.stringify(payload)
   });
 };
+export const createEvent = (eventData) => apiFetch(`${API_URL}/visits/event`, {
+  method: 'POST',
+  body: JSON.stringify(eventData)
+});
+export const createGroupEvent = (eventData) => apiFetch(`${API_URL}/visits/group-event`, {
+  method: 'POST',
+  body: JSON.stringify(eventData)
+});
 export const getVisitsByDate = (fecha) => apiFetch(`${API_URL}/visits/by-date?fecha=${fecha}`);
 export const getVisitWorkload = (startDate, endDate) => 
   apiFetch(`${API_URL}/visits/workload?start_date=${startDate}&end_date=${endDate}`);
@@ -525,3 +537,6 @@ export const cleanupData = (isDryRun = false) => apiFetch(`${API_URL}/admin/clea
   body: JSON.stringify({ dryRun: isDryRun })
 });
 
+// SUPERVISIÓN
+export const getSupervisionData = (fecha) => apiFetch(`${API_URL}/visits/supervision?fecha=${fecha}`);
+export const getSellerSupervisionDetail = (vendedorId, fecha) => apiFetch(`${API_URL}/visits/supervision/${vendedorId}?fecha=${fecha}`);

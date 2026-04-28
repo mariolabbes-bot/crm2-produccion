@@ -21,8 +21,6 @@ const runEmergencyMigration = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    // Se eliminó la inserción automática de tipos de actividad antiguos para evitar duplicados.
-    // La estandarización se maneja por script de base de datos manual.
     await client.query(`
       DO $$ 
       BEGIN 
@@ -46,7 +44,47 @@ const runEmergencyMigration = async () => {
     client.release();
   }
 };
+
+// MIGRACIÓN AUTOMÁTICA DE EMERGENCIA (005 - Agenda Integral)
+const runAgendaMigration = async () => {
+  const pool = require('./db');
+  const client = await pool.connect();
+  try {
+    console.log('👷 [Migration] Ejecutando verificación de esquema 005 (Agenda Integral)...');
+    await client.query('BEGIN');
+    await client.query(`
+      ALTER TABLE visitas_registro ALTER COLUMN cliente_rut DROP NOT NULL;
+      DO $$ 
+      BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='visitas_registro' AND column_name='titulo') THEN
+          ALTER TABLE visitas_registro ADD COLUMN titulo VARCHAR(255);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='visitas_registro' AND column_name='tipo_evento') THEN
+          ALTER TABLE visitas_registro ADD COLUMN tipo_evento VARCHAR(50) DEFAULT 'ruta';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='visitas_registro' AND column_name='hora_inicio_plan') THEN
+          ALTER TABLE visitas_registro ADD COLUMN hora_inicio_plan TIME;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='visitas_registro' AND column_name='hora_fin_plan') THEN
+          ALTER TABLE visitas_registro ADD COLUMN hora_fin_plan TIME;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='visitas_registro' AND column_name='participantes') THEN
+          ALTER TABLE visitas_registro ADD COLUMN participantes JSONB DEFAULT '[]';
+        END IF;
+      END $$;
+    `);
+    await client.query('COMMIT');
+    console.log('✅ [Migration] Esquema 005 verificado/actualizado correctamente.');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('❌ [Migration] Error en migración 005:', err.message);
+  } finally {
+    client.release();
+  }
+};
+
 runEmergencyMigration();
+runAgendaMigration();
 console.log('✅ NUEVO: Widget ImportStats + endpoint /api/import-stats/stats');
 
 // Iniciar Workers en el mismo proceso (para deployments simples en Render)

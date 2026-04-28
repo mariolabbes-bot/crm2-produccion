@@ -7,12 +7,16 @@ const cors = require('cors');
 const app = express();
 
 // Configuración de CORS para producción y desarrollo
+// Configuración de CORS para producción y desarrollo
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       'https://crm2-produccion.vercel.app',
       'http://localhost:3000',
-      'http://127.0.0.1:3000'
+      'http://127.0.0.1:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://localhost:5173'
     ];
     // Permitir requests sin origin (como Postman o scripts locales)
     if (!origin) return callback(null, true);

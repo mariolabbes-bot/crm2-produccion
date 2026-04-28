@@ -381,7 +381,7 @@ router.get('/:rut/actividades', auth(), async (req, res) => {
         at.nombre as tipo_actividad,
         at.icon as tipo_icono
       FROM cliente_actividad ca
-      JOIN usuario_alias ua ON ca.usuario_alias_id = ua.id
+      LEFT JOIN usuario_alias ua ON ca.usuario_alias_id = ua.id
       LEFT JOIN activity_types at ON ca.activity_type_id = at.id
       WHERE ca.cliente_rut = $1
       ORDER BY ca.created_at DESC

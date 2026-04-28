@@ -113,10 +113,12 @@ router.get('/vendedores', async (req, res) => {
         u.rol_usuario as rol,
         u.alias
       FROM usuario u
-      WHERE (LOWER(u.rol_usuario) = 'vendedor' OR LOWER(u.rol_usuario) = 'manager')
-      AND (
-        EXISTS (SELECT 1 FROM venta v WHERE UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor)) LIMIT 1)
-        OR EXISTS (SELECT 1 FROM venta v WHERE UPPER(TRIM(v.vendedor_documento)) = UPPER(TRIM(u.alias)) LIMIT 1)
+      WHERE (
+        (LOWER(u.rol_usuario) = 'vendedor' AND (
+          EXISTS (SELECT 1 FROM venta v WHERE UPPER(TRIM(v.vendedor_cliente)) = UPPER(TRIM(u.nombre_vendedor)) LIMIT 1)
+          OR EXISTS (SELECT 1 FROM venta v WHERE UPPER(TRIM(v.vendedor_documento)) = UPPER(TRIM(u.alias)) LIMIT 1)
+        ))
+        OR LOWER(u.rol_usuario) = 'manager'
       )
       AND u.nombre_vendedor IS NOT NULL
       AND (u.alias IS NULL OR u.alias NOT ILIKE '%_OLD')

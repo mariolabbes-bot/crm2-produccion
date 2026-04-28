@@ -8,6 +8,7 @@ import { getVendedores } from '../api';
 import PortfolioHealthReport from '../components/Reports/PortfolioHealthReport';
 import ManagementEfficiencyReport from '../components/Reports/ManagementEfficiencyReport';
 import CollectionPriorityReport from '../components/Reports/CollectionPriorityReport';
+import SupervisionDashboard from '../components/Reports/SupervisionDashboard';
 
 const ReportsPage = () => {
     const { isManager } = useAuth();
@@ -66,6 +67,7 @@ const ReportsPage = () => {
                     <Tab label="Salud de Cartera" />
                     <Tab label="Eficacia de Gestión" />
                     <Tab label="Cobranza Priorizada" />
+                    <Tab label="Supervisión de Ruta" />
                 </Tabs>
             </Box>
 
@@ -74,6 +76,7 @@ const ReportsPage = () => {
                 {tabValue === 0 && <PortfolioHealthReport vendedorId={vendedorSeleccionado} />}
                 {tabValue === 1 && <ManagementEfficiencyReport vendedorId={vendedorSeleccionado} />}
                 {tabValue === 2 && <CollectionPriorityReport vendedorId={vendedorSeleccionado} />}
+                {tabValue === 3 && <SupervisionDashboard />}
             </Box>
         </Container>
     );

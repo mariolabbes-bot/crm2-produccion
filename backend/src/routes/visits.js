@@ -53,12 +53,12 @@ async function syncToClientActivity(pool, data) {
 
         // Paso 1: Buscar el nombre completo del usuario usando su RUT o ID
         const userRes = await pool.query(
-            `SELECT nombre_completo, alias FROM usuario 
+            `SELECT nombre_completo, nombre_vendedor, alias FROM usuario 
              WHERE rut = $1 OR id::text = $1 LIMIT 1`,
             [vId]
         );
         
-        const userName = userRes.rows[0]?.nombre_completo;
+        const userName = userRes.rows[0]?.nombre_completo || userRes.rows[0]?.nombre_vendedor;
         const userAlias = userRes.rows[0]?.alias;
 
         // Paso 2: Buscar el ID de usuario_alias usando el nombre o alias
@@ -461,7 +461,7 @@ router.post('/plan', auth(), async (req, res) => {
                 const check = await client.query(checkQ, checkParams);
 
                 if (check.rows.length === 0) {
-                    if (req.user.rol === 'manager') {
+                    if (req.user.rol && req.user.rol.toLowerCase() === 'manager') {
                         // Manager can plan for specific dates
                         const insertQ = `INSERT INTO visitas_registro (vendedor_id, cliente_rut, fecha, estado, planificada, prioridad_sugerida, activity_type_id, goal_type_id, comentario_plan)
                                VALUES ((SELECT id FROM usuario WHERE rut = $1 LIMIT 1), $2, $3, 'pendiente', TRUE, 1, $4, $5, $6)`;
@@ -475,14 +475,16 @@ router.post('/plan', auth(), async (req, res) => {
                         const insertParams = [vendedorIdNum, rut, fechaTarget, act_id, goal_id, comment];
                         await client.query(insertQ, insertParams);
 
-                        // Unificación: Registrar planificación en el historial
-                        await syncToClientActivity(client, {
-                            cliente_rut: rut,
-                            vendedor_id: req.user.rol === 'manager' ? vendedorIdRut : req.user.rut,
-                            comentario: `Planificada para ${fechaTarget || 'hoy'}. ${comment}`,
-                            activity_type_id: act_id,
-                            status: 'planificada'
-                        });
+                        // Unificación: Registrar planificación en el historial solo si hay cliente
+                        if (rut) {
+                            await syncToClientActivity(client, {
+                                cliente_rut: rut,
+                                vendedor_id: (req.user.rol && req.user.rol.toLowerCase() === 'manager') ? vendedorIdRut : req.user.rut,
+                                comentario: `Planificada para ${fechaTarget || 'hoy'}. ${comment}`,
+                                activity_type_id: act_id,
+                                status: 'planificada'
+                            });
+                        }
                         
                         insertCount++;
                     }
@@ -503,27 +505,138 @@ router.post('/plan', auth(), async (req, res) => {
     }
 });
 
-// GET /api/visits/by-date?fecha=YYYY-MM-DD - Obtener visitas planificadas de una fecha específica
+// GET /api/visits/by-date?fecha=YYYY-MM-DD - Obtener visitas y eventos planificados
 router.get('/by-date', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.rut;
+        const vendedorId = req.user.rut || '';
+        const userId = req.user.id;
         const { fecha } = req.query;
 
-        if (!fecha) return res.status(400).json({ msg: 'Parámetro fecha requerido (YYYY-MM-DD)' });
+        if (!fecha) return res.status(400).json({ msg: 'Parámetro fecha requerido' });
+
+        // Normalización para búsqueda cruzada
+        const rutClean = vendedorId.replace(/[^a-zA-Z0-9]/g, '');
 
         const query = `
-            SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion, c.circuito
+            SELECT v.*, 
+                   c.nombre as cliente_nombre, 
+                   c.direccion as cliente_direccion, 
+                   c.circuito,
+                   COALESCE(v.tipo_evento, 'ruta') as tipo_evento,
+                   COALESCE(v.titulo, 'Visita a Cliente') as titulo,
+                   (
+                     SELECT string_agg(u.nombre_vendedor, ', ')
+                     FROM usuario u
+                     WHERE jsonb_typeof(v.participantes) = 'array' 
+                       AND u.id::text IN (
+                        SELECT jsonb_array_elements_text(v.participantes)
+                     )
+                   ) as nombres_participantes
             FROM visitas_registro v
-            JOIN cliente c ON v.cliente_rut = c.rut
-            WHERE (v.vendedor_id::text = $1 OR v.vendedor_id::text = $2)
-            AND v.fecha::date = $3::date
-            ORDER BY v.planificada DESC, v.id ASC
+            LEFT JOIN cliente c ON v.cliente_rut = c.rut
+            WHERE (
+                (v.vendedor_id::text ~ '^[0-9]+$' AND v.vendedor_id::text = $1) -- ID numérico directo
+                OR REGEXP_REPLACE(v.vendedor_id::text, '[^0-9]', '', 'g') = REGEXP_REPLACE($2, '[^0-9]', '', 'g') -- RUT numérico vs RUT numérico
+                OR REGEXP_REPLACE(v.vendedor_id::text, '[^0-9]', '', 'g') = REGEXP_REPLACE($3, '[^0-9]', '', 'g') -- RUT numérico vs RUT original
+            )
+            AND v.fecha::date = $4::date
+            ORDER BY 
+                CASE WHEN v.hora_inicio_plan IS NOT NULL THEN 0 ELSE 1 END,
+                v.hora_inicio_plan ASC,
+                v.planificada DESC, 
+                v.id ASC
         `;
-        const result = await pool.query(query, [vendedorId, req.user.id.toString(), fecha]);
+        const result = await pool.query(query, [userId.toString(), rutClean, vendedorId, fecha]);
         res.json(result.rows);
     } catch (err) {
         console.error('Error by-date:', err.message);
         res.status(500).send('Server Error by-date');
+    }
+});
+
+// POST /api/visits/event - Crear un evento manual (oficina, personal, etc.)
+router.post('/event', auth(), async (req, res) => {
+    try {
+        const vendedorIdNum = req.user.id;
+        const { titulo, tipo_evento, fecha, hora_inicio_plan, hora_fin_plan, notas } = req.body;
+
+        if (!titulo || !fecha) {
+            return res.status(400).json({ msg: 'Título y fecha son requeridos' });
+        }
+
+        const query = `
+            INSERT INTO visitas_registro (
+                vendedor_id, titulo, tipo_evento, fecha, 
+                hora_inicio_plan, hora_fin_plan, notas, 
+                estado, planificada
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 'pendiente', TRUE)
+            RETURNING *
+        `;
+        const params = [
+            vendedorIdNum, 
+            titulo, 
+            tipo_evento || 'oficina', 
+            fecha,
+            (hora_inicio_plan && hora_inicio_plan !== '') ? hora_inicio_plan : null,
+            (hora_fin_plan && hora_fin_plan !== '') ? hora_fin_plan : null,
+            notas || ''
+        ];
+
+        const result = await pool.query(query, params);
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error('Error creating event:', err.message);
+        res.status(500).send('Server Error creating event');
+    }
+});
+
+// POST /api/visits/group-event - Crear un evento para múltiples usuarios (Solo Manager)
+router.post('/group-event', auth(), async (req, res) => {
+    if (!req.user.rol || req.user.rol.toLowerCase() !== 'manager') {
+        return res.status(403).json({ msg: 'No autorizado. Se requiere rol Manager.' });
+    }
+
+    const client = await pool.connect();
+    try {
+        const { titulo, tipo_evento, fecha, hora_inicio_plan, hora_fin_plan, notas, participantes } = req.body;
+
+        if (!participantes || !Array.isArray(participantes) || participantes.length === 0) {
+            return res.status(400).json({ msg: 'Debe seleccionar al menos un participante' });
+        }
+
+        await client.query('BEGIN');
+
+        const insertQ = `
+            INSERT INTO visitas_registro (
+                vendedor_id, titulo, tipo_evento, fecha, 
+                hora_inicio_plan, hora_fin_plan, notas, 
+                estado, planificada, participantes
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 'pendiente', TRUE, $8)
+        `;
+
+        for (const userId of participantes) {
+            await client.query(insertQ, [
+                userId, 
+                titulo, 
+                tipo_evento || 'reunion', 
+                fecha,
+                (hora_inicio_plan && hora_inicio_plan !== '') ? hora_inicio_plan : null,
+                (hora_fin_plan && hora_fin_plan !== '') ? hora_fin_plan : null,
+                notas,
+                JSON.stringify(participantes)
+            ]);
+        }
+
+        await client.query('COMMIT');
+        res.json({ msg: 'Evento grupal creado correctamente', count: participantes.length });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('Error group event:', err.message);
+        res.status(500).send('Server Error group event');
+    } finally {
+        client.release();
     }
 });
 
@@ -551,25 +664,28 @@ router.post('/check-out', auth(), async (req, res) => {
 
         const visita = result.rows[0];
 
-        // 1. ACTUALIZACIÓN AUTOMÁTICA EN TABLA CLIENTE
-        try {
-            await pool.query(
-                'UPDATE cliente SET fecha_ultima_visita = CURRENT_DATE WHERE rut = $1',
-                [visita.cliente_rut]
-            );
-            console.log(`✅ [Check-out] fecha_ultima_visita actualizada para: ${visita.cliente_rut}`);
-        } catch (updateErr) {
-            console.error('⚠️ Error al actualizar fecha_ultima_visita en cliente:', updateErr.message);
-        }
+        // 1. ACTUALIZACIÓN AUTOMÁTICA EN TABLA CLIENTE (solo si hay cliente)
+        if (visita.cliente_rut) {
+            try {
+                await pool.query(
+                    'UPDATE cliente SET fecha_ultima_visita = CURRENT_DATE WHERE rut = $1',
+                    [visita.cliente_rut]
+                );
+                console.log(`✅ [Check-out] fecha_ultima_visita actualizada para: ${visita.cliente_rut}`);
+            } catch (updateErr) {
+                console.error('⚠️ Error al actualizar fecha_ultima_visita en cliente:', updateErr.message);
+            }
 
-        // 2. INTEGRACIÓN UNIFICADA CON HISTORIAL (cliente_actividad)
-        await syncToClientActivity(pool, {
-            cliente_rut: visita.cliente_rut,
-            vendedor_id: req.user.rut,
-            comentario: `${resultado || 'Finalizado'}.${notas ? ' Notas: ' + notas : ''}`,
-            activity_type_id: visita.activity_type_id || 391,
-            status: 'completada'
-        });
+            // 2. INTEGRACIÓN UNIFICADA CON HISTORIAL (cliente_actividad)
+            const comentarioDetallado = `${resultado || 'Visita finalizada'}${notas ? '. Notas: ' + notas : ''}`;
+            await syncToClientActivity(pool, {
+                cliente_rut: visita.cliente_rut,
+                vendedor_id: req.user.rut,
+                comentario: comentarioDetallado,
+                activity_type_id: visita.activity_type_id || 391,
+                status: 'completada'
+            });
+        }
 
         res.json(visita);
     } catch (err) {
@@ -578,12 +694,99 @@ router.post('/check-out', auth(), async (req, res) => {
     }
 });
 
-// GET /api/visits/active - Obtener visita activa del vendedor
+// GET /api/visits/supervision - Resumen detallado para dashboard de Manager
+router.get('/supervision', auth(), async (req, res) => {
+    if (!req.user.rol || req.user.rol.toLowerCase() !== 'manager') {
+        return res.status(403).json({ msg: 'Acceso restringido a Managers' });
+    }
+
+    try {
+        const { fecha } = req.query;
+        if (!fecha) return res.status(400).json({ msg: 'Fecha es requerida' });
+
+        const query = `
+            SELECT 
+                main.id as vendedor_id,
+                main.nombre_vendedor as nombre,
+                main.rut,
+                COALESCE(stats.total_actividades, 0) as total_actividades,
+                COALESCE(stats.planificadas, 0) as planificadas,
+                COALESCE(stats.completadas, 0) as completadas,
+                COALESCE(stats.en_progreso, 0) as en_progreso,
+                stats.primera_visita,
+                stats.ultima_visita,
+                COALESCE(stats.fuera_geocerca, 0) as fuera_geocerca
+            FROM (
+                SELECT DISTINCT ON (rut) *
+                FROM usuario
+                WHERE nombre_vendedor IS NOT NULL
+                  AND (rol_usuario ILIKE 'vendedor' OR rol_usuario ILIKE 'manager')
+                  AND rut NOT ILIKE 'stub-%'
+                  AND (alias IS NULL OR alias NOT ILIKE '%_OLD')
+                  AND nombre_vendedor NOT ILIKE '%admin%'
+            ) main
+            LEFT JOIN (
+                SELECT 
+                    v.vendedor_id,
+                    COUNT(v.id) as total_actividades,
+                    COUNT(CASE WHEN v.planificada = TRUE THEN 1 END) as planificadas,
+                    COUNT(CASE WHEN v.estado = 'completada' THEN 1 END) as completadas,
+                    COUNT(CASE WHEN v.estado = 'en_progreso' THEN 1 END) as en_progreso,
+                    MIN(v.hora_inicio) as primera_visita,
+                    MAX(v.hora_fin) as ultima_visita,
+                    COUNT(CASE WHEN v.distancia_checkin > 500 THEN 1 END) as fuera_geocerca
+                FROM visitas_registro v
+                WHERE v.fecha::date = $1::date
+                GROUP BY v.vendedor_id
+            ) stats ON (
+                main.id::text = stats.vendedor_id::text 
+                OR REGEXP_REPLACE(main.rut, '[^0-9]', '', 'g') = REGEXP_REPLACE(stats.vendedor_id::text, '[^0-9]', '', 'g')
+            )
+            ORDER BY main.nombre_vendedor ASC
+        `;
+        const result = await pool.query(query, [fecha]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error en supervision:', err);
+        res.status(500).json({ 
+            msg: 'Error interno en el reporte de supervisión',
+            error: err.message 
+        });
+    }
+});
+// GET /api/visits/supervision/:vendedor_id - Detalle de la jornada de un vendedor
+router.get('/supervision/:vendedor_id', auth(), async (req, res) => {
+    if (!req.user.rol || req.user.rol.toLowerCase() !== 'manager') {
+        return res.status(403).json({ msg: 'Acceso restringido' });
+    }
+
+    try {
+        const { vendedor_id } = req.params;
+        const { fecha } = req.query;
+
+        const query = `
+            SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion
+            FROM visitas_registro v
+            LEFT JOIN cliente c ON v.cliente_rut = c.rut
+            WHERE (v.vendedor_id::text = $1 OR v.vendedor_id::text = (SELECT rut FROM usuario WHERE id::text = $1 LIMIT 1))
+            AND v.fecha::date = $2::date
+            ORDER BY v.hora_inicio ASC NULLS LAST, v.id ASC
+        `;
+        const result = await pool.query(query, [vendedor_id, fecha]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error en detalle supervision:', err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// GET /api/visits/active - Obtener visita en curso
 router.get('/active', auth(), async (req, res) => {
     try {
-        const vendedorId = req.user.rut;
+        const vendedorId = req.user.rut || '';
+        const vendedorIdNum = req.user.id;
 
-        // 0. AUTO-CIERRE FALLBACK: Cerrar preventivamente
+        // 0. AUTO-CIERRE FALLBACK: Cerrar visitas > 120 mins
         try {
             const autoCloseQuery = `
                 UPDATE visitas_registro 
@@ -595,18 +798,18 @@ router.get('/active', auth(), async (req, res) => {
                   AND estado = 'en_progreso'
                   AND EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - (fecha + hora_inicio))) / 60 >= 120
             `;
-            await pool.query(autoCloseQuery, [vendedorId, req.user.id]);
+            await pool.query(autoCloseQuery, [vendedorId, vendedorIdNum]);
         } catch (autoErr) { console.error('⚠️ Error auto-cierre fallback:', autoErr.message); }
 
         const query = `
             SELECT v.*, c.nombre as cliente_nombre, c.direccion as cliente_direccion
             FROM visitas_registro v
-            JOIN cliente c ON v.cliente_rut = c.rut
+            LEFT JOIN cliente c ON v.cliente_rut = c.rut
             WHERE (v.vendedor_id::text = $1 OR v.vendedor_id::text = $2)
             AND v.estado = 'en_progreso'
             LIMIT 1
         `;
-        const result = await pool.query(query, [vendedorId, req.user.id]);
+        const result = await pool.query(query, [vendedorId, vendedorIdNum]);
         res.json(result.rows[0] || null);
     } catch (err) {
         console.error('Error fetching active visit:', err.message);
