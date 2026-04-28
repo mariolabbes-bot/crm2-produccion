@@ -67,7 +67,7 @@ const ReportsPage = () => {
                     <Tab label="Salud de Cartera" />
                     <Tab label="Eficacia de Gestión" />
                     <Tab label="Cobranza Priorizada" />
-                    <Tab label="Supervisión de Ruta" />
+                    {isManager() && <Tab label="Supervisión de Ruta" />}
                 </Tabs>
             </Box>
 
@@ -76,7 +76,7 @@ const ReportsPage = () => {
                 {tabValue === 0 && <PortfolioHealthReport vendedorId={vendedorSeleccionado} />}
                 {tabValue === 1 && <ManagementEfficiencyReport vendedorId={vendedorSeleccionado} />}
                 {tabValue === 2 && <CollectionPriorityReport vendedorId={vendedorSeleccionado} />}
-                {tabValue === 3 && <SupervisionDashboard />}
+                {tabValue === 3 && isManager() && <SupervisionDashboard />}
             </Box>
         </Container>
     );

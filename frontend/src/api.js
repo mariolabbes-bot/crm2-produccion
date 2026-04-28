@@ -33,7 +33,7 @@ export const apiFetch = async (url, options = {}) => {
     if (!response.ok) {
       let errorData = {};
       try { errorData = await response.json(); } catch (_) { }
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 401) {
         // Token inválido o expirado: limpiar y redirigir
         try { localStorage.removeItem('token'); } catch (_) { }
       }
